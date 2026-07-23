@@ -2,7 +2,7 @@
 
 #define TJCHMI_BAUDRATE 115200  //串口屏幕波特率
 #define QR_BAUDRATE 9600        //串口扫码模块波特率 默认波特率9600
-// device settings.
+// device settings.1111
 #define TJCHMI_RX PB15
 #define TJCHMI_TX PB14
 
