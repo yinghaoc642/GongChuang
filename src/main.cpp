@@ -1,229 +1,89 @@
+//使用V2版库，可自定义通讯串口
+//当前bug:打开电源顺序bug，先开总电源， 再开stm32板电源，程序可能会卡住。出现这种情况时，关闭stm32板电源会导致舵机驱动板电源指示灯熄灭。怀疑是从舵机驱动板取了电。
 #include <Arduino.h>
-#include <JY901.h>
-#include <string.h>
+#include <FashionStar_SmartGripper.h>  // Fashion Star智能夹具
 
-// -------------------- Serial settings --------------------
-#define TJCHMI_BAUDRATE 115200
-#define WTIMU_BAUDRATE  115200
-#define QR_BAUDRATE     9600
 
-#define TJCHMI_RX PB15
-#define TJCHMI_TX PB14
+#define SERVO_BAUDRATE 115200   //串口舵机波特率
 
-#define WTIMU_RX PD9
-#define WTIMU_TX PD8
+#define SERVO_RX PC7
+#define SERVO_TX PC6
 
-#define QR_RX PE0
-#define QR_TX PE1
+//舵机编号常量符号化
+// 串口总线舵机配置
+#define GRIPPER_SERVO_ID 4   // 舵机4的ID号 手爪
+#define STORAGE_SERVO_ID 5   // 舵机5的ID号 载物盘舵机
+#define USE_GRIPPER_A            //使用主力爪A
+//#define USE_GRIPPER_B            //使用备用爪B
 
-HardwareSerial Serial_TJCHMI(TJCHMI_RX, TJCHMI_TX);
-HardwareSerial Serial_WTIMU(WTIMU_RX, WTIMU_TX);
-HardwareSerial Serial_QR(QR_RX, QR_TX);
+/**主力主力爪A舵机参数****************************************/
+// 爪子的配置
+#ifdef USE_GRIPPER_A
+#define GRIPPER_OPEN_ANGLE 0.0   // 爪子张开时的角度
+#define GRIPPER_CLOSE_ANGLE 100  // 爪子闭合时的角度
+#define GRIPPER_OPEN_MAX_ANGLE -84  //爪子张开最大大角度
+#endif
+/**主力备用爪B舵机参数****************************************/
+#ifdef USE_GRIPPER_B
+#define GRIPPER_OPEN_ANGLE -10.0   // 爪子张开时的角度
+#define GRIPPER_CLOSE_ANGLE -96.0  // 爪子闭合时的角度
+#define GRIPPER_OPEN_MAX_ANGLE 30  //爪子张开最大大角度
+#endif
+//                 [0]出发位置   [1]R  [2]G  [3]B  储物盘三个盘位正对机械臂的角度
+int storage[4] = { -3, 9, -81, -130 };
 
-// -------------------- QR task code --------------------
-// 2027 task-code example: 156+123+516+231
-// Total: 15 visible characters + 1 string terminator.
-constexpr size_t QR_TASK_LENGTH = 15;
-constexpr size_t QR_BUFFER_SIZE = 32;
 
-char qrReceiveBuffer[QR_BUFFER_SIZE] = {0};
-char qrTaskCode[QR_TASK_LENGTH + 1] = {0};
-size_t qrDataIndex = 0;
-bool qrOverflow = false;
-bool scanFlag = false;
+//             串口舵机          RX          TX
+HardwareSerial Serial_SERVO(SERVO_RX, SERVO_TX);
 
-// Parsed data for the later motion-control program.
-uint8_t firstBatchColorOrder[3] = {0};
-uint8_t firstBatchPositions[3] = {0};
-uint8_t secondBatchColorOrder[3] = {0};
-uint8_t secondBatchPositions[3] = {0};
+/**舵机***************************************************/
+// 创建舵机的通信协议对象
+FSUS_Protocol protocol(&Serial_SERVO, SERVO_BAUDRATE);  //协议V2版本新增
 
-// -------------------- IMU --------------------
-float yaw = 0.0f;
-int32_t yaw100 = 0;  // x0 is configured with two decimal places.
+FSUS_Servo storageServo(STORAGE_SERVO_ID, &protocol);  // 载物盘舵机
 
-// -------------------- Timing --------------------
-uint32_t lastAngleUpdateMs = 0;
+FSUS_Servo gripperServo(GRIPPER_SERVO_ID, &protocol);  // 手爪
 
-// -------------------- TJC HMI helpers --------------------
-void hmiEndCommand() {
-  Serial_TJCHMI.write(0xFF);
-  Serial_TJCHMI.write(0xFF);
-  Serial_TJCHMI.write(0xFF);
-}
+// 创建智能机械爪实例
+FSGP_Gripper gripper(&gripperServo, GRIPPER_OPEN_ANGLE, GRIPPER_CLOSE_ANGLE);
 
-void hmiCommand(const char *command) {
-  Serial_TJCHMI.print(command);
-  hmiEndCommand();
-}
 
-void hmiSetText(const char *objectName, const char *text) {
-  Serial_TJCHMI.print(objectName);
-  Serial_TJCHMI.print(".txt=\"");
-  Serial_TJCHMI.print(text);
-  Serial_TJCHMI.print("\"");
-  hmiEndCommand();
-}
+unsigned long nowtime;
 
-void hmiSetValue(const char *objectName, int32_t value) {
-  Serial_TJCHMI.print(objectName);
-  Serial_TJCHMI.print(".val=");
-  Serial_TJCHMI.print(value);
-  hmiEndCommand();
-}
-
-// Current screen mapping:
-// n2 = correct grab count
-// n1 = correct placement count
-void hmiSetTaskCounts(uint8_t correctGrabCount,
-                      uint8_t correctPlacementCount) {
-  hmiSetValue("n2", correctGrabCount);
-  hmiSetValue("n1", correctPlacementCount);
-}
-
-// -------------------- Task-code validation and parsing --------------------
-bool charInRange(char value, char minimum, char maximum) {
-  return value >= minimum && value <= maximum;
-}
-
-bool validateTaskCode(const char *code) {
-  if (strlen(code) != QR_TASK_LENGTH) {
-    return false;
-  }
-
-  // Separators must be at fixed positions.
-  if (code[3] != '+' || code[7] != '+' || code[11] != '+') {
-    return false;
-  }
-
-  for (uint8_t i = 0; i < 3; ++i) {
-    // First and third groups are color numbers 1-6.
-    if (!charInRange(code[i], '1', '6') ||
-        !charInRange(code[8 + i], '1', '6')) {
-      return false;
-    }
-
-    // Second and fourth groups are placement numbers 1-3.
-    if (!charInRange(code[4 + i], '1', '3') ||
-        !charInRange(code[12 + i], '1', '3')) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-void parseTaskCode(const char *code) {
-  for (uint8_t i = 0; i < 3; ++i) {
-    firstBatchColorOrder[i] = code[i] - '0';
-    firstBatchPositions[i] = code[4 + i] - '0';
-    secondBatchColorOrder[i] = code[8 + i] - '0';
-    secondBatchPositions[i] = code[12 + i] - '0';
-  }
-}
-
-void finishQrFrame() {
-  if (qrDataIndex == 0 && !qrOverflow) {
-    return;
-  }
-
-  qrReceiveBuffer[qrDataIndex] = '\0';
-
-  if (!qrOverflow && validateTaskCode(qrReceiveBuffer)) {
-    strcpy(qrTaskCode, qrReceiveBuffer);
-    parseTaskCode(qrTaskCode);
-    scanFlag = true;
-
-    // t3 has enough height to wrap the full 15-character code.
-    hmiSetText("t3", qrTaskCode);
-    hmiSetText("t1", "QROK");
-  } else {
-    // Invalid data is rejected, and the scanner remains ready for another scan.
-    hmiSetText("t1", "QRERR");
-  }
-
-  qrDataIndex = 0;
-  qrOverflow = false;
-}
-
-void receiveQrTaskCode() {
-  // Keep the "scan once" behavior of the original example.
-  if (scanFlag) {
-    while (Serial_QR.available()) {
-      Serial_QR.read();
-    }
-    return;
-  }
-
-  while (Serial_QR.available()) {
-    const char incomingByte = static_cast<char>(Serial_QR.read());
-
-    // Supports scanners configured for CR, LF, or CRLF termination.
-    if (incomingByte == '\r' || incomingByte == '\n') {
-      finishQrFrame();
-      continue;
-    }
-
-    if (qrDataIndex < QR_BUFFER_SIZE - 1) {
-      qrReceiveBuffer[qrDataIndex++] = incomingByte;
-    } else {
-      // Ignore the rest of an overlong frame until CR/LF arrives.
-      qrOverflow = true;
-    }
-  }
-}
-
-// -------------------- IMU and periodic display updates --------------------
-void receiveImuData() {
-  while (Serial_WTIMU.available()) {
-    JY901.CopeSerialData(Serial_WTIMU.read());
-  }
-
-  yaw = static_cast<float>(JY901.stcAngle.Angle[2]) /
-        32768.0f * 180.0f;
-  yaw100 = static_cast<int32_t>(yaw * 100.0f);
-}
-
-void updatePeriodicDisplay() {
-  const uint32_t nowMs = millis();
-
-  // Update Angle Z every 100 ms.
-  if (nowMs - lastAngleUpdateMs >= 100) {
-    lastAngleUpdateMs = nowMs;
-    hmiSetValue("x0", yaw100);
-  }
-}
+//void storage_go_home();
 
 void setup() {
-  Serial_TJCHMI.begin(TJCHMI_BAUDRATE);
-  Serial_WTIMU.begin(WTIMU_BAUDRATE);
-  Serial_QR.begin(QR_BAUDRATE);
 
-  // Wait for the screen, IMU, and scanner to finish starting.
-  delay(300);
+  /*--------------硬件串口初始化----------------*/
+  //Serial.begin(115200);
+  protocol.init(&Serial_SERVO, SERVO_BAUDRATE);  // 舵机通信协议初始化
+  storageServo.init();                           // 储物盘舵机初始化
+  gripper.init();                                // 手爪舵机初始化，原始程序爪子会开启
 
-  while (Serial_TJCHMI.available()) {
-    Serial_TJCHMI.read();
-  }
-  while (Serial_QR.available()) {
-    Serial_QR.read();
-  }
+  // 参数配置
+  gripper.setMaxPower(400);    // 设置最大功率，单位mW
+  storageServo.setSpeed(500);  // 舵机1初始化 储物盘
 
-  hmiCommand("page main");
-  delay(50);
 
-  hmiSetText("t1", "QRWAIT");
-  hmiSetText("t3", "000+000+000+000");
-  hmiSetTaskCounts(0, 0);
-  // n0 is reset here, then the HMI's tm0 timer can increment it.
-  hmiSetValue("n0", 0);
-  hmiSetValue("x0", 0);
+ delay(100);
+ 
+    //storageServo.setSpeed(500);  // 舵机1初始化 储物盘
 
-  lastAngleUpdateMs = millis();
+//storage_go_home();
+
+    nowtime = millis();                            //获取当前已经运行的时间
 }
 
 void loop() {
-  receiveImuData();
-  receiveQrTaskCode();
-  updatePeriodicDisplay();
+ 
+  //gripper.open();
+  storageServo.setRawAngle(storage[0]);
+  storageServo.wait();
+  gripper.open(GRIPPER_OPEN_MAX_ANGLE);
+  delay(2000);
+  storageServo.setRawAngle(storage[3]);
+   storageServo.wait();
+  gripper.close();
+  delay(2000);
+
 }

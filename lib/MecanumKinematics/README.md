@@ -57,7 +57,8 @@ WheelSpeeds wheelRpm =
 运动学输出表示车轮的物理方向，而电机安装方向可能相反。方向修正独立配置：
 
 ```cpp
-WheelDirections motorDirections(+1, -1, +1, -1);
+// 默认方向依次为 1号−、2号＋、3号−、4号＋。
+WheelDirections motorDirections;
 
 DDSM210Commands commands =
     MecanumKinematics::toDDSM210Commands(
@@ -75,7 +76,8 @@ dc.ddsm210_ctrl_4(
 );
 ```
 
-`motorDirections` 必须在底盘架空时逐轮校准。不要仅根据线色或左右位置猜测方向。
+`WheelDirections()` 默认生成 `(-1, +1, -1, +1)`。`motorDirections`
+仍必须在底盘架空时逐轮校准，不要仅根据线色或左右位置猜测方向。
 
 如果任一电机命令超过 `±2100`，库会对四轮命令同比例缩小，以保持合成运动方向。
 

@@ -20,8 +20,8 @@
 // 爪子的配置
 #ifdef USE_GRIPPER_A
 #define GRIPPER_OPEN_ANGLE 0.0   // 爪子张开时的角度
-#define GRIPPER_CLOSE_ANGLE -90.0  // 爪子闭合时的角度
-#define GRIPPER_OPEN_MAX_ANGLE 30  //爪子张开最大大角度
+#define GRIPPER_CLOSE_ANGLE 100  // 爪子闭合时的角度
+#define GRIPPER_OPEN_MAX_ANGLE -84  //爪子张开最大大角度
 #endif
 /**主力备用爪B舵机参数****************************************/
 #ifdef USE_GRIPPER_B

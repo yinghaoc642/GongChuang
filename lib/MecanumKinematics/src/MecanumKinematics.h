@@ -110,8 +110,8 @@ struct WheelSpeeds {
  * - `+1`：电机命令正方向与车轮物理正方向一致；
  * - `-1`：电机命令正方向与车轮物理正方向相反。
  *
- * 例如当前底盘可能使用 `WheelDirections(+1, -1, +1, -1)`，
- * 但正式使用前必须架空底盘逐轮校准，不能只依靠左右位置猜测。
+ * 当前底盘默认使用 `WheelDirections(-1, +1, -1, +1)`。
+ * 正式使用前仍必须架空底盘逐轮校准，不能只依靠左右位置猜测。
  */
 struct WheelDirections {
   /** 1号前左轮电机的方向修正系数。 */
@@ -129,15 +129,15 @@ struct WheelDirections {
   /**
    * @brief 构造四轮电机方向配置。
    *
-   * 默认四个方向均为 +1。
+   * 默认方向为 `-1, +1, -1, +1`，依次对应 1～4 号电机。
    *
    * @param wheel1 1号前左轮方向，通常为 +1 或 -1。
    * @param wheel2 2号前右轮方向，通常为 +1 或 -1。
    * @param wheel3 3号后左轮方向，通常为 +1 或 -1。
    * @param wheel4 4号后右轮方向，通常为 +1 或 -1。
    */
-  WheelDirections(int8_t wheel1 = 1, int8_t wheel2 = 1,
-                  int8_t wheel3 = 1, int8_t wheel4 = 1)
+  WheelDirections(int8_t wheel1 = -1, int8_t wheel2 = +1,
+                  int8_t wheel3 = -1, int8_t wheel4 = +1)
       : frontLeft(wheel1), frontRight(wheel2), rearLeft(wheel3),
         rearRight(wheel4) {}
 };
@@ -356,7 +356,7 @@ public:
    *
    * 示例：
    * @code
-   * WheelDirections directions(+1, -1, +1, -1);
+   * WheelDirections directions; // 默认方向：-1, +1, -1, +1
    * DDSM210Commands cmd =
    *     MecanumKinematics::toDDSM210Commands(wheelRpm, directions);
    * dc.ddsm210_ctrl_4(cmd.wheel1, cmd.wheel2, cmd.wheel3, cmd.wheel4);
