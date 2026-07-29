@@ -934,6 +934,11 @@ void TTL_Protocol::Emm_V5_Receive_Data(uint8_t *rxCmd, uint8_t *rxCount)
  * @param    baudrate:波特率
  * @retval   无
  */
+TTL_Protocol::TTL_Protocol()
+    : baudrate(BAUDRATE), serial(nullptr)
+{
+}
+
 TTL_Protocol::TTL_Protocol(HardwareSerial *serial, uint32_t baudrate)
 {
   this->serial = serial;

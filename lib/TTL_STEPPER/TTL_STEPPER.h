@@ -69,6 +69,7 @@ public:
    uint32_t baudrate; // 串口通信的波特率
    // HardwareSerial *serial; //串口
    Stream *serial;
+   TTL_Protocol();
    TTL_Protocol(HardwareSerial *serial, uint32_t baudrate);
    void init(HardwareSerial *serial, uint32_t baudrate); // 初始化
    void emptyCache();
