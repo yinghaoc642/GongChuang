@@ -164,12 +164,12 @@ constexpr int32_t ARM_BASE_STANDARD_OLD_FRAME_DEGREES = -90;
 constexpr float ARM_BASE_TRAVEL_STANDARD_FRAME_DEGREES = 90.0f;
 constexpr int32_t ARM_BASE_HOME_ANGLE_DEGREES =
     ARM_BASE_TRAVEL_OLD_FRAME_DEGREES;
-// 容器夹取/释放位：相对标准状态顺时针100°（标准坐标顺时针为负）。
-constexpr float ARM_CONTAINER_CLOCKWISE_DEGREES = -100.0f;
+// 容器夹取/释放位：相对标准状态顺时针97°（标准坐标顺时针为负）。
+constexpr float ARM_CONTAINER_CLOCKWISE_DEGREES = -97.0f;
 /*
  * yyq5正式流程对M5使用60000 pulse/s、35000 pulse/s²；短行程受加速度
- * 限制，实际不会瞬间达到最高速度。这里只设置M5动作曲线，不设置全程
- * 运行时长停机限制。
+ * 限制，实际不会瞬间达到最高速度。完整24次搬运若仍用测试值1000/500，
+ * 单M5动作就会超过规则3分钟运行时间。
  */
 const float ARM_BASE_MAXIMUM_STEP_RATE = 60000.0f;
 const float ARM_BASE_STEP_ACCELERATION = 35000.0f;
@@ -247,8 +247,7 @@ constexpr float STORAGE_SERVO_POSITIONS_DEGREES[4] = {
 constexpr uint8_t MAIXCAM_FRAME_HEADER = 0xAA;
 constexpr uint8_t MAIXCAM_FRAME_TAIL = 0xBB;
 constexpr uint8_t MAIXCAM_STOP_REQUEST = 0x00;
-constexpr uint8_t MAIXCAM_ALL_COLORS_REQUEST = 0x08;
-constexpr uint8_t MAIXCAM_HOUGH_CIRCLE_REQUEST = 0x09;
+constexpr uint8_t MAIXCAM_HOUGH_CIRCLE_REQUEST = 0x07;
 constexpr uint32_t MAIXCAM_REQUEST_REPEAT_MS = 1000UL;
 constexpr uint32_t MAIXCAM_MODE_SWITCH_GUARD_MS = 100UL;
 constexpr uint32_t MAIXCAM_COORDINATE_STALE_MS = 1500UL;
@@ -278,6 +277,9 @@ constexpr float IMAGE_Y_TO_ARM_OUTWARD_SIGN = -1.0f;
  */
 constexpr float IMAGE_X_TO_BODY_FORWARD_SIGN = -1.0f;
 constexpr float IMAGE_Y_TO_BODY_LEFT_SIGN = -1.0f;
+constexpr int16_t RAW_STABILITY_SPAN_PIXELS = 5;
+constexpr uint32_t RAW_STABILITY_TIME_MS = 1000UL;
+constexpr uint8_t RAW_STABILITY_MINIMUM_SAMPLES = 3U;
 constexpr float CIRCLE_CENTER_TOLERANCE_PIXELS = 3.0f;
 constexpr uint32_t CIRCLE_CENTER_STABILITY_MS = 500UL;
 constexpr uint8_t CIRCLE_STABILITY_MINIMUM_SAMPLES = 2U;
@@ -285,7 +287,7 @@ constexpr uint32_t VISION_STABILITY_MAXIMUM_SAMPLE_GAP_MS =
     1200UL;
 constexpr float MAXIMUM_VISUAL_CORRECTION_MM = 150.0f;
 /*
- * 当前MaixCAM的0x09协议只返回“离画面中心最近的圆”，不返回1/2/3号。
+ * 当前MaixCAM的0x07协议只返回“离画面中心最近的圆”，不返回1/2/3号。
  * 原路线两次暂存停车点按开环命令分别比几何中心偏南约70/90 mm，第二次会
  * 更靠近1号圆。暂存定位前先向画面右侧（车体负forward）移动30 mm，使2号
  * 中间圆确定成为最近圆；该脉冲计入视觉累计量，离站前会完整反向恢复。
@@ -397,8 +399,8 @@ constexpr uint16_t STORAGE_CENTER_X_MM =
  * 启停区1先沿3、4侧直走1050 mm到达右边中部二维码区，收到有效任务码后
  * 再继续横移。规则要求先读取任务码再到原料区；当前代码把二维码作为
  * 继续路线的门控。扫码点若尚无有效码，会低速前探并按脉冲原路回位；
- * route[]的起终点仍不变，机械臂按四组任务码建立颜色到容器槽位的映射，
- * 并确定粗加工环位及第二批同色码垛位置。
+ * route[]的起终点仍不变，机械臂按四组任务码改变颜色请求、粗加工环位和
+ * 第二批同色码垛位置。
  *
  * route-simulator仍标注“二维码区不扫码、不停车”，这是旧tmcode1仿真行为，
  * 与本文件的COMMAND_QR_ACTION前探/回位逻辑不同；调试应以本文件为准。
@@ -463,11 +465,11 @@ constexpr uint16_t RETURN_LANE_TO_FINAL_ZONE_X_MM =
 // 本轮所有底盘直线速度均在修改前的当前值上再提高30%。
 const float MAXIMUM_STEP_RATE = 7150.0f;
 const float CENTRAL_CHANNEL_MAXIMUM_STEP_RATE = 9295.0f;
-// 普通/中央通道等非矫正直线加速度由当前5000减半。
-const float STEP_ACCELERATION = 2500.0f;
-// 底盘粗转和IMU航向纠偏角速度保持不变；仅粗转角加速度由1600减半。
+// 普通/中央通道等非矫正直线加速度在原2500基础上增加1倍。
+const float STEP_ACCELERATION = 5000.0f;
+// 底盘粗转和IMU航向纠偏角速度均提高50%；仅粗转角加速度增加1倍。
 const float TURN_MAXIMUM_STEP_RATE = 3000.0f;
-const float TURN_STEP_ACCELERATION = 800.0f;
+const float TURN_STEP_ACCELERATION = 1600.0f;
 const float HEADING_CORRECTION_MAXIMUM_STEP_RATE = 1500.0f;
 const float HEADING_CORRECTION_STEP_ACCELERATION = 450.0f;
 const float WORKSTATION_MAXIMUM_STEP_RATE = 2080.0f;
@@ -1229,9 +1231,8 @@ const RouteCommand route[] = {
      * 规则动作含义：按任务码第一组三位颜色顺序，每次抓取1个，并先把
      * 物料放到机器人载物位置，之后才能抓下一个；不得用手爪夹持跨区运输。
      * 原料台是每6~10 s旋转一周后随机停止的三工位转盘；
-     * COMMAND_RAW_ACTION以模式8请求同时识别四色；MaixCAM确认某一颜色
-     * 坐标连续0.3 s横、纵跨度各不超过3像素后，只计算一次M5/M6目标；
-     * 载物盘按该颜色在本批二维码序列中的槽位收纳，不移动底盘。
+     * COMMAND_RAW_ACTION持续请求对应颜色，坐标稳定1 s后只计算一次
+     * M5/M6目标，不移动底盘。
      */
     {COMMAND_MOVE_SIDE_13_MM, QR_PASS_TO_FIELD_CENTER_X_MM,
      "QR area -> raw centerline", false, true},
@@ -2074,18 +2075,13 @@ bool verifyManipulationServosOnline() {
 }
 
 struct MaixCoordinate {
-  uint8_t resultId;
   int16_t x;
   int16_t y;
   uint32_t sequence;
   uint32_t receivedMs;
 
   MaixCoordinate()
-      : resultId(0U),
-        x(0),
-        y(0),
-        sequence(0UL),
-        receivedMs(0UL) {}
+      : x(0), y(0), sequence(0UL), receivedMs(0UL) {}
 };
 
 bool maixcamSerialInitialized = false;
@@ -2129,8 +2125,9 @@ void stopMaixRequest() {
 }
 
 void beginMaixRequest(uint8_t request) {
-  if (request != MAIXCAM_ALL_COLORS_REQUEST &&
-      request != MAIXCAM_HOUGH_CIRCLE_REQUEST) {
+  if (request < 1U ||
+      (request > 4U &&
+       request != MAIXCAM_HOUGH_CIRCLE_REQUEST)) {
     routeFault("Invalid MaixCAM request");
     return;
   }
@@ -2155,23 +2152,15 @@ void beginMaixRequest(uint8_t request) {
 
 bool parseMaixCoordinateLine(
     const char *line,
-    uint8_t &resultId,
     int16_t &x,
     int16_t &y) {
   if (line == nullptr || line[0] == '\0') {
     return false;
   }
 
-  char *idEnd = nullptr;
-  const long parsedId = strtol(line, &idEnd, 10);
-  if (idEnd == line || idEnd == nullptr || *idEnd != ',') {
-    return false;
-  }
-
-  const char *xStart = idEnd + 1;
   char *xEnd = nullptr;
-  const long parsedX = strtol(xStart, &xEnd, 10);
-  if (xEnd == xStart || xEnd == nullptr || *xEnd != ',') {
+  const long parsedX = strtol(line, &xEnd, 10);
+  if (xEnd == line || xEnd == nullptr || *xEnd != ',') {
     return false;
   }
 
@@ -2182,13 +2171,11 @@ bool parseMaixCoordinateLine(
     return false;
   }
 
-  if (parsedId < 0L || parsedId > 255L ||
-      parsedX < 0L || parsedX > IMAGE_MAX_X ||
+  if (parsedX < 0L || parsedX > IMAGE_MAX_X ||
       parsedY < 0L || parsedY > IMAGE_MAX_Y) {
     return false;
   }
 
-  resultId = static_cast<uint8_t>(parsedId);
   x = static_cast<int16_t>(parsedX);
   y = static_cast<int16_t>(parsedY);
   return true;
@@ -2196,18 +2183,11 @@ bool parseMaixCoordinateLine(
 
 void finishMaixCoordinateLine() {
   maixReceiveLine[maixReceiveLength] = '\0';
-  uint8_t resultId = 0U;
   int16_t x = 0;
   int16_t y = 0;
   if (maixModeCommandSent &&
       maixRequestedMode != MAIXCAM_STOP_REQUEST &&
-      parseMaixCoordinateLine(
-          maixReceiveLine, resultId, x, y) &&
-      ((maixRequestedMode == MAIXCAM_ALL_COLORS_REQUEST &&
-        resultId >= 1U && resultId <= 4U) ||
-       (maixRequestedMode == MAIXCAM_HOUGH_CIRCLE_REQUEST &&
-        resultId == MAIXCAM_HOUGH_CIRCLE_REQUEST))) {
-    latestMaixCoordinate.resultId = resultId;
+      parseMaixCoordinateLine(maixReceiveLine, x, y)) {
     latestMaixCoordinate.x = x;
     latestMaixCoordinate.y = y;
     ++latestMaixCoordinate.sequence;
@@ -2215,8 +2195,6 @@ void finishMaixCoordinateLine() {
 
     SerialDebug.print("MaixCAM ");
     SerialDebug.print(maixRequestedMode);
-    SerialDebug.print(" result ");
-    SerialDebug.print(resultId);
     SerialDebug.print(": ");
     SerialDebug.print(x);
     SerialDebug.print(",");
@@ -2268,7 +2246,6 @@ void serviceMaixcam() {
 
 bool readNewMaixCoordinate(
     uint32_t &lastSequence,
-    uint8_t &resultId,
     int16_t &x,
     int16_t &y) {
   if (latestMaixCoordinate.sequence == lastSequence ||
@@ -2277,7 +2254,6 @@ bool readNewMaixCoordinate(
     return false;
   }
   lastSequence = latestMaixCoordinate.sequence;
-  resultId = latestMaixCoordinate.resultId;
   x = latestMaixCoordinate.x;
   y = latestMaixCoordinate.y;
   return true;
@@ -3096,8 +3072,7 @@ enum WorkActionKind {
 enum WorkActionPhase {
   WORK_PHASE_IDLE,
   WORK_PHASE_PREPARE,
-  WORK_PHASE_RAW_WAIT_RESULT,
-  WORK_PHASE_RAW_WAIT_STORAGE_POSITION,
+  WORK_PHASE_RAW_WAIT_STABLE,
   WORK_PHASE_CIRCLE_WAIT_ARM_LOWER,
   WORK_PHASE_CIRCLE_WAIT_COORDINATE,
   WORK_PHASE_CIRCLE_WAIT_CHASSIS,
@@ -3130,29 +3105,111 @@ uint32_t workStorageServoDeadlineMs = 0UL;
 uint32_t workLastMaixSequence = 0UL;
 MotorPulses visualCorrectionAccumulator;
 
-uint8_t rawFilledSlotMask = 0U;
-uint8_t rawCollectedCount = 0U;
-uint8_t rawPendingSlotIndex = 0U;
-uint8_t rawPendingColor = 0U;
-ArmPose rawPendingSourcePose;
+uint32_t rawStableStartMs = 0UL;
+uint32_t rawLastStableSampleMs = 0UL;
+uint8_t rawStableSampleCount = 0U;
+int16_t rawMinimumX = 0;
+int16_t rawMaximumX = 0;
+int16_t rawMinimumY = 0;
+int16_t rawMaximumY = 0;
+int32_t rawSumX = 0;
+int32_t rawSumY = 0;
 
 uint32_t circleStableStartMs = 0UL;
 uint32_t circleLastStableSampleMs = 0UL;
 uint8_t circleStableSampleCount = 0U;
 
+void resetRawStabilityWindow() {
+  rawStableStartMs = 0UL;
+  rawLastStableSampleMs = 0UL;
+  rawStableSampleCount = 0U;
+  rawMinimumX = 0;
+  rawMaximumX = 0;
+  rawMinimumY = 0;
+  rawMaximumY = 0;
+  rawSumX = 0;
+  rawSumY = 0;
+}
+
+void startRawStabilityWindow(
+    int16_t x,
+    int16_t y) {
+  rawStableStartMs = millis();
+  rawLastStableSampleMs = rawStableStartMs;
+  rawStableSampleCount = 1U;
+  rawMinimumX = x;
+  rawMaximumX = x;
+  rawMinimumY = y;
+  rawMaximumY = y;
+  rawSumX = x;
+  rawSumY = y;
+}
+
+bool addRawStableSample(
+    int16_t x,
+    int16_t y,
+    float &stableX,
+    float &stableY) {
+  if (rawStableSampleCount == 0U) {
+    startRawStabilityWindow(x, y);
+    return false;
+  }
+
+  const uint32_t nowMs = millis();
+  if (nowMs - rawLastStableSampleMs >
+      VISION_STABILITY_MAXIMUM_SAMPLE_GAP_MS) {
+    startRawStabilityWindow(x, y);
+    return false;
+  }
+  rawLastStableSampleMs = nowMs;
+
+  const int16_t candidateMinimumX =
+      x < rawMinimumX ? x : rawMinimumX;
+  const int16_t candidateMaximumX =
+      x > rawMaximumX ? x : rawMaximumX;
+  const int16_t candidateMinimumY =
+      y < rawMinimumY ? y : rawMinimumY;
+  const int16_t candidateMaximumY =
+      y > rawMaximumY ? y : rawMaximumY;
+
+  if (candidateMaximumX - candidateMinimumX >
+          RAW_STABILITY_SPAN_PIXELS ||
+      candidateMaximumY - candidateMinimumY >
+          RAW_STABILITY_SPAN_PIXELS) {
+    startRawStabilityWindow(x, y);
+    return false;
+  }
+
+  rawMinimumX = candidateMinimumX;
+  rawMaximumX = candidateMaximumX;
+  rawMinimumY = candidateMinimumY;
+  rawMaximumY = candidateMaximumY;
+  if (rawStableSampleCount < 255U) {
+    ++rawStableSampleCount;
+  }
+  rawSumX += x;
+  rawSumY += y;
+
+  if (rawStableSampleCount <
+          RAW_STABILITY_MINIMUM_SAMPLES ||
+      millis() - rawStableStartMs <
+          RAW_STABILITY_TIME_MS) {
+    return false;
+  }
+
+  stableX =
+      static_cast<float>(rawSumX) /
+      static_cast<float>(rawStableSampleCount);
+  stableY =
+      static_cast<float>(rawSumY) /
+      static_cast<float>(rawStableSampleCount);
+  return true;
+}
+
 void resetCircleStabilityWindow() {
   circleStableStartMs = 0UL;
   circleLastStableSampleMs = 0UL;
   circleStableSampleCount = 0U;
-}
-
-int8_t rawStorageSlotForColor(uint8_t color) {
-  for (uint8_t slot = 0U; slot < 3U; ++slot) {
-    if (taskColors[workRoundIndex][slot] == color) {
-      return static_cast<int8_t>(slot);
-    }
-  }
-  return -1;
 }
 
 uint8_t storageRingForItem(
@@ -3253,23 +3310,13 @@ void beginWorkAction(
   workItemIndex = 0U;
   activeTransferPurpose = TRANSFER_PURPOSE_NONE;
   visualCorrectionAccumulator = MotorPulses();
-  rawFilledSlotMask = 0U;
-  rawCollectedCount = 0U;
-  rawPendingSlotIndex = 0U;
-  rawPendingColor = 0U;
-  rawPendingSourcePose = ArmPose();
   workLastMaixSequence =
       latestMaixCoordinate.sequence;
+  resetRawStabilityWindow();
   resetCircleStabilityWindow();
 
   beginArmStandardization();
-  if (kind == WORK_ACTION_RAW) {
-    // 原料识别结果尚未知，载物盘先保持行驶位置；识别后再转到颜色对应槽位。
-    commandStorageServoParkingPosition();
-  } else {
-    // 粗加工/暂存卸料始终从二维码序列的第一个槽位开始。
-    commandStorageServoPosition(0U);
-  }
+  commandStorageServoPosition(0U);
   workStorageServoDeadlineMs =
       millis() + STORAGE_SERVO_SETTLE_MS;
   workActionPhase = WORK_PHASE_PREPARE;
@@ -3280,24 +3327,27 @@ void beginWorkAction(
 }
 
 void beginRawItemVision() {
+  resetRawStabilityWindow();
   workLastMaixSequence =
       latestMaixCoordinate.sequence;
   SerialDebug.print("[RAW VISION] t=");
   SerialDebug.print(millis());
-  SerialDebug.print(" ms, collected=");
+  SerialDebug.print(" ms, item=");
   SerialDebug.print(
-      static_cast<unsigned int>(rawCollectedCount));
+      static_cast<unsigned int>(workItemIndex + 1U));
+  SerialDebug.print(", request color=");
   SerialDebug.println(
-      ", request=8 (AA 08 BB, all colors)");
-  beginMaixRequest(MAIXCAM_ALL_COLORS_REQUEST);
-  workActionPhase = WORK_PHASE_RAW_WAIT_RESULT;
+      taskColors[workRoundIndex][workItemIndex]);
+  beginMaixRequest(
+      taskColors[workRoundIndex][workItemIndex]);
+  workActionPhase = WORK_PHASE_RAW_WAIT_STABLE;
 }
 
 void beginCircleVision() {
   /*
-   * 配套vision-3.py在多个圆中返回距离画面中心最近者。粗加工区的原路线
+   * 当前vision-2.py在多个圆中返回距离画面中心最近者。粗加工区的原路线
    * 停车点已经让2号环最近；暂存区则在PREPARE阶段先做30 mm选圆偏置。
-   * 请求9的返回格式为9,x,y，定位后统一把该圆作为2号基准。
+   * 主控收到的x,y协议本身不含环号，定位后统一把该圆作为2号基准。
    */
   resetCircleStabilityWindow();
   workLastMaixSequence =
@@ -3469,31 +3519,9 @@ void beginReloadingTransfer() {
 
 void completeTransferAndRotateStorage() {
   switch (activeTransferPurpose) {
-    case TRANSFER_PURPOSE_RAW_TO_CONTAINER: {
+    case TRANSFER_PURPOSE_RAW_TO_CONTAINER:
       ++correctGrabCount;
-      hmiSetTaskCounts();
-      consumeArmTransferCompletion();
-
-      rawFilledSlotMask = static_cast<uint8_t>(
-          rawFilledSlotMask |
-          (1U << rawPendingSlotIndex));
-      ++rawCollectedCount;
-      SerialDebug.print(
-          "[RAW STORED] color/slot/count=");
-      SerialDebug.print(rawPendingColor);
-      SerialDebug.print("/");
-      SerialDebug.print(rawPendingSlotIndex);
-      SerialDebug.print("/");
-      SerialDebug.println(rawCollectedCount);
-
-      if (rawCollectedCount >= 3U) {
-        // 第三件放好后不再经过-5°，立即命令载物盘回到行驶位置165°。
-        beginStorageParkingBeforeWorkFinish();
-      } else {
-        beginRawItemVision();
-      }
-      return;
-    }
+      break;
 
     case TRANSFER_PURPOSE_CONTAINER_TO_RING:
       ++correctPlacementCount;
@@ -3511,23 +3539,7 @@ void completeTransferAndRotateStorage() {
 
   consumeArmTransferCompletion();
   ++workItemIndex;
-  /*
-   * 粗加工卸完第三件后还要从槽0开始重新装盘，因此仅该情况回槽0。
-   * 粗加工重新装盘的第三件以及暂存最终卸料的第三件完成后，立即转165°；
-   * 下一工位仍会显式转到槽0并等待，不依赖此处留下的角度。
-   */
-  const bool finishedFinalContainerSequence =
-      workItemIndex >= 3U &&
-      (activeTransferPurpose ==
-           TRANSFER_PURPOSE_RING_TO_CONTAINER ||
-       (activeWorkAction == WORK_ACTION_STORAGE &&
-        activeTransferPurpose ==
-            TRANSFER_PURPOSE_CONTAINER_TO_RING));
-  if (finishedFinalContainerSequence) {
-    commandStorageServoParkingPosition();
-  } else {
-    commandStorageServoPosition(workItemIndex);
-  }
+  commandStorageServoPosition(workItemIndex);
   workStorageServoDeadlineMs =
       millis() + STORAGE_SERVO_SETTLE_MS;
   workActionPhase = WORK_PHASE_WAIT_STORAGE_SERVO;
@@ -3609,84 +3621,34 @@ void serviceCompetitionAction() {
       }
       break;
 
-    case WORK_PHASE_RAW_WAIT_RESULT: {
-      uint8_t detectedColor = 0U;
+    case WORK_PHASE_RAW_WAIT_STABLE: {
       int16_t x = 0;
       int16_t y = 0;
       if (!readNewMaixCoordinate(
-              workLastMaixSequence,
-              detectedColor,
-              x,
-              y)) {
+              workLastMaixSequence, x, y)) {
         break;
       }
 
-      const int8_t slot =
-          rawStorageSlotForColor(detectedColor);
-      if (slot < 0) {
-        SerialDebug.print(
-            "[RAW IGNORE] color not in this QR batch: ");
-        SerialDebug.println(detectedColor);
-        beginRawItemVision();
-        break;
-      }
-
-      const uint8_t slotIndex =
-          static_cast<uint8_t>(slot);
-      const uint8_t slotBit =
-          static_cast<uint8_t>(1U << slotIndex);
-      if ((rawFilledSlotMask & slotBit) != 0U) {
-        SerialDebug.print(
-            "[RAW IGNORE] slot already filled, color/slot=");
-        SerialDebug.print(detectedColor);
-        SerialDebug.print("/");
-        SerialDebug.println(slotIndex);
-        beginRawItemVision();
+      float stableX = 0.0f;
+      float stableY = 0.0f;
+      if (!addRawStableSample(
+              x, y, stableX, stableY)) {
         break;
       }
 
       ArmPose source;
-      if (!rawTargetPose(
-              static_cast<float>(x),
-              static_cast<float>(y),
-              source)) {
+      if (!rawTargetPose(stableX, stableY, source)) {
         break;
       }
-
       stopMaixRequest();
-      rawPendingColor = detectedColor;
-      rawPendingSlotIndex = slotIndex;
-      rawPendingSourcePose = source;
-      commandStorageServoPosition(rawPendingSlotIndex);
-      workStorageServoDeadlineMs =
-          millis() + STORAGE_SERVO_SETTLE_MS;
-      workActionPhase =
-          WORK_PHASE_RAW_WAIT_STORAGE_POSITION;
-      SerialDebug.print(
-          "[RAW SLOT] color/QR slot/angle=");
-      SerialDebug.print(rawPendingColor);
-      SerialDebug.print("/");
-      SerialDebug.print(rawPendingSlotIndex);
-      SerialDebug.print("/");
-      SerialDebug.println(
-          STORAGE_SERVO_POSITIONS_DEGREES[
-              rawPendingSlotIndex],
-          1);
-      break;
-    }
-
-    case WORK_PHASE_RAW_WAIT_STORAGE_POSITION:
-      if (!deadlineReached(
-              workStorageServoDeadlineMs)) {
-        break;
-      }
       beginArmTransfer(
-          rawPendingSourcePose,
+          source,
           containerPose(CONTAINER_PLACE_LOWER_MM));
       activeTransferPurpose =
           TRANSFER_PURPOSE_RAW_TO_CONTAINER;
       workActionPhase = WORK_PHASE_WAIT_TRANSFER;
       break;
+    }
 
     case WORK_PHASE_CIRCLE_WAIT_ARM_LOWER:
       if (!liftMoveFinished()) {
@@ -3698,7 +3660,7 @@ void serviceCompetitionAction() {
           " ms, M7 at -90 mm; start circle positioning");
       if (activeWorkAction == WORK_ACTION_STORAGE) {
         /*
-         * vision-3.py只返回最近圆。先利用原路线已知的暂存纵向偏差，
+         * vision-2.py只返回最近圆。先利用原路线已知的暂存纵向偏差，
          * 把画面中心向2号环方向偏置30 mm，再进入闭环Hough定位。
          */
         if (!startAccumulatedWorkstationMove(
@@ -3713,17 +3675,12 @@ void serviceCompetitionAction() {
       break;
 
     case WORK_PHASE_CIRCLE_WAIT_COORDINATE: {
-      uint8_t resultId = 0U;
       int16_t x = 0;
       int16_t y = 0;
       if (!readNewMaixCoordinate(
-              workLastMaixSequence,
-              resultId,
-              x,
-              y)) {
+              workLastMaixSequence, x, y)) {
         break;
       }
-      (void)resultId;
 
       const int32_t dx =
           static_cast<int32_t>(x - IMAGE_CENTER_X);
@@ -3829,6 +3786,10 @@ void serviceCompetitionAction() {
 
       if (workItemIndex < 3U) {
         if (activeTransferPurpose ==
+            TRANSFER_PURPOSE_RAW_TO_CONTAINER) {
+          beginRawItemVision();
+        } else if (
+            activeTransferPurpose ==
             TRANSFER_PURPOSE_CONTAINER_TO_RING) {
           workActionPhase = WORK_PHASE_START_UNLOAD;
         } else if (
@@ -3839,7 +3800,14 @@ void serviceCompetitionAction() {
         break;
       }
 
-      if (activeWorkAction == WORK_ACTION_PROCESS &&
+      if (activeWorkAction == WORK_ACTION_RAW) {
+        /*
+         * 原料区按要求绝不移动底盘；三件入盘并回零后直接结束。即使机械臂
+         * 动作造成轻微偏航，也留给下一条原有平移命令的段末IMU流程处理。
+         */
+        beginStorageParkingBeforeWorkFinish();
+      } else if (
+          activeWorkAction == WORK_ACTION_PROCESS &&
           activeTransferPurpose ==
               TRANSFER_PURPOSE_CONTAINER_TO_RING) {
         workItemIndex = 0U;
