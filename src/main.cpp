@@ -5729,6 +5729,10 @@ bool ringPose(
     return false;
   }
 
+  /*
+   * 实际取放只允许使用停车后由相机实测1/3并插值得到的机械臂局部地图。
+   * 场地坐标和开环路线只负责把车送到可达范围，绝不参与这里的M5/M6解算。
+   */
   pose = measuredRingPoses[ringPosition];
   pose.heightMm = -lowerMm;
   return true;
@@ -5961,6 +5965,9 @@ bool buildMeasuredRingMap() {
       midpointOutwardMm;
   measuredRingPoints[2U].leftMm =
       midpointLeftMm;
+  SerialDebug.println(
+      "[LOCAL RING MAP] field XY ignored: observed ring 1/3 "
+      "define arm-local ring 2 midpoint");
 
   for (uint8_t ring = 1U; ring <= 3U; ++ring) {
     ArmPose pose;
@@ -6113,6 +6120,7 @@ WorkActionKind activeWorkAction = WORK_ACTION_NONE;
 WorkActionPhase workActionPhase = WORK_PHASE_IDLE;
 TransferPurpose activeTransferPurpose = TRANSFER_PURPOSE_NONE;
 bool endpointDirectContainerPickupPending = false;
+bool endpointInitialStorageCommanded = false;
 bool containerPickupPrepositionedPending = false;
 uint8_t workRoundIndex = 0U;
 uint8_t workItemIndex = 0U;
@@ -6343,6 +6351,7 @@ void finishActiveWorkAction() {
   armTransferNextSourcePreparedAtEnd = false;
   armTransferReturnToRawViewAtEnd = false;
   endpointDirectContainerPickupPending = false;
+  endpointInitialStorageCommanded = false;
   containerPickupPrepositionedPending = false;
   workActionStartMs = 0UL;
   workVisionRequestStartMs = 0UL;
@@ -6539,6 +6548,7 @@ void beginWorkAction(
   armTransferNextSourcePreparedAtEnd = false;
   armTransferReturnToRawViewAtEnd = false;
   endpointDirectContainerPickupPending = false;
+  endpointInitialStorageCommanded = false;
   containerPickupPrepositionedPending = false;
   visualCorrectionAccumulator = MotorPulses();
   visualCorrectionForwardMm = 0.0f;
@@ -6587,20 +6597,25 @@ void beginWorkAction(
     beginArmStandardization(0.0f);
     // 原料识别结果尚未知，载物盘先保持行驶位置；识别后再转到颜色对应槽位。
     commandStorageServoParkingPosition();
+    workStorageServoDeadlineMs =
+        millis() + STORAGE_SERVO_SETTLE_MS;
   } else {
+    /*
+     * 载物盘内已有物料时，M5转向1号圈与载物盘从165°转到槽0不能并行，
+     * 否则长臂会扫到正在转动的物料。先让M5/M7完整到达1号粗识别姿态；
+     * 到位停稳后再转槽0，并把载物盘的300 ms动作隐藏在端点视觉识别中。
+     */
     beginArmEndpointPreparation();
-    // 粗加工/暂存卸料始终从二维码序列的第一个槽位开始。
-    commandStorageServoPosition(0U);
+    workStorageServoDeadlineMs = 0UL;
   }
-  workStorageServoDeadlineMs =
-      millis() + STORAGE_SERVO_SETTLE_MS;
   workActionPhase = WORK_PHASE_PREPARE;
   SerialDebug.print("[WORK PREPARE] t=");
   SerialDebug.print(millis());
   SerialDebug.println(
       kind == WORK_ACTION_RAW
           ? " ms, waiting for arm standardization"
-          : " ms, arm will rotate directly to ring-1 search angle");
+          : " ms, arm moves to ring-1 pose first; "
+            "storage remains parked");
 }
 
 void beginRawItemVision() {
@@ -6994,6 +7009,26 @@ void beginUnloadingTransfer() {
   if (!ringMapHeadingStillValid()) {
     return;
   }
+  if (endpointDirectContainerPickupPending) {
+    /*
+     * 正常情况下1/3号端点识别早已覆盖载物盘转槽时间；仍保留首次抓料
+     * 的硬门槛。显式标志保证槽0命令确实是在1号完整姿态停稳后发出的，
+     * 不能把deadline=0误判成已经到位。
+     */
+    if (!endpointInitialStorageCommanded ||
+        workStorageServoDeadlineMs == 0UL) {
+      routeFault(
+          "Initial storage slot was not commanded after ring-1 pose");
+      return;
+    }
+    if (!deadlineReached(workStorageServoDeadlineMs)) {
+      return;
+    }
+    workStorageServoDeadlineMs = 0UL;
+    SerialDebug.println(
+        "[TRANSFER SAFE] initial storage slot 0 settled; "
+        "first pickup may start");
+  }
 
   ArmPose destination;
   uint8_t ringPosition = 0U;
@@ -7314,24 +7349,39 @@ void serviceCompetitionAction() {
       break;
 
     case WORK_PHASE_PREPARE:
-      if (serviceArmStandardization() &&
-          deadlineReached(
-              workStorageServoDeadlineMs)) {
+      if (activeWorkAction == WORK_ACTION_RAW) {
+        if (!serviceArmStandardization() ||
+            !deadlineReached(
+                workStorageServoDeadlineMs)) {
+          break;
+        }
         SerialDebug.print("[WORK PREPARE] t=");
         SerialDebug.print(millis());
         SerialDebug.println(
             " ms, arm and storage settle complete");
         armStandardPhase = ARM_STANDARD_IDLE;
-        if (activeWorkAction == WORK_ACTION_RAW) {
-          beginRawItemVision();
-        } else {
-          /*
-           * 粗加工区和暂存区都冻结底盘后顺序实测1、3号端点，
-           * 由两端中点计算2号。正常流程不再进入旧mode9中圆
-           * 定位，也不在端点建图后修正底盘。
-           */
-          startPreEndpointHeadingCorrection();
-        }
+        beginRawItemVision();
+        break;
+      }
+
+      if (serviceArmStandardization()) {
+        armStandardPhase = ARM_STANDARD_IDLE;
+        /*
+         * 这里只完成M5到1号种子角和M7到粗识别高度；M6还没有伸到1号
+         * 搜索半径，因此载物盘继续保持165°。先锁定停车后的当前航向，
+         * 再伸M6；三轴全部到位并额外停稳后才允许载物盘转槽0。
+         */
+        SerialDebug.print("[WORK PREPARE] t=");
+        SerialDebug.print(millis());
+        SerialDebug.println(
+            " ms, M5/M7 ring-1 pre-pose ready; "
+            "storage remains parked until M6 arrives");
+        /*
+         * 粗加工区和暂存区都冻结底盘后顺序实测1、3号端点，
+         * 由两端中点计算2号。正常流程不再进入旧mode9中圆
+         * 定位，也不在端点建图后修正底盘。
+         */
+        startPreEndpointHeadingCorrection();
       }
       break;
 
@@ -7533,7 +7583,13 @@ void serviceCompetitionAction() {
         SerialDebug.println(
             activeEndpointScanPose.heightMm,
             2);
-        beginEndpointVision();
+        endpointLocalSettleDeadlineMs =
+            millis() + ENDPOINT_LOCAL_MOVE_SETTLE_MS;
+        workActionPhase =
+            WORK_PHASE_ENDPOINT_WAIT_LOCAL_SETTLE;
+        SerialDebug.println(
+            "[ENDPOINT SCAN] full coarse pose reached; "
+            "settle before vision/storage handoff");
       }
       break;
 
@@ -7835,7 +7891,25 @@ void serviceCompetitionAction() {
 
     case WORK_PHASE_ENDPOINT_WAIT_LOCAL_SETTLE:
       if (deadlineReached(
-              endpointLocalSettleDeadlineMs)) {
+          endpointLocalSettleDeadlineMs)) {
+        if (activeEndpointScanRing == 1U &&
+            !endpointInitialStorageCommanded) {
+          /*
+           * 1号完整粗识别姿态已经满足：M5到种子角、M6到搜索半径、
+           * M7到粗识别高度并额外停稳。此时长臂已离开载物盘扫掠区，
+           * 才允许载物盘从165°转槽0；随即开始识别，用视觉时间覆盖
+           * 载物盘动作，但首次抓料前仍会再次检查300 ms门槛。
+           */
+          commandStorageServoPosition(0U);
+          workStorageServoDeadlineMs =
+              millis() + STORAGE_SERVO_SETTLE_MS;
+          endpointInitialStorageCommanded = true;
+          SerialDebug.print("[WORK SAFE] t=");
+          SerialDebug.print(millis());
+          SerialDebug.println(
+              " ms, ring-1 full pose settled -> "
+              "storage slot 0 starts with endpoint vision");
+        }
         beginEndpointVision();
       }
       break;
@@ -8067,6 +8141,7 @@ void cancelCompetitionAction() {
   armTransferNextSourcePreparedAtEnd = false;
   armTransferReturnToRawViewAtEnd = false;
   endpointDirectContainerPickupPending = false;
+  endpointInitialStorageCommanded = false;
   containerPickupPrepositionedPending = false;
   workActionStartMs = 0UL;
   workVisionRequestStartMs = 0UL;
