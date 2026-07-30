@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "vision_version": "5.3.0-find1,3",
+  "protocol_version": 2,
+  "calibration_version": "UNVERIFIED-2026-07-30-ENDPOINT-FAST-STABLE",
+  "verified": false,
+  "image": {
+    "width": 320,
+    "height": 240,
+    "center_x": 160,
+    "center_y": 120
+  },
+  "ring_layout": {
+    "require_three_rings": true,
+    "minimum_spacing_pixels": 20,
+    "maximum_spacing_ratio": 1.45,
+    "maximum_line_error_ratio": 0.18,
+    "maximum_radius_ratio": 1.6,
+    "candidate_minimum_radius_pixels": 28,
+    "candidate_minimum_largest_radius_ratio": 0.55,
+    "allow_centered_ring_fallback": true,
+    "fallback_max_center_distance_pixels": 70,
+    "fallback_min_distance_margin_pixels": 15,
+    "fallback_minimum_dominant_radius_ratio": 0.75
+  },
+  "endpoint_scan": {
+    "mode": 10,
+    "target_id": 1,
+    "maximum_center_distance_pixels": 90,
+    "minimum_dominant_radius_ratio": 0.75,
+    "requires_three_ring_layout": false,
+    "stable_duration_ms": 120,
+    "minimum_stable_samples": 2,
+    "maximum_center_span_pixels": 2,
+    "maximum_radius_span_pixels": 2,
+    "fine_center_tolerance_pixels": 2,
+    "fine_center_confirmations": 2
+  },
+  "notes": [
+    "Thresholds and transforms must be replaced by measured competition-robot values.",
+    "This file is traceability metadata; v5 currently keeps runtime constants in the script."
+  ]
+}

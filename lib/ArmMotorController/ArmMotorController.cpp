@@ -17,7 +17,7 @@ const uint8_t M7_ADDRESS = 7U;
 
 const uint16_t FULL_STEPS_PER_REVOLUTION = 200U;
 const uint16_t M5_MICROSTEPS = 16U;
-const uint16_t M6_MICROSTEPS = 16U;
+const uint16_t M6_MICROSTEPS = 256U;
 const uint16_t M7_MICROSTEPS = 16U;
 const float M5_GEAR_RATIO = 5.0f;
 

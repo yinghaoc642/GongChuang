@@ -1,0 +1,8 @@
+{
+  "name": "VisionProtocol",
+  "version": "2.0.0",
+  "description": "Allocation-free CRC-framed vision request and strict V2 response parser",
+  "build": {
+    "srcDir": "src"
+  }
+}
