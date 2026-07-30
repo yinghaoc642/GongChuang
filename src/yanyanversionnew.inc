@@ -258,6 +258,8 @@ constexpr uint8_t ENDPOINT_FINE_M7_ACCELERATION = 220U;
 constexpr float RING_PLACE_FINAL_DESCENT_MM = 10.0f;
 constexpr uint16_t M7_RING_PLACE_SPEED_RPM = 1050U;
 constexpr uint8_t M7_RING_PLACE_ACCELERATION = 188U;
+// 相机完成圆环建图后，实际放料的M6目标统一比地图结算值回退10 mm。
+constexpr float RING_PLACE_M6_RETRACTION_MM = 10.0f;
 constexpr uint32_t RING_PLACE_EXTENSION_SETTLE_MS = 30UL;
 constexpr uint32_t RING_PLACE_LOWER_SETTLE_MS = 40UL;
 constexpr uint32_t ARM_LINEAR_POWER_ON_SETTLE_MS = 1500UL;
@@ -2177,7 +2179,7 @@ bool readArmLinearCurrentMotorAngleDegrees(
   return false;
 }
 
-void resetLinearAxisTerminalVerification(
+void cancelLinearAxisTerminalVerification(
     LinearAxisMotion &axis) {
   if (armLinearPositionQueryAxis == &axis) {
     armLinearPositionQueryAxis = nullptr;
@@ -2187,11 +2189,16 @@ void resetLinearAxisTerminalVerification(
   axis.terminalPositionRequestSent = false;
   axis.terminalStatusFlags = 0U;
   axis.terminalVerificationReason = ARM_AXIS_VERIFY_NONE;
-  axis.terminalVerificationFailures = 0U;
   axis.terminalPositionSamples = 0U;
   axis.terminalFirstPositionMm = 0.0f;
   axis.terminalPositionRequestDeadlineMs = 0UL;
   axis.terminalNextPositionRequestMs = 0UL;
+}
+
+void resetLinearAxisTerminalVerification(
+    LinearAxisMotion &axis) {
+  cancelLinearAxisTerminalVerification(axis);
+  axis.terminalVerificationFailures = 0U;
 }
 
 void markLinearAxisArrived(LinearAxisMotion &axis) {
@@ -2599,7 +2606,7 @@ void noteLinearAxisTerminalVerificationFailure(
     axis.terminalVerificationPending = false;
     axis.terminalVerificationReason = ARM_AXIS_VERIFY_NONE;
     SerialDebug.println(
-        "[EMM VERIFY] encoder unavailable; retain normal axis timeout");
+        "[EMM VERIFY] verification exhausted; retain normal axis timeout");
     return;
   }
   axis.terminalVerificationPending = true;
@@ -2969,7 +2976,7 @@ void handleArmLinearFrame(const uint8_t *frame) {
           elapsedMs >= ARM_AXIS_MINIMUM_ON_POSITION_MS));
     if ((protectionLatched || (locked && !onPosition)) &&
         axis->terminalVerificationPending) {
-      resetLinearAxisTerminalVerification(*axis);
+      cancelLinearAxisTerminalVerification(*axis);
     }
 
     /*
@@ -3069,7 +3076,12 @@ void handleArmLinearFrame(const uint8_t *frame) {
     }
 
     if (!onPosition) {
-      resetLinearAxisTerminalVerification(*axis);
+      /*
+       * 只取消本轮查询，保留同一FD命令已经累计的核对失败次数。旧代码
+       * 在每个未到位3A帧上把失败计数清零，700 ms门限早已满足后便会
+       * 每约65 ms重新做两次0x36查询，最终形成日志中的无限刷屏。
+       */
+      cancelLinearAxisTerminalVerification(*axis);
       axis->motionObserved = true;
       return;
     }
@@ -7007,6 +7019,29 @@ void beginUnloadingTransfer() {
   if (!ringPose(ringPosition, lowerMm, destination)) {
     return;
   }
+  /*
+   * measuredRingPoses保留相机标定的原始地图，不在建图阶段改值。只有
+   * container -> ring真正放料时，把M6最终伸长量一次性减10 mm；这不是
+   * 到位后再回退的第二段动作。近端目标仍受物理安全下限-6 mm约束。
+   */
+  const float mappedExtensionMm =
+      destination.extensionMm;
+  destination.extensionMm -=
+      RING_PLACE_M6_RETRACTION_MM;
+  if (destination.extensionMm <
+      M6_RING2_MINIMUM_EXTENSION_MM) {
+    destination.extensionMm =
+        M6_RING2_MINIMUM_EXTENSION_MM;
+  }
+  SerialDebug.print(
+      "[RING PLACE] M6 map/retracted/offset mm=");
+  SerialDebug.print(mappedExtensionMm, 2);
+  SerialDebug.print("/");
+  SerialDebug.print(destination.extensionMm, 2);
+  SerialDebug.print("/");
+  SerialDebug.println(
+      RING_PLACE_M6_RETRACTION_MM,
+      2);
 
   const bool concurrentSourcePreparation =
       endpointDirectContainerPickupPending;
