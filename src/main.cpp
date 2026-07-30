@@ -260,8 +260,6 @@ constexpr uint8_t ENDPOINT_FINE_M7_ACCELERATION = 220U;
 constexpr float RING_PLACE_FINAL_DESCENT_MM = 10.0f;
 constexpr uint16_t M7_RING_PLACE_SPEED_RPM = 1050U;
 constexpr uint8_t M7_RING_PLACE_ACCELERATION = 188U;
-// 相机完成圆环建图后，实际放料的M6目标统一比地图结算值回退10 mm。
-constexpr float RING_PLACE_M6_RETRACTION_MM = 10.0f;
 constexpr uint32_t RING_PLACE_EXTENSION_SETTLE_MS = 30UL;
 constexpr uint32_t RING_PLACE_LOWER_SETTLE_MS = 40UL;
 constexpr uint32_t ARM_LINEAR_POWER_ON_SETTLE_MS = 1500UL;
@@ -7021,30 +7019,6 @@ void beginUnloadingTransfer() {
   if (!ringPose(ringPosition, lowerMm, destination)) {
     return;
   }
-  /*
-   * measuredRingPoses保留相机标定的原始地图，不在建图阶段改值。只有
-   * container -> ring真正放料时，把M6最终伸长量一次性减10 mm；这不是
-   * 到位后再回退的第二段动作。近端目标仍受物理安全下限-6 mm约束。
-   */
-  const float mappedExtensionMm =
-      destination.extensionMm;
-  destination.extensionMm -=
-      RING_PLACE_M6_RETRACTION_MM;
-  if (destination.extensionMm <
-      M6_RING2_MINIMUM_EXTENSION_MM) {
-    destination.extensionMm =
-        M6_RING2_MINIMUM_EXTENSION_MM;
-  }
-  SerialDebug.print(
-      "[RING PLACE] M6 map/retracted/offset mm=");
-  SerialDebug.print(mappedExtensionMm, 2);
-  SerialDebug.print("/");
-  SerialDebug.print(destination.extensionMm, 2);
-  SerialDebug.print("/");
-  SerialDebug.println(
-      RING_PLACE_M6_RETRACTION_MM,
-      2);
-
   const bool concurrentSourcePreparation =
       endpointDirectContainerPickupPending;
   endpointDirectContainerPickupPending = false;
