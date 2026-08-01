@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Offline tests for pure logic embedded in the MaixCAM v5 script."""
 
 from __future__ import annotations
 
@@ -7,11 +6,9 @@ import ast
 import json
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 VISION = ROOT / "vision" / "yanyanview5.py"
 CALIBRATION = ROOT / "vision" / "calibration.json"
-
 
 class FakeCircle:
     def __init__(self, x: int, y: int, radius: int) -> None:
@@ -27,7 +24,6 @@ class FakeCircle:
 
     def r(self) -> int:
         return self._radius
-
 
 def load_ring_selection_functions():
     source = VISION.read_text(encoding="utf-8")
@@ -67,7 +63,6 @@ def load_ring_selection_functions():
         namespace["select_endpoint_ring"],
     )
 
-
 def load_protocol_functions():
     source = VISION.read_text(encoding="utf-8")
     tree = ast.parse(source)
@@ -97,7 +92,6 @@ def load_protocol_functions():
         namespace["build_v2_response"],
         namespace["detection_mode_for_request"],
     )
-
 
 def load_circle_stability_functions():
     source = VISION.read_text(encoding="utf-8")
@@ -142,6 +136,51 @@ def load_circle_stability_functions():
         namespace,
     )
 
+def load_color_stability_functions():
+    source = VISION.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    wanted = {
+        "reset_color_stability",
+        "update_color_stability",
+        "stable_color_coordinate",
+        "latest_color_coordinate",
+        "color_stability_profile",
+        "color_response_coordinate",
+    }
+    functions = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef)
+        and node.name in wanted
+    ]
+    module = ast.Module(body=functions, type_ignores=[])
+    namespace = {
+        "multi_color_duration": 300,
+        "multi_color_max_span": 3,
+        "multi_color_minimum_samples": 5,
+        "target_color_duration": 0,
+        "target_color_max_span": 12,
+        "target_color_minimum_samples": 2,
+        "color_stable_start_times": [None, None, None, None],
+        "color_min_x": [0, 0, 0, 0],
+        "color_max_x": [0, 0, 0, 0],
+        "color_min_y": [0, 0, 0, 0],
+        "color_max_y": [0, 0, 0, 0],
+        "color_latest_x": [0, 0, 0, 0],
+        "color_latest_y": [0, 0, 0, 0],
+        "color_sample_counts": [0, 0, 0, 0],
+        "color_sum_x": [0, 0, 0, 0],
+        "color_sum_y": [0, 0, 0, 0],
+    }
+    exec(compile(module, str(VISION), "exec"), namespace)
+    return (
+        namespace["update_color_stability"],
+        namespace["reset_color_stability"],
+        namespace["stable_color_coordinate"],
+        namespace["latest_color_coordinate"],
+        namespace["color_stability_profile"],
+        namespace["color_response_coordinate"],
+    )
 
 def main() -> None:
     (
@@ -162,7 +201,31 @@ def main() -> None:
     ) = (
         load_circle_stability_functions()
     )
+    (
+        update_color_stability,
+        reset_color_stability,
+        stable_color_coordinate,
+        latest_color_coordinate,
+        color_stability_profile,
+        color_response_coordinate,
+    ) = load_color_stability_functions()
     assert crc8(b"123456789") == 0xF4
+
+    assert not update_color_stability(0, 100, 100, 0, 0, 12, 2)
+    assert update_color_stability(0, 108, 105, 10, 0, 12, 2)
+    assert stable_color_coordinate(0) == (104, 102)
+    assert latest_color_coordinate(0) == (108, 105)
+    assert color_stability_profile(1) == (0, 12, 2)
+    assert color_stability_profile(4) == (0, 12, 2)
+    assert color_stability_profile(8) == (300, 3, 5)
+
+    assert color_response_coordinate(1, 0) == (108, 105)
+    assert color_response_coordinate(8, 0) == (104, 102)
+    reset_color_stability(0)
+    assert not update_color_stability(0, 100, 100, 0, 0, 12, 2)
+
+    assert not update_color_stability(0, 113, 100, 10, 0, 12, 2)
+    assert update_color_stability(0, 120, 103, 20, 0, 12, 2)
 
     stable_result = None
     for time_ms, radius in zip(
@@ -256,8 +319,6 @@ def main() -> None:
         is None
     )
 
-    # Mode 10 finds one endpoint without requiring the other two rings.
-    # Digit-sized Hough circles and non-dominant small candidates cannot win.
     endpoint = FakeCircle(166, 117, 42)
     digit_one = FakeCircle(160, 120, 12)
     other_ring = FakeCircle(245, 122, 41)
@@ -273,8 +334,7 @@ def main() -> None:
         )
         is endpoint
     )
-    # A far, oversized false Hough circle must not raise the centered
-    # endpoint's adaptive radius threshold.
+
     assert (
         select_endpoint_ring(
             [endpoint, FakeCircle(310, 230, 90)]
@@ -303,7 +363,15 @@ def main() -> None:
     endpoint_request[4] = crc8(endpoint_request[1:4])
     assert decode_request(endpoint_request) == (0x35, 0x0A)
     assert detection_mode_for_request(0x35, 10, -1) == 10
+    assert detection_mode_for_request(0x35, 10, 0x35) == 10
     assert detection_mode_for_request(0x34, 9, -1) == 9
+    assert detection_mode_for_request(0x34, 9, 0x34) == 9
+    for target_mode in (1, 2, 3, 4):
+        assert (
+            detection_mode_for_request(0x40, target_mode, -1)
+            == target_mode
+        )
+        assert detection_mode_for_request(0x40, target_mode, 0x40) == 0
     assert detection_mode_for_request(0x37, 8, -1) == 8
     assert detection_mode_for_request(0x37, 8, 0x37) == 0
     assert detection_mode_for_request(0x38, 7, -1) == 0
@@ -314,6 +382,18 @@ def main() -> None:
     payload, checksum_text = response.rstrip("\n").split("*")
     assert checksum_text == f"{crc8(payload.encode('ascii')):02X}"
     assert payload.startswith("V2,55,8,0,3,160,120,")
+    targeted_response = build_response(
+        0x40, 3, 0, 3, 168, 123, 2400, 800, 123500
+    )
+    targeted_payload, targeted_checksum = (
+        targeted_response.rstrip("\n").split("*")
+    )
+    assert targeted_checksum == (
+        f"{crc8(targeted_payload.encode('ascii')):02X}"
+    )
+    assert targeted_payload.startswith(
+        "V2,64,3,0,3,168,123,2400,800,"
+    )
     endpoint_response = build_response(
         0x35, 10, 0, 1, 161, 119, 42, 1000, 123956
     )
@@ -387,21 +467,30 @@ def main() -> None:
     )
     assert (
         calibration["endpoint_scan"][
+            "fast_accept_minimum_confidence"
+        ]
+        == 1000
+    )
+    assert (
+        calibration["endpoint_scan"]["fast_accept_confirmations"]
+        == 1
+    )
+    assert (
+        calibration["endpoint_scan"][
             "maximum_center_span_pixels"
         ]
         == 2
     )
 
     print(
-        "PASS Vision v5 ring-layout, endpoint-mode, protocol-v2 CRC "
-        "and calibration schema"
+        "PASS Vision v5 targeted-color, ring-layout, endpoint-mode, "
+        "protocol-v2 CRC and calibration schema"
     )
     if not calibration["verified"]:
         print(
             "NOTICE Vision calibration is intentionally marked UNVERIFIED; "
             "real-image commissioning is still required"
         )
-
 
 if __name__ == "__main__":
     main()

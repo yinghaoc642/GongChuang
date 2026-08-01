@@ -1,13 +1,4 @@
 #!/usr/bin/env python3
-"""Deterministic source preflight for the competition route controller.
-
-The check deliberately reads the firmware as its source of truth.  It verifies
-both start-zone route bindings, route geometry and action order, wheel-pulse
-signs and magnitudes, AccelStepper trajectories, IMU angle unwrapping, and the
-static safety/watchdog wiring.  Pass a source path as argv[1]; otherwise
-the implementation included by ``src/main.cpp`` is checked.  Only the Python
-standard library is required.
-"""
 
 from __future__ import annotations
 
@@ -19,13 +10,13 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence, Tuple
 
-
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_PATH = (
     Path(sys.argv[1]).resolve()
     if len(sys.argv) > 1
     else ROOT / "src" / "yanyanversionnew.inc"
 )
+CONFIG_PATH = ROOT / "lib" / "RobotConfig" / "src" / "RobotConfig.h"
 
 TRANSLATION_COMMANDS = {
     "COMMAND_MOVE_SIDE_12_MM",
@@ -45,24 +36,19 @@ ROUTE_BINDING_RETURN_TO_START_ROW = (
     "ROUTE_BINDING_RETURN_TO_START_ROW"
 )
 
-
 class PreflightFailure(AssertionError):
-    """A source or simulation invariant failed."""
-
+    pass
 
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise PreflightFailure(message)
-
 
 def near(
     actual: float, expected: float, tolerance: float = 1.0e-6
 ) -> bool:
     return abs(actual - expected) <= tolerance
 
-
 def strip_cpp_comments(text: str) -> str:
-    """Remove C++ comments without damaging quoted strings or line numbers."""
 
     output: List[str] = []
     index = 0
@@ -110,7 +96,6 @@ def strip_cpp_comments(text: str) -> str:
 
     return "".join(output)
 
-
 def clean_cpp_number_suffixes(expression: str) -> str:
     expression = re.sub(
         r"\b(0[xX][0-9A-Fa-f]+)(?:[uUlL]+)\b", r"\1", expression
@@ -122,13 +107,21 @@ def clean_cpp_number_suffixes(expression: str) -> str:
         expression,
     )
 
-
 def evaluate_expression(
     expression: str, values: Dict[str, float]
 ) -> float:
-    """Evaluate the arithmetic subset used by route/calibration constants."""
 
     cleaned = clean_cpp_number_suffixes(expression.strip())
+    cleaned = re.sub(
+        r"static_cast\s*<[^>]+>\s*\(([^()]*)\)",
+        r"\1",
+        cleaned,
+    )
+    cleaned = re.sub(
+        r"(?:(?:[A-Za-z_]\w*)\s*::\s*)+([A-Za-z_]\w*)",
+        r"\1",
+        cleaned,
+    )
     cleaned = re.sub(r"\s+", " ", cleaned)
     tree = ast.parse(cleaned, mode="eval")
 
@@ -166,9 +159,9 @@ def evaluate_expression(
 
     return evaluate(tree)
 
-
 def parse_numeric_constants(
     source_without_comments: str,
+    initial_values: Dict[str, float] | None = None,
 ) -> Dict[str, float]:
     declaration_pattern = re.compile(
         r"\b(?:constexpr|const)\s+"
@@ -185,7 +178,7 @@ def parse_numeric_constants(
         )
         if value_type.strip() != "bool"
     }
-    values: Dict[str, float] = {}
+    values: Dict[str, float] = dict(initial_values or {})
 
     made_progress = True
     while pending and made_progress:
@@ -200,7 +193,6 @@ def parse_numeric_constants(
 
     return values
 
-
 def parse_boolean_constants(
     source_without_comments: str,
 ) -> Dict[str, bool]:
@@ -214,7 +206,6 @@ def parse_boolean_constants(
             source_without_comments
         )
     }
-
 
 def find_matching_delimiter(
     text: str, opening_index: int, opening: str, closing: str
@@ -250,7 +241,6 @@ def find_matching_delimiter(
         f"unclosed delimiter {opening!r} at index {opening_index}"
     )
 
-
 def extract_braced_initializer(
     source_without_comments: str, declaration_pattern: str
 ) -> str:
@@ -266,7 +256,6 @@ def extract_braced_initializer(
         source_without_comments, opening_index, "{", "}"
     )
     return source_without_comments[opening_index + 1 : closing_index]
-
 
 def split_top_level_fields(text: str) -> List[str]:
     fields: List[str] = []
@@ -312,7 +301,6 @@ def split_top_level_fields(text: str) -> List[str]:
     fields.append(text[start:].strip())
     return fields
 
-
 @dataclass(frozen=True)
 class RouteCommand:
     command_type: str
@@ -321,7 +309,6 @@ class RouteCommand:
     precise_arrival: bool = False
     central_channel: bool = False
     binding: str = ROUTE_BINDING_FIXED
-
 
 def parse_route(
     source_without_comments: str, values: Dict[str, float]
@@ -409,7 +396,6 @@ def parse_route(
     )
     return commands
 
-
 def extract_function_body(
     source_without_comments: str, function_name: str
 ) -> str:
@@ -442,10 +428,8 @@ def extract_function_body(
         f"function definition {function_name}() was not found"
     )
 
-
 def compact_cpp(text: str) -> str:
     return re.sub(r"\s+", "", text)
-
 
 def verify_route_command_contract(
     source_without_comments: str,
@@ -546,7 +530,6 @@ def verify_route_command_contract(
     print("PASS RouteCommand contract: 2 booleans + explicit route binding")
     print("PASS start-zone selection: PB9 double-click toggles Zone1/Zone2")
 
-
 def resolve_route(
     commands: Sequence[RouteCommand],
     start_zone: int,
@@ -601,13 +584,11 @@ def resolve_route(
             )
     return resolved_commands
 
-
 @dataclass(frozen=True)
 class Pose:
     x_mm: float
     y_mm: float
     side_24_heading_deg: float
-
 
 @dataclass(frozen=True)
 class Movement:
@@ -615,11 +596,9 @@ class Movement:
     before: Pose
     after: Pose
 
-
 def normalized_heading(degrees: float) -> float:
     result = degrees % 360.0
     return 0.0 if near(result, 360.0) else result
-
 
 def translation_angle(
     command_type: str, side_24_heading_deg: float
@@ -632,7 +611,6 @@ def translation_angle(
     }
     return side_24_heading_deg + offsets[command_type]
 
-
 def initial_pose(start_zone: int, values: Dict[str, float]) -> Pose:
     return Pose(
         values["START_CENTER_X_MM"],
@@ -643,7 +621,6 @@ def initial_pose(start_zone: int, values: Dict[str, float]) -> Pose:
         ],
         0.0,
     )
-
 
 def simulate_route(
     commands: Sequence[RouteCommand],
@@ -690,7 +667,6 @@ def simulate_route(
         events.append((command, pose))
     return movements, events
 
-
 def assert_pose(actual: Pose, expected: Pose, label: str) -> None:
     require(near(actual.x_mm, expected.x_mm), f"{label}: x={actual.x_mm}")
     require(near(actual.y_mm, expected.y_mm), f"{label}: y={actual.y_mm}")
@@ -701,7 +677,6 @@ def assert_pose(actual: Pose, expected: Pose, label: str) -> None:
         ),
         f"{label}: heading={actual.side_24_heading_deg}",
     )
-
 
 def body_half_extents(
     heading_deg: float, footprint_x_mm: float, footprint_y_mm: float
@@ -715,7 +690,6 @@ def body_half_extents(
     if near(heading, 0.0) or near(heading, 180.0):
         return footprint_x_mm / 2.0, footprint_y_mm / 2.0
     return footprint_y_mm / 2.0, footprint_x_mm / 2.0
-
 
 def footprint_bounds(
     pose: Pose, values: Dict[str, float]
@@ -731,7 +705,6 @@ def footprint_bounds(
         pose.y_mm - half_y,
         pose.y_mm + half_y,
     )
-
 
 def selected_zone_bounds(
     start_zone: int, values: Dict[str, float]
@@ -753,7 +726,6 @@ def selected_zone_bounds(
         ),
     )
 
-
 def require_bounds_inside(
     inner: Tuple[float, float, float, float],
     outer: Tuple[float, float, float, float],
@@ -767,7 +739,6 @@ def require_bounds_inside(
         and inner[3] <= outer[3] + epsilon,
         f"{label}: footprint {inner} is outside {outer}",
     )
-
 
 def verify_action_sequence(commands: Sequence[RouteCommand]) -> None:
     action_types = {
@@ -835,7 +806,6 @@ def verify_action_sequence(commands: Sequence[RouteCommand]) -> None:
         "PASS mission actions: QR, RAW/PROCESS/STORAGE x2, FINAL_ALIGN"
     )
     print("PASS route tail: no chassis translation after FINAL_ALIGN")
-
 
 def verify_route_geometry(
     commands: Sequence[RouteCommand], values: Dict[str, float]
@@ -1030,10 +1000,8 @@ def verify_route_geometry(
     )
     return resolved_routes
 
-
 def rounded_pulse_count(pulses: float) -> int:
     return int(pulses + 0.5 if pulses >= 0.0 else pulses - 0.5)
-
 
 def motor_pulses_for_command(
     command: RouteCommand, values: Dict[str, float]
@@ -1089,7 +1057,6 @@ def motor_pulses_for_command(
         rounded_pulse_count(pulse * direction)
         for pulse, direction in zip(physical, motor_directions)
     )
-
 
 def verify_wheel_pulses(
     resolved_routes: Sequence[Sequence[RouteCommand]],
@@ -1213,9 +1180,7 @@ def verify_wheel_pulses(
         f"{checked_moves} resolved route moves"
     )
 
-
 class AccelStepperModel:
-    """Step-event model of AccelStepper 1.64 computeNewSpeed()."""
 
     CW = 1
     CCW = 0
@@ -1306,7 +1271,6 @@ class AccelStepperModel:
         self.compute_new_speed()
         return True
 
-
 def run_stepper_move(
     pulses: int, maximum_speed: float, acceleration: float
 ) -> Tuple[int, int]:
@@ -1346,7 +1310,6 @@ def run_stepper_move(
         "stepper displacement differs from requested pulses",
     )
     return maximum_overshoot, reverse_steps
-
 
 def verify_motion_profiles(
     resolved_routes: Sequence[Sequence[RouteCommand]],
@@ -1510,14 +1473,12 @@ def verify_motion_profiles(
         "zero overshoot and zero reversal"
     )
 
-
 def wrap_delta_degrees(degrees: float) -> float:
     while degrees >= 180.0:
         degrees -= 360.0
     while degrees < -180.0:
         degrees += 360.0
     return degrees
-
 
 def unwrap_sequence(raw_degrees: Iterable[float]) -> float:
     iterator = iter(raw_degrees)
@@ -1527,7 +1488,6 @@ def unwrap_sequence(raw_degrees: Iterable[float]) -> float:
         continuous += wrap_delta_degrees(raw - previous)
         previous = raw
     return continuous
-
 
 def verify_imu_unwrap(
     source_without_comments: str, values: Dict[str, float]
@@ -1592,7 +1552,6 @@ def verify_imu_unwrap(
         "firmware does not accumulate wrapped IMU frame deltas",
     )
     print("PASS IMU unwrap: +/-180 crossings and +/-730 degree turns")
-
 
 def verify_qr_reliability_contract(
     source_without_comments: str, values: Dict[str, float]
@@ -1721,7 +1680,6 @@ def verify_qr_reliability_contract(
         "PASS QR reliability: single validated-frame lock, invalid reset, "
         "dual-zone sweep, absolute four-wheel return"
     )
-
 
 def verify_vision_protocol_contract(
     source_without_comments: str, values: Dict[str, float]
@@ -1917,7 +1875,6 @@ def verify_vision_protocol_contract(
         "atomic overflow discard"
     )
 
-
 def verify_endpoint_mapping_contract(
     source_without_comments: str,
     values: Dict[str, float],
@@ -1979,10 +1936,10 @@ def verify_endpoint_mapping_contract(
     expected_m6_pulses_per_mm = (
         200.0 * 256.0 / (math.pi * 35.0)
     )
-    expected_m7_pulses_per_mm = 200.0 * 16.0 / 12.0
+    expected_m7_pulses_per_mm = 200.0 * 256.0 / 12.0
     require(
         near(values["M6_MICROSTEPS"], 256.0)
-        and near(values["M7_MICROSTEPS"], 16.0)
+        and near(values["M7_MICROSTEPS"], 256.0)
         and near(
             values["M6_PULSES_PER_MM"],
             expected_m6_pulses_per_mm,
@@ -1995,13 +1952,15 @@ def verify_endpoint_mapping_contract(
         )
         and "ARM_LINEAR_MICROSTEPS"
         not in source_without_comments,
-        "M6=256 and M7=16 are not independently converted to pulses/mm",
+        "M6 and M7 pulse conversion changed unexpectedly",
     )
     require(
-        near(values["M6_SPEED_RPM"], 260.0)
-        and near(values["M6_ACCELERATION"], 128.0)
-        and near(values["ENDPOINT_M6_SPEED_RPM"], 160.0)
-        and near(values["ENDPOINT_M6_ACCELERATION"], 96.0)
+        near(values["M6_SPEED_RPM"], 390.0)
+        and near(values["M6_ACCELERATION"], 171.0)
+        and near(values["ENDPOINT_FINE_M6_SPEED_RPM"], 160.0)
+        and near(values["ENDPOINT_FINE_M6_ACCELERATION"], 96.0)
+        and near(values["ENDPOINT_COARSE_M6_SPEED_RPM"], 240.0)
+        and near(values["ENDPOINT_COARSE_M6_ACCELERATION"], 149.0)
         and near(values["M6_RECOVERY_SPEED_RPM"], 120.0)
         and near(values["M6_RECOVERY_ACCELERATION"], 64.0)
         and near(values["ARM_LINEAR_STARTUP_ZERO_SPEED_RPM"], 100.0)
@@ -2012,7 +1971,7 @@ def verify_endpoint_mapping_contract(
         "ARM_AXIS_ENABLE_RESPONSE_WAIT_MS": 70.0,
         "ARM_AXIS_TERMINAL_CONFIRMATION_SAMPLES": 2.0,
         "ARM_AXIS_TERMINAL_VERIFY_MAX_FAILURES": 2.0,
-        "ARM_AXIS_TERMINAL_VERIFY_TOLERANCE_MM": 0.20,
+        "ARM_AXIS_TERMINAL_VERIFY_TOLERANCE_MM": 0.60,
         "ARM_AXIS_STALL_CONFIRMATION_SAMPLES": 3.0,
         "ARM_AXIS_MAXIMUM_RECOVERY_ATTEMPTS": 1.0,
         "ARM_AXIS_RECOVERY_TOTAL_TIMEOUT_MS": 5_500.0,
@@ -2629,11 +2588,11 @@ def verify_endpoint_mapping_contract(
         and near(values["ARM_BASE_STEP_ACCELERATION"], 18_000.0)
         and near(
             values["ARM_BASE_TRANSFER_MAXIMUM_STEP_RATE"],
-            52_000.0,
+            117_000.0,
         )
         and near(
             values["ARM_BASE_TRANSFER_STEP_ACCELERATION"],
-            24_000.0,
+            54_000.0,
         )
         and near(values["ARM_BASE_MOTION_TIMEOUT_MS"], 4_500.0),
         "M5 endpoint/transfer profiles or local timeout changed "
@@ -2724,18 +2683,18 @@ def verify_endpoint_mapping_contract(
     )
     require(
         "useArmBaseTransferMotionProfile();" in begin_transfer
-        and "useArmBaseEndpointMotionProfile();"
+        and "useArmBaseEndpointTravelMotionProfile();"
         in endpoint_initializer,
         "M5 transfer and endpoint phases do not select their separate "
         "motion profiles",
     )
 
     expected_slow_place_values = {
-        "RING_PLACE_FINAL_DESCENT_MM": 15.0,
-        "M7_RING_PLACE_SPEED_RPM": 1500.0,
-        "M7_RING_PLACE_ACCELERATION": 192.0,
-        "RING_PLACE_EXTENSION_SETTLE_MS": 0.0,
-        "RING_PLACE_LOWER_SETTLE_MS": 0.0,
+        "RING_PLACE_FINAL_DESCENT_MM": 10.0,
+        "M7_RING_PLACE_SPEED_RPM": 1050.0,
+        "M7_RING_PLACE_ACCELERATION": 188.0,
+        "RING_PLACE_EXTENSION_SETTLE_MS": 30.0,
+        "RING_PLACE_LOWER_SETTLE_MS": 40.0,
     }
     for name, expected in expected_slow_place_values.items():
         require(
@@ -2751,12 +2710,12 @@ def verify_endpoint_mapping_contract(
         near(values["RAW_PICK_LOWER_MM"], 63.0)
         and near(values["HOUGH_VISION_LOWER_MM"], 80.0)
         and near(values["ENDPOINT_FINE_VISION_LOWER_MM"], 95.0)
-        and near(values["CONTAINER_PICK_LOWER_MM"], 30.0)
+        and near(values["CONTAINER_PICK_LOWER_MM"], 28.0)
         and near(values["CONTAINER_PLACE_LOWER_MM"], 30.0)
-        and near(values["PROCESS_PLACE_LOWER_MM"], 145.0)
+        and near(values["PROCESS_PLACE_LOWER_MM"], 138.0)
         and near(
             values["STORAGE_ROUND1_PLACE_LOWER_MM"],
-            145.0,
+            138.0,
         )
         and near(values["STORAGE_ROUND2_PLACE_LOWER_MM"], 80.0),
         "M7 logical heights do not preserve the original physical "
@@ -2799,7 +2758,7 @@ def verify_endpoint_mapping_contract(
         )
         and near(
             values["ENDPOINT_RING3_SEARCH_SEED_ANGLE_DEGREES"],
-            -20.0,
+            -45.0,
         )
         and near(
             values["ENDPOINT_SEARCH_SEED_EXTENSION_MM"],
@@ -2815,7 +2774,7 @@ def verify_endpoint_mapping_contract(
             values[
                 "ENDPOINT_RING3_SEARCH_FALLBACK_STEP_DEGREES"
             ],
-            10.0,
+            15.0,
         )
         and near(
             values[
@@ -2833,13 +2792,13 @@ def verify_endpoint_mapping_contract(
             values[
                 "ENDPOINT_RING3_SEARCH_MINIMUM_ANGLE_DEGREES"
             ],
-            -30.0,
+            -60.0,
         )
         and near(
             values[
                 "ENDPOINT_RING3_SEARCH_MAXIMUM_ANGLE_DEGREES"
             ],
-            -10.0,
+            -30.0,
         )
         and near(
             values["ENDPOINT_SEARCH_MAXIMUM_FALLBACK_MOVES"],
@@ -2849,10 +2808,8 @@ def verify_endpoint_mapping_contract(
     )
     require(
         near(values["ENDPOINT_VISION_RESULT_TIMEOUT_MS"], 2_500.0)
-        and near(values["ENDPOINT_VISION_MAXIMUM_RETRIES"], 1.0)
-        and near(values["ENDPOINT_RING_SCAN_TIMEOUT_MS"], 15_000.0)
-        and near(values["ENDPOINT_MAP_TOTAL_TIMEOUT_MS"], 27_000.0),
-        "endpoint pose/ring/map timeout budgets changed unexpectedly",
+        and near(values["ENDPOINT_VISION_MAXIMUM_RETRIES"], 1.0),
+        "endpoint vision timeout changed unexpectedly",
     )
 
     begin_request = compact_cpp(
@@ -3041,7 +2998,7 @@ def verify_endpoint_mapping_contract(
         "midpointOutwardMm;",
         "measuredRingPoints[2U].leftMm=midpointLeftMm;",
         "planarPointToRingPose("
-        "measuredRingPoints[ring],0.0f,pose)",
+        "ring,measuredRingPoints[ring],0.0f,pose)",
         "measuredRingPoseValid[ring]=true;",
     ):
         require(
@@ -3201,9 +3158,9 @@ def verify_endpoint_mapping_contract(
     ]
     require(
         ring1_fallback_angles == [60.0, 30.0]
-        and ring3_fallback_angles == [-30.0, -10.0],
+        and ring3_fallback_angles == [-60.0, -30.0],
         "fallback candidates are not ring1 +60/+30 and "
-        "ring3 -30/-10",
+        "ring3 -60/-30",
     )
     endpoint_initializer = compact_cpp(
         extract_function_body(
@@ -3263,9 +3220,10 @@ def verify_endpoint_mapping_contract(
         "activeEndpointScanPose,measuredPoint,"
         "endpointFineVisionActive,targetPose,"
         "measuredCorrectionMm,commandedCorrectionMm)",
-        "startExtensionToMmWithProfile("
-        "activeEndpointScanPose.extensionMm,ENDPOINT_M6_SPEED_RPM,"
-        "ENDPOINT_M6_ACCELERATION)",
+        "ENDPOINT_FINE_M6_SPEED_RPM",
+        "ENDPOINT_COARSE_M6_SPEED_RPM",
+        "ENDPOINT_FINE_M6_ACCELERATION",
+        "ENDPOINT_COARSE_M6_ACCELERATION",
         "startArmBaseStandardFrameDegrees("
         "targetPose.standardFrameAngleDegrees);",
         "workActionPhase="
@@ -3283,8 +3241,6 @@ def verify_endpoint_mapping_contract(
         "caseWORK_PHASE_ENDPOINT_WAIT_FINE_LOWER:",
         "caseWORK_PHASE_ENDPOINT_WAIT_RING3_RAISE:",
         "beginDirectRing3EndpointScan();",
-        "caseWORK_PHASE_ENDPOINT_WAIT_ARM_STANDARD:",
-        "if(!buildMeasuredRingMap())",
         "workActionPhase=WORK_PHASE_START_UNLOAD;",
     )
     for fragment in required_action_fragments:
@@ -3293,73 +3249,6 @@ def verify_endpoint_mapping_contract(
             "endpoint state machine is missing "
             f"{fragment}",
         )
-
-    map_budget_index = action.find(
-        "ENDPOINT_MAP_TOTAL_TIMEOUT_MS"
-    )
-    ring_budget_index = action.find(
-        "ENDPOINT_RING_SCAN_TIMEOUT_MS"
-    )
-    per_pose_timeout_index = action.find(
-        "workVisionRequestStartMs!=0UL"
-    )
-    require(
-        0 <= map_budget_index < per_pose_timeout_index
-        and 0 <= ring_budget_index < per_pose_timeout_index,
-        "endpoint map/ring total budgets are not enforced before the "
-        "renewable per-pose vision timeout",
-    )
-    map_budget_segment = action[
-        max(0, map_budget_index - 600):
-        min(len(action), map_budget_index + 600)
-    ]
-    ring_budget_segment = action[
-        max(0, ring_budget_index - 800):
-        min(len(action), ring_budget_index + 800)
-    ]
-    require(
-        "endpointMapStartMs" in map_budget_segment
-        and "routeFault(" in map_budget_segment
-        and "activeEndpointScanRing" in ring_budget_segment
-        and "endpointScanStartMs[activeEndpointScanRing]"
-        in ring_budget_segment
-        and "routeFault(" in ring_budget_segment,
-        "endpoint total-budget checks are not tied to the original "
-        "map/ring start clocks and a hard fault",
-    )
-
-    compact_source = compact_cpp(source_without_comments)
-    require(
-        compact_source.count("endpointMapStartMs=millis();") == 1
-        and compact_source.count(
-            "endpointScanStartMs[ringPosition]=millis();"
-        )
-        == 1,
-        "endpoint map/ring budget start clocks can be refreshed by a "
-        "pose, fallback, or local correction",
-    )
-    pre_endpoint_heading = compact_cpp(
-        extract_function_body(
-            source_without_comments,
-            "startPreEndpointHeadingCorrection",
-        )
-    )
-    endpoint_fallback = compact_cpp(
-        extract_function_body(
-            source_without_comments,
-            "startEndpointSearchFallbackMove",
-        )
-    )
-    require(
-        "endpointMapStartMs=millis();" in pre_endpoint_heading
-        and "endpointScanStartMs[ringPosition]=millis();"
-        in endpoint_initializer
-        and "endpointMapStartMs=millis();"
-        not in endpoint_vision
-        and "endpointScanStartMs" not in endpoint_vision
-        and "endpointScanStartMs" not in endpoint_fallback,
-        "an endpoint pose/fallback can renew a total map/ring budget",
-    )
 
     endpoint_phase_index = action.find(
         "constboolendpointVisionPhase="
@@ -3462,18 +3351,27 @@ def verify_endpoint_mapping_contract(
 
     first_scan_index = action.find("beginEndpointScan(1U);")
     third_scan_index = action.find("beginDirectRing3EndpointScan();")
-    map_index = action.find("if(!buildMeasuredRingMap())")
-    unload_index = action.find(
-        "workActionPhase=WORK_PHASE_START_UNLOAD;",
-        map_index,
+    map_index = action.find(
+        "completeEndpointMapAndStartTransfers();"
     )
     require(
         0
         <= first_scan_index
         < third_scan_index
-        < map_index
-        < unload_index,
+        < map_index,
         "normal endpoint sequence is not 1 -> 3 -> map -> unload",
+    )
+    complete_map = compact_cpp(
+        extract_function_body(
+            source_without_comments,
+            "completeEndpointMapAndStartTransfers",
+        )
+    )
+    require(
+        "if(!buildMeasuredRingMap())" in complete_map
+        and "workActionPhase=WORK_PHASE_START_UNLOAD;"
+        in complete_map,
+        "endpoint completion does not build the map before unload",
     )
     require(
         action.count("beginEndpointScan(1U);") == 1
@@ -3595,7 +3493,7 @@ def verify_endpoint_mapping_contract(
             transfer_start.startswith(
                 "if(!ringMapHeadingStillValid()){return;}"
             ),
-            f"{function_name}() does not reject post-map chassis drift",
+            f"{function_name}() bypasses the post-map IMU guard",
         )
         require(
             "nominalRingPose(" not in transfer_start,
@@ -3625,8 +3523,13 @@ def verify_endpoint_mapping_contract(
     require(
         "if(!imuIsFresh())" in map_guard
         and "RING_MAP_MAXIMUM_HEADING_DRIFT_DEGREES"
-        in map_guard,
-        "ring-map guard does not check fresh IMU data and heading drift",
+        in map_guard
+        and 'routeFault("IMUstalewhileusingendpointmap");'
+        in map_guard
+        and "[RINGMAP]headingdriftwarning;continue="
+        in map_guard
+        and "Chassismovedafterendpointmapping" not in map_guard,
+        "ring-map guard must retain IMU checks without drift hard-stop",
     )
     for forbidden in (
         "startBodyDisplacement(",
@@ -3676,7 +3579,7 @@ def verify_endpoint_mapping_contract(
         and "if(armTransferMapDestination&&"
         "!ringMapHeadingStillValid()){return;}"
         in transfer_service,
-        "map drift is not rechecked immediately before ring descent",
+        "map IMU state is not rechecked immediately before ring descent",
     )
 
     test_task = compact_cpp(
@@ -3756,7 +3659,6 @@ def verify_endpoint_mapping_contract(
         "1 -> 3 handoff, lower fine view, midpoint ring 2, frozen "
         "chassis, physical 155 mm with mild final 15 mm"
     )
-
 
 def verify_safety_contract(
     source_without_comments: str,
@@ -4109,7 +4011,6 @@ def verify_safety_contract(
         "enforced"
     )
 
-
 def verify_general_static_contract(
     source_without_comments: str, commands: Sequence[RouteCommand]
 ) -> None:
@@ -4136,7 +4037,6 @@ def verify_general_static_contract(
         "no default Serial pin conflict, arm home before finish"
     )
 
-
 def main() -> int:
     require(
         SOURCE_PATH.is_file(),
@@ -4144,7 +4044,12 @@ def main() -> int:
     )
     source = SOURCE_PATH.read_text(encoding="utf-8")
     source_without_comments = strip_cpp_comments(source)
-    values = parse_numeric_constants(source_without_comments)
+    config_source = CONFIG_PATH.read_text(encoding="utf-8")
+    config_without_comments = strip_cpp_comments(config_source)
+    config_values = parse_numeric_constants(config_without_comments)
+    values = parse_numeric_constants(
+        source_without_comments, config_values
+    )
     boolean_values = parse_boolean_constants(source_without_comments)
 
     required_constants = {
@@ -4183,8 +4088,10 @@ def main() -> int:
         "M7_PULSES_PER_MM",
         "M6_SPEED_RPM",
         "M6_ACCELERATION",
-        "ENDPOINT_M6_SPEED_RPM",
-        "ENDPOINT_M6_ACCELERATION",
+        "ENDPOINT_FINE_M6_SPEED_RPM",
+        "ENDPOINT_FINE_M6_ACCELERATION",
+        "ENDPOINT_COARSE_M6_SPEED_RPM",
+        "ENDPOINT_COARSE_M6_ACCELERATION",
         "M6_RECOVERY_SPEED_RPM",
         "M6_RECOVERY_ACCELERATION",
         "M7_RECOVERY_SPEED_RPM",
@@ -4239,8 +4146,6 @@ def main() -> int:
         "ENDPOINT_RING3_SEARCH_MAXIMUM_ANGLE_DEGREES",
         "ENDPOINT_VISION_RESULT_TIMEOUT_MS",
         "ENDPOINT_VISION_MAXIMUM_RETRIES",
-        "ENDPOINT_RING_SCAN_TIMEOUT_MS",
-        "ENDPOINT_MAP_TOTAL_TIMEOUT_MS",
         "RING_PLACE_FINAL_DESCENT_MM",
         "M7_SPEED_RPM",
         "M7_RING_PLACE_SPEED_RPM",
@@ -4297,7 +4202,6 @@ def main() -> int:
     verify_general_static_contract(source_without_comments, commands)
     print(f"ALL PREFLIGHT CHECKS PASSED: {SOURCE_PATH}")
     return 0
-
 
 if __name__ == "__main__":
     try:

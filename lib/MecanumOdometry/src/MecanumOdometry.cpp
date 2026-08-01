@@ -15,7 +15,7 @@ bool directionIsValid(int8_t direction) {
 
 bool valueIsFinite(double value) { return isfinite(value); }
 
-} // namespace
+}
 
 MecanumOdometry::MecanumOdometry(
     const MecanumKinematics &kinematics,
@@ -119,10 +119,6 @@ bool MecanumOdometry::updateInternal(
     previousTurns_[3] = currentTurns[3];
     initialized_ = true;
 
-    /*
-     * 第一次轮子基线建立时若同时有 IMU，则自动计算零点偏置，使传感器当前
-     * 读数对应里程计当前 heading，不产生上电跳变。
-     */
     if (imuHeading != nullptr && !imuHeadingReferenceValid_) {
       setImuHeadingReference(imuHeading->yawRadians,
                              pose_.headingRadians);
@@ -148,10 +144,6 @@ bool MecanumOdometry::updateInternal(
     }
   }
 
-  /*
-   * 原始电机圈数乘以安装方向系数，转换为“推动底盘向前为正”的物理轮转角。
-   * 方向系数平方为 1，因此它与发送命令时使用的方向修正互为逆变换。
-   */
   const double wheelRadians[4] = {
       deltaTurns[0] * motorDirections_.frontLeft * kTwoPi,
       deltaTurns[1] * motorDirections_.frontRight * kTwoPi,
@@ -163,10 +155,6 @@ bool MecanumOdometry::updateInternal(
   const double leverArm =
       static_cast<double>(kinematics_.rotationLeverArmMeters());
 
-  /*
-   * 麦轮正运动学是线性的。把输入从 rad/s 换成一个采样周期内的 rad，
-   * 输出就相应从 m/s、rad/s 变成该周期内的 m、rad 位移。
-   */
   const double dxBody =
       radius * 0.25 *
       (wheelRadians[0] + wheelRadians[1] + wheelRadians[2] +
@@ -206,7 +194,6 @@ bool MecanumOdometry::updateInternal(
         normalizeAngle(wheelPredictedHeading +
                        headingError * imuHeading->fusionWeight);
 
-    // 取最短角差，正确处理 HWT101 从 +180° 跳到 -180° 的包络。
     fusedDHeading =
         normalizeAngle(fusedHeading - pose_.headingRadians);
   }
@@ -214,10 +201,6 @@ bool MecanumOdometry::updateInternal(
   lastDisplacement_ =
       ChassisDisplacement(dxBody, dyBody, fusedDHeading);
 
-  /*
-   * 使用 SE(2) 指数映射积分一个采样周期内的平移和旋转。
-   * 与简单地使用周期末航向旋转平移相比，这在边平移边旋转时更准确。
-   */
   double sinc;
   double cosc;
   if (fabs(fusedDHeading) < kSmallAngle) {
@@ -302,4 +285,4 @@ double MecanumOdometry::normalizeAngle(double radians) {
   return radians;
 }
 
-} // namespace mecanum
+}

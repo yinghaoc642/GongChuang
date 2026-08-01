@@ -37,7 +37,7 @@ int16_t normalizedCardinalHeading(int16_t degrees) {
   return normalized;
 }
 
-} // namespace
+}
 
 TaskPlan::TaskPlan() { clear(); }
 
@@ -147,4 +147,4 @@ bool rectangleContains(
          inner.maximumY <= outer.maximumY;
 }
 
-} // namespace competition
+}

@@ -4,9 +4,7 @@ namespace vision_protocol {
 namespace {
 
 constexpr size_t RESPONSE_FIELD_COUNT = 9U;
-// Enough bytes to contain a prefix character, "*", and two checksum digits.
-// Field completeness is diagnosed separately so truncated frames get a
-// specific field-count or empty-field error when possible.
+
 constexpr size_t MINIMUM_RESPONSE_LENGTH = 6U;
 
 enum NumberParseResult : uint8_t {
@@ -84,7 +82,7 @@ ParseError numberError(NumberParseResult result) {
   return PARSE_OK;
 }
 
-} // namespace
+}
 
 VisionResponse::VisionResponse()
     : sequence(0U),
@@ -300,4 +298,4 @@ const char *parseErrorText(ParseError error) {
   }
 }
 
-} // namespace vision_protocol
+}

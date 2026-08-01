@@ -12,7 +12,7 @@ bool directionIsValid(int8_t direction) {
   return direction == 1 || direction == -1;
 }
 
-} // namespace
+}
 
 PulseMecanumChassis::PulseMecanumChassis(
     const PulseMecanumPins &pins,
@@ -28,7 +28,7 @@ PulseMecanumChassis::PulseMecanumChassis(
       linearPulsesPerMeter_(linearPulsesPerMeter),
       maximumPulseRate_(maximumPulseRate),
       minimumPulseWidthMicros_(minimumPulseWidthMicros),
-      // 构造期间先不初始化输出；begin() 会先失能驱动器，再安全配置引脚。
+
       motor1_(AccelStepper::DRIVER, pins.motor1StepPin,
               pins.motor1DirectionPin, 0, 0, false),
       motor2_(AccelStepper::DRIVER, pins.motor2StepPin,
@@ -93,12 +93,10 @@ bool PulseMecanumChassis::begin(bool enableMotors) {
   enabled_ = false;
   stop();
 
-  // enablePin 自身无效时不能安全操作硬件，只能直接报告失败。
   if (!digitalPinIsValid(pins_.enablePin)) {
     return false;
   }
 
-  // 即使其余配置无效，也优先把公共使能脚置为失能，保证失败时安全。
   digitalWrite(pins_.enablePin, enableLevel(false));
   pinMode(pins_.enablePin, OUTPUT);
 
@@ -141,11 +139,6 @@ bool PulseMecanumChassis::calculatePulseRates(
     return false;
   }
 
-  /*
-   * 平移沿用 yyq5 的实测 10000 pulse/m；旋转使用 3200 pulse/rev
-   * 和传入的底盘几何。将两部分分开逆解后相加，既保留旧直线标定，
-   * 又让角速度严格服从轮径、轴距和轮距。
-   */
   const WheelSpeeds translationWheelRadPerSecond =
       kinematics_.inverse(ChassisVelocity(velocity.vx, velocity.vy, 0.0f));
   const WheelSpeeds rotationWheelRadPerSecond =
@@ -234,7 +227,6 @@ bool PulseMecanumChassis::run() {
     return false;
   }
 
-  // 必须逐个调用，不能用会短路的 runSpeed() || runSpeed() 写法。
   const bool motor1Stepped = motor1_.runSpeed();
   const bool motor2Stepped = motor2_.runSpeed();
   const bool motor3Stepped = motor3_.runSpeed();
@@ -304,4 +296,4 @@ const MecanumKinematics &PulseMecanumChassis::kinematics() const {
   return kinematics_;
 }
 
-} // namespace mecanum
+}

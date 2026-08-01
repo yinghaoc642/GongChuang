@@ -112,16 +112,13 @@ void testImuHeadingOverridesWheelHeading() {
       MecanumKinematics::fromMillimeters(187.5f, 195.0f, 100.0f);
   MecanumOdometry odometry(model, WheelDirections());
 
-  // 首帧 30° 自动对齐到当前里程计的 0 rad，不产生上电跳变。
+  
   assert(odometry.update(allWheels(0),
                          ImuHeadingMeasurement(kPi / 6.0, 1.0)));
   assert(odometry.hasImuHeadingReference());
   assert(near(odometry.pose().headingRadians, 0.0));
 
-  /*
-   * 轮子声称底盘发生逆时针转动，但 IMU 仍保持 30°。
-   * 权重 1.0 时最终航向应完全服从 IMU，保持 0 rad。
-   */
+  
   assert(odometry.update(WheelPositionSamples(
                              WheelPositionSample(-1, 0),
                              WheelPositionSample(1, 0),
@@ -140,7 +137,7 @@ void testImuWrapUsesShortestAngle() {
   assert(odometry.update(allWheels(0),
                          ImuHeadingMeasurement(179.0 * degree, 1.0)));
 
-  // HWT101 从 +179° 包络到 -179°，实际只前进了 +2°。
+  
   assert(odometry.update(allWheels(0),
                          ImuHeadingMeasurement(-179.0 * degree, 1.0)));
   assert(near(odometry.pose().headingRadians, 2.0 * degree));
@@ -156,11 +153,11 @@ void testImuFusionWeight() {
   assert(odometry.update(allWheels(0),
                          ImuHeadingMeasurement(kPi / 2.0, 0.5)));
 
-  // 轮式预测为 0，IMU 为 90°，0.5 权重得到 45°。
+  
   assert(near(odometry.pose().headingRadians, kPi / 4.0));
 }
 
-} // namespace
+} 
 
 int main() {
   testForwardOneTurn();

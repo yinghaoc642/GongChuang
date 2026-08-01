@@ -1,0 +1,11 @@
+{
+  "name": "ImuHeadingTracker",
+  "version": "1.0.0",
+  "description": "Validated JY901 yaw-frame parser with continuous heading unwrapping",
+  "frameworks": "arduino",
+  "platforms": "ststm32",
+  "dependencies": {
+    "JY901": "*",
+    "RobotConfig": "*"
+  }
+}

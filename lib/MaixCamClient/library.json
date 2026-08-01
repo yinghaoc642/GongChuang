@@ -1,0 +1,11 @@
+{
+  "name": "MaixCamClient",
+  "version": "1.0.0",
+  "description": "Non-blocking MaixCAM request/response transport for GongChuang",
+  "frameworks": "arduino",
+  "platforms": "ststm32",
+  "dependencies": {
+    "RobotConfig": "*",
+    "VisionProtocol": "*"
+  }
+}

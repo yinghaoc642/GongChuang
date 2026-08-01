@@ -242,7 +242,7 @@ int testOutputIsTransactional() {
   return 0;
 }
 
-} // namespace
+} 
 
 int main() {
   int result = testCrcAndRequest();
