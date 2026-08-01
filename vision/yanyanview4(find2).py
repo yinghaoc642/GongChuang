@@ -1,4 +1,3 @@
-"""GongChuang competition vision firmware v5 for MaixCAM Pro."""
 
 from maix import app, uart, time, pinmap, camera, display, image, gpio
 
@@ -6,13 +5,10 @@ VISION_VERSION = "5.2.0"
 PROTOCOL_VERSION = 2
 CALIBRATION_VERSION = "UNVERIFIED-2026-07-30-ENDPOINT-SCAN"
 
-# MaixCAM Pro 的照明 LED 连接到 B3，高电平点亮。
-# 程序启动后立即将 B3 复用为 GPIO 输出并保持高电平。
 pinmap.set_pin_function("B3", "GPIOB3")
 illumination_led = gpio.GPIO("GPIOB3", gpio.Mode.OUT)
 illumination_led.value(1)
 
-# A16/A17 分别对应 UART0_TX/UART0_RX，连接 STM32 时 TX/RX 交叉连接
 pinmap.set_pin_function("A17", "UART0_RX")
 pinmap.set_pin_function("A16", "UART0_TX")
 Serial_Maix0 = uart.UART("/dev/ttyS0", 115200)
@@ -25,7 +21,6 @@ print(
     CALIBRATION_VERSION,
 )
 
-# 初始化摄像头和显示屏
 cam = camera.Camera(320, 240)
 disp = display.Display()
 image_center_x = 160
@@ -33,51 +28,38 @@ image_center_y = 120
 
 area_threshold = 1500
 pixels_threshold = 1000
-# 颜色阈值定义
+
 red_thresholds = [[0, 80, 10, 80, 0, 40]]
 yellow_thresholds = [[20, 100, -20, 30, 20, 100]]
 blue_thresholds = [[-10, 70, -10, 40, -70, -8]]
 green_thresholds = [[0, 80, -120, -3, 10, 50]]
 
-# 霍夫圆检测参数
-# threshold 越大，检测越严格；当前7500比MaixVision内置示例的3000更严格。
-# M7固定在-90 mm低头识别时，1/2/3的弯曲笔画会产生半径约8～20 px的
-# 小圆候选；它们不是圆环外沿。先在霍夫阶段排除过小半径，再由下面的
-# 自适应尺度筛选处理剩余候选，避免数字2、3阻塞中心圆确认。
 circle_threshold = 7500
 circle_r_min = 28
 circle_r_max = 100
 circle_r_step = 2
 ring_candidate_min_radius_pixels = 28
-# 同一帧只保留不小于最大候选半径55%的圆。真实三环的透视半径差已有
-# 1.60倍容差，而数字笔画通常远小于圆环外沿。
+
 ring_candidate_min_largest_radius_ratio = 0.55
 require_three_ring_layout = True
 ring_min_spacing_pixels = 20
 ring_max_spacing_ratio = 1.45
 ring_max_line_error_ratio = 0.18
 ring_max_radius_ratio = 1.60
-# 低头定位后实车视野可能只完整保留中间环。三环整体优先；严格三环匹配
-# 失败时，仅允许“靠近画面中心且没有距离相近竞争者”的圆作为中间环。
+
 allow_centered_ring_fallback = True
 ring_fallback_max_center_distance_pixels = 70
 ring_fallback_min_distance_margin_pixels = 15
-# 单圆回退时只在近中心候选中比较半径接近最大外环的圆；数字小圆即使
-# 比外环圆心更接近画面中心，也不能抢占目标或制造“歧义而永不发送”。
+
 ring_fallback_min_dominant_radius_ratio = 0.75
-# 模式10用于机械臂分别扫描1号和3号端点。机械臂先把待测圆移动到画面中心附近，
-# 因此不要求同时看见三个圆；仍先复用外环尺寸过滤，再从中心附近的主导尺寸外环
-# 中选择离画面中心最近者。
+
 endpoint_max_center_distance_pixels = 90
 endpoint_min_dominant_radius_ratio = 0.75
 
-# 霍夫圆协议的连续命中计时
 circle_start_time = None
-# 霍夫圆沿用0.5秒连续命中时间
+
 duration = 500
-# 新协议0x08：四种颜色分别维护独立稳定窗口。
-# 只有连续0.3秒内横、纵坐标各自的最大值与最小值之差均不超过3像素，
-# 才允许返回该颜色和坐标。
+
 multi_color_duration = 300
 multi_color_max_span = 3
 multi_color_minimum_samples = 5
@@ -92,7 +74,6 @@ color_sample_counts = [0, 0, 0, 0]
 color_sum_x = [0, 0, 0, 0]
 color_sum_y = [0, 0, 0, 0]
 
-# 圆模式既要持续命中，也要确认连续帧锁定的是同一个物理圆。
 circle_stable_minimum_samples = 5
 circle_stable_max_span = 3
 circle_stable_max_radius_span = 3
@@ -108,15 +89,12 @@ circle_sample_count = 0
 circle_diagnostic_interval_ms = 500
 last_circle_diagnostic_time = 0
 
-# 多个颜色同时稳定时，从该游标开始轮询。游标不会因请求结束而清零，
-# 避免一个不属于当前批次但长期可见的颜色持续占用每次响应。
 color_round_robin_cursor = 0
 
-# 记录上一次发送坐标的时间，初始值为 0
 last_send_time = 0
-# 设定发送间隔为 0.1 秒（100 毫秒）
+
 send_interval = 100
-# 检测模式：8=同时识别红黄蓝绿，9=三圆布局的中间圆，10=端点单圆，其他=停止。
+
 current_color_to_detect = 0
 
 frame_header = 0xAA
@@ -131,9 +109,8 @@ buffer = bytearray()
 current_request_sequence = 0
 completed_color_request_sequence = -1
 
-
 def crc8(data):
-    """CRC-8, polynomial 0x07, initial value 0."""
+
     crc = 0
     for value in data:
         crc ^= value
@@ -144,9 +121,8 @@ def crc8(data):
                 crc = (crc << 1) & 0xFF
     return crc
 
-
 def decode_v2_request_frame(frame):
-    """Return (sequence, mode) for one valid six-byte request."""
+
     if (
         len(frame) != request_frame_length
         or frame[0] != frame_header
@@ -156,7 +132,6 @@ def decode_v2_request_frame(frame):
     ):
         return None
     return frame[2], frame[3]
-
 
 def build_v2_response(
     sequence,
@@ -169,7 +144,7 @@ def build_v2_response(
     confidence,
     timestamp,
 ):
-    """Build one newline-terminated, CRC-protected protocol-v2 line."""
+
     payload = (
         f"V2,{sequence},{mode},{status},{target_id},"
         f"{x},{y},{metric},{confidence},{timestamp}"
@@ -177,14 +152,12 @@ def build_v2_response(
     checksum = crc8(payload.encode("ascii"))
     return f"{payload}*{checksum:02X}\n"
 
-
 def stability_confidence(span, allowed_span):
-    """Heuristic 0..1000 stability score; it is not a probability."""
+
     if allowed_span <= 0:
         return 0
     bounded_span = min(max(span, 0), allowed_span)
     return 1000 - int(400 * bounded_span / allowed_span)
-
 
 def reset_color_stability(color_index):
     color_stable_start_times[color_index] = None
@@ -198,11 +171,9 @@ def reset_color_stability(color_index):
     color_sum_x[color_index] = 0
     color_sum_y[color_index] = 0
 
-
 def reset_all_color_stability():
     for color_index in range(4):
         reset_color_stability(color_index)
-
 
 def update_color_stability(color_index, x, y, current_time):
     if color_stable_start_times[color_index] is None:
@@ -227,7 +198,7 @@ def update_color_stability(color_index, x, y, current_time):
         next_max_x - next_min_x > multi_color_max_span
         or next_max_y - next_min_y > multi_color_max_span
     ):
-        # 当前点已经超出稳定窗口，以当前点重新开始0.3秒计时。
+
         reset_color_stability(color_index)
         color_stable_start_times[color_index] = current_time
         color_min_x[color_index] = x
@@ -257,14 +228,12 @@ def update_color_stability(color_index, x, y, current_time):
         >= multi_color_minimum_samples
     )
 
-
 def stable_color_coordinate(color_index):
     count = max(color_sample_counts[color_index], 1)
     return (
         int(round(color_sum_x[color_index] / count)),
         int(round(color_sum_y[color_index] / count)),
     )
-
 
 def reset_circle_stability():
     global circle_start_time
@@ -282,7 +251,6 @@ def reset_circle_stability():
     circle_sum_x = 0
     circle_sum_y = 0
     circle_sample_count = 0
-
 
 def update_circle_stability(circle, current_time):
     global circle_start_time
@@ -332,9 +300,8 @@ def update_circle_stability(circle, current_time):
         )
     return None
 
-
 def filter_outer_ring_candidates(circles):
-    """Reject digit-sized Hough circles before layout selection."""
+
     if not circles:
         return []
 
@@ -350,9 +317,8 @@ def filter_outer_ring_candidates(circles):
         if circle.r() >= adaptive_minimum_radius
     ]
 
-
 def select_center_ring(circles):
-    """Return the middle member of the best three-ring constellation."""
+
     outer_circles = filter_outer_ring_candidates(circles)
     if len(outer_circles) < 3:
         return None
@@ -404,9 +370,8 @@ def select_center_ring(circles):
                     best_circle = second
     return best_circle
 
-
 def select_centered_ring_fallback(circles):
-    """Return one unambiguous near-center ring, otherwise None."""
+
     outer_circles = filter_outer_ring_candidates(circles)
     if not outer_circles:
         return None
@@ -449,13 +414,8 @@ def select_centered_ring_fallback(circles):
         return None
     return best
 
-
 def select_endpoint_ring(circles):
-    """Return the dominant outer ring nearest the image center.
 
-    Mode 10 is used after the arm has moved one endpoint ring close to the
-    image center. It deliberately does not require a three-ring layout.
-    """
     outer_circles = filter_outer_ring_candidates(circles)
     if not outer_circles:
         return None
@@ -496,12 +456,10 @@ def select_endpoint_ring(circles):
         ),
     )
 
-
 while not app.need_exit():
     img = cam.read()
     current_time = time.ticks_ms()
 
-    # 协议v2请求固定为 AA,02,seq,mode,crc,BB。
     while Serial_Maix0.available():
         byte = Serial_Maix0.read(1)[0]
         if not buffer and byte != frame_header:
@@ -511,7 +469,7 @@ while not app.need_exit():
         if len(buffer) == request_frame_length:
             decoded_request = decode_v2_request_frame(buffer)
             if decoded_request is None:
-                # CRC/帧尾错误时保留最后一个可能的新帧头，快速重新同步。
+
                 last_header_index = -1
                 for index in range(1, len(buffer)):
                     if buffer[index] == frame_header:
@@ -524,7 +482,7 @@ while not app.need_exit():
 
             request_sequence, data = decoded_request
             if data == 0x08:
-                # 模式8每个请求序号只允许一条响应；周期重发不能再次触发。
+
                 new_detection_mode = (
                     0
                     if request_sequence
@@ -538,7 +496,6 @@ while not app.need_exit():
             else:
                 new_detection_mode = 0
 
-            # 新序号代表新的独立请求；相同序号的周期重发不得清空稳定窗口。
             if (
                 new_detection_mode != current_color_to_detect
                 or request_sequence != current_request_sequence
@@ -558,7 +515,6 @@ while not app.need_exit():
     selected_circle = None
     circle_selection_source = None
 
-    # 新协议0x08在同一帧中检查全部四种颜色。
     if current_color_to_detect == 8:
         red_blobs = img.find_blobs(
             red_thresholds,
@@ -595,8 +551,6 @@ while not app.need_exit():
                 reset_color_stability(color_index)
                 continue
 
-            # 同色出现多个色块时使用画面面积最大的一个，避免列表顺序变化
-            # 导致稳定窗口在不同目标之间跳动。
             blob = max(blobs, key=lambda b: b.w() * b.h())
             x, y = blob.cx(), blob.cy()
             if update_color_stability(
@@ -659,8 +613,6 @@ while not app.need_exit():
                 selected_color_index + 1
             ) % 4
 
-            # 每个模式8请求最多回复一条；保持轮询游标，只清检测窗口。
-            # STM32下一次发送新的v2请求序号后会重新开始检测。
             current_color_to_detect = 0
             completed_color_request_sequence = (
                 current_request_sequence
@@ -692,9 +644,7 @@ while not app.need_exit():
                     ],
                 )
                 last_circle_diagnostic_time = current_time
-            # 正式模式必须先找到近似共线、等间距、等半径的三圆整体，
-            # 再把中间成员作为2号基准。低头后若视野只完整保留中间环，
-            # 则使用带中心距离和歧义门限的受限回退，不能无条件取最近圆。
+
             if require_three_ring_layout:
                 circle = select_center_ring(circles)
                 if circle is not None:
@@ -756,25 +706,22 @@ while not app.need_exit():
                 )
                 last_send_time = current_time
                 reset_circle_stability()
-                # 模式9保持激活并约每0.5秒返回一次，让STM32能够连续取得
-                # 两个圆心样本完成稳定判定；完成后STM32发送v2停止帧。
+
         else:
             reset_circle_stability()
 
-    # 绘制检测到的色块轮廓，将方形改为圆形
     all_blobs = red_blobs + yellow_blobs + blue_blobs + green_blobs
     for b in all_blobs:
-        # 获取色块的中心点和半径
+
         x = b.cx()
         y = b.cy()
-        # 计算半径，这里简单使用宽度和高度的平均值
+
         radius = (b.w() + b.h()) // 4
         img.draw_circle(x, y, radius, color=image.COLOR_RED)
 
-    # 绘制霍夫圆检测结果
     for c in circles:
         img.draw_circle(c.x(), c.y(), c.r(), color=image.COLOR_GREEN, thickness=2)
-    # 绿色=原始霍夫候选；蓝色=通过外环尺度过滤；红色=最终2号目标。
+
     for c in outer_ring_candidates:
         img.draw_circle(
             c.x(),

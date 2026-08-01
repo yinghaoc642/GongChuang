@@ -1,5 +1,6 @@
 #include "ArmMotorController.h"
 
+#include <RobotConfig.h>
 #include <math.h>
 
 namespace {
@@ -15,33 +16,37 @@ const uint32_t M6M7_BAUDRATE = 115200UL;
 const uint8_t M6_ADDRESS = 6U;
 const uint8_t M7_ADDRESS = 7U;
 
-const uint16_t FULL_STEPS_PER_REVOLUTION = 200U;
-const uint16_t M5_MICROSTEPS = 16U;
-const uint16_t M6_MICROSTEPS = 256U;
-const uint16_t M7_MICROSTEPS = 16U;
-const float M5_GEAR_RATIO = 5.0f;
+constexpr uint16_t FULL_STEPS_PER_REVOLUTION =
+    gongchuang::config::arm_hardware::
+        FULL_STEPS_PER_REVOLUTION;
+constexpr uint16_t M5_MICROSTEPS =
+    gongchuang::config::arm_hardware::M5_MICROSTEPS;
+constexpr uint16_t M6_MICROSTEPS =
+    gongchuang::config::arm_hardware::M6_MICROSTEPS;
+constexpr uint16_t M7_MICROSTEPS =
+    gongchuang::config::arm_hardware::M7_MICROSTEPS;
+constexpr float M5_GEAR_RATIO =
+    gongchuang::config::arm_hardware::M5_GEAR_RATIO;
 
-/*
- * M6 齿轮齿条：
- *   模数 m = 1 mm，分度圆直径 d = 35 mm，因此齿数 z = d/m = 35；
- *   电机一圈的理论直线位移为 pi*d = pi*m*z。
- */
 const float M6_RACK_MODULE_MM = 1.0f;
-const float M6_PINION_PITCH_DIAMETER_MM = 35.0f;
+constexpr float M6_PINION_PITCH_DIAMETER_MM =
+    gongchuang::config::arm_hardware::
+        M6_PINION_PITCH_DIAMETER_MM;
 const float M6_PINION_TEETH =
     M6_PINION_PITCH_DIAMETER_MM / M6_RACK_MODULE_MM;
 const float M6_TRAVEL_PER_REVOLUTION_MM =
     PI * M6_RACK_MODULE_MM * M6_PINION_TEETH;
 
-// M7 已确认使用 T8x12 滚珠丝杠：导程 12 mm/圈。
-const float DEFAULT_M7_LEAD_MM_PER_REVOLUTION = 12.0f;
+constexpr float DEFAULT_M7_LEAD_MM_PER_REVOLUTION =
+    gongchuang::config::arm_hardware::
+        M7_LEAD_MM_PER_REVOLUTION;
 
-const float DEFAULT_M5_MAXIMUM_STEP_RATE = 1000.0f;
-const float DEFAULT_M5_STEP_ACCELERATION = 500.0f;
+const float DEFAULT_M5_MAXIMUM_STEP_RATE = 1800.0f;
+const float DEFAULT_M5_STEP_ACCELERATION = 750.0f;
 const uint16_t M5_MINIMUM_STEP_PULSE_WIDTH_US = 2U;
 
-const uint16_t DEFAULT_SERIAL_SPEED_RPM = 60U;
-const uint8_t DEFAULT_SERIAL_ACCELERATION = 50U;
+const uint16_t DEFAULT_SERIAL_SPEED_RPM = 108U;
+const uint8_t DEFAULT_SERIAL_ACCELERATION = 119U;
 const uint32_t SERIAL_RESPONSE_SETTLE_TIME_MS = 30UL;
 
 const uint8_t M6_POSITIVE_DIRECTION = 1U;
@@ -51,7 +56,7 @@ uint8_t oppositeDirection(uint8_t direction) {
   return direction == 0U ? 1U : 0U;
 }
 
-} // namespace
+}
 
 ArmMotorController::ArmMotorController()
     : motorM5_(
@@ -76,10 +81,7 @@ void ArmMotorController::beginM5() {
   digitalWrite(M5_ENABLE_PIN, HIGH);
 
   motorM5_.enableOutputs();
-  /*
-   * 实机复核：DIR不反相时，正脉冲为逆时针、负脉冲为顺时针，
-   * 与本库公开的“正角逆时针、负角顺时针”约定一致。
-   */
+
   motorM5_.setPinsInverted(false, false, false);
   motorM5_.setMinPulseWidth(
       M5_MINIMUM_STEP_PULSE_WIDTH_US);
@@ -187,9 +189,6 @@ void ArmMotorController::moveM6ByMillimeters(
     return;
   }
 
-  /*
-   * 实机中 M6 的正电机方向是收缩，因此伸长量为正时要发送反方向。
-   */
   const uint8_t direction =
       extensionMillimeters > 0.0f
           ? oppositeDirection(M6_POSITIVE_DIRECTION)

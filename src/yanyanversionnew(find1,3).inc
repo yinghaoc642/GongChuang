@@ -24,64 +24,64 @@ static_assert(
 
 using namespace mecanum;
 
-/*
- * GongChuang：225 mm机械臂中心偏移的省赛物流赛项两批物料移动路径
- *
- * 场地坐标：
- *   原点在场地左下角，+X 向右（东），+Y 向上（北），单位 mm。
- *
- * 车辆定义：
- *   3、4 号轮所在端是当前车头；
- *   1、2 号轮所在端是车尾；
- *   扫码器、机械臂和向下红外都从 2、4 号轮所在侧向外伸出。
- *   初始姿态下：3、4 侧朝南，1、2 侧朝北，1、3 侧朝西，
- *   2、4 侧朝东。
- *
- * 已按本次确认采用的实车约定：
- *   1. 10000 pulse 约等于直行 1 m；
- *   2. 四个电机安装方向仍为 [-,+,-,+]；
- *   3. JY901/HWT101 逆时针旋转时角度增加。
- *
- * MecanumKinematics 的 forward 轴仍沿 1、2 侧，不能把库中的
- * forward 直接理解为新车头方向。本程序统一按“向哪一个车体侧面平移”
- * 下达命令，避免车头旋转 90° 后出现前进、后退歧义。
- *
- * 路径完整执行两批“原料区 -> 粗加工区 -> 暂存区”。每个工作区均由
- * 2、4侧面对工位中线。PATH_ONLY_TEST=false时执行本文后半部的MaixCAM
- * 定位、M5～M7、夹爪和载物盘非阻塞动作状态机。
- *
- * 【参赛规则地点对照：附件2，物流赛项决赛第一阶段】
- *   - 场地为2400×2400 mm；灰色十字车道宽400 mm。
- *   - 启停区1在右上角，启停区2在右下角，尺寸均为300×300 mm。
- *   - 原料区在上边中部；粗加工区在下边中部；暂存区在左边中部；
- *     二维码板在右边内侧的规定范围内随机摆放。
- *   - 规则要求：扫码 -> 第一批原料/粗加工/暂存 ->
- *     第二批原料/粗加工/暂存（同色码垛）-> 返回抽签确定的启停区。
- *   - 规则图还画有精加工区、成品区，但决赛第一阶段公布的固定流程
- *     只经过原料区、粗加工区和暂存区；本路径没有访问精加工区、成品区。
- *   - 灰色道路上的黑色障碍物位置可随机变化；本文件是固定命令序列，
- *     没有障碍物检测、绕行或重新规划逻辑。
- *
- * 【三种坐标层次，调试时不能混用】
- *   1. 规则层：原料区和二维码板允许在规定范围内随机摆放，实际位置
- *      以现场为准；粗加工区/暂存区台面名义尺寸为580×150 mm。
- *   2. route-simulator层：旧tmcode1理想路线采用原料/粗加工/暂存车心
- *      (1200,2100)/(1200,300)/(300,1200)，仅用于理解路线形状。
- *   3. 本文件层：当前常量、补偿量和实车标定才决定实际发出的脉冲；
- *      程序不测量世界坐标，平移位置是开环脉冲累计，IMU只闭环航向。
- *      因此下文“坐标”均是设计或开环推算值，不是定位传感器实测值。
- *
- * 注意：代码中的“第1轮/第2轮”表示同一次比赛任务里的第一批/第二批
- * 三个物料，不是规则所说的两次独立运行机会。
- */
+  
+                                          
+  
+        
+                                      
+  
+        
+                    
+                  
+                                  
+                                   
+             
+  
+                 
+                              
+                             
+                                
+  
+                                               
+                                        
+                              
+  
+                                       
+                                                  
+                           
+  
+                            
+                                     
+                                        
+                                   
+                           
+                                 
+                                       
+                                    
+                                       
+                                     
+                         
+  
+                   
+                                     
+                                        
+                                                  
+                                                    
+                                     
+                                       
+                                      
+  
+                                     
+                        
+   
 
 namespace {
 
-// ---------------------------------------------------------------------------
-// 硬件引脚与串口
-// ---------------------------------------------------------------------------
+                                                                              
+          
+                                                                              
 
-const uint8_t DRIVE_ENABLE_PIN = PE13; // M1～M4 公共使能，低有效
+const uint8_t DRIVE_ENABLE_PIN = PE13;                  
 
 const uint8_t M1_STEP_PIN = PD4;
 const uint8_t M1_DIRECTION_PIN = PD6;
@@ -94,9 +94,9 @@ const uint8_t M4_DIRECTION_PIN = PC3_C;
 
 const uint8_t START_BUTTON_PIN = PB9;
 
-// true_example/Battery*.ino 使用的独立调试串口。
-// 不能使用默认 Serial：通用 H750 板型的 Serial RX 是 PA1，
-// 与四号轮 STEP 引脚冲突。
+                                       
+                                             
+                  
 const uint8_t DEBUG_RX_PIN = PB12;
 const uint8_t DEBUG_TX_PIN = PB13;
 const uint8_t HMI_RX_PIN = PB15;
@@ -138,66 +138,66 @@ FSUS_Servo storageServo(STORAGE_SERVO_ID, &servoProtocol);
 
 OneButton startButton(START_BUTTON_PIN, true, true);
 
-// ---------------------------------------------------------------------------
-// 底盘标定与安全参数
-// ---------------------------------------------------------------------------
+                                                                              
+            
+                                                                              
 
 const float PI_F = 3.14159265358979323846f;
 const float TWO_PI_F = 2.0f * PI_F;
 
-// GitHub 运动学库当前记录的实测几何尺寸。
+                          
 const float WHEELBASE_MM = 187.5f;
 const float TRACK_WIDTH_MM = 195.0f;
 const float WHEEL_DIAMETER_MM = 100.0f;
 
-/*
- * 本次确认先采用 yyq5 旧底盘的实测标定：10000 pulse 约为 1 m。
- * 麦轮横移通常比纵向更容易受滚子与地面影响，因此保留独立标定项；
- * 当前第一次烧录先按相同数值，之后可分别实测修正。
- */
+  
+                                            
+                                  
+                           
+   
 const float FORWARD_PULSES_PER_METER = 10000.0f;
 const float LATERAL_PULSES_PER_METER = 10000.0f;
 const float PULSES_PER_WHEEL_REVOLUTION = 3200.0f;
 
-// 顺、逆时针分别标定，减少粗转后的多次原地微调；IMU 仍做最终闭环。
+                                     
 const float COUNTERCLOCKWISE_ROTATION_PULSE_SCALE = 1.0f;
 const float CLOCKWISE_ROTATION_PULSE_SCALE = 1.0f;
 
-/*
- * M5 的200步/圈、16细分、5:1减速比及物理方向统一由
- * ArmMotorController 管理。库角度正值为逆时针、负值为顺时针：
- *   上电/发车/行驶姿态 = 旧坐标0°；
- *   标准作业姿态       = 从上电姿态顺时针90° = 旧坐标-90°。
- * 两种姿态下M6都回到离机械硬限位10 mm的工作零点，M7升到最高。
- */
+  
+                                 
+                                          
+                        
+                                          
+                                     
+   
 constexpr int32_t ARM_BASE_TRAVEL_OLD_FRAME_DEGREES = 0;
 constexpr int32_t ARM_BASE_STANDARD_OLD_FRAME_DEGREES = -90;
 constexpr float ARM_BASE_TRAVEL_STANDARD_FRAME_DEGREES = 90.0f;
 constexpr int32_t ARM_BASE_HOME_ANGLE_DEGREES =
     ARM_BASE_TRAVEL_OLD_FRAME_DEGREES;
-// 容器夹取/释放位：相对标准状态顺时针102°（标准坐标顺时针为负）。
+                                     
 constexpr float ARM_CONTAINER_CLOCKWISE_DEGREES = -102.0f;
-/*
- * 端点建图已删除-80°大幅预置，省下的时间用于降低M5冲击。端点首动改为
- * M5先转稳、M6后伸出，避免旋转和长距离伸出叠加载荷。
- */
+  
+                                       
+                              
+   
 const float ARM_BASE_MAXIMUM_STEP_RATE = 45000.0f;
 const float ARM_BASE_STEP_ACCELERATION = 18000.0f;
-// 搬运时M6已回安全零点后才允许M5大角度转动；使用仍低于旧版35000的
-// 中等加速度，减少六次搬运的固定耗时，但端点视觉继续使用上面的柔和曲线。
+                                       
+                                      
 const float ARM_BASE_TRANSFER_MAXIMUM_STEP_RATE = 52000.0f;
 const float ARM_BASE_TRANSFER_STEP_ACCELERATION = 24000.0f;
-// M5脉冲到位后的环节衔接等待按原值减半，仍保留50 ms机械消振。
+                                    
 constexpr uint32_t ARM_BASE_SETTLE_MS = 50UL;
 constexpr uint32_t ARM_BASE_MOTION_TIMEOUT_MS = 4500UL;
 
-// M6：模数1、分度圆直径35 mm的齿轮齿条；M7：T8x12，导程12 mm。
+                                           
 constexpr uint8_t ARM_EXTENSION_ADDRESS = 6U;
 constexpr uint8_t ARM_LIFT_ADDRESS = 7U;
 constexpr float FULL_STEPS_PER_REVOLUTION = 200.0f;
-// 必须与两只驱动器面板/上位机中的真实细分逐轴一致，不能共用一个值。
+                                    
 constexpr float M6_MICROSTEPS = 256.0f;
-constexpr float M7_MICROSTEPS = 16.0f;
+constexpr float M7_MICROSTEPS = 256.0f;
 const float M6_TRAVEL_PER_REVOLUTION_MM = PI_F * 35.0f;
 constexpr float M7_TRAVEL_PER_REVOLUTION_MM = 12.0f;
 const float M6_PULSES_PER_MM =
@@ -212,15 +212,15 @@ constexpr uint8_t M7_RAISE_DIRECTION = 1U;
 constexpr uint8_t M7_LOWER_DIRECTION = 0U;
 constexpr uint16_t M6_SPEED_RPM = 260U;
 constexpr uint8_t M6_ACCELERATION = 128U;
-// 端点搜索/闭环是短距离、空载精密动作，使用更柔和的独立曲线。
+                                 
 constexpr uint16_t ENDPOINT_M6_SPEED_RPM = 160U;
 constexpr uint8_t ENDPOINT_M6_ACCELERATION = 96U;
 constexpr uint16_t M6_RECOVERY_SPEED_RPM = 120U;
 constexpr uint8_t M6_RECOVERY_ACCELERATION = 64U;
 constexpr uint16_t M7_RECOVERY_SPEED_RPM = 1200U;
 constexpr uint8_t M7_RECOVERY_ACCELERATION = 128U;
-// 上电前人工把M6推到机械回缩端、M7推到物理最高点；上电后两轴各离开
-// 机械端点10 mm，再把到达位置共同设为运行期间的安全工作零点。
+                                     
+                                   
 constexpr float M6_STARTUP_WORKING_ZERO_OFFSET_MM = 10.0f;
 constexpr float M7_STARTUP_WORKING_ZERO_OFFSET_MM = 10.0f;
 constexpr uint16_t ARM_LINEAR_STARTUP_ZERO_SPEED_RPM = 100U;
@@ -228,10 +228,10 @@ constexpr uint8_t ARM_LINEAR_STARTUP_ZERO_ACCELERATION = 80U;
 constexpr uint32_t ARM_LINEAR_POSITION_READ_TIMEOUT_MS = 120UL;
 constexpr uint16_t M7_SPEED_RPM = 2496U;
 constexpr uint8_t M7_ACCELERATION = 220U;
-/*
- * 最终物理下降深度仍是155 mm。只把最后15 mm降速到正常速度约60%，
- * 不再插入额外停顿；既减少物料落下时的冲击，也避免明显增加比赛时间。
- */
+  
+                                         
+                                    
+   
 constexpr float RING_PLACE_FINAL_DESCENT_MM = 15.0f;
 constexpr uint16_t M7_RING_PLACE_SPEED_RPM = 1500U;
 constexpr uint8_t M7_RING_PLACE_ACCELERATION = 192U;
@@ -239,8 +239,8 @@ constexpr uint32_t RING_PLACE_EXTENSION_SETTLE_MS = 0UL;
 constexpr uint32_t RING_PLACE_LOWER_SETTLE_MS = 0UL;
 constexpr uint32_t ARM_LINEAR_POWER_ON_SETTLE_MS = 1500UL;
 constexpr uint32_t ARM_AXIS_COMMAND_GUARD_MS = 30UL;
-// 正常F3应答仍在30 ms内完成；仅在应答迟到时继续等到70 ms，避免固定给
-// 每条命令增加延时，也避免清掉迟到F3后过早发送FD而诱发E2。
+                                          
+                                  
 constexpr uint32_t ARM_AXIS_ENABLE_RESPONSE_WAIT_MS = 70UL;
 constexpr uint32_t ARM_AXIS_STATUS_INTERVAL_MS = 30UL;
 constexpr uint32_t ARM_AXIS_MINIMUM_ON_POSITION_MS = 120UL;
@@ -249,39 +249,39 @@ constexpr uint32_t ARM_AXIS_MAXIMUM_TIMEOUT_MS = 30000UL;
 constexpr uint8_t ARM_AXIS_TERMINAL_CONFIRMATION_SAMPLES = 2U;
 constexpr uint8_t ARM_AXIS_TERMINAL_VERIFY_MAX_FAILURES = 2U;
 constexpr float ARM_AXIS_TERMINAL_VERIFY_TOLERANCE_MM = 0.20f;
-// 只有连续3帧堵转状态才确认；健康帧会立即清零，不能第一帧就主动停车。
+                                     
 constexpr uint8_t ARM_AXIS_STALL_CONFIRMATION_SAMPLES = 3U;
-// 确认后只允许一次降档、实测位置约束下的续跑，禁止原参数反复硬顶。
+                                   
 constexpr uint8_t ARM_AXIS_MAXIMUM_RECOVERY_ATTEMPTS = 1U;
 constexpr uint32_t ARM_AXIS_RECOVERY_STOP_SETTLE_MS = 40UL;
 constexpr uint32_t ARM_AXIS_RECOVERY_TOTAL_TIMEOUT_MS = 5500UL;
 constexpr uint32_t ARM_AXIS_RECOVERY_SAMPLE_SETTLE_MS = 10UL;
 constexpr float ARM_AXIS_RECOVERY_POSITION_STABILITY_MM = 0.80f;
 constexpr float ARM_AXIS_RECOVERY_PATH_MARGIN_MM = 3.0f;
-// 先走0.5 mm探测；即使代码256而驱动器误设8，最坏也只外伸约16 mm。
+                                          
 constexpr float ARM_LINEAR_STARTUP_PROBE_MM = 0.5f;
 constexpr float ARM_LINEAR_ZERO_ANGLE_RATIO_MINIMUM = 0.80f;
 constexpr float ARM_LINEAR_ZERO_ANGLE_RATIO_MAXIMUM = 1.20f;
 
 constexpr float M6_STANDARD_EXTENSION_MM = 0.0f;
 constexpr float M7_STANDARD_HEIGHT_MM = 0.0f;
-// 物理总行程仍是150 mm；工作零点已离开硬限位10 mm，因此可用行程为140 mm。
+                                               
 constexpr float M6_MAXIMUM_PHYSICAL_EXTENSION_MM = 150.0f;
 constexpr float M6_MAXIMUM_EXTENSION_MM =
     M6_MAXIMUM_PHYSICAL_EXTENSION_MM -
     M6_STARTUP_WORKING_ZERO_OFFSET_MM;
-// M7物理总下降行程仍为160 mm；新零点已在最高点下方10 mm，因此工作
-// 坐标允许从0继续下降150 mm。
+                                         
+                    
 constexpr float M7_MINIMUM_PHYSICAL_HEIGHT_MM = -160.0f;
 constexpr float M7_MINIMUM_HEIGHT_MM =
     M7_MINIMUM_PHYSICAL_HEIGHT_MM +
     M7_STARTUP_WORKING_ZERO_OFFSET_MM;
 constexpr float ARM_AXIS_POSITION_TOLERANCE_MM = 0.05f;
-// 以下数值先保留原来的实际物理高度，再减去M7上电已下降的10 mm，确保
-// 更换工作零点后相机、夹取和放料的最终物理高度不变。
+                                       
+                            
 constexpr float RAW_PICK_PHYSICAL_LOWER_MM = 73.0f;
 constexpr float HOUGH_VISION_PHYSICAL_LOWER_MM = 90.0f;
-// 斜着找到端点后再多下降15 mm做最终居中，圆在画面中更大、更稳定。
+                                     
 constexpr float ENDPOINT_FINE_VISION_PHYSICAL_LOWER_MM =
     105.0f;
 constexpr float CONTAINER_PHYSICAL_LOWER_MM = 40.0f;
@@ -307,7 +307,7 @@ constexpr float CONTAINER_PICK_LOWER_MM =
 constexpr float CONTAINER_PLACE_LOWER_MM =
     CONTAINER_PHYSICAL_LOWER_MM -
     M7_STARTUP_WORKING_ZERO_OFFSET_MM;
-// 临时实车试验的物理下降仍是155 mm；新工作坐标中的命令值为145 mm。
+                                         
 constexpr float PROCESS_PLACE_LOWER_MM =
     PROCESS_PLACE_PHYSICAL_LOWER_MM -
     M7_STARTUP_WORKING_ZERO_OFFSET_MM;
@@ -318,19 +318,19 @@ constexpr float STORAGE_ROUND2_PLACE_LOWER_MM =
     STORAGE_ROUND2_PLACE_PHYSICAL_LOWER_MM -
     M7_STARTUP_WORKING_ZERO_OFFSET_MM;
 
-// 实机夹爪标定：闭合99°、打开37°；最大张开档暂保留但当前未调用。
+                                     
 constexpr float GRIPPER_CLOSE_ANGLE_DEGREES = 99.0f;
 constexpr float GRIPPER_OPEN_ANGLE_DEGREES = 37.0f;
 constexpr float GRIPPER_MAX_OPEN_ANGLE_DEGREES = -90.0f;
 constexpr uint16_t GRIPPER_INTERVAL_MS = 100U;
 constexpr uint16_t GRIPPER_OPEN_POWER_MW = 0U;
 constexpr uint16_t GRIPPER_CLOSE_POWER_MW = 2000U;
-// 夹爪100 ms角度命令之后的动作衔接等待按原值减半。
+                              
 constexpr uint32_t GRIPPER_OPEN_SETTLE_MS = 175UL;
 constexpr uint32_t GRIPPER_CLOSE_SETTLE_MS = 225UL;
 constexpr uint16_t STORAGE_SERVO_INTERVAL_MS = 200U;
 constexpr uint32_t STORAGE_SERVO_SETTLE_MS = 300UL;
-// 上电和底盘行驶保持165°；作业时依次使用-5°、-95°、-185°。
+                                       
 constexpr float STORAGE_SERVO_PARK_ANGLE_DEGREES = 165.0f;
 constexpr float STORAGE_SERVO_WORK_ZERO_ANGLE_DEGREES = -5.0f;
 constexpr float STORAGE_SERVO_CLOCKWISE_STEP_DEGREES = -90.0f;
@@ -345,8 +345,8 @@ constexpr float STORAGE_SERVO_POSITIONS_DEGREES[4] = {
 constexpr uint8_t MAIXCAM_STOP_REQUEST = 0x00;
 constexpr uint8_t MAIXCAM_ALL_COLORS_REQUEST = 0x08;
 constexpr uint8_t MAIXCAM_HOUGH_CIRCLE_REQUEST = 0x09;
-// 模式10只在机械臂已移动到1号或3号名义搜索位后寻找唯一主外环。
-// 圆号由STM32当前扫描阶段赋予，不依赖圆内印刷数字。
+                                   
+                              
 constexpr uint8_t MAIXCAM_ENDPOINT_CIRCLE_REQUEST = 0x0A;
 constexpr uint32_t MAIXCAM_REQUEST_REPEAT_MS = 1000UL;
 constexpr uint32_t MAIXCAM_MODE_SWITCH_GUARD_MS = 100UL;
@@ -359,8 +359,8 @@ constexpr int16_t IMAGE_MAX_Y = 239;
 constexpr float PIXEL_MAPPING_SWITCH_RADIUS_PIXELS = 50.0f;
 constexpr float RAW_NEAR_MM_PER_PIXEL = 40.0f / 72.0f;
 constexpr float RAW_FAR_MM_PER_PIXEL = 70.0f / 72.0f;
-// 实测圆环：实线外径85 mm、实线内径82 mm。
-// 视觉定位采用两条实线的中心线直径83.5 mm，对应实际半径41.75 mm。
+                            
+                                          
 constexpr float RING_OUTER_DIAMETER_MM = 85.0f;
 constexpr float RING_INNER_DIAMETER_MM = 82.0f;
 constexpr float RING_CENTERLINE_DIAMETER_MM =
@@ -370,14 +370,14 @@ constexpr float RING_PHYSICAL_RADIUS_MM =
     0.5f * RING_CENTERLINE_DIAMETER_MM;
 constexpr float CIRCLE_MM_PER_PIXEL =
     RING_PHYSICAL_RADIUS_MM / 72.0f;
-// 永久实测机械尺寸：M6抵住完全回缩端时，M5转轴到相机光轴为125.74 mm。
+                                           
 constexpr float ARM_PIVOT_TO_CAMERA_FULLY_RETRACTED_MM =
     125.74f;
-// 当前仍假设完全回缩时夹爪中心与相机光轴具有相同径向距离。
+                               
 constexpr float ARM_PIVOT_TO_GRIPPER_FULLY_RETRACTED_MM =
     125.74f;
-// 后续运动坐标以“物理回缩端前方10 mm”为M6工作零点，所以视觉和夹爪
-// 逆运动学的零伸出基准距离均需加上这10 mm，永久125.74 mm标定未改变。
+                                       
+                                           
 constexpr float ARM_PIVOT_TO_CAMERA_CENTER_MM =
     ARM_PIVOT_TO_CAMERA_FULLY_RETRACTED_MM +
     M6_STARTUP_WORKING_ZERO_OFFSET_MM;
@@ -393,27 +393,27 @@ constexpr uint16_t RING_ENDPOINT_MINIMUM_RADIUS_PIXELS = 40U;
 constexpr uint16_t RING_ENDPOINT_MAXIMUM_RADIUS_PIXELS = 110U;
 constexpr uint16_t RING_ENDPOINT_MINIMUM_CONFIDENCE = 600U;
 constexpr float RING_ENDPOINT_MAXIMUM_RADIUS_RATIO = 1.50f;
-/*
- * 实测日志中端点最终M5集中在标准坐标约±35°，M6约90～95 mm。第一次
- * 搜索从±20°/90 mm开始；若未命中只看同侧±30°、±10°，不再执行-80°
- * 大范围预置。找到1号后，利用实测1号半径和已知300 mm间距直接高位
- * 横移到3号的-20°视野。粗观察压到6 px内后下降15 mm，最终连续两个
- * 结果在5 px内即可记录，避免在相机噪声平台反复微调。
- */
+  
+                                          
+                                             
+                                      
+                                         
+                              
+   
 constexpr float ENDPOINT_COARSE_CENTER_TOLERANCE_PIXELS = 6.0f;
-// 实机日志在5 px附近已进入相机噪声平台；两帧确认后即可接受，避免2 px死磕。
+                                           
 constexpr float ENDPOINT_FINAL_CENTER_TOLERANCE_PIXELS = 5.0f;
 constexpr uint8_t ENDPOINT_FINAL_CENTER_CONFIRMATIONS = 2U;
 constexpr uint8_t ENDPOINT_MAXIMUM_SERVO_MOVES_PER_STAGE = 5U;
-// 实测最差一次在fine第5步进入5 px；允许少量coarse修正，但不再让单个
-// 端点粗/细各跑满5次，把PROCESS的65 s预算全部吃掉。
+                                           
+                                  
 constexpr uint8_t ENDPOINT_MAXIMUM_TOTAL_SERVO_MOVES = 7U;
 constexpr float ENDPOINT_COARSE_SERVO_GAIN = 0.85f;
 constexpr float ENDPOINT_FINE_SERVO_GAIN = 0.55f;
 constexpr float ENDPOINT_COARSE_MAXIMUM_CORRECTION_MM = 25.0f;
 constexpr float ENDPOINT_FINE_MAXIMUM_CORRECTION_MM = 6.0f;
 constexpr uint32_t ENDPOINT_LOCAL_MOVE_SETTLE_MS = 80UL;
-// 实机最终确认：1号圈只在+30°～+60°搜索；3号圈沿用当前准确参数。
+                                       
 constexpr float ENDPOINT_RING1_SEARCH_SEED_ANGLE_DEGREES = 45.0f;
 constexpr float ENDPOINT_RING3_SEARCH_SEED_ANGLE_DEGREES = -20.0f;
 constexpr float ENDPOINT_SEARCH_SEED_EXTENSION_MM = 90.0f;
@@ -433,31 +433,31 @@ constexpr float RING_TARGET_MAXIMUM_ANGLE_DEGREES = 75.0f;
 constexpr float RING_MAP_MAXIMUM_HEADING_DRIFT_DEGREES = 1.0f;
 constexpr float RING_ENDPOINT_MAXIMUM_SCAN_HEADING_DELTA_DEGREES =
     0.75f;
-// 端点闭环仍保留标准坐标-80°～+80°绝对安全包络，但正常搜索只用局部窗口。
+                                          
 constexpr float RING_SCAN_MINIMUM_ANGLE_DEGREES = -80.0f;
 constexpr float RING_SCAN_MAXIMUM_ANGLE_DEGREES = 80.0f;
-/*
- * 相机安装实机标定：
- *   画面+x（向右）对应M5顺时针；
- *   画面+y（向下）对应机械臂向内、M6缩短，因此到“机械臂向外”的
- *   映射符号为-1。
- */
+  
+            
+                     
+                                     
+             
+   
 constexpr float IMAGE_Y_TO_ARM_OUTWARD_SIGN = -1.0f;
-/*
- * 标准姿态下机械臂沿车体2、4侧伸出：
- *   画面+x（向右）对应车体3、4侧，故底盘forward为负；
- *   画面纵向先按上面的实机标定换算为“机械臂向外”为正；
- *   机械臂向外对应body-left为负。
- * 若实机图像被镜像，只改这两个符号，不改底盘既有标定参数。
- */
+  
+                     
+                                   
+                               
+                        
+                               
+   
 constexpr float IMAGE_X_TO_BODY_FORWARD_SIGN = -1.0f;
 constexpr float IMAGE_Y_TO_BODY_LEFT_SIGN = -1.0f;
 constexpr float CIRCLE_CENTER_TOLERANCE_PIXELS = 3.0f;
-/*
- * 模式9仍要求同一物理圆稳定0.5 s；端点模式10使用120 ms、至少2帧且
- * 坐标/半径跨度不超过2 px的快速反馈。最终是否真正居中由STM32连续两次
- * 2 px门槛确认，运动期间则停止相机请求，避免读取机械臂运动中的旧结果。
- */
+  
+                                          
+                                         
+                                       
+   
 constexpr uint32_t CIRCLE_CENTER_STABILITY_MS = 0UL;
 constexpr uint8_t CIRCLE_STABILITY_MINIMUM_SAMPLES = 1U;
 constexpr uint32_t VISION_STABILITY_MAXIMUM_SAMPLE_GAP_MS =
@@ -468,133 +468,133 @@ constexpr uint32_t RAW_MAIN_CONFIRMATION_MAXIMUM_GAP_MS = 2500UL;
 constexpr float MAXIMUM_VISUAL_CORRECTION_MM = 150.0f;
 constexpr float MAXIMUM_ACCUMULATED_VISUAL_CORRECTION_MM = 220.0f;
 constexpr uint8_t MAXIMUM_VISUAL_CORRECTION_MOVES = 6U;
-/*
- * 配套Vision 5模式9优先拟合三圆整体并返回中间2号圆；低头后只完整看到
- * 中间圆时，可使用带中心距离和歧义门槛的受限回退。因此不再通过暂存区
- * 固定-30 mm位移“诱导最近圆”，也不会无条件把画面最近圆当作2号基准。
- */
+  
+                                         
+                                    
+                                        
+   
 
-/*
- * M1～M4 电机安装方向。前进时原始驱动脉冲符号为 [-,+,-,+]。
- * 注意不要混淆两层符号：
- *   运动学“物理轮”[-,+,-,+] = 车体逆时针旋转；
- *   乘安装方向后，逆时针对应的“驱动原始脉冲”是 [+,+,+,+]。
- */
+  
+                                       
+              
+                                 
+                                      
+   
 const WheelDirections MOTOR_DIRECTIONS(-1, +1, -1, +1);
 
-/*
- * 场地与车辆均按毫米建模。以下布局采用规则图1的左下角为原点：
- *
- *                         +Y / 北
- *                原料区（上边中部）
- *                         |
- *   暂存区（左边中部）-- 场地中心 -- 二维码板（右边中部）
- *                         |
- *              粗加工区（下边中部）   启停区2（右下）
- *                                           启停区1位于右上
- *
- * 该示意只说明地点关系，不表示代码具备地图定位或随机点位识别能力。
- */
+  
+                                 
+  
+                                 
+                           
+                            
+                                   
+                            
+                                     
+                                                     
+  
+                                   
+   
 constexpr uint16_t FIELD_SIZE_MM = 2400U;
 constexpr uint16_t FIELD_CENTER_MM = FIELD_SIZE_MM / 2U;
 constexpr uint16_t START_ZONE_SIZE_MM = 300U;
 constexpr uint16_t START_ZONE_MIN_X_MM =
-    FIELD_SIZE_MM - START_ZONE_SIZE_MM;                      // 2100
+    FIELD_SIZE_MM - START_ZONE_SIZE_MM;                             
 constexpr uint16_t START_ZONE_1_MIN_Y_MM =
-    FIELD_SIZE_MM - START_ZONE_SIZE_MM;                      // 2100
+    FIELD_SIZE_MM - START_ZONE_SIZE_MM;                             
 
-/*
- * PulseMecanumChassis 的 187.5/195/100 mm 是轮心轴距、轮距和轮径，
- * 不是车体外廓。按实车最终确认的初始摆放：
- *   2、4侧朝+X，世界X方向外廓为230 mm；
- *   3、4侧朝-Y，世界Y方向外廓为300 mm。
- */
+  
+                                                      
+                       
+                            
+                            
+   
 constexpr uint16_t CHASSIS_FOOTPRINT_X_MM = 230U;
 constexpr uint16_t CHASSIS_FOOTPRINT_Y_MM = 300U;
 
-/*
- * 当前代码把三个目标都固定为每组三个位置中的中间位置，并把机械臂
- * 目标点设置为距对应场地边界40 mm。
- *
- * 规则/仿真差异（仅记录，不在本次改数值）：
- *   - 规则图3的粗加工区、暂存区台面深150 mm，名义圆心线在深度中线，
- *     即距场地边界约75 mm；
- *   - 三个圆环的数字1、2、3均朝向场地中心；检查机械臂放料位序时，
- *     应从场地中心侧读取编号，不能按车体当前朝向自行重排；
- *   - route-simulator也使用75 mm目标点；
- *   - 本文件继续保留40 mm实调假设，因此车心坐标比仿名义点更靠边35 mm。
- * 原料区是转动圆盘且位置允许随机，40 mm同样只是本代码固定测试假设，
- * 不是规则给出的原料固定坐标。
- *
- * 机械臂中心相对车体几何中心沿2、4侧偏移225 mm。
- */
+  
+                                  
+                      
+  
+                        
+                                         
+                    
+                                      
+                                 
+                                  
+                                            
+                                      
+                 
+  
+                              
+   
 constexpr uint16_t RING_BOUNDARY_OFFSET_MM = 40U;
 constexpr uint16_t ARM_CENTER_OFFSET_MM = 225U;
 constexpr uint16_t CHASSIS_HALF_WIDTH_MM =
-    CHASSIS_FOOTPRINT_X_MM / 2U;                             // 115
+    CHASSIS_FOOTPRINT_X_MM / 2U;                                   
 constexpr uint16_t ARM_CENTER_BEYOND_NEAR_WHEEL_MM =
-    ARM_CENTER_OFFSET_MM - CHASSIS_HALF_WIDTH_MM;            // 110
+    ARM_CENTER_OFFSET_MM - CHASSIS_HALF_WIDTH_MM;                  
 constexpr uint16_t ARM_CENTER_TO_FARTHEST_WHEEL_MM =
-    ARM_CENTER_OFFSET_MM + CHASSIS_HALF_WIDTH_MM;            // 340
+    ARM_CENTER_OFFSET_MM + CHASSIS_HALF_WIDTH_MM;                  
 static_assert(
     CHASSIS_HALF_WIDTH_MM == 115U &&
         ARM_CENTER_BEYOND_NEAR_WHEEL_MM == 110U &&
         ARM_CENTER_TO_FARTHEST_WHEEL_MM == 340U,
     "225 mm arm offset must be measured from the center of the 230 mm width");
 constexpr uint16_t RAW_RING_CENTER_Y_MM =
-    FIELD_SIZE_MM - RING_BOUNDARY_OFFSET_MM;                 // 2360
+    FIELD_SIZE_MM - RING_BOUNDARY_OFFSET_MM;                        
 constexpr uint16_t PROCESS_RING_CENTER_Y_MM =
-    RING_BOUNDARY_OFFSET_MM;                                 // 40
+    RING_BOUNDARY_OFFSET_MM;                                      
 constexpr uint16_t STORAGE_RING_CENTER_X_MM =
-    RING_BOUNDARY_OFFSET_MM;                                 // 40
+    RING_BOUNDARY_OFFSET_MM;                                      
 
-/*
- * 规则图把原料区横向位置标在1100~1300 mm范围内，本代码固定取1200 mm，
- * 不会根据现场随机位置自动改X坐标。二维码板也可能随机摆放，但本路径
- * 同样固定在右边中线附近扫码。
- *
- * 两个启停区均已参数化：车体贴各区左边，并分别贴上/下场地边界放置，
- * 设计起点中心为(2215,2250)或(2215,150)。这仍是假定人工摆放正确的
- * 名义坐标，不是上电后的X/Y定位结果。
- */
+  
+                                              
+                                    
+                 
+  
+                                    
+                                             
+                      
+   
 static_assert(FIELD_CENTER_MM == 1200U, "Field centerline must be 1200 mm");
 constexpr uint16_t START_CENTER_X_MM =
-    START_ZONE_MIN_X_MM + CHASSIS_FOOTPRINT_X_MM / 2U;       // 2215
+    START_ZONE_MIN_X_MM + CHASSIS_FOOTPRINT_X_MM / 2U;              
 constexpr uint16_t START_ZONE_1_CENTER_Y_MM =
-    START_ZONE_1_MIN_Y_MM + CHASSIS_FOOTPRINT_Y_MM / 2U;     // 2250
+    START_ZONE_1_MIN_Y_MM + CHASSIS_FOOTPRINT_Y_MM / 2U;            
 constexpr uint16_t START_ZONE_2_CENTER_Y_MM =
-    CHASSIS_FOOTPRINT_Y_MM / 2U;                             // 150
-// 回区时瞄准300×300启停区几何中心，而不是沿用贴边发车的X坐标。
+    CHASSIS_FOOTPRINT_Y_MM / 2U;                                   
+                                     
 constexpr uint16_t FINAL_ZONE_CENTER_X_MM =
-    FIELD_SIZE_MM - START_ZONE_SIZE_MM / 2U;                 // 2250
+    FIELD_SIZE_MM - START_ZONE_SIZE_MM / 2U;                        
 
-/*
- * 由“目标圆心 - 机械臂中心偏移”反算车体中心。三个工作姿态都让
- * 2、4侧面对工位，所以原料区向北、粗加工区向南、暂存区向西。
- */
+  
+                                   
+                                 
+   
 constexpr uint16_t RAW_CENTER_Y_MM =
-    RAW_RING_CENTER_Y_MM - ARM_CENTER_OFFSET_MM;             // 2135
+    RAW_RING_CENTER_Y_MM - ARM_CENTER_OFFSET_MM;                    
 constexpr uint16_t PROCESS_CENTER_Y_MM =
-    PROCESS_RING_CENTER_Y_MM + ARM_CENTER_OFFSET_MM;         // 265
+    PROCESS_RING_CENTER_Y_MM + ARM_CENTER_OFFSET_MM;               
 constexpr uint16_t STORAGE_CENTER_X_MM =
-    STORAGE_RING_CENTER_X_MM + ARM_CENTER_OFFSET_MM;         // 265
+    STORAGE_RING_CENTER_X_MM + ARM_CENTER_OFFSET_MM;               
 
-/*
- * 启停区1沿3、4侧向南、启停区2沿1、2侧向北，各走1050 mm到达右边
- * 中部二维码区。规则要求先读取任务码再到原料区；二维码是继续路线的
- * 门控。调试版收到一次完整且校验通过的任务码即锁定，不重复扫码；
- * 扫码点若尚无有效码，会沿进入方向低速前探并按
- * 保存的四轮绝对脉冲原路回位；
- * route[]的起终点仍不变，机械臂按四组任务码建立颜色到容器槽位的映射，
- * 并确定粗加工环位及第二批同色码垛位置。
- *
- * route-simulator仍标注“二维码区不扫码、不停车”，这是旧tmcode1仿真行为，
- * 与本文件的COMMAND_QR_ACTION前探/回位逻辑不同；调试应以本文件为准。
- *
- * 回程仍使用X=2150的安全转弯带；若在起点中心X=2215原地转180°，
- * 230x300 mm车体的外接圆会越过场地右边界约4 mm。
- */
-constexpr uint16_t QR_PASS_CENTER_X_MM = START_CENTER_X_MM;  // 2215
+  
+                                        
+                                   
+                                  
+                         
+                 
+                                        
+                      
+  
+                                                  
+                                             
+  
+                                         
+                                 
+   
+constexpr uint16_t QR_PASS_CENTER_X_MM = START_CENTER_X_MM;         
 constexpr uint16_t RETURN_LANE_X_MM = 2150U;
 
 static_assert(
@@ -611,13 +611,13 @@ static_assert(
     "Storage arm center must hit the middle ring");
 
 constexpr uint16_t WORKSTATION_APPROACH_MM = 150U;
-/*
- * 起步Y方向实车手调只改这一行：
- *   走过头多少毫米就减多少，没走够多少毫米就加多少。
- * QR_PASS_TO_RAW_APPROACH_MM会自动反算，原料区最终坐标不会被带偏。
- */
+  
+                  
+                             
+                                                
+   
 constexpr uint16_t START_TO_QR_PASS_MM = 1050U;
-constexpr uint16_t QR_PASS_CENTER_Y_MM = FIELD_CENTER_MM;    // 1200
+constexpr uint16_t QR_PASS_CENTER_Y_MM = FIELD_CENTER_MM;           
 static_assert(
     START_ZONE_1_CENTER_Y_MM - QR_PASS_CENTER_Y_MM ==
             START_TO_QR_PASS_MM &&
@@ -625,65 +625,65 @@ static_assert(
             START_TO_QR_PASS_MM,
     "Both start zones must be symmetric around the QR row");
 constexpr uint16_t QR_PASS_TO_FIELD_CENTER_X_MM =
-    QR_PASS_CENTER_X_MM - FIELD_CENTER_MM;                   // 1015
+    QR_PASS_CENTER_X_MM - FIELD_CENTER_MM;                          
 constexpr uint16_t QR_PASS_TO_RAW_APPROACH_MM =
     RAW_CENTER_Y_MM - WORKSTATION_APPROACH_MM -
-    QR_PASS_CENTER_Y_MM;                                     // 785
+    QR_PASS_CENTER_Y_MM;                                           
 static_assert(
     START_TO_QR_PASS_MM >= 1000U &&
         START_TO_QR_PASS_MM <= 1100U,
     "Start-to-QR manual calibration must stay within a safe range");
 constexpr uint16_t CENTER_TO_RAW_MM =
-    RAW_CENTER_Y_MM - FIELD_CENTER_MM;                       // 935
+    RAW_CENTER_Y_MM - FIELD_CENTER_MM;                             
 constexpr uint16_t RAW_TO_PROCESS_MM =
-    RAW_CENTER_Y_MM - PROCESS_CENTER_Y_MM;                   // 1870
+    RAW_CENTER_Y_MM - PROCESS_CENTER_Y_MM;                          
 constexpr uint16_t PROCESS_TO_CENTER_MM =
-    FIELD_CENTER_MM - PROCESS_CENTER_Y_MM;                   // 935
+    FIELD_CENTER_MM - PROCESS_CENTER_Y_MM;                         
 constexpr uint16_t CENTER_TO_STORAGE_MM =
-    FIELD_CENTER_MM - STORAGE_CENTER_X_MM;                   // 935
+    FIELD_CENTER_MM - STORAGE_CENTER_X_MM;                         
 constexpr uint16_t STORAGE_TO_CENTER_MM =
-    FIELD_CENTER_MM - STORAGE_CENTER_X_MM;                   // 935
+    FIELD_CENTER_MM - STORAGE_CENTER_X_MM;                         
 constexpr uint16_t CENTER_TO_RETURN_LANE_MM =
-    RETURN_LANE_X_MM - FIELD_CENTER_MM;                      // 950
+    RETURN_LANE_X_MM - FIELD_CENTER_MM;                            
 constexpr uint16_t RETURN_LANE_TO_FINAL_ZONE_X_MM =
-    FINAL_ZONE_CENTER_X_MM - RETURN_LANE_X_MM;               // 100
-/*
- * 第二批暂存动作点受两轮既有Y补偿影响，开环推算为1110 mm。
- * 两个回区纵移都从这里计算到启停区几何中心；最终仍必须由真实定位/
- * 边线传感器确认，不能把该推算当作实测位姿。
- */
+    FINAL_ZONE_CENTER_X_MM - RETURN_LANE_X_MM;                     
+  
+                                   
+                                   
+                        
+   
 constexpr uint16_t STORAGE_ROUND2_OPEN_LOOP_Y_MM =
-    FIELD_CENTER_MM - 90U;                                   // 1110
+    FIELD_CENTER_MM - 90U;                                          
 constexpr uint16_t RETURN_TO_START_ZONE_1_Y_MM =
-    START_ZONE_1_CENTER_Y_MM - STORAGE_ROUND2_OPEN_LOOP_Y_MM; // 1140
+    START_ZONE_1_CENTER_Y_MM - STORAGE_ROUND2_OPEN_LOOP_Y_MM;        
 constexpr uint16_t RETURN_TO_START_ZONE_2_Y_MM =
-    STORAGE_ROUND2_OPEN_LOOP_Y_MM - START_ZONE_2_CENTER_Y_MM; // 960
+    STORAGE_ROUND2_OPEN_LOOP_Y_MM - START_ZONE_2_CENTER_Y_MM;       
 
-// 本轮所有底盘直线速度均在修改前的当前值上再提高30%。
+                              
 const float MAXIMUM_STEP_RATE = 7150.0f;
 const float CENTRAL_CHANNEL_MAXIMUM_STEP_RATE = 9295.0f;
-// 普通/中央通道等非矫正直线加速度由当前5000减半。
+                             
 const float STEP_ACCELERATION = 2500.0f;
-// 底盘粗转和IMU航向纠偏角速度保持不变；仅粗转角加速度由1600减半。
+                                      
 const float TURN_MAXIMUM_STEP_RATE = 3000.0f;
 const float TURN_STEP_ACCELERATION = 800.0f;
 const float HEADING_CORRECTION_MAXIMUM_STEP_RATE = 1500.0f;
 const float HEADING_CORRECTION_STEP_ACCELERATION = 450.0f;
 const float WORKSTATION_MAXIMUM_STEP_RATE = 2080.0f;
 const float WORKSTATION_STEP_ACCELERATION = 700.0f;
-const float FINAL_MAXIMUM_STEP_RATE = 1040.0f; // 最后进入300×300启停区
+const float FINAL_MAXIMUM_STEP_RATE = 1040.0f;                  
 const float FINAL_STEP_ACCELERATION = 400.0f;
-// 扫码区低速前探约104 mm/s，最大只走500 mm。
+                               
 constexpr uint16_t QR_SCAN_SWEEP_MAXIMUM_MM = 500U;
 const float QR_SCAN_MAXIMUM_STEP_RATE = 1040.0f;
 const float QR_SCAN_STEP_ACCELERATION = 400.0f;
 const uint16_t MINIMUM_STEP_WIDTH_US = 2U;
 
-/*
- * 非中央通道仍保留原1.1 m分段上限。中央通道允许单段最多2.0 m，
- * 覆盖当前最长的1885 mm同向直线，使原料区到粗加工区的1740/1760 mm
- * 以及最终1885 mm回程均不中途停车；转角处仍按独立路线命令停稳。
- */
+  
+                                      
+                                            
+                                     
+   
 constexpr uint16_t MAX_TRANSLATION_SEGMENT_MM = 1100U;
 constexpr uint16_t CENTRAL_CHANNEL_MAX_TRANSLATION_SEGMENT_MM = 2000U;
 
@@ -707,10 +707,10 @@ const uint32_t IMU_STALE_TIMEOUT_MS = 600UL;
 const bool ENABLE_MOTION_TIMEOUTS = true;
 constexpr uint8_t MAXIMUM_TURN_CORRECTIONS = 12U;
 constexpr uint32_t QR_SCAN_ACTION_TIMEOUT_MS = 20000UL;
-// 当前扫码器按用户要求单帧锁定；如现场串口干扰明显可改回2。
+                                
 constexpr uint8_t QR_REQUIRED_MATCHING_FRAMES = 1U;
-// false：任务内哪个未抓颜色先稳定就先抓，并放入该颜色的二维码槽位。
-// true：严格等待二维码颜色顺序；正式赛前按当届规则确认。
+                                      
+                                
 constexpr bool REQUIRE_RAW_PICK_QR_ORDER = false;
 constexpr uint32_t VISION_RESULT_TIMEOUT_MS = 12000UL;
 constexpr uint8_t VISION_MAXIMUM_RETRIES = 2U;
@@ -718,7 +718,7 @@ constexpr uint32_t RAW_ACTION_TIMEOUT_MS = 45000UL;
 constexpr uint32_t PROCESS_ACTION_TIMEOUT_MS = 65000UL;
 constexpr uint32_t STORAGE_ACTION_TIMEOUT_MS = 45000UL;
 constexpr uint32_t MISSION_PROGRESS_TIMEOUT_MS = 45000UL;
-// 调试版关闭整场180秒硬停；正式比赛前改为true。
+                             
 constexpr bool ENABLE_COMPETITION_TIME_LIMIT = false;
 constexpr uint32_t COMPETITION_TIME_LIMIT_MS = 180000UL;
 constexpr uint32_t COMPETITION_HARD_STOP_MARGIN_MS = 1500UL;
@@ -726,41 +726,41 @@ static_assert(
     COMPETITION_HARD_STOP_MARGIN_MS < COMPETITION_TIME_LIMIT_MS,
     "Competition hard-stop margin must be smaller than the time limit");
 
-// +1：传感器逆时针角度增加；若以后更换安装方向，可改为 -1。
+                                  
 const int8_t IMU_COUNTERCLOCKWISE_SIGN = +1;
 
-/*
- * “只检查路径”模式：原料区、粗加工区、暂存区动作都只等待750 ms，
- * 不会实际完成规则要求的抓取、随车承载、放置和第二批同色码垛。
- * COMMAND_FINAL_ALIGN也会直接判定完成。因此该模式只能调底盘路线，
- * 不能用来验证完整物流任务。
- */
+  
+                                      
+                                 
+                                            
+                
+   
 const bool PATH_ONLY_TEST = false;
 
-/*
- * src/main.cpp或visionyanyan构建环境把该宏设为1。测试模式跳过扫码和
- * 整场路线，默认料盘槽0/1/2已装料，只做粗加工区1/3端点建图、推算2号
- * 并依次放置，随后停机等待人工测量。正式比赛入口必须把该宏设为0。
- */
+  
+                                                
+                                        
+                                   
+   
 constexpr bool VISION_YANYAN_TEST_MODE =
     GONGCHUANG_VISION_YANYAN_TEST != 0;
 
-// 恢复二维码接收：到达扫码位置后，必须收到有效任务码才继续路线。
+                                  
 const bool ENABLE_QR_RECEIVER = true;
 const bool REQUIRE_QR_SUCCESS = true;
 
-// 仅用于环节衔接/路径测试的等待按原值减半。
+                        
 const uint32_t QR_TEST_HOLD_MS = 500UL;
 const uint32_t WORKSTATION_TEST_HOLD_MS = 750UL;
 const uint32_t FINAL_HOLD_MS = 1500UL;
 
-// 当前屏幕仍保留 x0 时显示连续航向角；若已删除 x0，可改为 false。
+                                         
 const bool DISPLAY_YAW_ON_X0 = true;
 const bool DISPLAY_BATTERY_ON_X1 = true;
 const bool SHOW_RESULT_PAGE_ON_FINISH = true;
 
-// true_example uses a 10 kOhm + 1 kOhm divider on PC1 and sends V * 100 to x1.
-// Adjust BATTERY_CALIBRATION_SCALE after comparing x1 with a multimeter.
+                                                                               
+                                                                         
 const float BATTERY_ADC_REFERENCE_VOLTAGE = 3.3f;
 const float BATTERY_DIVIDER_RATIO = 11.0f;
 const float BATTERY_CALIBRATION_SCALE = 1.0f;
@@ -781,10 +781,10 @@ AccelStepper motor3(
 AccelStepper motor4(
     AccelStepper::DRIVER, M4_STEP_PIN, M4_DIRECTION_PIN);
 ArmMotorController armMotors;
-/*
- * 一次运行结束或急停后禁止再次给M5发运动命令，直到MCU重新上电。
- * 这样可以保留原PB9回调主体，同时避免终点/故障姿态下误触导致扫碰。
- */
+  
+                                    
+                                     
+   
 bool armBaseMotionLockedUntilReset = false;
 bool armBaseMotionWatchdogActive = false;
 uint32_t armBaseMotionDeadlineMs = 0UL;
@@ -792,9 +792,9 @@ uint32_t armBaseMotionDeadlineMs = 0UL;
 AccelStepper *const motors[4] = {
     &motor1, &motor2, &motor3, &motor4};
 
-// ---------------------------------------------------------------------------
-// HMI
-// ---------------------------------------------------------------------------
+                                                                              
+      
+                                                                              
 
 uint32_t lastHmiRefreshMs = 0;
 uint32_t lastBatterySampleMs = 0;
@@ -871,15 +871,15 @@ void hmiSetRunStatus(const char *status) {
 }
 
 void hmiSetTaskCounts() {
-  // 短期调试记录中最终界面使用 n5=正确抓取数、n6=正确放置数。
+                                     
   hmiSetValue("n5", correctGrabCount);
   hmiSetValue("n6", correctPlacementCount);
 }
 
 void hmiShowTaskCode(const char *taskCode) {
-  // 规则示例完整码：134+123+314+231
-  // t3：134+123+（8字符）
-  // t8：314+231 （7字符）
+                            
+                     
+                     
   char firstRow[9] = {0};
   char secondRow[8] = {0};
 
@@ -890,9 +890,9 @@ void hmiShowTaskCode(const char *taskCode) {
   hmiSetText("t8", secondRow);
 }
 
-// ---------------------------------------------------------------------------
-// 二维码
-// ---------------------------------------------------------------------------
+                                                                              
+      
+                                                                              
 
 const size_t QR_CODE_LENGTH = competition::TASK_CODE_LENGTH;
 const size_t QR_BUFFER_SIZE = 32;
@@ -996,7 +996,7 @@ void receiveQrData() {
     const char incomingByte =
         static_cast<char>(SerialQr.read());
 
-    // 同时兼容 CR、LF 和 CRLF 结尾。
+                            
     if (incomingByte == '\r' || incomingByte == '\n') {
       finishQrFrame();
       continue;
@@ -1010,9 +1010,9 @@ void receiveQrData() {
   }
 }
 
-// ---------------------------------------------------------------------------
-// IMU：把 ±180° 原始角展开为连续的“逆时针为正”角度
-// ---------------------------------------------------------------------------
+                                                                              
+                                 
+                                                                              
 
 bool imuInitialized = false;
 float imuLastSignedRawDegrees = 0.0f;
@@ -1048,10 +1048,10 @@ void updateContinuousImuHeading(int16_t rawYawValue) {
     return;
   }
 
-  /*
-   * 先对相邻帧做相位展开，再累加连续角。不能直接对原始 ±180°
-   * 数值做普通均值或低通，否则 179° 与 -179° 会被错误平均到 0°。
-   */
+    
+                                    
+                                           
+     
   const float continuousDeltaDegrees =
       wrapDeltaDegrees(
           counterClockwiseSignedRaw -
@@ -1068,11 +1068,11 @@ void receiveImuData() {
         static_cast<uint8_t>(SerialImu.read());
     JY901.CopeSerialData(incomingByte);
 
-    /*
-     * JY901 每帧11字节：0x55、类型、8字节数据、校验和。
-     * 只有收到校验正确的0x53角度帧后，才把IMU标记为可用；
-     * 这样不会在半帧或其他类型数据到达时误用初始零值。
-     */
+      
+                                      
+                                    
+                               
+       
     if (imuFrameIndex == 0) {
       if (incomingByte == 0x55) {
         imuFrame[imuFrameIndex++] = incomingByte;
@@ -1092,7 +1092,7 @@ void receiveImuData() {
       if (checksum == imuFrame[10] &&
           imuFrame[0] == 0x55 &&
           imuFrame[1] == 0x53) {
-        // JY901 角度帧中 yaw 是第6、7字节的小端 int16_t。
+                                             
         const uint16_t yawUnsigned =
             static_cast<uint16_t>(imuFrame[6]) |
             (static_cast<uint16_t>(imuFrame[7]) << 8);
@@ -1100,7 +1100,7 @@ void receiveImuData() {
             static_cast<int16_t>(yawUnsigned));
       }
 
-      // 若坏帧最后一个字节恰好是下一帧帧头，保留该帧头继续同步。
+                                     
       if (checksum != imuFrame[10] &&
           imuFrame[10] == 0x55) {
         imuFrame[0] = 0x55;
@@ -1117,9 +1117,9 @@ bool imuIsFresh() {
          millis() - lastImuReceiveMs <= IMU_STALE_TIMEOUT_MS;
 }
 
-// ---------------------------------------------------------------------------
-// 运动学位移逆解
-// ---------------------------------------------------------------------------
+                                                                              
+          
+                                                                              
 
 struct MotorPulses {
   long motor1;
@@ -1166,14 +1166,14 @@ MotorPulses bodyDisplacementToMotorPulses(
     float forwardMeters,
     float leftMeters,
     float counterClockwiseRadians) {
-  /*
-   * MecanumKinematics 是线性模型。把 vx/vy/wz 分别替换成
-   * dx/dy/dHeading，inverse() 的结果就对应各轮转角。
-   *
-   * 纵向与横移分别使用各自的 pulse/m 标定；
-   * 旋转使用 3200 pulse/rev 与实测几何；
-   * 最后再施加 -,+,-,+ 的电机安装方向修正。
-   */
+    
+                                             
+                                         
+    
+                             
+                               
+                             
+     
   const WheelSpeeds forwardWheelRadians =
       geometry.inverse(
           ChassisVelocity(forwardMeters, 0.0f, 0.0f));
@@ -1221,7 +1221,7 @@ MotorPulses bodyDisplacementToMotorPulses(
 }
 
 void startRelativeMotorMove(const MotorPulses &pulses) {
-  // 调试串口可直接确认每段四号轮是否收到了非零目标脉冲。
+                               
   SerialDebug.print("Pulses M1..M4: ");
   SerialDebug.print(pulses.motor1);
   SerialDebug.print(", ");
@@ -1254,7 +1254,7 @@ bool allMotorsArrived() {
 }
 
 void runAllMotors() {
-  // 每个 run() 都必须执行，不能使用短路逻辑连接。
+                               
   motor1.run();
   motor2.run();
   motor3.run();
@@ -1296,18 +1296,18 @@ void startArmBaseLibraryDegrees(float libraryDegrees) {
 }
 
 void startArmBaseRotationToDegrees(float oldFrameDegrees) {
-  /*
-   * M5库已按实机恢复为“正角逆时针、负角顺时针”；旧坐标与库坐标
-   * 使用相同符号。旧0°是上电/行驶姿态，旧-90°是标准作业姿态。
-   */
+    
+                                    
+                                     
+     
   startArmBaseLibraryDegrees(oldFrameDegrees);
 }
 
 void startArmBaseStandardFrameDegrees(float angleDegrees) {
-  /*
-   * 工位机械臂采用“旧-90°=新0°”坐标。
-   * 新坐标正角为逆时针、负角为顺时针。
-   */
+    
+                          
+                      
+     
   const float standardLibraryDegrees =
       static_cast<float>(
           ARM_BASE_STANDARD_OLD_FRAME_DEGREES);
@@ -1346,23 +1346,23 @@ void setDriveMotionProfile(float maximumStepRate, float acceleration) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// 省赛物流决赛第一阶段：固定两批路线
-// ---------------------------------------------------------------------------
+                                                                              
+                    
+                                                                              
 
-/*
- * 这里不是根据障碍物或现场点位实时搜索得到的动态路径规划，而是：
- *   固定RouteCommand表 -> 逐条启动 -> 等待完成 -> 推进到下一条。
- *
- * 四种平移命令按车体侧面命名，方向会随车体姿态一起旋转：
- *   SIDE_12：朝1、2侧，运动学forward为正；
- *   SIDE_34：朝3、4侧，运动学forward为负；
- *   SIDE_13：朝1、3侧，运动学left为正；
- *   SIDE_24：朝2、4侧，运动学left为负。
- *
- * 所以下面注释中的东/西/南/北，必须结合执行该命令前的车体朝向理解；
- * 不能把SIDE_24永久等同为某个世界坐标方向。
- */
+  
+                                  
+                                               
+  
+                              
+                                
+                                
+                             
+                             
+  
+                                     
+                           
+   
 
 enum CommandType {
   COMMAND_ARM_BASE_HOME,
@@ -1411,72 +1411,72 @@ struct RouteCommand {
         binding(routeBinding) {}
 };
 
-/*
- * 几何设计层的关键工位姿态（单位 mm，角度表示2、4侧朝向）：
- *
- *   启停区1起点：(2215,2250)，启停区2起点：(2215,150)，2、4侧朝东
- *   对应终点：  (2250,2250)/(2250,150)，2、4侧朝西
- *   二维码扫码点：(2215,1200)，2、4侧朝东；有效扫码后继续
- *   原料区：  (1200, 2135)，2、4侧朝北，机械臂中心(1200,2360)
- *   粗加工区：(1200,265)，两轮均由2、4侧朝南进入
- *   暂存区：  ( 265, 1200)，2、4侧朝西
- *
- * 初始世界外廓按X=230、Y=300 mm建模；全部工位横向中心固定为1200 mm，
- * 不再在1100~1300 mm范围内取近似值。机械臂中心目标分别为
- * (1200,2360)、(1200,40)、(40,1200)，均距对应场地边界40 mm。
- * 机械臂中心从车体中心沿2、4侧偏移225 mm。
- *
- * route-simulator的旧tmcode1名义车心是(1200,2100)、(1200,300)、
- * (300,1200)，与这里的2135/265/265不同；仿真只用于理解运动顺序。
- *
- * 更重要的是，route[]中保留了+20、+40、-20、-40、-50等
- * 实车补偿。若从起点严格按现有命令值开环累计，若无打滑，调试推算点为：
- *   扫码点                 (2215,1200)
- *   第1批原料动作点        (1200,2135)
- *   第1批粗加工动作点      (1200, 245)
- *   第1批暂存动作点        ( 265,1130)
- *   第2批原料动作点        (1200,2105)
- *   第2批粗加工动作点      (1200, 215)
- *   第2批暂存动作点        ( 265,1110)
- *   启停区1/2名义终点       (2250,2250)/(2250,150)
- * 这些是“按代码值推算”，不是修改建议，也不是定位传感器测量结果。
- * 因此命令名称中的field center/start zone表示路线意图，未必等于实测坐标。
- *
- * 新车头是3、4侧。第一段向3、4侧移动就是实车“前进”，但在旧运动学
- * 坐标中等价于负 forward，所以路径命令不再使用 forward/backward 命名。
- */
+  
+                                  
+  
+                                                
+                                         
+                                      
+                                               
+                                 
+                              
+  
+                                              
+                                    
+                                                 
+                           
+  
+                                                       
+                                             
+  
+                                        
+                                     
+                                    
+                                
+                               
+                                
+                                
+                               
+                                
+                                            
+                                   
+                                                  
+  
+                                     
+                                                  
+   
 const RouteCommand route[] = {
-    /*
-     * PB9后机械臂保持上电/发车姿态：M5旧坐标0°，M6安全工作零点、
-     * M7安全工作零点（物理最高点下方10 mm）；
-     * 到各工位且底盘停稳后，作业状态机才把M5顺时针转90°进入标准状态。
-     */
-    /*
-     * 规则阶段：从抽签启停区出发，到二维码板读取四组三位任务码。
-     * 启动前双击PB9选择启停区1/2；两区以相反方向各走1050 mm到
-     * 右边中部扫码点(2215,1200)。若尚未收到一次完整有效任务码，
-     * COMMAND_QR_ACTION沿各自进入方向低速前探最多500 mm，锁码后按
-     * 四轮实际脉冲回到该停车点，再继续后续路线。
-     * 若此时IMU尚无有效帧，机械臂保持行驶姿态，底盘停在IMUWAIT。
-     */
+      
+                                         
+                              
+                                         
+       
+      
+                                    
+                                         
+                                         
+                                                
+                            
+                                         
+       
     {COMMAND_MOVE_SIDE_34_MM, START_TO_QR_PASS_MM,
      "Selected start zone -> QR area direct", false, false,
      ROUTE_BINDING_START_TO_QR},
     {COMMAND_QR_ACTION, 0, "Scan QR task code"},
 
-    // -------------------- 第一批三个物料（代码中的第1轮） --------------------
-    /*
-     * 扫码点 -> 原料区：
-     * 先向1、3侧横移到X=1200，再向1、2侧到原料区前；逆时针转90°后，
-     * 2、4侧朝北，最后150 mm低速进入第1批原料动作点(1200,2135)。
-     *
-     * 规则动作含义：按任务码第一组三位颜色顺序，每次抓取1个，并先把
-     * 物料放到机器人载物位置，之后才能抓下一个；不得用手爪夹持跨区运输。
-     * 原料台是每6~10 s旋转一周后随机停止的三工位转盘；
-     * COMMAND_RAW_ACTION以模式8请求同时识别四色；MaixCAM确认某一颜色
-     * 坐标连续0.3 s横、纵跨度各不超过3像素后，只计算一次M5/M6目标；
-     * 载物盘按该颜色在本批二维码序列中的槽位收纳，不移动底盘。
-     */
+                                                                 
+      
+                  
+                                            
+                                              
+      
+                                      
+                                        
+                                  
+                                                   
+                                           
+                                   
+       
     {COMMAND_MOVE_SIDE_13_MM, QR_PASS_TO_FIELD_CENTER_X_MM,
      "QR area -> raw centerline", false, true},
     {COMMAND_MOVE_SIDE_12_MM,
@@ -1488,16 +1488,16 @@ const RouteCommand route[] = {
      "Precise entry to raw round 1", true},
     {COMMAND_RAW_ACTION, 1, "Raw action round 1"},
 
-    /*
-     * 第1批原料区 -> 粗加工区：
-     * 向1、3侧长距离南移；该1740 mm中央通道直线现在一段直达，
-     * 仅在终点IMU回正。随后逆时针180°，让2、4侧朝南，最后150 mm低速进入。
-     * 当前+20 mm为已有实调补偿，按命令累计动作点约为(1200,245)。
-     *
-     * 规则动作含义：把第一批三个物料按任务码第二组三位指定的1/2/3号
-     * 圆环位置放到粗加工区；随后还要按任务码顺序重新抓回车上。
-     * COMMAND_PROCESS_ACTION同时代表“放下3个并重新抓回3个”的接口。
-     */
+      
+                      
+                                       
+                                                
+                                            
+      
+                                        
+                                   
+                                                  
+       
     {COMMAND_MOVE_SIDE_13_MM,
      RAW_TO_PROCESS_MM - WORKSTATION_APPROACH_MM + 20U,
      "Raw -> process approach round 1", false, true},
@@ -1507,15 +1507,15 @@ const RouteCommand route[] = {
      "Precise entry to process round 1", true},
     {COMMAND_PROCESS_ACTION, 1, "Process action round 1"},
 
-    /*
-     * 第1批粗加工区 -> 暂存区：
-     * 先向1、3侧北移，再向3、4侧西移至工位前；顺时针90°使2、4侧
-     * 朝西，最后150 mm低速进入。受现有-50 mm补偿影响，按命令累计
-     * 暂存动作点约为(265,1130)，不是几何注释中的(265,1200)。
-     *
-     * 规则动作含义：将第一批三个物料按任务码第二组三位规定的位置，
-     * 平面放置到暂存区，为第二批同色码垛留下底层。
-     */
+      
+                      
+                                        
+                                          
+                                            
+      
+                                     
+                             
+       
     {COMMAND_MOVE_SIDE_13_MM, PROCESS_TO_CENTER_MM - 50U,
      "Process -> field center round 1", false, true},
     {COMMAND_MOVE_SIDE_34_MM,
@@ -1527,16 +1527,16 @@ const RouteCommand route[] = {
      "Precise entry to storage round 1", true},
     {COMMAND_STORAGE_ACTION, 1, "Storage action round 1"},
 
-    // -------------------- 第二批三个物料（代码中的第2轮） --------------------
-    /*
-     * 暂存区 -> 原料区：
-     * 保持2、4侧朝西，先向1、3侧回到X=1200，再向3、4侧北移；
-     * 顺时针90°使2、4侧朝北，最后以150+40 mm进入。+40 mm是现有
-     * 实调补偿，按命令累计第2批原料动作点约为(1200,2105)。
-     *
-     * 规则动作含义：按任务码第三组三位颜色顺序抓取第二批三个物料，
-     * 同样必须逐个放到机器人上后才能跨区运输。
-     */
+                                                                 
+      
+                  
+                                        
+                                             
+                                       
+      
+                                     
+                           
+       
     {COMMAND_MOVE_SIDE_13_MM, STORAGE_TO_CENTER_MM,
      "Storage -> field center round 2", false, true},
     {COMMAND_MOVE_SIDE_34_MM,
@@ -1548,14 +1548,14 @@ const RouteCommand route[] = {
      "Precise entry to raw round 2", true},
     {COMMAND_RAW_ACTION, 2, "Raw action round 2"},
 
-    /*
-     * 第2批原料区 -> 粗加工区：
-     * 长移段+40 mm、精靠段-20 mm均为已有实调补偿；逆时针180°后
-     * 2、4侧朝南，按命令累计粗加工动作点约为(1200,215)。
-     *
-     * 规则动作含义：按任务码第四组三位指定的圆环位置放下第二批，
-     * 再按搬运顺序重新抓回车上，准备送往暂存区。
-     */
+      
+                      
+                                           
+                                      
+      
+                                    
+                            
+       
     {COMMAND_MOVE_SIDE_13_MM,
      RAW_TO_PROCESS_MM - WORKSTATION_APPROACH_MM + 40U,
      "Raw -> process approach round 2", false, true},
@@ -1565,14 +1565,14 @@ const RouteCommand route[] = {
      "Precise entry to process round 2", true},
     {COMMAND_PROCESS_ACTION, 2, "Process action round 2"},
 
-    /*
-     * 第2批粗加工区 -> 暂存区：
-     * 先北移、再西移，顺时针90°让2、4侧朝西后精靠；当前-40 mm
-     * 补偿使按命令累计暂存动作点约为(265,1110)。
-     *
-     * 规则动作含义：第二批只能码垛在第一批已正确放置的同色物料上。
-     * COMMAND_STORAGE_ACTION第2批接口应在实际机械臂完成三次码垛后反馈。
-     */
+      
+                      
+                                        
+                                 
+      
+                                     
+                                                   
+       
     {COMMAND_MOVE_SIDE_13_MM, PROCESS_TO_CENTER_MM - 40U,
      "Process -> field center round 2", false, true},
     {COMMAND_MOVE_SIDE_34_MM,
@@ -1584,14 +1584,14 @@ const RouteCommand route[] = {
      "Precise entry to storage round 2", true},
     {COMMAND_STORAGE_ACTION, 2, "Storage action round 2"},
 
-    /*
-     * 规则阶段：完成两批后返回启动前锁定的启停区。
-     * 两个启停区共用到X=2150回程通道的路线，仅纵向方向/距离参数化：
-     *   Zone1：向北1140 mm到Y=2250；
-     *   Zone2：向南 960 mm到Y=150。
-     * 最后向东100 mm到启停区几何中心X=2250。旧版终点(2255,2210)
-     * 会让230×300车体下沿伸出Zone1约40 mm，故删除末尾50/40 mm手调尾巴。
-     */
+      
+                             
+                                         
+                                
+                               
+                                               
+                                                    
+       
     {COMMAND_MOVE_SIDE_13_MM,
      STORAGE_TO_CENTER_MM + CENTER_TO_RETURN_LANE_MM,
      "Storage -> return lane final direct", false, true},
@@ -1664,7 +1664,7 @@ float targetCounterClockwiseHeadingDegrees = 0.0f;
 volatile bool startRequested = false;
 volatile bool abortRequested = false;
 
-// 三个工位状态机完成全部真实动作后设置这些完成标志。
+                            
 volatile bool rawActionFinished = false;
 volatile bool processActionFinished = false;
 volatile bool storageActionFinished = false;
@@ -1688,7 +1688,7 @@ RouteCommand resolveRouteCommand(const RouteCommand &command) {
 
     case ROUTE_BINDING_START_TO_QR:
       if (selectedStartZone == START_ZONE_2) {
-        // Zone2保持与Zone1相同车体朝向，沿1、2侧倒车向北到二维码行。
+                                              
         resolved.type = COMMAND_MOVE_SIDE_12_MM;
         resolved.name = "Start2 -> QR area direct";
       } else {
@@ -1781,9 +1781,9 @@ void routeFault(const char *reason) {
       "physical top before restarting.");
 }
 
-// ---------------------------------------------------------------------------
-// M6/M7串口步进、舵机与MaixCAM非阻塞底层
-// ---------------------------------------------------------------------------
+                                                                              
+                            
+                                                                              
 
 bool deadlineReached(uint32_t deadlineMs) {
   return static_cast<int32_t>(millis() - deadlineMs) >= 0;
@@ -1937,10 +1937,10 @@ void writeArmLinearPosition(
     uint16_t speedRpm,
     uint8_t acceleration,
     uint32_t pulses) {
-  /*
-   * EMM V5位置帧：
-   *   byte10=0 相对运动；byte11=0 非多机同步。
-   */
+    
+               
+                                    
+     
   const uint8_t frame[13] = {
       address,
       0xFDU,
@@ -2061,10 +2061,10 @@ bool waitForArmLinearSimpleResponse(
 bool readArmLinearCurrentMotorAngleDegrees(
     uint8_t address,
     float &angleDegrees) {
-  /*
-   * 该阻塞式读取会独占共享串口并清空接收缓存，只允许在两轴都静止时用于
-   * 上电标定或停车后的恢复复测。运行中的终态核对使用下方异步0x36解析器。
-   */
+    
+                                      
+                                         
+     
   if (extensionAxis.active ||
       liftAxis.active ||
       armLinearPositionQueryAxis != nullptr) {
@@ -2224,7 +2224,7 @@ bool linearAxisPositionMmFromMotorAngle(
     return true;
   }
   if (axis.address == liftAxis.address) {
-    // M7向下的工作坐标为负，而驱动器该方向的实时角度为正。
+                                  
     positionMm =
         -relativeAngleDegrees *
         M7_TRAVEL_PER_REVOLUTION_MM / 360.0f;
@@ -2297,11 +2297,11 @@ void serviceLinearAxisRecovery(LinearAxisMotion &axis) {
   if (!deadlineReached(axis.recoveryReadyMs)) {
     return;
   }
-  /*
-   * M5由需要高频serviceM5()的STEP/DIR状态机驱动。即使上层以后误把两轴
-   * 同时启动，M6也必须等M5完全停稳后才读位置和降档重试，避免恢复代码
-   * 的串口等待饿死M5脉冲服务。
-   */
+    
+                                                
+                                       
+                   
+     
   if (axis.address == extensionAxis.address &&
       armMotors.isM5Running()) {
     return;
@@ -2454,10 +2454,10 @@ void serviceLinearAxisRecovery(LinearAxisMotion &axis) {
   }
   axis.recoveryPending = false;
   axis.recoveryReason = ARM_AXIS_RECOVERY_NONE;
-  /*
-   * recoveryDeadlineMs覆盖“停车、双次实测、清保护、一次降档续跑”的
-   * 整条恢复链。这里进入续跑时不能刷新或清零，成功到位/FAULT才清理。
-   */
+    
+                                              
+                                        
+     
   if (!startLinearAxisMove(
           axis,
           retryTargetMm,
@@ -2649,10 +2649,10 @@ void handleArmLinearPositionFrame(const uint8_t *frame) {
   }
 
   if (protectionLatched) {
-    /*
-     * 0x08是已经锁存的堵转保护，任何编码器结果都不能覆盖它。正常逻辑
-     * 不会为0x0B/0x0F发起核对；这里保留防御性处理。
-     */
+      
+                                        
+                                  
+       
     if (!armLinearReferenceValid) {
       faultLinearAxis(
           *axis,
@@ -2689,12 +2689,12 @@ void handleArmLinearPositionFrame(const uint8_t *frame) {
     return;
   }
 
-  /*
-   * 0x03无ACK/运动证据可能只是命令刚发出时遗留的旧到位状态；0x07也可能
-   * 是到位瞬间locked位短暂滞留。编码器尚未到目标时不立即停车，允许第二次
-   * 核对，随后恢复普通3A/原运动deadline。这样不会把一次旧状态扩大成恢复，
-   * 也不会借编码器读数延长轴超时。
-   */
+    
+                                            
+                                          
+                                             
+                    
+     
   noteLinearAxisTerminalVerificationFailure(
       *axis,
       verificationReason ==
@@ -2784,11 +2784,11 @@ bool consumeArmLinearEnableResponse(
       } else {
         printArmLinearFrame(
             "enable condition not met", window);
-        /*
-         * 不在这里自动清堵转，也不把F3 E2直接当作路线故障：
-         * 某些固件对“已经使能”重复使能也可能返回条件不满足。继续发送
-         * FD，随后由FD结果和3A状态位安全地决定是否停止。
-         */
+          
+                                      
+                                         
+                                     
+           
       }
     } else if (
         window[0] == axis.address &&
@@ -2814,10 +2814,10 @@ bool consumeArmLinearEnableResponse(
   armLinearReceiveCount = 0U;
   armLinearExpectedFrameLength = 0U;
   if (!enableResponseSeen) {
-    /*
-     * 某些驱动器可配置为不立即回复控制命令；继续发送FD，让FD ACK或
-     * 后续3A状态决定成败，但把缺少F3应答明确留在调试串口中。
-     */
+      
+                                         
+                                    
+       
     SerialDebug.print("[EMM ENABLE] t=");
     SerialDebug.print(millis());
     SerialDebug.print(" ms, M");
@@ -2849,10 +2849,10 @@ void handleArmLinearFrame(const uint8_t *frame) {
   if (frame[1] == 0xFDU && frame[2] == 0xE2U) {
     printArmLinearFrame(
         "position condition not met", frame);
-    /*
-     * FD E2只表示位置命令条件不满足，并不等于堵转。先请求3A分类；
-     * 后续状态机再区分禁用、真实堵转/保护或一次可恢复的命令拒绝。
-     */
+      
+                                        
+                                     
+       
     resetLinearAxisTerminalVerification(*axis);
     axis->positionCommandRejected = true;
     axis->commandAcknowledged = false;
@@ -2896,10 +2896,10 @@ void handleArmLinearFrame(const uint8_t *frame) {
         (axis->commandAcknowledged ||
          axis->motionObserved);
 
-    /*
-     * 普通到位显式排除locked。0x07必须在120 ms后进入双次编码器核对，
-     * 不能再仅凭FD ACK/运动证据放行；门限前也不累计瞬态locked。
-     */
+      
+                                              
+                                          
+       
     if (verifiedOnPosition) {
       markLinearAxisArrived(*axis);
       return;
@@ -2914,11 +2914,11 @@ void handleArmLinearFrame(const uint8_t *frame) {
       resetLinearAxisTerminalVerification(*axis);
     }
 
-    /*
-     * locked/protection必须是连续状态。旧逻辑在第1帧就FE停车、再原参数
-     * 续跑，实际完全绕过了“三帧确认”，也会把到位时的瞬态0x04扩大成
-     * 程序主动停机。现在前两帧只观察，任何健康帧都会立即清零。
-     */
+      
+                                                 
+                                        
+                                   
+       
     if (stallCandidate) {
       if (axis->stallProtectionSamples < 255U) {
         ++axis->stallProtectionSamples;
@@ -2950,10 +2950,10 @@ void handleArmLinearFrame(const uint8_t *frame) {
             flags,
             ARM_AXIS_VERIFY_LOCKED_ON_POSITION);
       }
-      /*
-       * 先让0x36双样本核对完成，再决定0x07是“确已到目标但locked位滞留”
-       * 还是实际堵转。查询期间暂停新的3A，因此不会无限压住三帧确认。
-       */
+        
+                                                
+                                        
+         
       if (lockedOnPositionForVerification &&
           axis->terminalVerificationPending) {
         return;
@@ -3039,7 +3039,7 @@ void handleArmLinearFrame(const uint8_t *frame) {
     return;
   }
 
-  // 部分EMM固件在相对位置运动结束时主动返回 id FD 9F 6B。
+                                       
   if (frame[1] == 0xFDU &&
       frame[2] == 0x9FU) {
     markLinearAxisArrived(*axis);
@@ -3093,10 +3093,10 @@ void serviceArmLinearAxes() {
                armLinearExpectedFrameLength == 4U) {
       handleArmLinearFrame(armLinearReceiveWindow);
     }
-    /*
-     * 0x36的4字节位置payload中允许出现0x6B；只有收满固定8字节才结束，
-     * 因而不会把数据字节误当帧尾，也不会清掉前后相邻的FD/3A响应。
-     */
+      
+                                               
+                                       
+       
     armLinearReceiveCount = 0U;
     armLinearExpectedFrameLength = 0U;
   }
@@ -3171,7 +3171,7 @@ bool startLinearAxisMove(
     return false;
   }
   resetLinearAxisTerminalVerification(axis);
-  // 堵转样本只允许在同一条FD命令的连续3A帧内累计。
+                              
   axis.stallProtectionSamples = 0U;
   axis.positionCommandRejected = false;
   if (!recoveryRetry) {
@@ -3221,10 +3221,10 @@ bool startLinearAxisMove(
       axis.address == extensionAxis.address
           ? M6_TRAVEL_PER_REVOLUTION_MM
           : M7_TRAVEL_PER_REVOLUTION_MM;
-  /*
-   * 超时按本轴真实脉冲/毫米反推，不再引用共享细分。这样M6=256、M7=16
-   * 时两轴仍分别得到正确的物理RPM和时间预算。
-   */
+    
+                                           
+                           
+     
   const float pulsesPerSecond =
       static_cast<float>(speedRpm) *
       pulsesPerMm *
@@ -3241,11 +3241,11 @@ bool startLinearAxisMove(
   }
   axis.timeoutMs = estimatedMs;
 
-  /*
-   * 与已验证的ArmMotorController时序一致：每次运动前重新使能目标轴，
-   * 等待驱动器处理并回复后再发送位置命令。不能在EMM应答前背靠背发送
-   * 下一条3A查询，否则部分固件会返回FD E2或漏掉命令。
-   */
+    
+                                              
+                                      
+                                 
+     
   clearArmLinearReceiveBuffer();
   writeArmLinearEnable(axis.address, true);
   SerialArmLinear.flush();
@@ -3270,11 +3270,11 @@ bool startLinearAxisMove(
       acceleration,
       pulses);
   SerialArmLinear.flush();
-  /*
-   * 第一条3A状态查询由serviceArmLinearAxes在30 ms保护间隔后发送。
-   * 后续只有在收到FD命令ACK、观察过未到位，或收到明确FD 9F到位帧后
-   * 才承认完成，防止命令丢失时把旧的on-position状态误当成本次到位。
-   */
+    
+                                                 
+                                         
+                                          
+     
 
   SerialDebug.print("Arm axis M");
   SerialDebug.print(axis.address);
@@ -3326,7 +3326,7 @@ bool startExtensionToMmWithProfile(
 }
 
 bool startLiftToHeightMm(float heightMm) {
-  // 高度以最高点为0，向上为正、向下为负。
+                        
   return startLinearAxisMove(
       liftAxis,
       heightMm,
@@ -3343,7 +3343,7 @@ bool startLiftToHeightMmWithProfile(
     float heightMm,
     uint16_t speedRpm,
     uint8_t acceleration) {
-  // 只供需要独立速度曲线的短距离M7动作使用。
+                          
   return startLinearAxisMove(
       liftAxis,
       heightMm,
@@ -3390,11 +3390,11 @@ void emergencyStopArmLinearAxes() {
 }
 
 void resetArmLinearSoftwareOrigin() {
-  /*
-   * 本机没有M6/M7限位开关寻零：上电前仍需人工确认M6抵住完全回缩端、
-   * M7位于物理最高点。这里先把这两个机械端点当作临时零点；只有M6向外
-   * 10 mm、M7向下10 mm并分别重新标零成功后，参考才允许置真。
-   */
+    
+                                        
+                                       
+                                       
+     
   extensionAxis.currentMm = M6_STANDARD_EXTENSION_MM;
   extensionAxis.targetMm = M6_STANDARD_EXTENSION_MM;
   extensionAxis.active = false;
@@ -3578,11 +3578,11 @@ bool establishLinearAxisSafeWorkingZero(
     return false;
   }
 
-  /*
-   * 上电探测期间尚未建立最终工作零，先把机械端点读数作为临时编码器参考。
-   * 这样短动作即使FD 02/FD 9F都丢失，也能由健康3A+异步0x36确认完成；
-   * 随后的角度比例校验仍会独立拒绝方向或细分错误。
-   */
+    
+                                       
+                                              
+                            
+     
   axis.driverWorkingZeroAngleDegrees =
       angleBeforeDegrees;
   axis.driverWorkingZeroAngleValid = true;
@@ -3635,11 +3635,11 @@ bool establishLinearAxisSafeWorkingZero(
   SerialDebug.print(probeTargetMm, 3);
   SerialDebug.println(" mm");
 
-  /*
-   * 不能直接用10 mm检查细分：代码256而面板仍16时，10 mm命令会先实际
-   * 冲出约160 mm。先用0.5 mm探测，最坏256/8错配也只移动约16 mm；
-   * 编码器比例通过后才补足到10 mm工作零点。
-   */
+    
+                                            
+                                              
+                           
+     
   if (!startLinearAxisMove(
           axis,
           probeTargetMm,
@@ -3738,10 +3738,10 @@ bool establishLinearAxisSafeWorkingZero(
           0x0AU,
           ARM_LINEAR_POSITION_READ_TIMEOUT_MS);
   if (!driverZeroAcknowledged) {
-    /*
-     * 后续全是相对位置命令，软件零点仍然有效；驱动器内部清零只用于
-     * 诊断读数，因此不因缺少该ACK再次向机械端点运动。
-     */
+      
+                                     
+                                
+       
     SerialDebug.print("[");
     SerialDebug.print(axisLabel);
     SerialDebug.println(
@@ -3750,11 +3750,11 @@ bool establishLinearAxisSafeWorkingZero(
   }
   clearArmLinearReceiveBuffer();
 
-  /*
-   * 无论驱动器清零ACK是否丢失，都再次读取“工作零点”对应的真实电机
-   * 角度。后续堵转恢复只使用相对此角度的差值，不再假设驱动器内部零点
-   * 一定与软件零点相同。
-   */
+    
+                                      
+                                     
+               
+     
   float workingZeroAngleDegrees = 0.0f;
   bool workingZeroAngleValid =
       readArmLinearCurrentMotorAngleDegrees(
@@ -3880,11 +3880,11 @@ void commandStorageServoPosition(uint8_t positionIndex) {
     routeFault("Invalid storage servo position");
     return;
   }
-  /*
-   * 作业序列为-5、-95、-185、-5度，对应顺时针90度、
-   * 再顺时针90度、最后逆时针180度回到工作零位。序列会越过
-   * 单圈角度边界，因此必须使用多圈绝对角度命令。
-   */
+    
+                                   
+                                  
+                           
+     
   storageServo.setRawAngleMTurn(
       STORAGE_SERVO_POSITIONS_DEGREES[positionIndex],
       STORAGE_SERVO_INTERVAL_MS);
@@ -3907,11 +3907,11 @@ void commandStorageServoParkingPosition() {
 }
 
 bool verifyManipulationServosOnline() {
-  /*
-   * 两次ping不能用&&短路，否则夹爪掉线时不会检查载物盘。
-   * 该检查只在启动前或工位停车后执行，最坏约2×100 ms，不影响
-   * 正在运行的软件步进脉冲。
-   */
+    
+                                  
+                                     
+                 
+     
   const bool gripperOnline = gripperServo.ping();
   const bool storageOnline = storageServo.ping();
   manipulationServosOnline =
@@ -3974,10 +3974,10 @@ void writeMaixRequestFrame(uint8_t request) {
   const size_t queuedBytes =
       SerialMaixcam.write(frame, sizeof(frame));
 
-  /*
-   * 诊断日志记录真正执行SerialMaixcam.write()的时刻。
-   * “MaixCAM mode request”只代表状态机计划切换模式，不能证明已经走到TX。
-   */
+    
+                                        
+                                                   
+     
   SerialDebug.print("[MAIX TX] t=");
   SerialDebug.print(millis());
   SerialDebug.print(" ms, v2 seq/mode=");
@@ -4235,7 +4235,7 @@ void startHeadingCorrection(
     correction = -minimumCorrection;
   }
 
-  // IMU与运动学均为逆时针正，误差可以直接换算为运动学角度。
+                                  
   const float correctionCounterClockwiseRadians =
       correction * PI_F / 180.0f;
   if (turnMotionEnabled) {
@@ -4338,10 +4338,10 @@ void startQrScanReturnToOrigin() {
   SerialDebug.println(
       "[QR SWEEP] code acquired; returning to saved origin");
 
-  /*
-   * 直接把四轮绝对目标改回各自扫码点脉冲原点。AccelStepper会按当前
-   * 低速参数先减速、再反转；不能固定反走500 mm，因为可能在途中扫码。
-   */
+    
+                                          
+                                        
+     
   setDriveMotionProfile(
       QR_SCAN_MAXIMUM_STEP_RATE,
       QR_SCAN_STEP_ACCELERATION);
@@ -4362,10 +4362,10 @@ void startQrScanAction() {
       currentDriveMotorPositions();
   hmiSetRunStatus("SCAN");
 
-  /*
-   * 二维码串口在行驶途中也一直监听。若到扫码点前已经得到并校验了完整
-   * 任务码，就保留该有效结果，不再做没有必要的附加位移。
-   */
+    
+                                     
+                               
+     
   if (scanFlag) {
     SerialDebug.println(
         "[QR SWEEP] valid code already available; no sweep needed");
@@ -4373,7 +4373,7 @@ void startQrScanAction() {
     return;
   }
 
-  // 测试旁路保持原行为：只定时停车，不额外产生扫码位移。
+                               
   if (!REQUIRE_QR_SUCCESS) {
     qrScanPhase = QR_SCAN_IDLE;
     return;
@@ -4382,10 +4382,10 @@ void startQrScanAction() {
   setDriveMotionProfile(
       QR_SCAN_MAXIMUM_STEP_RATE,
       QR_SCAN_STEP_ACCELERATION);
-  /*
-   * 扫码前探延续所选启停区到二维码行的进入方向，避免Start2到Y=1200
-   * 后折返、只重复搜索南半段。回位仍保存四轮绝对脉冲原点，与方向无关。
-   */
+    
+                                          
+                                      
+     
   const float qrSweepForwardSign =
       selectedStartZone == START_ZONE_1
           ? -1.0f
@@ -4489,11 +4489,11 @@ bool isTranslationCommand(CommandType type) {
 }
 
 void startTranslationSegment(CommandType type) {
-  /*
-   * 中央通道同一直线最多2000 mm一段直达，非中央通道仍保留原1100 mm
-   * 上限。remaining只是“尚未发送的命令距离”，不是里程计或世界坐标
-   * 反馈；轮胎打滑不会自动修改它。
-   */
+    
+                                           
+                                         
+                    
+     
   const uint16_t maximumSegmentMm =
       translationCentralChannelEnabled
           ? CENTRAL_CHANNEL_MAX_TRANSLATION_SEGMENT_MM
@@ -4502,10 +4502,10 @@ void startTranslationSegment(CommandType type) {
       translationRemainingMm > maximumSegmentMm
           ? maximumSegmentMm
           : translationRemainingMm;
-  /*
-   * 精靠段必须从静止状态就使用低速低加速度，严禁在高速运动中突然降低
-   * acceleration；否则 AccelStepper 会因剩余刹车距离不足越过目标再反向。
-   */
+    
+                                     
+                                                    
+     
   workstationApproachEnabled =
       translationPreciseArrivalEnabled;
   translationRemainingMm -= segmentMm;
@@ -4533,19 +4533,19 @@ void startTranslationSegment(CommandType type) {
 
   switch (type) {
     case COMMAND_MOVE_SIDE_12_MM:
-      // 朝当前车体1、2侧移动；世界方向取决于当前车身姿态。
+                                   
       startBodyDisplacement(distanceMeters, 0.0f, 0.0f);
       break;
     case COMMAND_MOVE_SIDE_34_MM:
-      // 朝当前车体3、4侧移动；起步时该方向为场地南侧。
+                                 
       startBodyDisplacement(-distanceMeters, 0.0f, 0.0f);
       break;
     case COMMAND_MOVE_SIDE_13_MM:
-      // 朝当前车体1、3侧横移。
+                     
       startBodyDisplacement(0.0f, distanceMeters, 0.0f);
       break;
     case COMMAND_MOVE_SIDE_24_MM:
-      // 朝当前车体2、4侧横移；也是机械臂伸出侧的工位精靠方向。
+                                     
       startBodyDisplacement(0.0f, -distanceMeters, 0.0f);
       break;
     default:
@@ -4558,9 +4558,9 @@ void startTranslationSegment(CommandType type) {
   motorsArrivedStartMs = 0;
 }
 
-// ---------------------------------------------------------------------------
-// 机械臂动作与三个工作区流程
-// ---------------------------------------------------------------------------
+                                                                              
+                
+                                                                              
 
 struct ArmPose {
   float standardFrameAngleDegrees;
@@ -4760,10 +4760,10 @@ void beginArmTransfer(
     return;
   }
 
-  /*
-   * 搬运的M5大角度动作都在M6回安全零点之后启动，可使用仍低于旧版的
-   * 中等曲线；端点扫描初始化时会显式切回柔和曲线。
-   */
+    
+                                      
+                            
+     
   useArmBaseTransferMotionProfile();
   armTransferSourcePose = source;
   armTransferDestinationPose = destination;
@@ -5082,10 +5082,10 @@ bool nominalRingPose(
     return false;
   }
 
-  /*
-   * 1号按实机最终窗口+30°～+60°，从+45°/90 mm首看；3号保留已经
-   * 验证准确的-20°首看。这里只负责首次看见圆，最终点仍由视觉闭环测量。
-   */
+    
+                                            
+                                        
+     
   pose.standardFrameAngleDegrees =
       ringPosition == 1U
           ? ENDPOINT_RING1_SEARCH_SEED_ANGLE_DEGREES
@@ -5202,11 +5202,11 @@ bool predictedRing3SearchPose(ArmPose &pose) {
     return false;
   }
 
-  /*
-   * 底盘已锁定工位航向，圆排在机械臂标准坐标的left轴上。1号压中后，
-   * 直接沿该轴跨越两格（300 mm）得到3号高位搜索点；mode10闭环负责
-   * 消除停车姿态和圆排轻微倾斜造成的剩余误差。
-   */
+    
+                                       
+                                          
+                          
+     
   const PlanarPoint predictedPoint(
       measuredRingPoints[1U].outwardMm,
       measuredRingPoints[1U].leftMm -
@@ -5223,10 +5223,10 @@ bool predictedRing3SearchPose(ArmPose &pose) {
     routeFault("Predicted ring 3 is not on the expected M5 side");
     return false;
   }
-  /*
-   * 预测结果只保留M6半径；3号M5仍固定为已验证的-20°，失败时只看
-   * -30°、-10°。1号搜索窗口的修改不会传递到3号。
-   */
+    
+                                       
+                                
+     
   pose.standardFrameAngleDegrees =
       ENDPOINT_RING3_SEARCH_SEED_ANGLE_DEGREES;
 
@@ -5295,12 +5295,12 @@ bool endpointVisionToPlanarPoint(
     return false;
   }
 
-  /*
-   * 圆环中心线实测半径41.75 mm，因此同一帧的mm/px可由41.75/r
-   * 自适应得到。
-   * 局部坐标：图像+y向下对应机械臂向内，图像+x向右对应顺时针，
-   * 所以标准坐标的向外/逆时针切向偏移都取负号。
-   */
+    
+                                           
+           
+                                    
+                           
+     
   const float mmPerPixel =
       RING_PHYSICAL_RADIUS_MM /
       static_cast<float>(radiusPixels);
@@ -5534,26 +5534,26 @@ bool rawTargetPose(
     float pixelX,
     float pixelY,
     ArmPose &pose) {
-  /*
-   * 只在稳定窗口完成后计算一次：
-   *   图像是x向右、y向下为正的左手系；
-   *   x>160时，为使目标横坐标减小到160，M5必须顺时针，故标准角取负；
-   *   y>120时，为使目标纵坐标减小到120，M6应缩短；
-   *   y<120时，为使目标纵坐标增大到120，M6应伸长。
-   *   因此图像+y与机械臂向外方向相反，使用
-   *   IMAGE_Y_TO_ARM_OUTWARD_SIGN=-1换算。
-   */
+    
+                   
+                        
+                                           
+                                  
+                                  
+                          
+                                        
+     
   const float pixelDeltaX =
       pixelX - static_cast<float>(IMAGE_CENTER_X);
   const float pixelDeltaY =
       pixelY - static_cast<float>(IMAGE_CENTER_Y);
   const float pixelRadius =
       hypotf(pixelDeltaX, pixelDeltaY);
-  /*
-   * 横纵偏差共用同一档比例，避免分别选档后改变偏移向量方向。
-   * 到画面中心的距离不超过50像素用40/72，超过50像素用70/72。
-   * 这仍是两档实调模型；正式版应由标定数据替换为连续单应性/多项式。
-   */
+    
+                                 
+                                        
+                                     
+     
   const float rawMmPerPixel =
       pixelRadius <= PIXEL_MAPPING_SWITCH_RADIUS_PIXELS
           ? RAW_NEAR_MM_PER_PIXEL
@@ -5967,10 +5967,10 @@ bool confirmRawCoordinate(
 
 void beginStorageParkingBeforeWorkFinish() {
   commandStorageServoParkingPosition();
-  /*
-   * 结束标志只能在机械臂先完整回到标准状态后产生：M7安全零点、M6安全
-   * 零点、M5标准0°。随后再单独把M5逆时针90°转到上电/行驶姿态。
-   */
+    
+                                       
+                                       
+     
   beginArmStandardization();
   workStorageServoDeadlineMs =
       millis() + STORAGE_SERVO_SETTLE_MS;
@@ -6066,10 +6066,10 @@ void beginWorkAction(
 
   beginArmStandardization();
   if (kind == WORK_ACTION_RAW) {
-    // 原料识别结果尚未知，载物盘先保持行驶位置；识别后再转到颜色对应槽位。
+                                         
     commandStorageServoParkingPosition();
   } else {
-    // 粗加工/暂存卸料始终从二维码序列的第一个槽位开始。
+                                
     commandStorageServoPosition(0U);
   }
   workStorageServoDeadlineMs =
@@ -6097,10 +6097,10 @@ void beginRawItemVision() {
 }
 
 void beginCircleVision() {
-  /*
-   * 配套Vision 5在多个候选圆中先检查三圆共线、近似等间距和等半径，
-   * 协议v2以mode=9、target=2明确返回该三圆整体的中间成员。
-   */
+    
+                                        
+                                        
+     
   resetCircleStabilityWindow();
   workLastMaixSequence =
       latestMaixCoordinate.sequence;
@@ -6150,10 +6150,10 @@ bool startEndpointSearchPlanarMove() {
     routeFault("Endpoint M5-first move requires idle M6");
     return false;
   }
-  /*
-   * 先在当前安全高度只转M5。M5停稳后由状态机单独伸M6，彻底消除首段
-   * 旋转+90 mm伸出的机械耦合和电源峰值。
-   */
+    
+                                       
+                          
+     
   startArmBaseStandardFrameDegrees(
       activeEndpointScanPose.standardFrameAngleDegrees);
   workActionPhase =
@@ -6245,10 +6245,10 @@ bool startEndpointSearchFallbackMove() {
       endpointSearchFallbackMoveCount == 1U
           ? (scanningRing1 ? 1.0f : -1.0f)
           : (scanningRing1 ? -1.0f : 1.0f);
-  /*
-   * 1号候选固定+60°、+30°；3号保持原来的-30°、-10°。
-   * 两个端点使用独立窗口，避免再次因修改1号而破坏已经准确的3号。
-   */
+    
+                                      
+                                    
+     
   const float fallbackAngleDegrees =
       seedAngleDegrees +
       fallbackOffsetDirection *
@@ -6387,7 +6387,7 @@ bool startAccumulatedWorkstationMove(
 }
 
 float circleMmPerPixelForRadius(float pixelRadius) {
-  // 霍夫圆全部距离统一按72像素=41.75 mm换算；保留参数以维持调用接口。
+                                           
   (void)pixelRadius;
   return CIRCLE_MM_PER_PIXEL;
 }
@@ -6434,10 +6434,10 @@ void startVisualCorrection(
 }
 
 void startPostVisionHeadingCorrection() {
-  /*
-   * 霍夫闭环已经满足像素条件，且机械臂已恢复标准状态。这里不改变XY
-   * 累计量，只按当前路线目标航向进行一次静止IMU锁向。
-   */
+    
+                                     
+                               
+     
   setDriveMotionProfile(
       WORKSTATION_MAXIMUM_STEP_RATE,
       WORKSTATION_STEP_ACCELERATION);
@@ -6544,7 +6544,7 @@ void completeTransferAndRotateStorage() {
       SerialDebug.println(rawCollectedCount);
 
       if (rawCollectedCount >= 3U) {
-        // 第三件放好后不再经过-5°，立即命令载物盘回到行驶位置165°。
+                                           
         beginStorageParkingBeforeWorkFinish();
       } else {
         workVisionRetryCount = 0U;
@@ -6574,11 +6574,11 @@ void completeTransferAndRotateStorage() {
       activeTransferPurpose ==
           TRANSFER_PURPOSE_CONTAINER_TO_RING &&
       workItemIndex >= 3U) {
-    /*
-     * 测量模式只放下三个物料。第三次传送已经把M5/M6/M7收回标准状态；
-     * 再沿正式收尾状态机停好料盘并把M5转到行驶姿态，随后停在MEASURE。
-     * 不执行正式粗加工流程中的“三件重新抓回”。
-     */
+      
+                                          
+                                           
+                            
+       
     visionYanyanPlacementSequenceComplete = true;
     SerialDebug.println(
         "[VISION YANYAN] three placements complete; "
@@ -6587,11 +6587,11 @@ void completeTransferAndRotateStorage() {
     return;
   }
 
-  /*
-   * 粗加工卸完第三件后还要从槽0开始重新装盘，因此仅该情况回槽0。
-   * 粗加工重新装盘的第三件以及暂存最终卸料的第三件完成后，立即转165°；
-   * 下一工位仍会显式转到槽0并等待，不依赖此处留下的角度。
-   */
+    
+                                    
+                                        
+                                
+     
   const bool finishedFinalContainerSequence =
       workItemIndex >= 3U &&
       (activeTransferPurpose ==
@@ -6613,10 +6613,10 @@ void startVisualCorrectionRestore() {
   stopMaixRequest();
   if (motorPulsesAreZero(
           visualCorrectionAccumulator)) {
-    /*
-     * 即使没有发生视觉平移，也在机械臂三次搬运后重新锁定路线目标航向。
-     * 否则臂的惯性造成的车体偏航会被带入下一段长距离开环平移。
-     */
+      
+                                       
+                                   
+       
     setDriveMotionProfile(
         WORKSTATION_MAXIMUM_STEP_RATE,
         WORKSTATION_STEP_ACCELERATION);
@@ -6766,11 +6766,11 @@ void serviceCompetitionAction() {
         if (activeWorkAction == WORK_ACTION_RAW) {
           beginRawItemVision();
         } else {
-          /*
-           * 粗加工区和暂存区都冻结底盘后顺序实测1、3号端点，
-           * 由两端中点计算2号。正常流程不再进入旧mode9中圆
-           * 定位，也不在端点建图后修正底盘。
-           */
+            
+                                      
+                                       
+                             
+             
           startPreEndpointHeadingCorrection();
         }
       }
@@ -6799,10 +6799,10 @@ void serviceCompetitionAction() {
         const uint8_t expectedColor =
             taskColors[workRoundIndex][rawCollectedCount];
         if (detectedColor != expectedColor) {
-          /*
-           * 严格顺序模式下，非目标色只丢弃本次结果，不能清掉尚未过期的
-           * 目标色首样本。
-           */
+            
+                                          
+                    
+             
           SerialDebug.print(
               "[RAW WAIT] expected/detected color=");
           SerialDebug.print(expectedColor);
@@ -6833,10 +6833,10 @@ void serviceCompetitionAction() {
       const uint8_t slotBit =
           static_cast<uint8_t>(1U << slotIndex);
       if ((rawFilledSlotMask & slotBit) != 0U) {
-        /*
-         * 任意顺序模式下，同一颜色可能继续可见；槽位掩码保证每个任务色
-         * 只抓一次，并保持“颜色 -> 二维码槽位”的后续加工映射。
-         */
+          
+                                         
+                                        
+           
         SerialDebug.print(
             "[RAW IGNORE] slot already filled, color/slot=");
         SerialDebug.print(detectedColor);
@@ -7026,8 +7026,8 @@ void serviceCompetitionAction() {
         break;
       }
 
-      // 只有通过置信度、半径/几何和航向检查的帧才续期；垃圾帧不能
-      // 无限推迟2.5 s局部fallback，更不能虚假喂活任务进度看门狗。
+                                      
+                                            
       workVisionRequestStartMs = millis();
       markMissionProgress();
       const uint8_t ring = activeEndpointScanRing;
@@ -7082,10 +7082,10 @@ void serviceCompetitionAction() {
         stopMaixRequest();
         workVisionRequestStartMs = 0UL;
         workVisionRetryCount = 0U;
-        /*
-         * 闭环小修正也保持M5先转、M6后伸缩；两轴不再在任何端点定位
-         * 阶段并发，减少齿条侧向载荷和相机停稳后的回弹。
-         */
+          
+                                         
+                                  
+           
         startArmBaseStandardFrameDegrees(
             targetPose.standardFrameAngleDegrees);
         activeEndpointScanPose = targetPose;
@@ -7572,11 +7572,11 @@ bool plannedFinalFootprintIsInsideSelectedZone() {
           selectedStartZone == START_ZONE_1
               ? START_ZONE_1_CENTER_Y_MM
               : START_ZONE_2_CENTER_Y_MM);
-  /*
-   * 回区时2、4侧朝西（180°），因此外廓X/Y半尺寸仍分别为115/150 mm。
-   * 这是名义路线门禁，不是实际定位反馈；接入位置/边线传感器后必须用
-   * 实测位姿替换centerX/centerY。
-   */
+    
+                                              
+                                     
+                           
+     
   const competition::StartZone zone =
       selectedStartZone == START_ZONE_1
           ? competition::START_ZONE_1
@@ -7598,10 +7598,10 @@ bool plannedFinalFootprintIsInsideSelectedZone() {
 }
 
 void startMotionCommand(const RouteCommand &command) {
-  /*
-   * 路线命令只在这里转换为“开始做什么”。函数不会阻塞等待完成；
-   * loop()持续服务四轮、IMU和二维码，updateRoute()负责判断何时推进。
-   */
+    
+                                   
+                                                
+     
   turnMotionEnabled = false;
   workstationApproachEnabled = false;
   translationPreciseArrivalEnabled = false;
@@ -7657,12 +7657,12 @@ void startMotionCommand(const RouteCommand &command) {
       break;
 
     case COMMAND_QR_ACTION:
-      // 停稳后最多前探500 mm；只有扫码并回到停车点后才允许推进路线。
+                                          
       startQrScanAction();
       break;
 
     case COMMAND_RAW_ACTION:
-      // value=1/2表示同一次比赛的第一批/第二批。
+                                  
       activeCompetitionRound =
           static_cast<uint8_t>(command.value);
       rawActionFinished = false;
@@ -7676,7 +7676,7 @@ void startMotionCommand(const RouteCommand &command) {
       break;
 
     case COMMAND_PROCESS_ACTION:
-      // 霍夫圆定位后，按任务码放3个，再按同一顺序抓回载物盘。
+                                    
       activeCompetitionRound =
           static_cast<uint8_t>(command.value);
       processActionFinished = false;
@@ -7690,7 +7690,7 @@ void startMotionCommand(const RouteCommand &command) {
       break;
 
     case COMMAND_STORAGE_ACTION:
-      // 第一批按第二组位置平放；第二批按颜色映射到第一批上码垛。
+                                     
       activeCompetitionRound =
           static_cast<uint8_t>(command.value);
       storageActionFinished = false;
@@ -7704,11 +7704,11 @@ void startMotionCommand(const RouteCommand &command) {
       break;
 
     case COMMAND_FINAL_ALIGN:
-      /*
-       * 先把旧版“无条件完成”升级为完整外廓的名义几何门禁。当前硬件
-       * 未给出向下红外/XY协议，故不能伪称实测闭环；正式比赛接入后应在
-       * 此状态持续微调，并仅在实测四角均入区时置完成。
-       */
+        
+                                       
+                                         
+                                
+         
       hmiSetRunStatus("ALIGN");
       if (!plannedFinalFootprintIsInsideSelectedZone()) {
         routeFault("Planned final footprint outside selected zone");
@@ -7730,7 +7730,7 @@ void startMotionCommand(const RouteCommand &command) {
     case COMMAND_MOVE_SIDE_34_MM:
     case COMMAND_MOVE_SIDE_13_MM:
     case COMMAND_MOVE_SIDE_24_MM:
-      // 纯平移已在switch之前分段启动。
+                           
       break;
   }
 }
@@ -7755,10 +7755,10 @@ void startCurrentCommand() {
 bool timedActionFinished(
     bool externalFeedback,
     uint32_t testDurationMs) {
-  /*
-   * 路径测试模式按固定时间伪造工位完成；正式接入机械臂后必须由对应
-   * 动作状态机设置externalFeedback，不能把固定测试等待当作规则任务完成。
-   */
+    
+                                    
+                                               
+     
   if (PATH_ONLY_TEST) {
     return millis() - commandStartMs >= testDurationMs;
   }
@@ -7767,7 +7767,7 @@ bool timedActionFinished(
 
 void finishRawActionIfNeeded() {
   if (PATH_ONLY_TEST) {
-    // 每批原料区抓取3个；这里只更新显示计数，没有验证颜色或抓取成功。
+                                       
     correctGrabCount += 3;
     hmiSetTaskCounts();
   }
@@ -7775,7 +7775,7 @@ void finishRawActionIfNeeded() {
 
 void finishProcessActionIfNeeded() {
   if (PATH_ONLY_TEST) {
-    // 每批粗加工区先放下3个、再抓回3个；这里只模拟统计结果。
+                                   
     correctPlacementCount += 3;
     correctGrabCount += 3;
     hmiSetTaskCounts();
@@ -7784,7 +7784,7 @@ void finishProcessActionIfNeeded() {
 
 void finishStorageActionIfNeeded() {
   if (PATH_ONLY_TEST) {
-    // 每批暂存区放置3个；第二批的同色码垛正确性在此模式下未验证。
+                                     
     correctPlacementCount += 3;
     hmiSetTaskCounts();
   }
@@ -7811,15 +7811,15 @@ void finishProgram() {
 }
 
 void updateRoute() {
-  /*
-   * 固定路线状态机的统一“完成判定”：
-   *   平移/转向 -> 四轮到达脉冲目标且IMU航向稳定；
-   *   二维码     -> scanFlag有效（或明确关闭强制扫码）；
-   *   三个工位   -> 路径测试定时，或正式机械臂反馈；
-   *   最终对齐   -> 不增加位移的启停区同步点；
-   *   HOLD       -> 定时结束。
-   * advanceRoute()只推进数组下标，不做坐标重定位。
-   */
+    
+                      
+                                 
+                                        
+                                 
+                              
+                          
+                                   
+     
   if (VISION_YANYAN_TEST_MODE) {
     return;
   }
@@ -7843,7 +7843,7 @@ void updateRoute() {
     case COMMAND_MOVE_SIDE_34_MM:
     case COMMAND_MOVE_SIDE_13_MM:
     case COMMAND_MOVE_SIDE_24_MM:
-      // 中央直线最多2000 mm一段，非中央最多1100 mm；段末只锁航向。
+                                             
       if (updateHeadingLock(MOTION_TIMEOUT_MS)) {
         if (translationRemainingMm > 0) {
           startTranslationSegment(command.type);
@@ -7928,20 +7928,20 @@ void updateRoute() {
   }
 }
 
-// ---------------------------------------------------------------------------
-// 启动、停止与周期服务
-// ---------------------------------------------------------------------------
+                                                                              
+             
+                                                                              
 
 void onStartButtonClick() {
   if (programState != PROGRAM_RUNNING) {
     abortRequested = false;
     startRequested = true;
     imuWaitStatusDisplayed = false;
-    /*
-     * 对应规则的“一键式启动”。机械臂保持上电/行驶姿态（旧坐标0°）；
-     * 实际摆放正确时该命令不产生M5位移，只使库目标与行驶姿态一致。
-     * beginRoute()仍要求先收到有效IMU帧。
-     */
+      
+                                        
+                                      
+                                
+       
     startArmBaseRotationToDegrees(
         static_cast<float>(
             ARM_BASE_TRAVEL_OLD_FRAME_DEGREES));
@@ -7971,10 +7971,10 @@ void onStartButtonLongPress() {
 }
 
 bool configureVisionYanyanTask() {
-  /*
-   * 槽0/1/2依次放到环1/2/3；颜色值只用于满足正式TaskPlan契约，
-   * 测量模式不进行颜色识别。使用正式解析器可避免测试路径绕过数组边界。
-   */
+    
+                                           
+                                      
+     
   constexpr char TEST_TASK_CODE[] =
       "123+123+123+123";
   competition::TaskPlan testPlan;
@@ -8001,12 +8001,12 @@ bool configureVisionYanyanTask() {
 }
 
 void beginRoute() {
-  /*
-   * PB9回调保持原一键启动主体；真正的单次比赛门控放在这里。FAULT/FINISHED
-   * 状态不能把当前终点姿态重新当作所选启停区的发车姿态，必须断电并人工恢复上电
-   * 行驶姿态（M5旧0°、M6抵住回缩端、M7位于物理最高点）；上电后程序
-   * 会自动将M6向外、M7向下各移动10 mm并建立两个安全工作零点。
-   */
+    
+                                                
+                                          
+                                        
+                                      
+     
   if (programState != PROGRAM_WAITING) {
     startRequested = false;
     return;
@@ -8039,11 +8039,11 @@ void beginRoute() {
     return;
   }
 
-  /*
-   * 这里把命令下标、IMU相对航向和软件脉冲位置清零，默认机器人已经按
-   * 注释放在已选择启停区的设计起点。它不是回零/定位过程，不会测量当前世界坐标；
-   * 若实际摆放位置或朝向不同，整条开环路线会整体带偏。
-   */
+    
+                                      
+                                           
+                              
+     
   routeIndex = 0;
   activeCompetitionRound = 0;
   commandStarted = false;
@@ -8101,7 +8101,7 @@ void beginRoute() {
     motors[i]->setCurrentPosition(0);
   }
 
-  // 上一次运行结束时可能停留在最终低速档，每次启动都恢复巡航参数。
+                                    
   setDriveMotionProfile(MAXIMUM_STEP_RATE, STEP_ACCELERATION);
   enableDriveMotors();
   programState = PROGRAM_RUNNING;
@@ -8186,26 +8186,26 @@ void updateHmiYaw() {
 void initializeMotorOutputs() {
   pinMode(DRIVE_ENABLE_PIN, OUTPUT);
 
-  // 初始化期间先保持所有步进驱动器失能。
+                       
   digitalWrite(DRIVE_ENABLE_PIN, HIGH);
 
   for (uint8_t i = 0; i < 4; ++i) {
-    // AccelStepper 的构造函数会配置引脚，但这里在全部串口初始化后
-    // 再明确配置一次，防止任何外设复用覆盖 STEP/DIR GPIO。
+                                           
+                                        
     motors[i]->enableOutputs();
     motors[i]->setMinPulseWidth(MINIMUM_STEP_WIDTH_US);
   }
 
-  /*
-   * 仅初始化库中的 M5，明确不启动库内的 M6/M7 串口，避免与当前
-   * 非阻塞 M6/M7 状态机共用 PA2/PA3 时产生双重串口对象冲突。
-   */
+    
+                                       
+                                         
+     
   armMotors.beginM5();
   useArmBaseEndpointMotionProfile();
-  /*
-   * 上电时必须人工保证M5位于旧坐标0°行驶姿态、M6抵住回缩端、M7升到
-   * 最高；稍后程序会令M6前伸10 mm并建立安全工作零点。
-   */
+    
+                                        
+                                 
+     
   armMotors.setM5CurrentAngle(0.0f);
   armMotors.disableM5();
 
@@ -8254,10 +8254,10 @@ void initializeManipulationHardware() {
   }
   stopMaixRequest();
 
-  /*
-   * M6/M7驱动器与STM32通常同时上电；已验证的独立例程会先等待
-   * 1500 ms。保证驱动器完成自检后再发第一次使能命令。
-   */
+    
+                                      
+                                 
+     
   const uint32_t manipulationStartupMs = millis();
   if (manipulationStartupMs <
       ARM_LINEAR_POWER_ON_SETTLE_MS) {
@@ -8301,7 +8301,7 @@ void initializeManipulationHardware() {
   SerialDebug.println(M7_PULSES_PER_MM, 4);
 }
 
-} // namespace
+}             
 
 void setup() {
   SerialDebug.begin(DEBUG_BAUDRATE);
@@ -8315,7 +8315,7 @@ void setup() {
   analogReadResolution(12);
   pinMode(BATTERY_ADC_PIN, INPUT_ANALOG);
 
-  // 串口初始化完成后最后配置电机 GPIO，确保 PA1 保持为 M4 STEP 输出。
+                                               
   initializeMotorOutputs();
 
   startButton.reset();
@@ -8375,10 +8375,10 @@ void setup() {
 }
 
 void loop() {
-  /*
-   * 电机 run()、按钮、IMU、二维码和状态机都采用非阻塞服务。
-   * 运行过程中不要加入 delay()、舵机 wait() 或 runToPosition()。
-   */
+    
+                                     
+                                                   
+     
   runAllMotors();
   armMotors.serviceM5();
   serviceArmBaseMotionWatchdog();
@@ -8393,10 +8393,10 @@ void loop() {
   serviceBatteryVoltage();
 
   if (abortRequested) {
-    /*
-     * RUN阶段及点击后的IMUWAIT阶段立即急停；尚未点击、已完赛或已故障时
-     * 忽略长按，避免把FINISH结果页覆盖为STOP。
-     */
+      
+                                            
+                                
+       
     if (programState == PROGRAM_RUNNING ||
         (programState == PROGRAM_WAITING &&
          startRequested)) {

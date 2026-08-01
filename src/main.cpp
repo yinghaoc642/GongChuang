@@ -1,23 +1,16 @@
-#define GONGCHUANG_VISION_YANYAN_TEST 0
-
-#ifndef GONGCHUANG_VISION_YANYAN_TEST
-#define GONGCHUANG_VISION_YANYAN_TEST 0
-#endif
-
-static_assert(
-    GONGCHUANG_VISION_YANYAN_TEST == 0 ||
-        GONGCHUANG_VISION_YANYAN_TEST == 1,
-    "GONGCHUANG_VISION_YANYAN_TEST must be 0 or 1");
+#include <MobileRobotConfig.h>
+#include <RobotConfig.h>
 
 #include <AccelStepper.h>
 #include <ArmMotorController.h>
+#include <ArmTransferPlanner.h>
 #include <Arduino.h>
 #include <CompetitionCore.h>
 #include <FashionStar_UartServo.h>
-#include <JY901.h>
+#include <ImuHeadingTracker.h>
+#include <MaixCamClient.h>
 #include <MecanumKinematics.h>
 #include <OneButton.h>
-#include <VisionProtocol.h>
 
 #include <math.h>
 #include <stdint.h>
@@ -27,63 +20,25 @@ static_assert(
 using namespace mecanum;
 
 /*
- * GongChuang：225 mm机械臂中心偏移的省赛物流赛项两批物料移动路径
+ * 底盘唯一实现来源：GongChuang_route/src/main.cpp 的完整副本。
  *
- * 场地坐标：
- *   原点在场地左下角，+X 向右（东），+Y 向上（北），单位 mm。
- *
- * 车辆定义：
- *   3、4 号轮所在端是当前车头；
- *   1、2 号轮所在端是车尾；
- *   扫码器、机械臂和向下红外都从 2、4 号轮所在侧向外伸出。
- *   初始姿态下：3、4 侧朝南，1、2 侧朝北，1、3 侧朝西，
- *   2、4 侧朝东。
- *
- * 已按本次确认采用的实车约定：
- *   1. 10000 pulse 约等于直行 1 m；
- *   2. 四个电机安装方向仍为 [-,+,-,+]；
- *   3. JY901/HWT101 逆时针旋转时角度增加。
- *
- * MecanumKinematics 的 forward 轴仍沿 1、2 侧，不能把库中的
- * forward 直接理解为新车头方向。本程序统一按“向哪一个车体侧面平移”
- * 下达命令，避免车头旋转 90° 后出现前进、后退歧义。
- *
- * 路径完整执行两批“原料区 -> 粗加工区 -> 暂存区”。每个工作区均由
- * 2、4侧面对工位中线。PATH_ONLY_TEST=false时执行本文后半部的MaixCAM
- * 定位、M5～M7、夹爪和载物盘非阻塞动作状态机。
- *
- * 【参赛规则地点对照：附件2，物流赛项决赛第一阶段】
- *   - 场地为2400×2400 mm；灰色十字车道宽400 mm。
- *   - 启停区1在右上角，启停区2在右下角，尺寸均为300×300 mm。
- *   - 原料区在上边中部；粗加工区在下边中部；暂存区在左边中部；
- *     二维码板在右边内侧的规定范围内随机摆放。
- *   - 规则要求：扫码 -> 第一批原料/粗加工/暂存 ->
- *     第二批原料/粗加工/暂存（同色码垛）-> 返回抽签确定的启停区。
- *   - 规则图还画有精加工区、成品区，但决赛第一阶段公布的固定流程
- *     只经过原料区、粗加工区和暂存区；本路径没有访问精加工区、成品区。
- *   - 灰色道路上的黑色障碍物位置可随机变化；本文件是固定命令序列，
- *     没有障碍物检测、绕行或重新规划逻辑。
- *
- * 【三种坐标层次，调试时不能混用】
- *   1. 规则层：原料区和二维码板允许在规定范围内随机摆放，实际位置
- *      以现场为准；粗加工区/暂存区台面名义尺寸为580×150 mm。
- *   2. route-simulator层：旧tmcode1理想路线采用原料/粗加工/暂存车心
- *      (1200,2100)/(1200,300)/(300,1200)，仅用于理解路线形状。
- *   3. 本文件层：当前常量、补偿量和实车标定才决定实际发出的脉冲；
- *      程序不测量世界坐标，平移位置是开环脉冲累计，IMU只闭环航向。
- *      因此下文“坐标”均是设计或开环推算值，不是定位传感器实测值。
- *
- * 注意：代码中的“第1轮/第2轮”表示同一次比赛任务里的第一批/第二批
- * 三个物料，不是规则所说的两次独立运行机会。
+ * route_chassis_main.inc 保持21步路线、M1～M4、PB9、IMU、二维码、HMI、
+ * 电池与全部底盘速度/位移控制原样不变。GC当前文件只在六个工位暂停窗口
+ * 运行机械臂和视觉，禁止维护第二套正在运行的底盘状态机。
  */
+namespace route_chassis {
+#include "route_chassis_main.inc"
+} // namespace route_chassis
 
 namespace {
 
-// ---------------------------------------------------------------------------
-// 硬件引脚与串口
-// ---------------------------------------------------------------------------
+using gongchuang::ArmPose;
+namespace arm_transfer = gongchuang::arm_transfer;
+namespace arm_config = gongchuang::config::arm_transfer;
+namespace m7_experiment = gongchuang::config::m7_experiment;
+namespace mobile_robot_config = gongchuang::mobile_robot;
 
-const uint8_t DRIVE_ENABLE_PIN = PE13; // M1～M4 公共使能，低有效
+const uint8_t DRIVE_ENABLE_PIN = PE13;
 
 const uint8_t M1_STEP_PIN = PD4;
 const uint8_t M1_DIRECTION_PIN = PD6;
@@ -96,9 +51,6 @@ const uint8_t M4_DIRECTION_PIN = PC3_C;
 
 const uint8_t START_BUTTON_PIN = PB9;
 
-// true_example/Battery*.ino 使用的独立调试串口。
-// 不能使用默认 Serial：通用 H750 板型的 Serial RX 是 PA1，
-// 与四号轮 STEP 引脚冲突。
 const uint8_t DEBUG_RX_PIN = PB12;
 const uint8_t DEBUG_TX_PIN = PB13;
 const uint8_t HMI_RX_PIN = PB15;
@@ -123,14 +75,15 @@ const uint32_t MAIXCAM_BAUDRATE = 115200;
 const uint32_t ARM_LINEAR_BAUDRATE = 115200;
 const uint32_t SERVO_BAUDRATE = 115200;
 
-HardwareSerial SerialDebug(DEBUG_RX_PIN, DEBUG_TX_PIN);
-HardwareSerial SerialHmi(HMI_RX_PIN, HMI_TX_PIN);
-HardwareSerial SerialImu(IMU_RX_PIN, IMU_TX_PIN);
-HardwareSerial SerialQr(QR_RX_PIN, QR_TX_PIN);
+HardwareSerial &SerialDebug = route_chassis::SerialDebug;
+HardwareSerial &SerialHmi = route_chassis::SerialHmi;
+HardwareSerial &SerialImu = route_chassis::SerialImu;
+HardwareSerial &SerialQr = route_chassis::SerialQr;
 HardwareSerial SerialMaixcam(MAIXCAM_RX_PIN, MAIXCAM_TX_PIN);
 HardwareSerial SerialArmLinear(
     ARM_LINEAR_RX_PIN, ARM_LINEAR_TX_PIN);
 HardwareSerial SerialServo(SERVO_RX_PIN, SERVO_TX_PIN);
+gongchuang::ImuHeadingTracker imuTracker(SerialImu);
 
 constexpr uint8_t GRIPPER_SERVO_ID = 4U;
 constexpr uint8_t STORAGE_SERVO_ID = 5U;
@@ -138,79 +91,76 @@ FSUS_Protocol servoProtocol;
 FSUS_Servo gripperServo(GRIPPER_SERVO_ID, &servoProtocol);
 FSUS_Servo storageServo(STORAGE_SERVO_ID, &servoProtocol);
 
-OneButton startButton(START_BUTTON_PIN, true, true);
-
-// ---------------------------------------------------------------------------
-// 底盘标定与安全参数
-// ---------------------------------------------------------------------------
+OneButton &startButton = route_chassis::startButton;
 
 const float PI_F = 3.14159265358979323846f;
 const float TWO_PI_F = 2.0f * PI_F;
 
-// GitHub 运动学库当前记录的实测几何尺寸。
 const float WHEELBASE_MM = 187.5f;
 const float TRACK_WIDTH_MM = 195.0f;
 const float WHEEL_DIAMETER_MM = 100.0f;
 
-/*
- * 本次确认先采用 yyq5 旧底盘的实测标定：10000 pulse 约为 1 m。
- * 麦轮横移通常比纵向更容易受滚子与地面影响，因此保留独立标定项；
- * 当前第一次烧录先按相同数值，之后可分别实测修正。
- */
 const float FORWARD_PULSES_PER_METER = 10000.0f;
 const float LATERAL_PULSES_PER_METER = 10000.0f;
 const float PULSES_PER_WHEEL_REVOLUTION = 3200.0f;
 
-// 顺、逆时针分别标定，减少粗转后的多次原地微调；IMU 仍做最终闭环。
 const float COUNTERCLOCKWISE_ROTATION_PULSE_SCALE = 1.0f;
 const float CLOCKWISE_ROTATION_PULSE_SCALE = 1.0f;
 
-/*
- * M5 的200步/圈、16细分、5:1减速比及物理方向统一由
- * ArmMotorController 管理。库角度正值为逆时针、负值为顺时针：
- *   上电/发车/行驶姿态 = 旧坐标0°；
- *   标准作业姿态       = 从上电姿态顺时针90° = 旧坐标-90°。
- * 两种姿态下M6都回到离机械硬限位10 mm的工作零点，M7升到最高。
- */
 constexpr int32_t ARM_BASE_TRAVEL_OLD_FRAME_DEGREES = 0;
 constexpr int32_t ARM_BASE_STANDARD_OLD_FRAME_DEGREES = -90;
 constexpr float ARM_BASE_TRAVEL_STANDARD_FRAME_DEGREES = 90.0f;
 constexpr int32_t ARM_BASE_HOME_ANGLE_DEGREES =
     ARM_BASE_TRAVEL_OLD_FRAME_DEGREES;
-// 容器释放位保持顺时针102°；抓取位在同方向上再多转1°。
-// 标准坐标中顺时针为负，因此抓取目标为-103°。
-constexpr float ARM_CONTAINER_PLACE_ANGLE_DEGREES = -102.0f;
-constexpr float ARM_CONTAINER_PICK_ANGLE_DEGREES = -103.0f;
-// 仅物料盘抓取时，M6相对工作零点向外伸出6 mm。
-constexpr float ARM_CONTAINER_PICK_EXTENSION_MM = 6.0f;
-/*
- * 端点建图已删除-80°大幅预置，省下的时间用于降低M5冲击。端点首动改为
- * M5先转稳、M6后伸出，避免旋转和长距离伸出叠加载荷。
- */
-// 视觉fine精调保持slow1曲线；coarse粗调在slow1基础上提速50%。
-const float ARM_BASE_MAXIMUM_STEP_RATE = 45000.0f;
-const float ARM_BASE_STEP_ACCELERATION = 18000.0f;
-const float ARM_BASE_ENDPOINT_COARSE_MAXIMUM_STEP_RATE = 67500.0f;
-const float ARM_BASE_ENDPOINT_COARSE_STEP_ACCELERATION = 27000.0f;
-// 端点首看、搜索fallback和1->3跨圈在slow1基础上再次提高50%。
-const float ARM_BASE_ENDPOINT_TRAVEL_MAXIMUM_STEP_RATE = 101250.0f;
-const float ARM_BASE_ENDPOINT_TRAVEL_STEP_ACCELERATION = 40500.0f;
-// 搬运、抓料和复位大角度动作在slow1基础上再次提高50%。
-const float ARM_BASE_TRANSFER_MAXIMUM_STEP_RATE = 117000.0f;
-const float ARM_BASE_TRANSFER_STEP_ACCELERATION = 54000.0f;
-// M5脉冲到位后的环节衔接等待按原值减半，仍保留50 ms机械消振。
-constexpr uint32_t ARM_BASE_SETTLE_MS = 50UL;
+
+const float ARM_BASE_MAXIMUM_STEP_RATE = 81000.0f;
+const float ARM_BASE_STEP_ACCELERATION = 27000.0f;
+const float ARM_BASE_ENDPOINT_COARSE_MAXIMUM_STEP_RATE = 121500.0f;
+const float ARM_BASE_ENDPOINT_COARSE_STEP_ACCELERATION = 40500.0f;
+
+const float ARM_BASE_ENDPOINT_TRAVEL_MAXIMUM_STEP_RATE = 182250.0f;
+const float ARM_BASE_ENDPOINT_TRAVEL_STEP_ACCELERATION = 60750.0f;
+
+// Vision-facing M5 stabilization is capped at 20 ms. Endpoint preparation
+// already uses the shorter dedicated 10 ms gate below.
+constexpr uint32_t ARM_BASE_SETTLE_MS = 20UL;
+constexpr uint32_t FIRST_ENDPOINT_M7_SETTLE_MS = 10UL;
+static_assert(
+    FIRST_ENDPOINT_M7_SETTLE_MS * 2UL == ARM_BASE_SETTLE_MS,
+    "First endpoint M7 settle must remain below the vision delay cap");
+// Endpoint vision moves have already been position-verified. The remaining
+// M5-to-M6 handoff is reduced by exactly 70% without changing the normal arm
+// base settle used by travel, recovery, or non-vision standardization.
+constexpr uint32_t ENDPOINT_BASE_TO_EXTENSION_SETTLE_PREVIOUS_MS = 50UL;
+constexpr uint32_t ENDPOINT_BASE_TO_EXTENSION_SETTLE_MS = 15UL;
+static_assert(
+    ENDPOINT_BASE_TO_EXTENSION_SETTLE_MS * 10UL ==
+        ENDPOINT_BASE_TO_EXTENSION_SETTLE_PREVIOUS_MS * 3UL,
+    "Endpoint M5-to-M6 handoff must remain reduced by 70 percent");
+constexpr uint32_t ARM_TRANSFER_BASE_SETTLE_MS = 5UL;
+constexpr uint32_t ARM_TRANSFER_RETURN_SETTLE_MS = 0UL;
 constexpr uint32_t ARM_BASE_MOTION_TIMEOUT_MS = 4500UL;
 
-// M6：模数1、分度圆直径35 mm的齿轮齿条；M7：T8x12，导程12 mm。
 constexpr uint8_t ARM_EXTENSION_ADDRESS = 6U;
 constexpr uint8_t ARM_LIFT_ADDRESS = 7U;
-constexpr float FULL_STEPS_PER_REVOLUTION = 200.0f;
-// 必须与两只驱动器面板/上位机中的真实细分逐轴一致，不能共用一个值。
-constexpr float M6_MICROSTEPS = 256.0f;
-constexpr float M7_MICROSTEPS = 16.0f;
-const float M6_TRAVEL_PER_REVOLUTION_MM = PI_F * 35.0f;
-constexpr float M7_TRAVEL_PER_REVOLUTION_MM = 12.0f;
+constexpr float FULL_STEPS_PER_REVOLUTION =
+    static_cast<float>(
+        gongchuang::config::arm_hardware::
+            FULL_STEPS_PER_REVOLUTION);
+
+constexpr float M6_MICROSTEPS =
+    static_cast<float>(
+        gongchuang::config::arm_hardware::M6_MICROSTEPS);
+constexpr float M7_MICROSTEPS =
+    static_cast<float>(
+        gongchuang::config::arm_hardware::M7_MICROSTEPS);
+const float M6_TRAVEL_PER_REVOLUTION_MM =
+    PI_F *
+    gongchuang::config::arm_hardware::
+        M6_PINION_PITCH_DIAMETER_MM;
+constexpr float M7_TRAVEL_PER_REVOLUTION_MM =
+    gongchuang::config::arm_hardware::
+        M7_LEAD_MM_PER_REVOLUTION;
 const float M6_PULSES_PER_MM =
     FULL_STEPS_PER_REVOLUTION * M6_MICROSTEPS /
     M6_TRAVEL_PER_REVOLUTION_MM;
@@ -221,109 +171,168 @@ constexpr uint8_t M6_EXTEND_DIRECTION = 0U;
 constexpr uint8_t M6_RETRACT_DIRECTION = 1U;
 constexpr uint8_t M7_RAISE_DIRECTION = 1U;
 constexpr uint8_t M7_LOWER_DIRECTION = 0U;
-/*
- * EMM的acc字节不是线性百分比，而近似满足a∝1/(256-acc)。
- * 因此slow1的128若要得到约1.5倍物理加速度，应取171，不能直接乘到192。
- */
-constexpr uint16_t M6_SPEED_RPM = 390U;
-constexpr uint8_t M6_ACCELERATION = 171U;
-// 端点fine保持slow1柔和曲线，搜索与coarse使用提高50%的独立曲线。
-constexpr uint16_t ENDPOINT_FINE_M6_SPEED_RPM = 160U;
-constexpr uint8_t ENDPOINT_FINE_M6_ACCELERATION = 96U;
-constexpr uint16_t ENDPOINT_COARSE_M6_SPEED_RPM = 240U;
-constexpr uint8_t ENDPOINT_COARSE_M6_ACCELERATION = 149U;
-constexpr uint16_t M6_RECOVERY_SPEED_RPM = 120U;
-constexpr uint8_t M6_RECOVERY_ACCELERATION = 64U;
-constexpr uint16_t M7_RECOVERY_SPEED_RPM = 1200U;
-constexpr uint8_t M7_RECOVERY_ACCELERATION = 128U;
-// 上电前人工把M6推到机械回缩端、M7推到物理最高点；上电后两轴各离开
-// 机械端点10 mm，再把到达位置共同设为运行期间的安全工作零点。
-constexpr float M6_STARTUP_WORKING_ZERO_OFFSET_MM = 10.0f;
-constexpr float M7_STARTUP_WORKING_ZERO_OFFSET_MM = 10.0f;
-constexpr uint16_t ARM_LINEAR_STARTUP_ZERO_SPEED_RPM = 100U;
-constexpr uint8_t ARM_LINEAR_STARTUP_ZERO_ACCELERATION = 80U;
+
+constexpr uint16_t M6_SPEED_RPM =
+    arm_config::M6_STANDARD_SPEED_RPM;
+constexpr uint8_t M6_ACCELERATION =
+    arm_config::M6_STANDARD_ACCELERATION;
+constexpr uint16_t RAW_M6_SPEED_RPM =
+    arm_config::M6_RAW_SPEED_RPM;
+constexpr uint8_t RAW_M6_ACCELERATION =
+    arm_config::M6_RAW_ACCELERATION;
+constexpr uint16_t PLACE_M6_SPEED_RPM =
+    arm_config::M6_PLACE_SPEED_RPM;
+constexpr uint8_t PLACE_M6_ACCELERATION =
+    arm_config::M6_PLACE_ACCELERATION;
+constexpr uint16_t RETURN_M6_SPEED_RPM =
+    arm_config::M6_RETURN_SPEED_RPM;
+constexpr uint8_t RETURN_M6_ACCELERATION =
+    arm_config::M6_RETURN_ACCELERATION;
+constexpr uint16_t RETURN_M7_SPEED_RPM =
+    arm_config::M7_RETURN_SPEED_RPM;
+constexpr uint8_t RETURN_M7_ACCELERATION =
+    arm_config::M7_RETURN_ACCELERATION;
+
+constexpr uint16_t ENDPOINT_FINE_M6_SPEED_RPM = 288U;
+constexpr uint8_t ENDPOINT_FINE_M6_ACCELERATION = 149U;
+constexpr uint16_t ENDPOINT_COARSE_M6_SPEED_RPM = 432U;
+constexpr uint8_t ENDPOINT_COARSE_M6_ACCELERATION = 185U;
+constexpr uint16_t M6_RECOVERY_SPEED_RPM = 216U;
+constexpr uint8_t M6_RECOVERY_ACCELERATION = 128U;
+constexpr uint16_t M7_RECOVERY_SPEED_RPM = 2160U;
+constexpr uint8_t M7_RECOVERY_ACCELERATION = 171U;
+
+constexpr float M6_STARTUP_WORKING_ZERO_OFFSET_MM =
+    gongchuang::config::arm_hardware::
+        M6_STARTUP_WORKING_ZERO_OFFSET_MM;
+constexpr float M7_STARTUP_WORKING_ZERO_OFFSET_MM =
+    gongchuang::config::arm_hardware::
+        M7_STARTUP_WORKING_ZERO_OFFSET_MM;
+constexpr uint16_t ARM_LINEAR_STARTUP_ZERO_SPEED_RPM = 180U;
+constexpr uint8_t ARM_LINEAR_STARTUP_ZERO_ACCELERATION = 139U;
 constexpr uint32_t ARM_LINEAR_POSITION_READ_TIMEOUT_MS = 120UL;
-/*
- * 普通升降恢复上上版的快速冲击档；只有视觉fine和三个物料最终下放
- * 使用下面各自的慢档，不能再把普通下降一起降速。
- */
-constexpr uint16_t M7_SPEED_RPM = 3744U;
-constexpr uint8_t M7_ACCELERATION = 255U;
-// 端点由coarse高度落实到fine高度时保持slow1曲线。
-constexpr uint16_t ENDPOINT_FINE_M7_SPEED_RPM = 2496U;
-constexpr uint8_t ENDPOINT_FINE_M7_ACCELERATION = 220U;
-/*
- * 放置采用“两段软着陆”：大段快速下降只走到目标上方10 mm，最后10 mm
- * 用低峰值速度、低物理加速度落下。它不增加第三条EMM命令，末段理论时间
- * 比900/184档再快一小档，但仍低于旧15 mm、1500/192的触地冲击。
- */
-constexpr float RING_PLACE_FINAL_DESCENT_MM = 10.0f;
-constexpr uint16_t M7_RING_PLACE_SPEED_RPM = 1050U;
-constexpr uint8_t M7_RING_PLACE_ACCELERATION = 188U;
-constexpr uint32_t RING_PLACE_EXTENSION_SETTLE_MS = 30UL;
-constexpr uint32_t RING_PLACE_LOWER_SETTLE_MS = 40UL;
+
+constexpr uint16_t M7_SPEED_RPM =
+    gongchuang::config::arm_hardware::M7_TRAVEL_SPEED_RPM;
+constexpr uint8_t M7_ACCELERATION =
+    gongchuang::config::arm_hardware::M7_TRAVEL_ACCELERATION;
+
+constexpr float M7_ZERO_SOFT_LANDING_DISTANCE_MM =
+    gongchuang::config::arm_hardware::
+        M7_ZERO_SOFT_LANDING_DISTANCE_MM;
+constexpr uint16_t M7_ZERO_SOFT_LANDING_SPEED_RPM =
+    gongchuang::config::arm_hardware::
+        M7_ZERO_SOFT_LANDING_SPEED_RPM;
+constexpr uint8_t M7_ZERO_SOFT_LANDING_ACCELERATION =
+    gongchuang::config::arm_hardware::
+        M7_ZERO_SOFT_LANDING_ACCELERATION;
+constexpr float M6_CONTACT_SOFT_LANDING_DISTANCE_MM =
+    gongchuang::config::arm_hardware::
+        M6_CONTACT_SOFT_LANDING_DISTANCE_MM;
+constexpr uint8_t M6_CONTACT_SOFT_LANDING_ACCELERATION =
+    gongchuang::config::arm_hardware::
+        M6_CONTACT_SOFT_LANDING_ACCELERATION;
+constexpr float M7_CONTACT_SOFT_LANDING_DISTANCE_MM =
+    gongchuang::config::arm_hardware::
+        M7_CONTACT_SOFT_LANDING_DISTANCE_MM;
+constexpr uint8_t M7_CONTACT_SOFT_LANDING_ACCELERATION =
+    gongchuang::config::arm_hardware::
+        M7_CONTACT_SOFT_LANDING_ACCELERATION;
+constexpr uint16_t RAW_M7_SPEED_RPM = M7_SPEED_RPM;
+constexpr uint8_t RAW_M7_ACCELERATION = M7_ACCELERATION;
+
+constexpr uint16_t ENDPOINT_FINE_M7_SPEED_RPM = 4493U;
+constexpr uint8_t ENDPOINT_FINE_M7_ACCELERATION = 232U;
+
+constexpr float RING_PLACE_FINAL_DESCENT_MM =
+    M7_CONTACT_SOFT_LANDING_DISTANCE_MM;
+constexpr uint16_t M7_RING_PLACE_SPEED_RPM =
+    arm_config::M7_RING_PLACE_SPEED_RPM;
+constexpr uint8_t M7_RING_PLACE_ACCELERATION =
+    arm_config::M7_RING_PLACE_ACCELERATION;
 constexpr uint32_t ARM_LINEAR_POWER_ON_SETTLE_MS = 1500UL;
 constexpr uint32_t ARM_AXIS_COMMAND_GUARD_MS = 30UL;
-// 正常F3应答仍在30 ms内完成；仅在应答迟到时继续等到70 ms，避免固定给
-// 每条命令增加延时，也避免清掉迟到F3后过早发送FD而诱发E2。
+
 constexpr uint32_t ARM_AXIS_ENABLE_RESPONSE_WAIT_MS = 70UL;
 constexpr uint32_t ARM_AXIS_STATUS_INTERVAL_MS = 30UL;
 constexpr uint32_t ARM_AXIS_MINIMUM_ON_POSITION_MS = 120UL;
-constexpr uint32_t ARM_AXIS_EXPECTED_COMPLETION_VERIFY_MS = 700UL;
+// EMM42 V5 M7 gets a tighter verified-arrival cadence for workstation
+// gripper handoffs. The same enabled/on-position/no-fault/command-evidence
+// checks still apply; only the polling and minimum command-age are reduced.
+constexpr uint32_t M7_AXIS_STATUS_INTERVAL_MS = 10UL;
+constexpr uint32_t M7_AXIS_MINIMUM_ON_POSITION_MS = 100UL;
+// EMM42 V5 can delay its position-complete indication after the shaft has
+// physically settled. Poll the real-time encoder position and accept M7 only
+// after two close, stable samples plus a fresh healthy status frame.
+constexpr bool M7_ENCODER_FAST_ARRIVAL_ENABLED = true;
+constexpr uint32_t M7_FAST_ARRIVAL_QUERY_INTERVAL_MS = 20UL;
+constexpr uint32_t M7_FAST_ARRIVAL_SAMPLE_GAP_MS = 10UL;
+constexpr uint32_t M7_FAST_ARRIVAL_RESPONSE_TIMEOUT_MS = 20UL;
+constexpr uint32_t M7_FAST_ARRIVAL_STATUS_FRESH_MS = 30UL;
+constexpr float M7_FAST_ARRIVAL_TARGET_TOLERANCE_MM = 0.35f;
+constexpr float M7_FAST_ARRIVAL_STABILITY_MM = 0.15f;
+static_assert(
+    M7_AXIS_STATUS_INTERVAL_MS < ARM_AXIS_STATUS_INTERVAL_MS &&
+        M7_AXIS_MINIMUM_ON_POSITION_MS <=
+            ARM_AXIS_MINIMUM_ON_POSITION_MS,
+    "M7 verified-arrival response must be tighter than the normal axis gate");
+constexpr uint32_t ARM_AXIS_EXPECTED_COMPLETION_VERIFY_MARGIN_MS =
+    250UL;
 constexpr uint32_t ARM_AXIS_MINIMUM_TIMEOUT_MS = 2500UL;
 constexpr uint32_t ARM_AXIS_MAXIMUM_TIMEOUT_MS = 30000UL;
 constexpr uint8_t ARM_AXIS_TERMINAL_CONFIRMATION_SAMPLES = 2U;
 constexpr uint8_t ARM_AXIS_TERMINAL_VERIFY_MAX_FAILURES = 2U;
 constexpr float ARM_AXIS_TERMINAL_VERIFY_TOLERANCE_MM = 0.60f;
-// 只有连续3帧堵转状态才确认；健康帧会立即清零，不能第一帧就主动停车。
+
 constexpr uint8_t ARM_AXIS_STALL_CONFIRMATION_SAMPLES = 3U;
-// 确认后只允许一次降档、实测位置约束下的续跑，禁止原参数反复硬顶。
+
 constexpr uint8_t ARM_AXIS_MAXIMUM_RECOVERY_ATTEMPTS = 1U;
 constexpr uint32_t ARM_AXIS_RECOVERY_STOP_SETTLE_MS = 40UL;
 constexpr uint32_t ARM_AXIS_RECOVERY_TOTAL_TIMEOUT_MS = 5500UL;
 constexpr uint32_t ARM_AXIS_RECOVERY_SAMPLE_SETTLE_MS = 10UL;
 constexpr float ARM_AXIS_RECOVERY_POSITION_STABILITY_MM = 0.80f;
 constexpr float ARM_AXIS_RECOVERY_PATH_MARGIN_MM = 3.0f;
-// 先走0.5 mm探测；即使代码256而驱动器误设8，最坏也只外伸约16 mm。
+static_assert(
+    M7_FAST_ARRIVAL_SAMPLE_GAP_MS <
+            M7_FAST_ARRIVAL_QUERY_INTERVAL_MS &&
+        M7_FAST_ARRIVAL_RESPONSE_TIMEOUT_MS <=
+            ARM_LINEAR_POSITION_READ_TIMEOUT_MS &&
+        M7_FAST_ARRIVAL_TARGET_TOLERANCE_MM <
+            ARM_AXIS_TERMINAL_VERIFY_TOLERANCE_MM &&
+        M7_FAST_ARRIVAL_STABILITY_MM <
+            ARM_AXIS_RECOVERY_POSITION_STABILITY_MM,
+    "M7 encoder arrival gate must remain faster and stricter than recovery");
+
 constexpr float ARM_LINEAR_STARTUP_PROBE_MM = 0.5f;
 constexpr float ARM_LINEAR_ZERO_ANGLE_RATIO_MINIMUM = 0.80f;
 constexpr float ARM_LINEAR_ZERO_ANGLE_RATIO_MAXIMUM = 1.20f;
 
 constexpr float M6_STANDARD_EXTENSION_MM = 0.0f;
-/*
- * M6上电从机械回缩端向外移动10 mm后建立工作零点。仅2号圈的取放允许
- * 从该工作零点向机械端回缩，最小到-6 mm，仍保留约4 mm硬限位余量。
- * 视觉定位、1号圈、3号圈及普通搬运仍以0 mm为最小伸长。
- */
-constexpr float M6_RING2_MINIMUM_EXTENSION_MM = -6.0f;
+
+constexpr float M6_RING2_MINIMUM_EXTENSION_MM = -8.0f;
 static_assert(
     M6_STARTUP_WORKING_ZERO_OFFSET_MM +
             M6_RING2_MINIMUM_EXTENSION_MM >=
-        4.0f,
-    "Ring-2 M6 retraction must retain 4 mm hard-stop margin");
+        2.0f,
+    "Ring-2 M6 retraction must retain 2 mm hard-stop margin");
 constexpr float M7_STANDARD_HEIGHT_MM = 0.0f;
-// 物理总行程仍是150 mm；工作零点已离开硬限位10 mm，因此可用行程为140 mm。
+
 constexpr float M6_MAXIMUM_PHYSICAL_EXTENSION_MM = 150.0f;
 constexpr float M6_MAXIMUM_EXTENSION_MM =
     M6_MAXIMUM_PHYSICAL_EXTENSION_MM -
     M6_STARTUP_WORKING_ZERO_OFFSET_MM;
-// M7物理总下降行程仍为160 mm；新零点已在最高点下方10 mm，因此工作
-// 坐标允许从0继续下降150 mm。
+
 constexpr float M7_MINIMUM_PHYSICAL_HEIGHT_MM = -160.0f;
 constexpr float M7_MINIMUM_HEIGHT_MM =
     M7_MINIMUM_PHYSICAL_HEIGHT_MM +
     M7_STARTUP_WORKING_ZERO_OFFSET_MM;
 constexpr float ARM_AXIS_POSITION_TOLERANCE_MM = 0.05f;
-// 以下数值先保留原来的实际物理高度，再减去M7上电已下降的10 mm，确保
-// 更换工作零点后相机、夹取和放料的最终物理高度不变。
+
 constexpr float RAW_PICK_PHYSICAL_LOWER_MM = 73.0f;
 constexpr float HOUGH_VISION_PHYSICAL_LOWER_MM = 90.0f;
-// 斜着找到端点后再多下降15 mm做最终居中，圆在画面中更大、更稳定。
+
 constexpr float ENDPOINT_FINE_VISION_PHYSICAL_LOWER_MM =
     105.0f;
-// 只把物料盘抓取下降量由40 mm减为38 mm；放回高度保持40 mm。
-constexpr float CONTAINER_PICK_PHYSICAL_LOWER_MM = 38.0f;
-constexpr float CONTAINER_PLACE_PHYSICAL_LOWER_MM = 40.0f;
 constexpr float PROCESS_PLACE_PHYSICAL_LOWER_MM = 148.0f;
 constexpr float STORAGE_ROUND1_PLACE_PHYSICAL_LOWER_MM =
     148.0f;
@@ -340,14 +349,7 @@ constexpr float ENDPOINT_FINE_VISION_LOWER_MM =
     M7_STARTUP_WORKING_ZERO_OFFSET_MM;
 constexpr float HOUGH_VISION_HEIGHT_MM =
     M7_STANDARD_HEIGHT_MM - HOUGH_VISION_LOWER_MM;
-constexpr float CONTAINER_PICK_LOWER_MM =
-    CONTAINER_PICK_PHYSICAL_LOWER_MM -
-    M7_STARTUP_WORKING_ZERO_OFFSET_MM;
-constexpr float CONTAINER_PLACE_LOWER_MM =
-    CONTAINER_PLACE_PHYSICAL_LOWER_MM -
-    M7_STARTUP_WORKING_ZERO_OFFSET_MM;
-// 当前物理下降148 mm；M7工作零点已在物理最高点下方10 mm，
-// 因此下发的工作坐标为-138 mm。
+
 constexpr float PROCESS_PLACE_LOWER_MM =
     PROCESS_PLACE_PHYSICAL_LOWER_MM -
     M7_STARTUP_WORKING_ZERO_OFFSET_MM;
@@ -357,20 +359,103 @@ constexpr float STORAGE_ROUND1_PLACE_LOWER_MM =
 constexpr float STORAGE_ROUND2_PLACE_LOWER_MM =
     STORAGE_ROUND2_PLACE_PHYSICAL_LOWER_MM -
     M7_STARTUP_WORKING_ZERO_OFFSET_MM;
+static_assert(
+    PROCESS_PLACE_LOWER_MM +
+            arm_config::RING_RETURN_PICK_EXTRA_LOWER_MM <=
+        -M7_MINIMUM_HEIGHT_MM,
+    "Ring-return pickup extra lower must remain inside M7 travel");
+static_assert(
+    PROCESS_PLACE_LOWER_MM +
+            arm_config::TARGET_PLACE_EXTRA_LOWER_MM <=
+        -M7_MINIMUM_HEIGHT_MM &&
+        STORAGE_ROUND1_PLACE_LOWER_MM +
+                arm_config::TARGET_PLACE_EXTRA_LOWER_MM <=
+            -M7_MINIMUM_HEIGHT_MM,
+    "Target placement extra lower must remain inside M7 travel");
 
-// 实机夹爪标定：闭合99°、打开37°；最大张开档暂保留但当前未调用。
-constexpr float GRIPPER_CLOSE_ANGLE_DEGREES = 99.0f;
-constexpr float GRIPPER_OPEN_ANGLE_DEGREES = 37.0f;
-constexpr float GRIPPER_MAX_OPEN_ANGLE_DEGREES = -90.0f;
-constexpr uint16_t GRIPPER_INTERVAL_MS = 100U;
+constexpr float GRIPPER_CLOSE_ANGLE_DEGREES =
+    gongchuang::config::gripper::CLOSE_ANGLE_DEGREES;
+constexpr float GRIPPER_OPEN_ANGLE_DEGREES =
+    gongchuang::config::gripper::OPEN_ANGLE_DEGREES;
+constexpr float GRIPPER_MAX_OPEN_ANGLE_DEGREES =
+    gongchuang::config::gripper::MAX_OPEN_ANGLE_DEGREES;
+constexpr uint16_t GRIPPER_INTERVAL_MS = 60U;
+// Target placement keeps the prior 40 ms release. The three user-selected
+// operations (tray pickup, target pickup, tray release) use the doubled-speed
+// 20 ms command interval.
+constexpr uint16_t GRIPPER_TARGET_PLACE_OPEN_INTERVAL_MS = 40U;
+constexpr uint16_t GRIPPER_DOUBLE_SPEED_INTERVAL_MS = 20U;
 constexpr uint16_t GRIPPER_OPEN_POWER_MW = 0U;
 constexpr uint16_t GRIPPER_CLOSE_POWER_MW = 2000U;
-// 夹爪100 ms角度命令之后的动作衔接等待按原值减半。
-constexpr uint32_t GRIPPER_OPEN_SETTLE_MS = 175UL;
-constexpr uint32_t GRIPPER_CLOSE_SETTLE_MS = 225UL;
-constexpr uint16_t STORAGE_SERVO_INTERVAL_MS = 200U;
-constexpr uint32_t STORAGE_SERVO_SETTLE_MS = 300UL;
-// 上电和底盘行驶保持165°；作业时依次使用-5°、-95°、-185°。
+
+// Opening has no clamping-load uncertainty, so its gate matches the commanded
+// 60 ms motion exactly; the short gripper-to-M7 handoff follows separately.
+constexpr uint32_t GRIPPER_OPEN_SETTLE_MS = 60UL;
+constexpr uint32_t GRIPPER_CLOSE_SETTLE_MS = 120UL;
+constexpr uint32_t GRIPPER_TARGET_PLACE_OPEN_SETTLE_MS = 40UL;
+constexpr uint32_t GRIPPER_TRAY_RELEASE_OPEN_SETTLE_MS = 20UL;
+constexpr uint32_t GRIPPER_TARGET_PICK_CLOSE_SETTLE_MS = 120UL;
+// A 20 ms command asks the servo to move quickly, but the loaded jaw can take
+// longer to reach clamping force. Tray pickup therefore gets a dedicated
+// completion gate before M7 is allowed to reverse.
+constexpr uint32_t GRIPPER_TRAY_PICK_CLOSE_SETTLE_MS = 160UL;
+static_assert(
+    GRIPPER_OPEN_SETTLE_MS >=
+        static_cast<uint32_t>(GRIPPER_INTERVAL_MS),
+    "Normal gripper open gate must cover the full servo command");
+static_assert(
+    GRIPPER_CLOSE_SETTLE_MS >=
+        static_cast<uint32_t>(GRIPPER_INTERVAL_MS),
+    "Normal gripper close gate must cover the full servo command");
+// M7 terminal verification already confirms that the lift has stopped. Keep
+// only a short command handoff in each direction; the separate settle values
+// above cover the actual servo movement and clamping time.
+constexpr uint32_t WORK_M7_TO_GRIPPER_GAP_MS = 10UL;
+constexpr uint32_t WORK_GRIPPER_TO_M7_GAP_MS = 10UL;
+// Target placement is the one requested 50% exception. Pickup from either
+// side and release into the tray retain the common 10 ms handoff.
+constexpr uint32_t WORK_TARGET_PLACE_M7_TO_GRIPPER_GAP_PREVIOUS_MS = 10UL;
+constexpr uint32_t WORK_TARGET_PLACE_M7_TO_GRIPPER_GAP_MS = 5UL;
+constexpr uint32_t WORK_M7_TO_GRIPPER_RESPONSE_LIMIT_MS = 100UL;
+constexpr uint32_t RING_RETURN_STORAGE_COMMAND_DELAY_MS = 500UL;
+static_assert(
+    WORK_M7_TO_GRIPPER_GAP_MS > 0UL &&
+        WORK_GRIPPER_TO_M7_GAP_MS > 0UL &&
+        WORK_M7_TO_GRIPPER_GAP_MS <=
+            WORK_M7_TO_GRIPPER_RESPONSE_LIMIT_MS,
+    "Workstation M7/gripper command handoffs must remain nonzero");
+static_assert(
+    WORK_TARGET_PLACE_M7_TO_GRIPPER_GAP_MS * 2UL ==
+            WORK_TARGET_PLACE_M7_TO_GRIPPER_GAP_PREVIOUS_MS &&
+        WORK_TARGET_PLACE_M7_TO_GRIPPER_GAP_MS <=
+            WORK_M7_TO_GRIPPER_RESPONSE_LIMIT_MS,
+    "Target-place M7-to-gripper handoff must remain 50 percent shorter");
+static_assert(
+    RING_RETURN_STORAGE_COMMAND_DELAY_MS >= 500UL,
+    "Ring-return storage command delay must be at least 500 ms");
+static_assert(
+    GRIPPER_TARGET_PLACE_OPEN_SETTLE_MS >=
+        static_cast<uint32_t>(
+            GRIPPER_TARGET_PLACE_OPEN_INTERVAL_MS),
+    "Target-place open gate must cover the full servo command");
+static_assert(
+    GRIPPER_TRAY_RELEASE_OPEN_SETTLE_MS >=
+        static_cast<uint32_t>(GRIPPER_DOUBLE_SPEED_INTERVAL_MS),
+    "Tray-release open gate must cover the doubled-speed command");
+static_assert(
+    GRIPPER_TARGET_PICK_CLOSE_SETTLE_MS >=
+        static_cast<uint32_t>(GRIPPER_DOUBLE_SPEED_INTERVAL_MS) &&
+        GRIPPER_TRAY_PICK_CLOSE_SETTLE_MS >=
+            static_cast<uint32_t>(GRIPPER_DOUBLE_SPEED_INTERVAL_MS),
+    "Pickup close gates must cover the doubled-speed command");
+// 30% lower turntable speed means 1 / 0.7 times the former 286 ms duration.
+constexpr uint16_t STORAGE_SERVO_INTERVAL_MS = 409U;
+constexpr uint32_t STORAGE_SERVO_SETTLE_MS = 510UL;
+static_assert(
+    STORAGE_SERVO_SETTLE_MS >=
+        static_cast<uint32_t>(STORAGE_SERVO_INTERVAL_MS) + 100UL,
+    "Storage servo settle gate must retain at least 100 ms margin");
+
 constexpr float STORAGE_SERVO_PARK_ANGLE_DEGREES = 165.0f;
 constexpr float STORAGE_SERVO_WORK_ZERO_ANGLE_DEGREES = -5.0f;
 constexpr float STORAGE_SERVO_CLOCKWISE_STEP_DEGREES = -90.0f;
@@ -382,25 +467,39 @@ constexpr float STORAGE_SERVO_POSITIONS_DEGREES[4] = {
         2.0f * STORAGE_SERVO_CLOCKWISE_STEP_DEGREES,
     STORAGE_SERVO_WORK_ZERO_ANGLE_DEGREES};
 
-constexpr uint8_t MAIXCAM_STOP_REQUEST = 0x00;
-constexpr uint8_t MAIXCAM_ALL_COLORS_REQUEST = 0x08;
-constexpr uint8_t MAIXCAM_HOUGH_CIRCLE_REQUEST = 0x09;
-// 模式10只在机械臂已移动到1号或3号名义搜索位后寻找唯一主外环。
-// 圆号由STM32当前扫描阶段赋予，不依赖圆内印刷数字。
-constexpr uint8_t MAIXCAM_ENDPOINT_CIRCLE_REQUEST = 0x0A;
-constexpr uint32_t MAIXCAM_REQUEST_REPEAT_MS = 1000UL;
-constexpr uint32_t MAIXCAM_MODE_SWITCH_GUARD_MS = 100UL;
-constexpr uint32_t MAIXCAM_COORDINATE_STALE_MS = 1500UL;
-constexpr size_t MAIXCAM_LINE_CAPACITY = 96U;
-constexpr int16_t IMAGE_CENTER_X = 160;
-constexpr int16_t IMAGE_CENTER_Y = 120;
+constexpr uint8_t MAIXCAM_STOP_REQUEST =
+    gongchuang::MaixCamClient::STOP_REQUEST;
+constexpr uint8_t MAIXCAM_RED_REQUEST =
+    gongchuang::MaixCamClient::RED_REQUEST;
+constexpr uint8_t MAIXCAM_YELLOW_REQUEST =
+    gongchuang::MaixCamClient::YELLOW_REQUEST;
+constexpr uint8_t MAIXCAM_BLUE_REQUEST =
+    gongchuang::MaixCamClient::BLUE_REQUEST;
+constexpr uint8_t MAIXCAM_GREEN_REQUEST =
+    gongchuang::MaixCamClient::GREEN_REQUEST;
+constexpr uint8_t MAIXCAM_ALL_COLORS_REQUEST =
+    gongchuang::MaixCamClient::ALL_COLORS_REQUEST;
+constexpr uint8_t MAIXCAM_HOUGH_CIRCLE_REQUEST =
+    gongchuang::MaixCamClient::HOUGH_CIRCLE_REQUEST;
+
+constexpr uint8_t MAIXCAM_ENDPOINT_CIRCLE_REQUEST =
+    gongchuang::MaixCamClient::ENDPOINT_CIRCLE_REQUEST;
+constexpr int16_t IMAGE_CENTER_X =
+    gongchuang::config::vision_link::IMAGE_CENTER_X;
+constexpr int16_t IMAGE_CENTER_Y =
+    gongchuang::config::vision_link::IMAGE_CENTER_Y;
 constexpr int16_t IMAGE_MAX_X = 319;
 constexpr int16_t IMAGE_MAX_Y = 239;
 constexpr float PIXEL_MAPPING_SWITCH_RADIUS_PIXELS = 50.0f;
 constexpr float RAW_NEAR_MM_PER_PIXEL = 40.0f / 72.0f;
 constexpr float RAW_FAR_MM_PER_PIXEL = 70.0f / 72.0f;
-// 实测圆环：实线外径85 mm、实线内径82 mm。
-// 视觉定位采用两条实线的中心线直径83.5 mm，对应实际半径41.75 mm。
+
+constexpr float RAW_VIEW_EXTENSION_MM = 50.0f;
+static_assert(
+    RAW_VIEW_EXTENSION_MM >= M6_STANDARD_EXTENSION_MM &&
+        RAW_VIEW_EXTENSION_MM <= M6_MAXIMUM_EXTENSION_MM,
+    "RAW view extension must stay inside M6 travel");
+
 constexpr float RING_OUTER_DIAMETER_MM = 85.0f;
 constexpr float RING_INNER_DIAMETER_MM = 82.0f;
 constexpr float RING_CENTERLINE_DIAMETER_MM =
@@ -410,14 +509,13 @@ constexpr float RING_PHYSICAL_RADIUS_MM =
     0.5f * RING_CENTERLINE_DIAMETER_MM;
 constexpr float CIRCLE_MM_PER_PIXEL =
     RING_PHYSICAL_RADIUS_MM / 72.0f;
-// 永久实测机械尺寸：M6抵住完全回缩端时，M5转轴到相机光轴为125.74 mm。
+
 constexpr float ARM_PIVOT_TO_CAMERA_FULLY_RETRACTED_MM =
     125.74f;
-// 当前仍假设完全回缩时夹爪中心与相机光轴具有相同径向距离。
+
 constexpr float ARM_PIVOT_TO_GRIPPER_FULLY_RETRACTED_MM =
     125.74f;
-// 后续运动坐标以“物理回缩端前方10 mm”为M6工作零点，所以视觉和夹爪
-// 逆运动学的零伸出基准距离均需加上这10 mm，永久125.74 mm标定未改变。
+
 constexpr float ARM_PIVOT_TO_CAMERA_CENTER_MM =
     ARM_PIVOT_TO_CAMERA_FULLY_RETRACTED_MM +
     M6_STARTUP_WORKING_ZERO_OFFSET_MM;
@@ -433,27 +531,40 @@ constexpr uint16_t RING_ENDPOINT_MINIMUM_RADIUS_PIXELS = 40U;
 constexpr uint16_t RING_ENDPOINT_MAXIMUM_RADIUS_PIXELS = 110U;
 constexpr uint16_t RING_ENDPOINT_MINIMUM_CONFIDENCE = 600U;
 constexpr float RING_ENDPOINT_MAXIMUM_RADIUS_RATIO = 1.50f;
-/*
- * 实测日志中端点最终M5集中在标准坐标约±35°，M6约90～95 mm。第一次
- * 搜索从±20°/90 mm开始；若未命中只看同侧±30°、±10°，不再执行-80°
- * 大范围预置。找到1号后，利用实测1号半径和已知300 mm间距直接高位
- * 横移到3号的-45°视野。粗观察压到6 px内后下降15 mm，最终连续两个
- * 结果在5 px内即可记录，避免在相机噪声平台反复微调。
- */
+
 constexpr float ENDPOINT_COARSE_CENTER_TOLERANCE_PIXELS = 6.0f;
-// 实机日志在5 px附近已进入相机噪声平台；两帧确认后即可接受，避免2 px死磕。
+
 constexpr float ENDPOINT_FINAL_CENTER_TOLERANCE_PIXELS = 5.0f;
 constexpr uint8_t ENDPOINT_FINAL_CENTER_CONFIRMATIONS = 2U;
+// A mode-10 result already represents at least two camera samples collected
+// across the 120 ms endpoint stability window. If that result is both inside
+// the stricter 2 px target and completely stable (confidence 1000), accepting
+// it immediately removes one redundant 120 ms window. Borderline results
+// still require the normal two independent STM32 confirmations below.
+constexpr float ENDPOINT_FAST_ACCEPT_CENTER_TOLERANCE_PIXELS = 2.0f;
+constexpr uint16_t ENDPOINT_FAST_ACCEPT_MINIMUM_CONFIDENCE = 1000U;
+static_assert(
+    ENDPOINT_FAST_ACCEPT_CENTER_TOLERANCE_PIXELS <
+            ENDPOINT_FINAL_CENTER_TOLERANCE_PIXELS &&
+        ENDPOINT_FAST_ACCEPT_MINIMUM_CONFIDENCE >=
+            RING_ENDPOINT_MINIMUM_CONFIDENCE,
+    "Endpoint fast acceptance must be stricter than the normal final gate");
 constexpr uint8_t ENDPOINT_MAXIMUM_SERVO_MOVES_PER_STAGE = 5U;
-// 实测最差一次在fine第5步进入5 px；允许少量coarse修正，但不再让单个
-// 端点粗/细各跑满5次，把PROCESS的65 s预算全部吃掉。
+
 constexpr uint8_t ENDPOINT_MAXIMUM_TOTAL_SERVO_MOVES = 7U;
 constexpr float ENDPOINT_COARSE_SERVO_GAIN = 0.85f;
 constexpr float ENDPOINT_FINE_SERVO_GAIN = 0.55f;
 constexpr float ENDPOINT_COARSE_MAXIMUM_CORRECTION_MM = 25.0f;
 constexpr float ENDPOINT_FINE_MAXIMUM_CORRECTION_MM = 6.0f;
-constexpr uint32_t ENDPOINT_LOCAL_MOVE_SETTLE_MS = 80UL;
-// 实机最终确认：1号圈+30°～+60°；3号圈改为-60°～-30°。
+// Closed-loop endpoint vision cadence: after each M5/M6 correction reaches
+// its verified target, wait at most 20 ms before requesting the next frame.
+constexpr uint32_t ENDPOINT_LOCAL_MOVE_SETTLE_PREVIOUS_MS = 80UL;
+constexpr uint32_t ENDPOINT_LOCAL_MOVE_SETTLE_MS = 20UL;
+static_assert(
+    ENDPOINT_LOCAL_MOVE_SETTLE_MS * 4UL ==
+        ENDPOINT_LOCAL_MOVE_SETTLE_PREVIOUS_MS,
+    "Endpoint re-recognition settle must remain reduced by 75 percent");
+
 constexpr float ENDPOINT_RING1_SEARCH_SEED_ANGLE_DEGREES = 45.0f;
 constexpr float ENDPOINT_RING3_SEARCH_SEED_ANGLE_DEGREES = -45.0f;
 constexpr float ENDPOINT_SEARCH_SEED_EXTENSION_MM = 90.0f;
@@ -471,168 +582,76 @@ constexpr float RING_TARGET_MAXIMUM_ANGLE_DEGREES = 75.0f;
 constexpr float RING_MAP_MAXIMUM_HEADING_DRIFT_DEGREES = 1.0f;
 constexpr float RING_ENDPOINT_MAXIMUM_SCAN_HEADING_DELTA_DEGREES =
     0.75f;
-// 端点闭环仍保留标准坐标-80°～+80°绝对安全包络，但正常搜索只用局部窗口。
+
 constexpr float RING_SCAN_MINIMUM_ANGLE_DEGREES = -80.0f;
 constexpr float RING_SCAN_MAXIMUM_ANGLE_DEGREES = 80.0f;
-/*
- * 相机安装实机标定：
- *   画面+x（向右）对应M5顺时针；
- *   画面+y（向下）对应机械臂向内、M6缩短，因此到“机械臂向外”的
- *   映射符号为-1。
- */
+
 constexpr float IMAGE_Y_TO_ARM_OUTWARD_SIGN = -1.0f;
-/*
- * 标准姿态下机械臂沿车体2、4侧伸出：
- *   画面+x（向右）对应车体3、4侧，故底盘forward为负；
- *   画面纵向先按上面的实机标定换算为“机械臂向外”为正；
- *   机械臂向外对应body-left为负。
- * 若实机图像被镜像，只改这两个符号，不改底盘既有标定参数。
- */
+
 constexpr float IMAGE_X_TO_BODY_FORWARD_SIGN = -1.0f;
 constexpr float IMAGE_Y_TO_BODY_LEFT_SIGN = -1.0f;
 constexpr float CIRCLE_CENTER_TOLERANCE_PIXELS = 3.0f;
-/*
- * 模式9仍要求同一物理圆稳定0.5 s；端点模式10使用120 ms、至少2帧且
- * 坐标/半径跨度不超过2 px的快速反馈。最终是否真正居中由STM32连续两次
- * 2 px门槛确认，运动期间则停止相机请求，避免读取机械臂运动中的旧结果。
- */
+
 constexpr uint32_t CIRCLE_CENTER_STABILITY_MS = 0UL;
 constexpr uint8_t CIRCLE_STABILITY_MINIMUM_SAMPLES = 1U;
 constexpr uint32_t VISION_STABILITY_MAXIMUM_SAMPLE_GAP_MS =
     1200UL;
-constexpr uint8_t RAW_MAIN_CONFIRMATION_SAMPLES = 2U;
-constexpr int16_t RAW_MAIN_CONFIRMATION_MAX_DELTA_PIXELS = 4;
-constexpr uint32_t RAW_MAIN_CONFIRMATION_MAXIMUM_GAP_MS = 2500UL;
 constexpr float MAXIMUM_VISUAL_CORRECTION_MM = 150.0f;
 constexpr float MAXIMUM_ACCUMULATED_VISUAL_CORRECTION_MM = 220.0f;
 constexpr uint8_t MAXIMUM_VISUAL_CORRECTION_MOVES = 6U;
-/*
- * 配套Vision 5模式9优先拟合三圆整体并返回中间2号圆；低头后只完整看到
- * 中间圆时，可使用带中心距离和歧义门槛的受限回退。因此不再通过暂存区
- * 固定-30 mm位移“诱导最近圆”，也不会无条件把画面最近圆当作2号基准。
- */
 
-/*
- * M1～M4 电机安装方向。前进时原始驱动脉冲符号为 [-,+,-,+]。
- * 注意不要混淆两层符号：
- *   运动学“物理轮”[-,+,-,+] = 车体逆时针旋转；
- *   乘安装方向后，逆时针对应的“驱动原始脉冲”是 [+,+,+,+]。
- */
 const WheelDirections MOTOR_DIRECTIONS(-1, +1, -1, +1);
 
-/*
- * 场地与车辆均按毫米建模。以下布局采用规则图1的左下角为原点：
- *
- *                         +Y / 北
- *                原料区（上边中部）
- *                         |
- *   暂存区（左边中部）-- 场地中心 -- 二维码板（右边中部）
- *                         |
- *              粗加工区（下边中部）   启停区2（右下）
- *                                           启停区1位于右上
- *
- * 该示意只说明地点关系，不表示代码具备地图定位或随机点位识别能力。
- */
 constexpr uint16_t FIELD_SIZE_MM = 2400U;
 constexpr uint16_t FIELD_CENTER_MM = FIELD_SIZE_MM / 2U;
 constexpr uint16_t START_ZONE_SIZE_MM = 300U;
 constexpr uint16_t START_ZONE_MIN_X_MM =
-    FIELD_SIZE_MM - START_ZONE_SIZE_MM;                      // 2100
+    FIELD_SIZE_MM - START_ZONE_SIZE_MM;
 constexpr uint16_t START_ZONE_1_MIN_Y_MM =
-    FIELD_SIZE_MM - START_ZONE_SIZE_MM;                      // 2100
+    FIELD_SIZE_MM - START_ZONE_SIZE_MM;
 
-/*
- * PulseMecanumChassis 的 187.5/195/100 mm 是轮心轴距、轮距和轮径，
- * 不是车体外廓。按实车最终确认的初始摆放：
- *   2、4侧朝+X，世界X方向外廓为230 mm；
- *   3、4侧朝-Y，世界Y方向外廓为300 mm。
- */
 constexpr uint16_t CHASSIS_FOOTPRINT_X_MM = 230U;
 constexpr uint16_t CHASSIS_FOOTPRINT_Y_MM = 300U;
 
-/*
- * 当前代码把三个目标都固定为每组三个位置中的中间位置，并把机械臂
- * 目标点设置为距对应场地边界40 mm。
- *
- * 规则/仿真差异（仅记录，不在本次改数值）：
- *   - 规则图3的粗加工区、暂存区台面深150 mm，名义圆心线在深度中线，
- *     即距场地边界约75 mm；
- *   - 三个圆环的数字1、2、3均朝向场地中心；检查机械臂放料位序时，
- *     应从场地中心侧读取编号，不能按车体当前朝向自行重排；
- *   - route-simulator也使用75 mm目标点；
- *   - 本文件继续保留40 mm实调假设，因此车心坐标比仿名义点更靠边35 mm。
- * 原料区是转动圆盘且位置允许随机，40 mm同样只是本代码固定测试假设，
- * 不是规则给出的原料固定坐标。
- *
- * 机械臂中心相对车体几何中心沿2、4侧偏移225 mm。
- */
 constexpr uint16_t RING_BOUNDARY_OFFSET_MM = 40U;
 constexpr uint16_t ARM_CENTER_OFFSET_MM = 225U;
 constexpr uint16_t CHASSIS_HALF_WIDTH_MM =
-    CHASSIS_FOOTPRINT_X_MM / 2U;                             // 115
+    CHASSIS_FOOTPRINT_X_MM / 2U;
 constexpr uint16_t ARM_CENTER_BEYOND_NEAR_WHEEL_MM =
-    ARM_CENTER_OFFSET_MM - CHASSIS_HALF_WIDTH_MM;            // 110
+    ARM_CENTER_OFFSET_MM - CHASSIS_HALF_WIDTH_MM;
 constexpr uint16_t ARM_CENTER_TO_FARTHEST_WHEEL_MM =
-    ARM_CENTER_OFFSET_MM + CHASSIS_HALF_WIDTH_MM;            // 340
+    ARM_CENTER_OFFSET_MM + CHASSIS_HALF_WIDTH_MM;
 static_assert(
     CHASSIS_HALF_WIDTH_MM == 115U &&
         ARM_CENTER_BEYOND_NEAR_WHEEL_MM == 110U &&
         ARM_CENTER_TO_FARTHEST_WHEEL_MM == 340U,
     "225 mm arm offset must be measured from the center of the 230 mm width");
 constexpr uint16_t RAW_RING_CENTER_Y_MM =
-    FIELD_SIZE_MM - RING_BOUNDARY_OFFSET_MM;                 // 2360
+    FIELD_SIZE_MM - RING_BOUNDARY_OFFSET_MM;
 constexpr uint16_t PROCESS_RING_CENTER_Y_MM =
-    RING_BOUNDARY_OFFSET_MM;                                 // 40
+    RING_BOUNDARY_OFFSET_MM;
 constexpr uint16_t STORAGE_RING_CENTER_X_MM =
-    RING_BOUNDARY_OFFSET_MM;                                 // 40
+    RING_BOUNDARY_OFFSET_MM;
 
-/*
- * 规则图把原料区横向位置标在1100~1300 mm范围内，本代码固定取1200 mm，
- * 不会根据现场随机位置自动改X坐标。二维码板也可能随机摆放，但本路径
- * 同样固定在右边中线附近扫码。
- *
- * 两个启停区均已参数化：车体贴各区左边，并分别贴上/下场地边界放置，
- * 设计起点中心为(2215,2250)或(2215,150)。这仍是假定人工摆放正确的
- * 名义坐标，不是上电后的X/Y定位结果。
- */
 static_assert(FIELD_CENTER_MM == 1200U, "Field centerline must be 1200 mm");
 constexpr uint16_t START_CENTER_X_MM =
-    START_ZONE_MIN_X_MM + CHASSIS_FOOTPRINT_X_MM / 2U;       // 2215
+    START_ZONE_MIN_X_MM + CHASSIS_FOOTPRINT_X_MM / 2U;
 constexpr uint16_t START_ZONE_1_CENTER_Y_MM =
-    START_ZONE_1_MIN_Y_MM + CHASSIS_FOOTPRINT_Y_MM / 2U;     // 2250
+    START_ZONE_1_MIN_Y_MM + CHASSIS_FOOTPRINT_Y_MM / 2U;
 constexpr uint16_t START_ZONE_2_CENTER_Y_MM =
-    CHASSIS_FOOTPRINT_Y_MM / 2U;                             // 150
-// 回区时瞄准300×300启停区几何中心，而不是沿用贴边发车的X坐标。
+    CHASSIS_FOOTPRINT_Y_MM / 2U;
+
 constexpr uint16_t FINAL_ZONE_CENTER_X_MM =
-    FIELD_SIZE_MM - START_ZONE_SIZE_MM / 2U;                 // 2250
+    FIELD_SIZE_MM - START_ZONE_SIZE_MM / 2U;
 
-/*
- * 由“目标圆心 - 机械臂中心偏移”反算车体中心。三个工作姿态都让
- * 2、4侧面对工位，所以原料区向北、粗加工区向南、暂存区向西。
- */
 constexpr uint16_t RAW_CENTER_Y_MM =
-    RAW_RING_CENTER_Y_MM - ARM_CENTER_OFFSET_MM;             // 2135
+    RAW_RING_CENTER_Y_MM - ARM_CENTER_OFFSET_MM;
 constexpr uint16_t PROCESS_CENTER_Y_MM =
-    PROCESS_RING_CENTER_Y_MM + ARM_CENTER_OFFSET_MM;         // 265
+    PROCESS_RING_CENTER_Y_MM + ARM_CENTER_OFFSET_MM;
 constexpr uint16_t STORAGE_CENTER_X_MM =
-    STORAGE_RING_CENTER_X_MM + ARM_CENTER_OFFSET_MM;         // 265
+    STORAGE_RING_CENTER_X_MM + ARM_CENTER_OFFSET_MM;
 
-/*
- * 启停区1沿3、4侧向南、启停区2沿1、2侧向北，各走1050 mm到达右边
- * 中部二维码区。规则要求先读取任务码再到原料区；二维码是继续路线的
- * 门控。调试版收到一次完整且校验通过的任务码即锁定，不重复扫码；
- * 扫码点若尚无有效码，会沿进入方向低速前探并按
- * 保存的四轮绝对脉冲原路回位；
- * route[]的起终点仍不变，机械臂按四组任务码建立颜色到容器槽位的映射，
- * 并确定粗加工环位及第二批同色码垛位置。
- *
- * route-simulator仍标注“二维码区不扫码、不停车”，这是旧tmcode1仿真行为，
- * 与本文件的COMMAND_QR_ACTION前探/回位逻辑不同；调试应以本文件为准。
- *
- * 回程仍使用X=2150的安全转弯带；若在起点中心X=2215原地转180°，
- * 230x300 mm车体的外接圆会越过场地右边界约4 mm。
- */
-constexpr uint16_t QR_PASS_CENTER_X_MM = START_CENTER_X_MM;  // 2215
+constexpr uint16_t QR_PASS_CENTER_X_MM = START_CENTER_X_MM;
 constexpr uint16_t RETURN_LANE_X_MM = 2150U;
 
 static_assert(
@@ -649,13 +668,9 @@ static_assert(
     "Storage arm center must hit the middle ring");
 
 constexpr uint16_t WORKSTATION_APPROACH_MM = 150U;
-/*
- * 起步Y方向实车手调只改这一行：
- *   走过头多少毫米就减多少，没走够多少毫米就加多少。
- * QR_PASS_TO_RAW_APPROACH_MM会自动反算，原料区最终坐标不会被带偏。
- */
+
 constexpr uint16_t START_TO_QR_PASS_MM = 1050U;
-constexpr uint16_t QR_PASS_CENTER_Y_MM = FIELD_CENTER_MM;    // 1200
+constexpr uint16_t QR_PASS_CENTER_Y_MM = FIELD_CENTER_MM;
 static_assert(
     START_ZONE_1_CENTER_Y_MM - QR_PASS_CENTER_Y_MM ==
             START_TO_QR_PASS_MM &&
@@ -663,65 +678,227 @@ static_assert(
             START_TO_QR_PASS_MM,
     "Both start zones must be symmetric around the QR row");
 constexpr uint16_t QR_PASS_TO_FIELD_CENTER_X_MM =
-    QR_PASS_CENTER_X_MM - FIELD_CENTER_MM;                   // 1015
+    QR_PASS_CENTER_X_MM - FIELD_CENTER_MM;
 constexpr uint16_t QR_PASS_TO_RAW_APPROACH_MM =
     RAW_CENTER_Y_MM - WORKSTATION_APPROACH_MM -
-    QR_PASS_CENTER_Y_MM;                                     // 785
+    QR_PASS_CENTER_Y_MM;
 static_assert(
     START_TO_QR_PASS_MM >= 1000U &&
         START_TO_QR_PASS_MM <= 1100U,
     "Start-to-QR manual calibration must stay within a safe range");
 constexpr uint16_t CENTER_TO_RAW_MM =
-    RAW_CENTER_Y_MM - FIELD_CENTER_MM;                       // 935
+    RAW_CENTER_Y_MM - FIELD_CENTER_MM;
 constexpr uint16_t RAW_TO_PROCESS_MM =
-    RAW_CENTER_Y_MM - PROCESS_CENTER_Y_MM;                   // 1870
+    RAW_CENTER_Y_MM - PROCESS_CENTER_Y_MM;
 constexpr uint16_t PROCESS_TO_CENTER_MM =
-    FIELD_CENTER_MM - PROCESS_CENTER_Y_MM;                   // 935
+    FIELD_CENTER_MM - PROCESS_CENTER_Y_MM;
 constexpr uint16_t CENTER_TO_STORAGE_MM =
-    FIELD_CENTER_MM - STORAGE_CENTER_X_MM;                   // 935
+    FIELD_CENTER_MM - STORAGE_CENTER_X_MM;
 constexpr uint16_t STORAGE_TO_CENTER_MM =
-    FIELD_CENTER_MM - STORAGE_CENTER_X_MM;                   // 935
+    FIELD_CENTER_MM - STORAGE_CENTER_X_MM;
 constexpr uint16_t CENTER_TO_RETURN_LANE_MM =
-    RETURN_LANE_X_MM - FIELD_CENTER_MM;                      // 950
+    RETURN_LANE_X_MM - FIELD_CENTER_MM;
 constexpr uint16_t RETURN_LANE_TO_FINAL_ZONE_X_MM =
-    FINAL_ZONE_CENTER_X_MM - RETURN_LANE_X_MM;               // 100
-/*
- * 第二批暂存动作点受两轮既有Y补偿影响，开环推算为1110 mm。
- * 两个回区纵移都从这里计算到启停区几何中心；最终仍必须由真实定位/
- * 边线传感器确认，不能把该推算当作实测位姿。
- */
-constexpr uint16_t STORAGE_ROUND2_OPEN_LOOP_Y_MM =
-    FIELD_CENTER_MM - 90U;                                   // 1110
-constexpr uint16_t RETURN_TO_START_ZONE_1_Y_MM =
-    START_ZONE_1_CENTER_Y_MM - STORAGE_ROUND2_OPEN_LOOP_Y_MM; // 1140
-constexpr uint16_t RETURN_TO_START_ZONE_2_Y_MM =
-    STORAGE_ROUND2_OPEN_LOOP_Y_MM - START_ZONE_2_CENTER_Y_MM; // 960
+    FINAL_ZONE_CENTER_X_MM - RETURN_LANE_X_MM;
 
-// 本轮所有底盘直线速度均在修改前的当前值上再提高30%。
-const float MAXIMUM_STEP_RATE = 7150.0f;
-const float CENTRAL_CHANNEL_MAXIMUM_STEP_RATE = 9295.0f;
-// 普通/中央通道等非矫正直线加速度由当前5000减半。
-const float STEP_ACCELERATION = 2500.0f;
-// 底盘粗转和IMU航向纠偏角速度保持不变；仅粗转角加速度由1600减半。
-const float TURN_MAXIMUM_STEP_RATE = 3000.0f;
-const float TURN_STEP_ACCELERATION = 800.0f;
-const float HEADING_CORRECTION_MAXIMUM_STEP_RATE = 1500.0f;
-const float HEADING_CORRECTION_STEP_ACCELERATION = 450.0f;
-const float WORKSTATION_MAXIMUM_STEP_RATE = 2080.0f;
-const float WORKSTATION_STEP_ACCELERATION = 700.0f;
-const float FINAL_MAXIMUM_STEP_RATE = 1040.0f; // 最后进入300×300启停区
-const float FINAL_STEP_ACCELERATION = 400.0f;
-// 扫码区低速前探约104 mm/s，最大只走500 mm。
+constexpr uint16_t STORAGE_ROUND2_OPEN_LOOP_Y_MM =
+    FIELD_CENTER_MM - 90U;
+constexpr uint16_t RETURN_TO_START_ZONE_1_Y_MM =
+    START_ZONE_1_CENTER_Y_MM - STORAGE_ROUND2_OPEN_LOOP_Y_MM;
+constexpr uint16_t RETURN_TO_START_ZONE_2_Y_MM =
+    STORAGE_ROUND2_OPEN_LOOP_Y_MM - START_ZONE_2_CENTER_Y_MM;
+
+constexpr int32_t ROUTE_CHASSIS_LENGTH_MM = 290;
+constexpr int32_t ROUTE_CHASSIS_WIDTH_MM = 234;
+constexpr int32_t DISTANCE_A_MM =
+    1100 - 300 + ROUTE_CHASSIS_LENGTH_MM / 2 + 8;
+constexpr int32_t SCAN_START_TO_POINT_A_MM =
+    900 + ROUTE_CHASSIS_LENGTH_MM / 2 - DISTANCE_A_MM;
+constexpr int32_t MAXIMUM_SCAN_DISTANCE_B_MM = 200;
+constexpr int32_t DISTANCE_C_MM =
+    900 + ROUTE_CHASSIS_WIDTH_MM / 2;
+constexpr int32_t DISTANCE_D_MM =
+    1200 - 85 - ROUTE_CHASSIS_LENGTH_MM / 2 - 20;
+constexpr int32_t DISTANCE_E_MM =
+    DISTANCE_D_MM + 1200 - 150 -
+    ROUTE_CHASSIS_LENGTH_MM / 2 - 20;
+constexpr int32_t DISTANCE_F_MM =
+    1200 - 150 - 40 - ROUTE_CHASSIS_WIDTH_MM / 2;
+constexpr int32_t DISTANCE_G_MM =
+    1200 - 150 - ROUTE_CHASSIS_LENGTH_MM / 2 - 20;
+constexpr int32_t STORAGE_F_TO_SCAN_A_MM =
+    DISTANCE_F_MM + DISTANCE_C_MM;
+constexpr int32_t POINT_A_TO_START_ZONE_MM =
+    1100 - 300 + ROUTE_CHASSIS_LENGTH_MM / 2;
+
+static_assert(DISTANCE_A_MM == 953, "Route distance a must be 953 mm");
+static_assert(
+    SCAN_START_TO_POINT_A_MM == 92,
+    "Scan start to point A must be 92 mm");
+static_assert(DISTANCE_C_MM == 1017, "Route distance c must be 1017 mm");
+static_assert(DISTANCE_D_MM == 950, "Route distance d must be 950 mm");
+static_assert(DISTANCE_E_MM == 1835, "Route distance e must be 1835 mm");
+static_assert(DISTANCE_F_MM == 893, "Route distance f must be 893 mm");
+static_assert(DISTANCE_G_MM == 885, "Route distance g must be 885 mm");
+static_assert(
+    STORAGE_F_TO_SCAN_A_MM == 1910,
+    "Storage F to scan A must be 1910 mm");
+static_assert(
+    POINT_A_TO_START_ZONE_MM == 945,
+    "Point A to start zone must be 945 mm");
+static_assert(
+    SCAN_START_TO_POINT_A_MM < MAXIMUM_SCAN_DISTANCE_B_MM,
+    "The slow scan limit must pass point A");
+
+constexpr float STEP_01_MOTION_SCALE = 1.02f;
+constexpr float STEP_02_MOTION_SCALE = 1.00f;
+constexpr float STEP_03_MOTION_SCALE = 1.00f;
+constexpr float STEP_04_MOTION_SCALE = 1.005f;
+constexpr float STEP_05_MOTION_SCALE = 0.965f;
+constexpr float STEP_06_MOTION_SCALE = 1.00f;
+constexpr float STEP_07_MOTION_SCALE = 0.998f;
+constexpr float STEP_08_MOTION_SCALE = 1.00f;
+constexpr float STEP_09_MOTION_SCALE = 0.993f;
+constexpr float STEP_10_MOTION_SCALE = 0.99f;
+constexpr float STEP_11_MOTION_SCALE = 0.968f;
+constexpr float STEP_12_MOTION_SCALE = 0.97f;
+constexpr float STEP_13_MOTION_SCALE = 1.00f;
+constexpr float STEP_14_MOTION_SCALE = 0.98f;
+constexpr float STEP_15_MOTION_SCALE = 0.995f;
+constexpr float STEP_16_MOTION_SCALE = 1.00f;
+constexpr float STEP_17_MOTION_SCALE = 1.03f;
+constexpr float STEP_18_MOTION_SCALE = 0.99f;
+constexpr float STEP_19_MOTION_SCALE = 0.95f;
+constexpr float STEP_20_MOTION_SCALE = 1.015f;
+constexpr float STEP_21_MOTION_SCALE = 1.077f;
+
+constexpr float STEP_07_LATERAL_MAX_SPEED_SCALE = 0.975f;
+constexpr float STEP_07_LATERAL_ACCELERATION_SCALE = 0.60f;
+constexpr float STEP_15_LATERAL_MAX_SPEED_SCALE = 0.975f;
+constexpr float STEP_15_LATERAL_ACCELERATION_SCALE = 0.60f;
+static_assert(
+    STEP_07_LATERAL_MAX_SPEED_SCALE > 0.0f &&
+        STEP_07_LATERAL_ACCELERATION_SCALE > 0.0f &&
+        STEP_15_LATERAL_MAX_SPEED_SCALE > 0.0f &&
+        STEP_15_LATERAL_ACCELERATION_SCALE > 0.0f,
+    "Step 7/15 anti-slip profile scales must be greater than zero");
+constexpr float ROUTE_LATERAL_ACCELERATION_LIMIT_RELATIVE_TO_LONGITUDINAL =
+    0.50f;
+static_assert(
+    ROUTE_LATERAL_ACCELERATION_LIMIT_RELATIVE_TO_LONGITUDINAL > 0.0f &&
+        ROUTE_LATERAL_ACCELERATION_LIMIT_RELATIVE_TO_LONGITUDINAL <= 1.0f,
+    "Route lateral acceleration limit must be in (0, 1]");
+
+static_assert(
+    STEP_01_MOTION_SCALE > 0.0f &&
+        STEP_02_MOTION_SCALE > 0.0f &&
+        STEP_03_MOTION_SCALE > 0.0f &&
+        STEP_04_MOTION_SCALE > 0.0f &&
+        STEP_05_MOTION_SCALE > 0.0f &&
+        STEP_06_MOTION_SCALE > 0.0f &&
+        STEP_07_MOTION_SCALE > 0.0f &&
+        STEP_08_MOTION_SCALE > 0.0f &&
+        STEP_09_MOTION_SCALE > 0.0f &&
+        STEP_10_MOTION_SCALE > 0.0f &&
+        STEP_11_MOTION_SCALE > 0.0f &&
+        STEP_12_MOTION_SCALE > 0.0f &&
+        STEP_13_MOTION_SCALE > 0.0f &&
+        STEP_14_MOTION_SCALE > 0.0f &&
+        STEP_15_MOTION_SCALE > 0.0f &&
+        STEP_16_MOTION_SCALE > 0.0f &&
+        STEP_17_MOTION_SCALE > 0.0f &&
+        STEP_18_MOTION_SCALE > 0.0f &&
+        STEP_19_MOTION_SCALE > 0.0f &&
+        STEP_20_MOTION_SCALE > 0.0f &&
+        STEP_21_MOTION_SCALE > 0.0f,
+    "Every route step scale must be greater than zero");
+
+constexpr float ROUTE_MOTION_PROFILE_INCREASE_SCALE = 1.50f;
+constexpr float ROUTE_NON_07_15_LINEAR_PROFILE_INCREASE_SCALE = 1.50f;
+constexpr float ROUTE_ADDITIONAL_ANGULAR_MAXIMUM_SPEED_SCALE = 1.50f;
+constexpr float ROUTE_ADDITIONAL_ANGULAR_ACCELERATION_SCALE = 1.50f;
+constexpr float ROUTE_FINAL_ALL_MAXIMUM_SPEED_SCALE = 2.0f / 3.0f;
+constexpr float ROUTE_FINAL_ALL_ACCELERATION_SCALE = 4.00f;
+constexpr float ROUTE_DECELERATION_ACCELERATION_SCALE = 2.0f / 3.0f;
+constexpr float ROUTE_DECELERATION_SWITCH_MARGIN_STEPS = 8.0f;
+constexpr float ROUTE_FAST_MAXIMUM_STEP_RATE =
+    mobile_robot_config::ROUTE_FAST_BASE_MAXIMUM_STEP_RATE *
+    ROUTE_MOTION_PROFILE_INCREASE_SCALE *
+    ROUTE_FINAL_ALL_MAXIMUM_SPEED_SCALE;
+constexpr float ROUTE_FAST_STEP_ACCELERATION =
+    mobile_robot_config::ROUTE_FAST_BASE_STEP_ACCELERATION *
+    ROUTE_MOTION_PROFILE_INCREASE_SCALE *
+    ROUTE_FINAL_ALL_ACCELERATION_SCALE;
+constexpr float ROUTE_SCAN_MAXIMUM_STEP_RATE =
+    mobile_robot_config::ROUTE_SCAN_BASE_MAXIMUM_STEP_RATE *
+    ROUTE_MOTION_PROFILE_INCREASE_SCALE *
+    ROUTE_FINAL_ALL_MAXIMUM_SPEED_SCALE;
+constexpr float ROUTE_SCAN_STEP_ACCELERATION =
+    mobile_robot_config::ROUTE_SCAN_BASE_STEP_ACCELERATION *
+    ROUTE_MOTION_PROFILE_INCREASE_SCALE *
+    ROUTE_FINAL_ALL_ACCELERATION_SCALE;
+constexpr float ROUTE_TURN_MAXIMUM_STEP_RATE =
+    mobile_robot_config::ROUTE_TURN_BASE_MAXIMUM_STEP_RATE *
+    ROUTE_MOTION_PROFILE_INCREASE_SCALE *
+    ROUTE_ADDITIONAL_ANGULAR_MAXIMUM_SPEED_SCALE *
+    ROUTE_FINAL_ALL_MAXIMUM_SPEED_SCALE;
+constexpr float ROUTE_TURN_STEP_ACCELERATION =
+    mobile_robot_config::ROUTE_TURN_BASE_STEP_ACCELERATION *
+    ROUTE_MOTION_PROFILE_INCREASE_SCALE *
+    ROUTE_ADDITIONAL_ANGULAR_ACCELERATION_SCALE *
+    ROUTE_FINAL_ALL_ACCELERATION_SCALE;
+constexpr float ROUTE_HEADING_CORRECTION_MAXIMUM_STEP_RATE =
+    mobile_robot_config::ROUTE_HEADING_BASE_MAXIMUM_STEP_RATE *
+    ROUTE_MOTION_PROFILE_INCREASE_SCALE *
+    ROUTE_ADDITIONAL_ANGULAR_MAXIMUM_SPEED_SCALE *
+    ROUTE_FINAL_ALL_MAXIMUM_SPEED_SCALE;
+constexpr float ROUTE_HEADING_CORRECTION_STEP_ACCELERATION =
+    mobile_robot_config::ROUTE_HEADING_BASE_STEP_ACCELERATION *
+    ROUTE_MOTION_PROFILE_INCREASE_SCALE *
+    ROUTE_ADDITIONAL_ANGULAR_ACCELERATION_SCALE *
+    ROUTE_FINAL_ALL_ACCELERATION_SCALE;
+
+constexpr float ROUTE_TRANSLATION_HEADING_TOLERANCE_DEGREES = 0.25f;
+constexpr float ROUTE_TURN_HEADING_TOLERANCE_DEGREES = 0.15f;
+constexpr float ROUTE_MAXIMUM_HEADING_CORRECTION_DEGREES = 12.0f;
+constexpr float ROUTE_MINIMUM_HEADING_CORRECTION_DEGREES = 0.15f;
+constexpr uint32_t ROUTE_MOTION_TIMEOUT_MS = 30000UL;
+constexpr uint32_t ROUTE_HEADING_LOCK_TIMEOUT_MS = 20000UL;
+constexpr float TURN_IMU_CONTROL_LATENCY_SECONDS = 0.015f;
+constexpr float TURN_PREDICTIVE_BRAKE_MARGIN_DEGREES = 0.10f;
+
+constexpr float MAXIMUM_STEP_RATE =
+    mobile_robot_config::MAXIMUM_STEP_RATE;
+constexpr float CENTRAL_CHANNEL_MAXIMUM_STEP_RATE =
+    mobile_robot_config::CENTRAL_CHANNEL_MAXIMUM_STEP_RATE;
+
+constexpr float STEP_ACCELERATION =
+    mobile_robot_config::STEP_ACCELERATION;
+
+constexpr float TURN_MAXIMUM_STEP_RATE =
+    mobile_robot_config::TURN_MAXIMUM_STEP_RATE;
+constexpr float TURN_STEP_ACCELERATION =
+    mobile_robot_config::TURN_STEP_ACCELERATION;
+constexpr float HEADING_CORRECTION_MAXIMUM_STEP_RATE =
+    mobile_robot_config::HEADING_CORRECTION_MAXIMUM_STEP_RATE;
+constexpr float HEADING_CORRECTION_STEP_ACCELERATION =
+    mobile_robot_config::HEADING_CORRECTION_STEP_ACCELERATION;
+constexpr float WORKSTATION_MAXIMUM_STEP_RATE =
+    mobile_robot_config::WORKSTATION_MAXIMUM_STEP_RATE;
+constexpr float WORKSTATION_STEP_ACCELERATION =
+    mobile_robot_config::WORKSTATION_STEP_ACCELERATION;
+constexpr float FINAL_MAXIMUM_STEP_RATE =
+    mobile_robot_config::FINAL_MAXIMUM_STEP_RATE;
+constexpr float FINAL_STEP_ACCELERATION =
+    mobile_robot_config::FINAL_STEP_ACCELERATION;
+
 constexpr uint16_t QR_SCAN_SWEEP_MAXIMUM_MM = 500U;
-const float QR_SCAN_MAXIMUM_STEP_RATE = 1040.0f;
-const float QR_SCAN_STEP_ACCELERATION = 400.0f;
+constexpr float QR_SCAN_MAXIMUM_STEP_RATE =
+    mobile_robot_config::QR_SCAN_MAXIMUM_STEP_RATE;
+constexpr float QR_SCAN_STEP_ACCELERATION =
+    mobile_robot_config::QR_SCAN_STEP_ACCELERATION;
 const uint16_t MINIMUM_STEP_WIDTH_US = 2U;
 
-/*
- * 非中央通道仍保留原1.1 m分段上限。中央通道允许单段最多2.0 m，
- * 覆盖当前最长的1885 mm同向直线，使原料区到粗加工区的1740/1760 mm
- * 以及最终1885 mm回程均不中途停车；转角处仍按独立路线命令停稳。
- */
 constexpr uint16_t MAX_TRANSLATION_SEGMENT_MM = 1100U;
 constexpr uint16_t CENTRAL_CHANNEL_MAX_TRANSLATION_SEGMENT_MM = 2000U;
 
@@ -739,66 +916,65 @@ const uint32_t WORKSTATION_HEADING_STABLE_TIME_MS = 400UL;
 const uint32_t TURN_HEADING_STABLE_TIME_MS = 500UL;
 const uint32_t FINAL_HEADING_STABLE_TIME_MS = 600UL;
 const uint32_t IMU_POST_MOTION_SETTLE_TIME_MS = 120UL;
+// Vision action gates are deliberately capped at 20 ms. Failure timeouts and
+// camera retransmission periods are not action delays and stay independent.
+constexpr uint32_t VISION_ACTION_DELAY_CAP_MS = 20UL;
+constexpr uint32_t VISION_POST_MOTION_SETTLE_TIME_MS = 20UL;
+constexpr uint32_t VISION_HEADING_STABLE_TIME_MS = 20UL;
+constexpr uint32_t ENDPOINT_PRE_SCAN_POST_MOTION_SETTLE_TIME_MS = 15UL;
+constexpr uint32_t ENDPOINT_PRE_SCAN_HEADING_STABLE_TIME_MS = 20UL;
+static_assert(
+    FIRST_ENDPOINT_M7_SETTLE_MS +
+            ENDPOINT_PRE_SCAN_POST_MOTION_SETTLE_TIME_MS +
+            ENDPOINT_PRE_SCAN_HEADING_STABLE_TIME_MS +
+            ENDPOINT_BASE_TO_EXTENSION_SETTLE_MS ==
+        60UL,
+    "First endpoint software handoff must stay below 100 ms");
+static_assert(
+    gongchuang::config::vision_link::MODE_SWITCH_GUARD_MS <=
+            VISION_ACTION_DELAY_CAP_MS &&
+        ARM_BASE_SETTLE_MS <= VISION_ACTION_DELAY_CAP_MS &&
+        FIRST_ENDPOINT_M7_SETTLE_MS <= VISION_ACTION_DELAY_CAP_MS &&
+        ENDPOINT_BASE_TO_EXTENSION_SETTLE_MS <=
+            VISION_ACTION_DELAY_CAP_MS &&
+        ENDPOINT_LOCAL_MOVE_SETTLE_MS <= VISION_ACTION_DELAY_CAP_MS &&
+        VISION_POST_MOTION_SETTLE_TIME_MS <=
+            VISION_ACTION_DELAY_CAP_MS &&
+        VISION_HEADING_STABLE_TIME_MS <=
+            VISION_ACTION_DELAY_CAP_MS &&
+        ENDPOINT_PRE_SCAN_POST_MOTION_SETTLE_TIME_MS <=
+            VISION_ACTION_DELAY_CAP_MS &&
+        ENDPOINT_PRE_SCAN_HEADING_STABLE_TIME_MS <=
+            VISION_ACTION_DELAY_CAP_MS,
+    "Every deliberate vision action delay must be at most 20 ms");
+
 const uint32_t MOTION_TIMEOUT_MS = 20000UL;
 const uint32_t TURN_TIMEOUT_MS = 16000UL;
-const uint32_t IMU_STALE_TIMEOUT_MS = 600UL;
 const bool ENABLE_MOTION_TIMEOUTS = true;
 constexpr uint8_t MAXIMUM_TURN_CORRECTIONS = 12U;
-constexpr uint32_t QR_SCAN_ACTION_TIMEOUT_MS = 20000UL;
-// 当前扫码器按用户要求单帧锁定；如现场串口干扰明显可改回2。
+
 constexpr uint8_t QR_REQUIRED_MATCHING_FRAMES = 1U;
-// false：任务内哪个未抓颜色先稳定就先抓，并放入该颜色的二维码槽位。
-// true：严格等待二维码颜色顺序；正式赛前按当届规则确认。
-constexpr bool REQUIRE_RAW_PICK_QR_ORDER = false;
+
+constexpr bool REQUIRE_RAW_PICK_QR_ORDER = true;
+static_assert(
+    REQUIRE_RAW_PICK_QR_ORDER,
+    "RAW pickup must remain locked to QR order");
 constexpr uint32_t VISION_RESULT_TIMEOUT_MS = 12000UL;
 constexpr uint8_t VISION_MAXIMUM_RETRIES = 2U;
-constexpr uint32_t RAW_ACTION_TIMEOUT_MS = 45000UL;
+
+constexpr uint32_t RAW_TARGET_REQUEST_REFRESH_MS = 15000UL;
+constexpr uint32_t RAW_ACTION_TIMEOUT_MS = 65000UL;
 constexpr uint32_t PROCESS_ACTION_TIMEOUT_MS = 65000UL;
 constexpr uint32_t STORAGE_ACTION_TIMEOUT_MS = 45000UL;
-constexpr uint32_t MISSION_PROGRESS_TIMEOUT_MS = 45000UL;
-// 调试版关闭整场180秒硬停；正式比赛前改为true。
-constexpr bool ENABLE_COMPETITION_TIME_LIMIT = false;
-constexpr uint32_t COMPETITION_TIME_LIMIT_MS = 180000UL;
-constexpr uint32_t COMPETITION_HARD_STOP_MARGIN_MS = 1500UL;
-static_assert(
-    COMPETITION_HARD_STOP_MARGIN_MS < COMPETITION_TIME_LIMIT_MS,
-    "Competition hard-stop margin must be smaller than the time limit");
+constexpr uint32_t MISSION_PROGRESS_TIMEOUT_MS = 70000UL;
 
-// +1：传感器逆时针角度增加；若以后更换安装方向，可改为 -1。
-const int8_t IMU_COUNTERCLOCKWISE_SIGN = +1;
+constexpr bool ROUGH_PROCESSING_CALIBRATION_MODE =
+    GONGCHUANG_RUN_MODE == 1;
 
-/*
- * “只检查路径”模式：原料区、粗加工区、暂存区动作都只等待750 ms，
- * 不会实际完成规则要求的抓取、随车承载、放置和第二批同色码垛。
- * COMMAND_FINAL_ALIGN也会直接判定完成。因此该模式只能调底盘路线，
- * 不能用来验证完整物流任务。
- */
-const bool PATH_ONLY_TEST = false;
-
-/*
- * src/main.cpp或visionyanyan构建环境把该宏设为1。测试模式跳过扫码和
- * 整场路线，默认料盘槽0/1/2已装料，只做粗加工区1/3端点建图、推算2号
- * 并依次放置，随后停机等待人工测量。正式比赛入口必须把该宏设为0。
- */
-constexpr bool VISION_YANYAN_TEST_MODE =
-    GONGCHUANG_VISION_YANYAN_TEST != 0;
-
-// 恢复二维码接收：到达扫码位置后，必须收到有效任务码才继续路线。
-const bool ENABLE_QR_RECEIVER = true;
-const bool REQUIRE_QR_SUCCESS = true;
-
-// 仅用于环节衔接/路径测试的等待按原值减半。
-const uint32_t QR_TEST_HOLD_MS = 500UL;
-const uint32_t WORKSTATION_TEST_HOLD_MS = 750UL;
-const uint32_t FINAL_HOLD_MS = 1500UL;
-
-// 当前屏幕仍保留 x0 时显示连续航向角；若已删除 x0，可改为 false。
 const bool DISPLAY_YAW_ON_X0 = true;
 const bool DISPLAY_BATTERY_ON_X1 = true;
 const bool SHOW_RESULT_PAGE_ON_FINISH = true;
 
-// true_example uses a 10 kOhm + 1 kOhm divider on PC1 and sends V * 100 to x1.
-// Adjust BATTERY_CALIBRATION_SCALE after comparing x1 with a multimeter.
 const float BATTERY_ADC_REFERENCE_VOLTAGE = 3.3f;
 const float BATTERY_DIVIDER_RATIO = 11.0f;
 const float BATTERY_CALIBRATION_SCALE = 1.0f;
@@ -806,23 +982,14 @@ const float BATTERY_FILTER_ALPHA = 0.10f;
 const uint32_t BATTERY_SAMPLE_INTERVAL_MS = 50UL;
 const uint32_t BATTERY_HMI_INTERVAL_MS = 500UL;
 
-MecanumKinematics geometry =
-    MecanumKinematics::fromMillimeters(
-        WHEELBASE_MM, TRACK_WIDTH_MM, WHEEL_DIAMETER_MM);
+MecanumKinematics &geometry = route_chassis::geometry;
 
-AccelStepper motor1(
-    AccelStepper::DRIVER, M1_STEP_PIN, M1_DIRECTION_PIN);
-AccelStepper motor2(
-    AccelStepper::DRIVER, M2_STEP_PIN, M2_DIRECTION_PIN);
-AccelStepper motor3(
-    AccelStepper::DRIVER, M3_STEP_PIN, M3_DIRECTION_PIN);
-AccelStepper motor4(
-    AccelStepper::DRIVER, M4_STEP_PIN, M4_DIRECTION_PIN);
+AccelStepper &motor1 = route_chassis::motor1;
+AccelStepper &motor2 = route_chassis::motor2;
+AccelStepper &motor3 = route_chassis::motor3;
+AccelStepper &motor4 = route_chassis::motor4;
 ArmMotorController armMotors;
-/*
- * 一次运行结束或急停后禁止再次给M5发运动命令，直到MCU重新上电。
- * 这样可以保留原PB9回调主体，同时避免终点/故障姿态下误触导致扫碰。
- */
+
 bool armBaseMotionLockedUntilReset = false;
 bool armBaseMotionWatchdogActive = false;
 uint32_t armBaseMotionDeadlineMs = 0UL;
@@ -830,9 +997,15 @@ uint32_t armBaseMotionDeadlineMs = 0UL;
 AccelStepper *const motors[4] = {
     &motor1, &motor2, &motor3, &motor4};
 
-// ---------------------------------------------------------------------------
-// HMI
-// ---------------------------------------------------------------------------
+float activeDriveAcceleration = 1.0f;
+float activeDriveDeceleration = 1.0f;
+bool driveDecelerationActive = false;
+bool routeDriveProfileEnabled = false;
+
+bool integratedTurnControlActive = false;
+bool integratedTurnBrakeCommandIssued = false;
+int8_t integratedTurnDirectionSign = 0;
+float activeTurnPulsesPerDegree = 1.0f;
 
 uint32_t lastHmiRefreshMs = 0;
 uint32_t lastBatterySampleMs = 0;
@@ -909,15 +1082,13 @@ void hmiSetRunStatus(const char *status) {
 }
 
 void hmiSetTaskCounts() {
-  // 短期调试记录中最终界面使用 n5=正确抓取数、n6=正确放置数。
+
   hmiSetValue("n5", correctGrabCount);
   hmiSetValue("n6", correctPlacementCount);
 }
 
 void hmiShowTaskCode(const char *taskCode) {
-  // 规则示例完整码：134+123+314+231
-  // t3：134+123+（8字符）
-  // t8：314+231 （7字符）
+
   char firstRow[9] = {0};
   char secondRow[8] = {0};
 
@@ -927,10 +1098,6 @@ void hmiShowTaskCode(const char *taskCode) {
   hmiSetText("t3", firstRow);
   hmiSetText("t8", secondRow);
 }
-
-// ---------------------------------------------------------------------------
-// 二维码
-// ---------------------------------------------------------------------------
 
 const size_t QR_CODE_LENGTH = competition::TASK_CODE_LENGTH;
 const size_t QR_BUFFER_SIZE = 32;
@@ -1034,7 +1201,6 @@ void receiveQrData() {
     const char incomingByte =
         static_cast<char>(SerialQr.read());
 
-    // 同时兼容 CR、LF 和 CRLF 结尾。
     if (incomingByte == '\r' || incomingByte == '\n') {
       finishQrFrame();
       continue;
@@ -1048,116 +1214,21 @@ void receiveQrData() {
   }
 }
 
-// ---------------------------------------------------------------------------
-// IMU：把 ±180° 原始角展开为连续的“逆时针为正”角度
-// ---------------------------------------------------------------------------
-
-bool imuInitialized = false;
-float imuLastSignedRawDegrees = 0.0f;
-float imuCounterClockwiseDegrees = 0.0f;
-uint32_t lastImuReceiveMs = 0;
-uint8_t imuFrame[11] = {0};
-uint8_t imuFrameIndex = 0;
-
 float wrapDeltaDegrees(float degrees) {
-  while (degrees >= 180.0f) {
-    degrees -= 360.0f;
-  }
-  while (degrees < -180.0f) {
-    degrees += 360.0f;
-  }
-  return degrees;
-}
-
-void updateContinuousImuHeading(int16_t rawYawValue) {
-  const float rawDegrees =
-      static_cast<float>(rawYawValue) /
-      32768.0f * 180.0f;
-  const float counterClockwiseSignedRaw =
-      rawDegrees *
-      static_cast<float>(IMU_COUNTERCLOCKWISE_SIGN);
-
-  lastImuReceiveMs = millis();
-
-  if (!imuInitialized) {
-    imuInitialized = true;
-    imuLastSignedRawDegrees = counterClockwiseSignedRaw;
-    imuCounterClockwiseDegrees = 0.0f;
-    return;
-  }
-
-  /*
-   * 先对相邻帧做相位展开，再累加连续角。不能直接对原始 ±180°
-   * 数值做普通均值或低通，否则 179° 与 -179° 会被错误平均到 0°。
-   */
-  const float continuousDeltaDegrees =
-      wrapDeltaDegrees(
-          counterClockwiseSignedRaw -
-          imuLastSignedRawDegrees);
-  imuCounterClockwiseDegrees +=
-      continuousDeltaDegrees;
-  imuLastSignedRawDegrees =
-      counterClockwiseSignedRaw;
+  return gongchuang::ImuHeadingTracker::
+      wrapDeltaDegrees(degrees);
 }
 
 void receiveImuData() {
-  while (SerialImu.available()) {
-    const uint8_t incomingByte =
-        static_cast<uint8_t>(SerialImu.read());
-    JY901.CopeSerialData(incomingByte);
-
-    /*
-     * JY901 每帧11字节：0x55、类型、8字节数据、校验和。
-     * 只有收到校验正确的0x53角度帧后，才把IMU标记为可用；
-     * 这样不会在半帧或其他类型数据到达时误用初始零值。
-     */
-    if (imuFrameIndex == 0) {
-      if (incomingByte == 0x55) {
-        imuFrame[imuFrameIndex++] = incomingByte;
-      }
-      continue;
-    }
-
-    imuFrame[imuFrameIndex++] = incomingByte;
-
-    if (imuFrameIndex == sizeof(imuFrame)) {
-      uint8_t checksum = 0;
-      for (uint8_t i = 0; i < 10; ++i) {
-        checksum = static_cast<uint8_t>(
-            checksum + imuFrame[i]);
-      }
-
-      if (checksum == imuFrame[10] &&
-          imuFrame[0] == 0x55 &&
-          imuFrame[1] == 0x53) {
-        // JY901 角度帧中 yaw 是第6、7字节的小端 int16_t。
-        const uint16_t yawUnsigned =
-            static_cast<uint16_t>(imuFrame[6]) |
-            (static_cast<uint16_t>(imuFrame[7]) << 8);
-        updateContinuousImuHeading(
-            static_cast<int16_t>(yawUnsigned));
-      }
-
-      // 若坏帧最后一个字节恰好是下一帧帧头，保留该帧头继续同步。
-      if (checksum != imuFrame[10] &&
-          imuFrame[10] == 0x55) {
-        imuFrame[0] = 0x55;
-        imuFrameIndex = 1;
-      } else {
-        imuFrameIndex = 0;
-      }
-    }
-  }
+  /*
+   * PD8/PD9只允许route_chassis解析一次。机械臂/视觉侧直接读取其已经
+   * 校验并展开的连续航向，避免两个接收器争抢同一串口字节。
+   */
 }
 
 bool imuIsFresh() {
-  return imuInitialized &&
-         millis() - lastImuReceiveMs <= IMU_STALE_TIMEOUT_MS;
+  return route_chassis::imuIsFresh();
 }
-
-// ---------------------------------------------------------------------------
-// 运动学位移逆解
-// ---------------------------------------------------------------------------
 
 struct MotorPulses {
   long motor1;
@@ -1204,14 +1275,7 @@ MotorPulses bodyDisplacementToMotorPulses(
     float forwardMeters,
     float leftMeters,
     float counterClockwiseRadians) {
-  /*
-   * MecanumKinematics 是线性模型。把 vx/vy/wz 分别替换成
-   * dx/dy/dHeading，inverse() 的结果就对应各轮转角。
-   *
-   * 纵向与横移分别使用各自的 pulse/m 标定；
-   * 旋转使用 3200 pulse/rev 与实测几何；
-   * 最后再施加 -,+,-,+ 的电机安装方向修正。
-   */
+
   const WheelSpeeds forwardWheelRadians =
       geometry.inverse(
           ChassisVelocity(forwardMeters, 0.0f, 0.0f));
@@ -1258,8 +1322,32 @@ MotorPulses bodyDisplacementToMotorPulses(
       roundedPulseCount(physical4 * MOTOR_DIRECTIONS.rearRight));
 }
 
+float absolutePulseCount(long pulses) {
+  return static_cast<float>(
+      pulses >= 0L ? pulses : -pulses);
+}
+
+float rotationPulsesPerDegree(int8_t directionSign) {
+
+  const float calibrationDegrees =
+      directionSign >= 0 ? 100.0f : -100.0f;
+  const MotorPulses pulses =
+      bodyDisplacementToMotorPulses(
+          0.0f,
+          0.0f,
+          calibrationDegrees * PI_F / 180.0f);
+  const float averageAbsolutePulses =
+      (absolutePulseCount(pulses.motor1) +
+       absolutePulseCount(pulses.motor2) +
+       absolutePulseCount(pulses.motor3) +
+       absolutePulseCount(pulses.motor4)) /
+      4.0f;
+  return averageAbsolutePulses /
+         fabsf(calibrationDegrees);
+}
+
 void startRelativeMotorMove(const MotorPulses &pulses) {
-  // 调试串口可直接确认每段四号轮是否收到了非零目标脉冲。
+
   SerialDebug.print("Pulses M1..M4: ");
   SerialDebug.print(pulses.motor1);
   SerialDebug.print(", ");
@@ -1291,8 +1379,51 @@ bool allMotorsArrived() {
          motor4.distanceToGo() == 0;
 }
 
+void serviceDriveDecelerationProfile() {
+
+  if (!routeDriveProfileEnabled ||
+      integratedTurnControlActive ||
+      driveDecelerationActive ||
+      activeDriveDeceleration <= 0.0f) {
+    return;
+  }
+
+  bool shouldStartDeceleration = false;
+  for (uint8_t i = 0U; i < 4U; ++i) {
+    long remainingSteps = motors[i]->distanceToGo();
+    if (remainingSteps < 0L) {
+      remainingSteps = -remainingSteps;
+    }
+
+    const float currentSpeed = fabsf(motors[i]->speed());
+    if (remainingSteps == 0L || currentSpeed <= 0.0f) {
+      continue;
+    }
+
+    const float stoppingSteps =
+        currentSpeed * currentSpeed /
+        (2.0f * activeDriveDeceleration);
+    if (static_cast<float>(remainingSteps) <=
+        stoppingSteps +
+            ROUTE_DECELERATION_SWITCH_MARGIN_STEPS) {
+      shouldStartDeceleration = true;
+      break;
+    }
+  }
+
+  if (!shouldStartDeceleration) {
+    return;
+  }
+
+  for (uint8_t i = 0U; i < 4U; ++i) {
+    motors[i]->setAcceleration(activeDriveDeceleration);
+  }
+  driveDecelerationActive = true;
+}
+
 void runAllMotors() {
-  // 每个 run() 都必须执行，不能使用短路逻辑连接。
+
+  serviceDriveDecelerationProfile();
   motor1.run();
   motor2.run();
   motor3.run();
@@ -1304,6 +1435,11 @@ void stopAllMotorsImmediately() {
     const long currentPosition = motors[i]->currentPosition();
     motors[i]->setCurrentPosition(currentPosition);
   }
+  driveDecelerationActive = false;
+  routeDriveProfileEnabled = false;
+  integratedTurnControlActive = false;
+  integratedTurnBrakeCommandIssued = false;
+  integratedTurnDirectionSign = 0;
 }
 
 void enableDriveMotors() {
@@ -1334,18 +1470,12 @@ void startArmBaseLibraryDegrees(float libraryDegrees) {
 }
 
 void startArmBaseRotationToDegrees(float oldFrameDegrees) {
-  /*
-   * M5库已按实机恢复为“正角逆时针、负角顺时针”；旧坐标与库坐标
-   * 使用相同符号。旧0°是上电/行驶姿态，旧-90°是标准作业姿态。
-   */
+
   startArmBaseLibraryDegrees(oldFrameDegrees);
 }
 
 void startArmBaseStandardFrameDegrees(float angleDegrees) {
-  /*
-   * 工位机械臂采用“旧-90°=新0°”坐标。
-   * 新坐标正角为逆时针、负角为顺时针。
-   */
+
   const float standardLibraryDegrees =
       static_cast<float>(
           ARM_BASE_STANDARD_OLD_FRAME_DEGREES);
@@ -1385,282 +1515,155 @@ void useArmBaseEndpointTravelMotionProfile() {
 
 void useArmBaseTransferMotionProfile() {
   armMotors.setM5MotionProfile(
-      ARM_BASE_TRANSFER_MAXIMUM_STEP_RATE,
-      ARM_BASE_TRANSFER_STEP_ACCELERATION);
+      arm_config::M5_STANDARD_MAXIMUM_STEP_RATE,
+      arm_config::M5_STANDARD_STEP_ACCELERATION);
+}
+
+void useArmBasePlaceMotionProfile() {
+  armMotors.setM5MotionProfile(
+      arm_config::M5_PLACE_MAXIMUM_STEP_RATE,
+      arm_config::M5_PLACE_STEP_ACCELERATION);
+}
+
+void useArmBaseReturnMotionProfile() {
+  armMotors.setM5MotionProfile(
+      arm_config::M5_RETURN_MAXIMUM_STEP_RATE,
+      arm_config::M5_RETURN_STEP_ACCELERATION);
+}
+
+void useArmBaseLoadedReturnMotionProfile() {
+  armMotors.setM5MotionProfile(
+      arm_config::M5_LOADED_RETURN_MAXIMUM_STEP_RATE,
+      arm_config::M5_LOADED_RETURN_STEP_ACCELERATION);
+}
+
+void useArmBaseRawTransferMotionProfile() {
+  armMotors.setM5MotionProfile(
+      arm_config::M5_RAW_MAXIMUM_STEP_RATE,
+      arm_config::M5_RAW_STEP_ACCELERATION);
 }
 
 void setDriveMotionProfile(float maximumStepRate, float acceleration) {
+
+  routeDriveProfileEnabled = false;
+  driveDecelerationActive = false;
   for (uint8_t i = 0; i < 4; ++i) {
     motors[i]->setMaxSpeed(maximumStepRate);
     motors[i]->setAcceleration(acceleration);
   }
 }
 
-// ---------------------------------------------------------------------------
-// 省赛物流决赛第一阶段：固定两批路线
-// ---------------------------------------------------------------------------
+void setRouteDriveMotionProfile(
+    float maximumStepRate,
+    float acceleration) {
+  activeDriveAcceleration = acceleration;
+  activeDriveDeceleration =
+      acceleration *
+      ROUTE_DECELERATION_ACCELERATION_SCALE;
+  driveDecelerationActive = false;
+  routeDriveProfileEnabled = true;
 
-/*
- * 这里不是根据障碍物或现场点位实时搜索得到的动态路径规划，而是：
- *   固定RouteCommand表 -> 逐条启动 -> 等待完成 -> 推进到下一条。
- *
- * 四种平移命令按车体侧面命名，方向会随车体姿态一起旋转：
- *   SIDE_12：朝1、2侧，运动学forward为正；
- *   SIDE_34：朝3、4侧，运动学forward为负；
- *   SIDE_13：朝1、3侧，运动学left为正；
- *   SIDE_24：朝2、4侧，运动学left为负。
- *
- * 所以下面注释中的东/西/南/北，必须结合执行该命令前的车体朝向理解；
- * 不能把SIDE_24永久等同为某个世界坐标方向。
- */
+  for (uint8_t i = 0U; i < 4U; ++i) {
+    motors[i]->setMaxSpeed(maximumStepRate);
+    motors[i]->setAcceleration(activeDriveAcceleration);
+  }
+}
 
 enum CommandType {
-  COMMAND_ARM_BASE_HOME,
-  COMMAND_MOVE_SIDE_12_MM,
-  COMMAND_MOVE_SIDE_34_MM,
-  COMMAND_MOVE_SIDE_13_MM,
-  COMMAND_MOVE_SIDE_24_MM,
-  COMMAND_TURN_COUNTERCLOCKWISE_DEGREES,
-  COMMAND_TURN_CLOCKWISE_DEGREES,
-  COMMAND_SET_PRECISE_MOTION,
-  COMMAND_QR_ACTION,
+  COMMAND_ZONE_LONGITUDINAL_FAST,
+  COMMAND_SCAN_SLOW,
+  COMMAND_ADJUST_TO_POINT_A,
+  COMMAND_FORWARD_FAST,
+  COMMAND_BACKWARD_FAST,
+  COMMAND_RIGHT_FAST,
+  COMMAND_TURN_COUNTERCLOCKWISE,
+  COMMAND_TURN_CLOCKWISE,
   COMMAND_RAW_ACTION,
   COMMAND_PROCESS_ACTION,
   COMMAND_STORAGE_ACTION,
-  COMMAND_FINAL_ALIGN,
-  COMMAND_HOLD,
   COMMAND_FINISH
 };
 
-enum RouteBinding {
-  ROUTE_BINDING_FIXED,
-  ROUTE_BINDING_START_TO_QR,
-  ROUTE_BINDING_RETURN_TO_START_ROW
-};
-
 struct RouteCommand {
+  uint8_t specificationStep;
   CommandType type;
   int32_t value;
+  float motionScale;
   const char *name;
-  bool preciseArrival;
-  bool centralChannel;
-  RouteBinding binding;
 
   RouteCommand(
+      uint8_t step,
       CommandType commandType,
       int32_t commandValue,
-      const char *commandName,
-      bool precise = false,
-      bool central = false,
-      RouteBinding routeBinding = ROUTE_BINDING_FIXED)
-      : type(commandType),
+      float scale,
+      const char *commandName)
+      : specificationStep(step),
+        type(commandType),
         value(commandValue),
-        name(commandName),
-        preciseArrival(precise),
-        centralChannel(central),
-        binding(routeBinding) {}
+        motionScale(scale),
+        name(commandName) {}
 };
 
-/*
- * 几何设计层的关键工位姿态（单位 mm，角度表示2、4侧朝向）：
- *
- *   启停区1起点：(2215,2250)，启停区2起点：(2215,150)，2、4侧朝东
- *   对应终点：  (2250,2250)/(2250,150)，2、4侧朝西
- *   二维码扫码点：(2215,1200)，2、4侧朝东；有效扫码后继续
- *   原料区：  (1200, 2135)，2、4侧朝北，机械臂中心(1200,2360)
- *   粗加工区：(1200,265)，两轮均由2、4侧朝南进入
- *   暂存区：  ( 265, 1200)，2、4侧朝西
- *
- * 初始世界外廓按X=230、Y=300 mm建模；全部工位横向中心固定为1200 mm，
- * 不再在1100~1300 mm范围内取近似值。机械臂中心目标分别为
- * (1200,2360)、(1200,40)、(40,1200)，均距对应场地边界40 mm。
- * 机械臂中心从车体中心沿2、4侧偏移225 mm。
- *
- * route-simulator的旧tmcode1名义车心是(1200,2100)、(1200,300)、
- * (300,1200)，与这里的2135/265/265不同；仿真只用于理解运动顺序。
- *
- * 更重要的是，route[]中保留了+20、+40、-20、-40、-50等
- * 实车补偿。若从起点严格按现有命令值开环累计，若无打滑，调试推算点为：
- *   扫码点                 (2215,1200)
- *   第1批原料动作点        (1200,2135)
- *   第1批粗加工动作点      (1200, 245)
- *   第1批暂存动作点        ( 265,1130)
- *   第2批原料动作点        (1200,2105)
- *   第2批粗加工动作点      (1200, 215)
- *   第2批暂存动作点        ( 265,1110)
- *   启停区1/2名义终点       (2250,2250)/(2250,150)
- * 这些是“按代码值推算”，不是修改建议，也不是定位传感器测量结果。
- * 因此命令名称中的field center/start zone表示路线意图，未必等于实测坐标。
- *
- * 新车头是3、4侧。第一段向3、4侧移动就是实车“前进”，但在旧运动学
- * 坐标中等价于负 forward，所以路径命令不再使用 forward/backward 命名。
- */
 const RouteCommand route[] = {
-    /*
-     * PB9后机械臂保持上电/发车姿态：M5旧坐标0°，M6安全工作零点、
-     * M7安全工作零点（物理最高点下方10 mm）；
-     * RAW工位直接去相机标定拍摄角；PROCESS/STORAGE直接去1号搜索角。
-     * 工位间只收回M6/M7，M5不再经过额外0°中转。
-     */
-    /*
-     * 规则阶段：从抽签启停区出发，到二维码板读取四组三位任务码。
-     * 启动前双击PB9选择启停区1/2；两区以相反方向各走1050 mm到
-     * 右边中部扫码点(2215,1200)。若尚未收到一次完整有效任务码，
-     * COMMAND_QR_ACTION沿各自进入方向低速前探最多500 mm，锁码后按
-     * 四轮实际脉冲回到该停车点，再继续后续路线。
-     * 若此时IMU尚无有效帧，机械臂保持行驶姿态，底盘停在IMUWAIT。
-     */
-    {COMMAND_MOVE_SIDE_34_MM, START_TO_QR_PASS_MM,
-     "Selected start zone -> QR area direct", false, false,
-     ROUTE_BINDING_START_TO_QR},
-    {COMMAND_QR_ACTION, 0, "Scan QR task code"},
+    {1U, COMMAND_ZONE_LONGITUDINAL_FAST, DISTANCE_A_MM,
+     STEP_01_MOTION_SCALE, "Start zone -> slow QR scan start (a)"},
+    {2U, COMMAND_SCAN_SLOW, MAXIMUM_SCAN_DISTANCE_B_MM,
+     STEP_02_MOTION_SCALE, "Slow scan until QR success, b <= 200"},
+    {3U, COMMAND_ADJUST_TO_POINT_A, SCAN_START_TO_POINT_A_MM,
+     STEP_03_MOTION_SCALE, "Adjust by 92-b to QR midpoint A"},
+    {4U, COMMAND_RIGHT_FAST, DISTANCE_C_MM,
+     STEP_04_MOTION_SCALE, "A -> center B, right c"},
+    {5U, COMMAND_BACKWARD_FAST, DISTANCE_D_MM,
+     STEP_05_MOTION_SCALE, "B -> raw area C, backward d"},
+    {6U, COMMAND_TURN_COUNTERCLOCKWISE, 90,
+     STEP_06_MOTION_SCALE, "At C turn counter-clockwise 90"},
+    {0U, COMMAND_RAW_ACTION, 1, 1.0f, "Raw action round 1 at C"},
+    {7U, COMMAND_RIGHT_FAST, DISTANCE_E_MM,
+     STEP_07_MOTION_SCALE, "C -> rough process D, right e"},
+    {8U, COMMAND_TURN_CLOCKWISE, 180,
+     STEP_08_MOTION_SCALE, "At D turn clockwise 180"},
+    {0U, COMMAND_PROCESS_ACTION, 1, 1.0f,
+     "Verified three-ring process action round 1 at D"},
+    {9U, COMMAND_FORWARD_FAST, DISTANCE_F_MM,
+     STEP_09_MOTION_SCALE, "D -> lower-left E, forward f"},
+    {10U, COMMAND_TURN_CLOCKWISE, 90,
+     STEP_10_MOTION_SCALE, "At E turn clockwise 90"},
+    {11U, COMMAND_FORWARD_FAST, DISTANCE_G_MM,
+     STEP_11_MOTION_SCALE, "E -> temporary storage F, forward g"},
+    {0U, COMMAND_STORAGE_ACTION, 1, 1.0f,
+     "Storage action round 1 at F"},
+    {12U, COMMAND_FORWARD_FAST, DISTANCE_D_MM,
+     STEP_12_MOTION_SCALE, "F -> upper-left G, forward d"},
+    {13U, COMMAND_TURN_CLOCKWISE, 90,
+     STEP_13_MOTION_SCALE, "At G turn clockwise 90"},
+    {14U, COMMAND_FORWARD_FAST, DISTANCE_F_MM,
+     STEP_14_MOTION_SCALE, "G -> raw area C, forward f"},
+    {0U, COMMAND_RAW_ACTION, 2, 1.0f, "Raw action round 2 at C"},
+    {15U, COMMAND_RIGHT_FAST, DISTANCE_E_MM,
+     STEP_15_MOTION_SCALE, "Repeat step 7: C -> D, right e"},
+    {16U, COMMAND_TURN_CLOCKWISE, 180,
+     STEP_16_MOTION_SCALE, "Repeat step 8: at D clockwise 180"},
+    {0U, COMMAND_PROCESS_ACTION, 2, 1.0f,
+     "Verified three-ring process action round 2 at D"},
+    {17U, COMMAND_FORWARD_FAST, DISTANCE_F_MM,
+     STEP_17_MOTION_SCALE, "Repeat step 9: D -> E, forward f"},
+    {18U, COMMAND_TURN_CLOCKWISE, 90,
+     STEP_18_MOTION_SCALE, "Repeat step 10: at E clockwise 90"},
+    {19U, COMMAND_FORWARD_FAST, DISTANCE_G_MM,
+     STEP_19_MOTION_SCALE, "Repeat step 11: E -> F, forward g"},
+    {0U, COMMAND_STORAGE_ACTION, 2, 1.0f,
+     "Storage action round 2 at F"},
+    {20U, COMMAND_RIGHT_FAST, STORAGE_F_TO_SCAN_A_MM,
+     STEP_20_MOTION_SCALE, "F -> QR midpoint A, right f+c"},
+    {21U, COMMAND_ZONE_LONGITUDINAL_FAST, POINT_A_TO_START_ZONE_MM,
+     STEP_21_MOTION_SCALE, "A -> selected start zone"},
+    {0U, COMMAND_FINISH, 0, 1.0f, "Finished"}};
 
-    // -------------------- 第一批三个物料（代码中的第1轮） --------------------
-    /*
-     * 扫码点 -> 原料区：
-     * 先向1、3侧横移到X=1200，再向1、2侧到原料区前；逆时针转90°后，
-     * 2、4侧朝北，最后150 mm低速进入第1批原料动作点(1200,2135)。
-     *
-     * 规则动作含义：按任务码第一组三位颜色顺序，每次抓取1个，并先把
-     * 物料放到机器人载物位置，之后才能抓下一个；不得用手爪夹持跨区运输。
-     * 原料台是每6~10 s旋转一周后随机停止的三工位转盘；
-     * COMMAND_RAW_ACTION以模式8请求同时识别四色；MaixCAM确认某一颜色
-     * 坐标连续0.3 s横、纵跨度各不超过3像素后，只计算一次M5/M6目标；
-     * 载物盘按该颜色在本批二维码序列中的槽位收纳，不移动底盘。
-     */
-    {COMMAND_MOVE_SIDE_13_MM, QR_PASS_TO_FIELD_CENTER_X_MM,
-     "QR area -> raw centerline", false, true},
-    {COMMAND_MOVE_SIDE_12_MM,
-     QR_PASS_TO_RAW_APPROACH_MM,
-     "QR Y=1200 -> raw approach round 1", false, true},
-    {COMMAND_TURN_COUNTERCLOCKWISE_DEGREES, 90,
-     "Face side 2,4 north"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM,
-     "Precise entry to raw round 1", true},
-    {COMMAND_RAW_ACTION, 1, "Raw action round 1"},
-
-    /*
-     * 第1批原料区 -> 粗加工区：
-     * 向1、3侧长距离南移；该1740 mm中央通道直线现在一段直达，
-     * 仅在终点IMU回正。随后逆时针180°，让2、4侧朝南，最后150 mm低速进入。
-     * 当前+20 mm为已有实调补偿，按命令累计动作点约为(1200,245)。
-     *
-     * 规则动作含义：把第一批三个物料按任务码第二组三位指定的1/2/3号
-     * 圆环位置放到粗加工区；随后还要按任务码顺序重新抓回车上。
-     * COMMAND_PROCESS_ACTION同时代表“放下3个并重新抓回3个”的接口。
-     */
-    {COMMAND_MOVE_SIDE_13_MM,
-     RAW_TO_PROCESS_MM - WORKSTATION_APPROACH_MM + 20U,
-     "Raw -> process approach round 1", false, true},
-    {COMMAND_TURN_COUNTERCLOCKWISE_DEGREES, 180,
-     "Face side 2,4 south"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM,
-     "Precise entry to process round 1", true},
-    {COMMAND_PROCESS_ACTION, 1, "Process action round 1"},
-
-    /*
-     * 第1批粗加工区 -> 暂存区：
-     * 先向1、3侧北移，再向3、4侧西移至工位前；顺时针90°使2、4侧
-     * 朝西，最后150 mm低速进入。受现有-50 mm补偿影响，按命令累计
-     * 暂存动作点约为(265,1130)，不是几何注释中的(265,1200)。
-     *
-     * 规则动作含义：将第一批三个物料按任务码第二组三位规定的位置，
-     * 平面放置到暂存区，为第二批同色码垛留下底层。
-     */
-    {COMMAND_MOVE_SIDE_13_MM, PROCESS_TO_CENTER_MM - 50U,
-     "Process -> field center round 1", false, true},
-    {COMMAND_MOVE_SIDE_34_MM,
-     CENTER_TO_STORAGE_MM - WORKSTATION_APPROACH_MM,
-     "Center -> storage approach round 1", false, true},
-    {COMMAND_TURN_CLOCKWISE_DEGREES, 90,
-     "Face side 2,4 west"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM,
-     "Precise entry to storage round 1", true},
-    {COMMAND_STORAGE_ACTION, 1, "Storage action round 1"},
-
-    // -------------------- 第二批三个物料（代码中的第2轮） --------------------
-    /*
-     * 暂存区 -> 原料区：
-     * 保持2、4侧朝西，先向1、3侧回到X=1200，再向3、4侧北移；
-     * 顺时针90°使2、4侧朝北，最后以150+40 mm进入。+40 mm是现有
-     * 实调补偿，按命令累计第2批原料动作点约为(1200,2105)。
-     *
-     * 规则动作含义：按任务码第三组三位颜色顺序抓取第二批三个物料，
-     * 同样必须逐个放到机器人上后才能跨区运输。
-     */
-    {COMMAND_MOVE_SIDE_13_MM, STORAGE_TO_CENTER_MM,
-     "Storage -> field center round 2", false, true},
-    {COMMAND_MOVE_SIDE_34_MM,
-     CENTER_TO_RAW_MM - WORKSTATION_APPROACH_MM,
-     "Field center -> raw approach round 2", false, true},
-    {COMMAND_TURN_CLOCKWISE_DEGREES, 90,
-     "Face side 2,4 north"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM + 40U,
-     "Precise entry to raw round 2", true},
-    {COMMAND_RAW_ACTION, 2, "Raw action round 2"},
-
-    /*
-     * 第2批原料区 -> 粗加工区：
-     * 长移段+40 mm、精靠段-20 mm均为已有实调补偿；逆时针180°后
-     * 2、4侧朝南，按命令累计粗加工动作点约为(1200,215)。
-     *
-     * 规则动作含义：按任务码第四组三位指定的圆环位置放下第二批，
-     * 再按搬运顺序重新抓回车上，准备送往暂存区。
-     */
-    {COMMAND_MOVE_SIDE_13_MM,
-     RAW_TO_PROCESS_MM - WORKSTATION_APPROACH_MM + 40U,
-     "Raw -> process approach round 2", false, true},
-    {COMMAND_TURN_COUNTERCLOCKWISE_DEGREES, 180,
-     "Face side 2,4 south"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM - 20U,
-     "Precise entry to process round 2", true},
-    {COMMAND_PROCESS_ACTION, 2, "Process action round 2"},
-
-    /*
-     * 第2批粗加工区 -> 暂存区：
-     * 先北移、再西移，顺时针90°让2、4侧朝西后精靠；当前-40 mm
-     * 补偿使按命令累计暂存动作点约为(265,1110)。
-     *
-     * 规则动作含义：第二批只能码垛在第一批已正确放置的同色物料上。
-     * COMMAND_STORAGE_ACTION第2批接口应在实际机械臂完成三次码垛后反馈。
-     */
-    {COMMAND_MOVE_SIDE_13_MM, PROCESS_TO_CENTER_MM - 40U,
-     "Process -> field center round 2", false, true},
-    {COMMAND_MOVE_SIDE_34_MM,
-     CENTER_TO_STORAGE_MM - WORKSTATION_APPROACH_MM,
-     "Center -> storage approach round 2", false, true},
-    {COMMAND_TURN_CLOCKWISE_DEGREES, 90,
-     "Face side 2,4 west"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM,
-     "Precise entry to storage round 2", true},
-    {COMMAND_STORAGE_ACTION, 2, "Storage action round 2"},
-
-    /*
-     * 规则阶段：完成两批后返回启动前锁定的启停区。
-     * 两个启停区共用到X=2150回程通道的路线，仅纵向方向/距离参数化：
-     *   Zone1：向北1140 mm到Y=2250；
-     *   Zone2：向南 960 mm到Y=150。
-     * 最后向东100 mm到启停区几何中心X=2250。旧版终点(2255,2210)
-     * 会让230×300车体下沿伸出Zone1约40 mm，故删除末尾50/40 mm手调尾巴。
-     */
-    {COMMAND_MOVE_SIDE_13_MM,
-     STORAGE_TO_CENTER_MM + CENTER_TO_RETURN_LANE_MM,
-     "Storage -> return lane final direct", false, true},
-    {COMMAND_SET_PRECISE_MOTION, 0,
-     "Set low speed for selected start-zone entry"},
-    {COMMAND_MOVE_SIDE_34_MM, RETURN_TO_START_ZONE_1_Y_MM,
-     "Return lane -> selected start-zone row", true, false,
-     ROUTE_BINDING_RETURN_TO_START_ROW},
-    {COMMAND_MOVE_SIDE_13_MM, RETURN_LANE_TO_FINAL_ZONE_X_MM,
-      "Enter selected start-zone center", true},
-    {COMMAND_FINAL_ALIGN, 0, "Verify final zone footprint"},
-    {COMMAND_HOLD, FINAL_HOLD_MS, "Hold in selected start zone"},
-    {COMMAND_ARM_BASE_HOME, ARM_BASE_HOME_ANGLE_DEGREES,
-     "Keep arm base at travel old 0"},
-    {COMMAND_FINISH, 0, "Finished"}};
-
-const size_t ROUTE_COMMAND_COUNT =
+constexpr size_t ROUTE_COMMAND_COUNT =
     sizeof(route) / sizeof(route[0]);
+static_assert(
+    ROUTE_COMMAND_COUNT == 28U,
+    "Route must contain 21 moves, six work actions and FINISH");
 
 enum ProgramState {
   PROGRAM_WAITING,
@@ -1677,31 +1680,57 @@ enum StartZone {
 enum QrScanPhase {
   QR_SCAN_IDLE,
   QR_SCAN_FORWARD,
+  QR_SCAN_LOCK_AFTER_MOTION,
   QR_SCAN_WAIT_AT_LIMIT,
-  QR_SCAN_RETURNING,
+  QR_SCAN_LOCK_AFTER_CODE,
   QR_SCAN_COMPLETE
 };
 
+enum RouteMotionPhase {
+  ROUTE_MOTION_IDLE,
+  ROUTE_MOTION_COARSE,
+  ROUTE_MOTION_HEADING_LOCK
+};
+
 ProgramState programState = PROGRAM_WAITING;
+
+enum IntegratedWorkPause {
+  INTEGRATED_WORK_NONE,
+  INTEGRATED_WORK_RAW_1,
+  INTEGRATED_WORK_PROCESS_1,
+  INTEGRATED_WORK_STORAGE_1,
+  INTEGRATED_WORK_RAW_2,
+  INTEGRATED_WORK_PROCESS_2,
+  INTEGRATED_WORK_STORAGE_2
+};
+
+IntegratedWorkPause integratedWorkPause = INTEGRATED_WORK_NONE;
+uint32_t integratedWorkPauseStartMs = 0UL;
 StartZone selectedStartZone = START_ZONE_1;
 QrScanPhase qrScanPhase = QR_SCAN_IDLE;
+RouteMotionPhase routeMotionPhase = ROUTE_MOTION_IDLE;
 MotorPulses qrScanOriginMotorPositions;
 uint32_t qrScanActionStartMs = 0UL;
+float scanDistanceBmm = 0.0f;
+float scanCommandedMaximumDistanceMm = 0.0f;
+bool scanOriginValid = false;
 size_t routeIndex = 0;
 RouteCommand activeRouteCommand(
-    COMMAND_FINISH, 0, "Unresolved route command");
+    0U, COMMAND_FINISH, 0, 1.0f,
+    "Unresolved route command");
 uint8_t activeCompetitionRound = 0;
 bool commandStarted = false;
 uint32_t commandStartMs = 0;
-uint32_t competitionStartMs = 0UL;
 uint32_t lastMissionProgressMs = 0UL;
 uint32_t headingStableStartMs = 0;
 uint32_t motorsArrivedStartMs = 0;
+uint32_t routeHeadingLockStartMs = 0UL;
 bool imuWaitStatusDisplayed = false;
 uint16_t translationRemainingMm = 0;
 bool translationCentralChannelEnabled = false;
 bool preciseMotionEnabled = false;
 bool turnMotionEnabled = false;
+bool activeRouteTurnCommand = false;
 bool translationPreciseArrivalEnabled = false;
 bool workstationApproachEnabled = false;
 bool turnCoarseTelemetryPending = false;
@@ -1715,7 +1744,6 @@ float targetCounterClockwiseHeadingDegrees = 0.0f;
 volatile bool startRequested = false;
 volatile bool abortRequested = false;
 
-// 三个工位状态机完成全部真实动作后设置这些完成标志。
 volatile bool rawActionFinished = false;
 volatile bool processActionFinished = false;
 volatile bool storageActionFinished = false;
@@ -1725,47 +1753,27 @@ void resetQrScanActionState() {
   qrScanPhase = QR_SCAN_IDLE;
   qrScanOriginMotorPositions = MotorPulses();
   qrScanActionStartMs = 0UL;
+  scanDistanceBmm = 0.0f;
+  scanCommandedMaximumDistanceMm = 0.0f;
+  scanOriginValid = false;
 }
 
 void markMissionProgress() {
   lastMissionProgressMs = millis();
 }
 
-RouteCommand resolveRouteCommand(const RouteCommand &command) {
-  RouteCommand resolved = command;
-  switch (command.binding) {
-    case ROUTE_BINDING_FIXED:
-      break;
+float selectedStartZoneDirection() {
+  return selectedStartZone == START_ZONE_1 ? 1.0f : -1.0f;
+}
 
-    case ROUTE_BINDING_START_TO_QR:
-      if (selectedStartZone == START_ZONE_2) {
-        // Zone2保持与Zone1相同车体朝向，沿1、2侧倒车向北到二维码行。
-        resolved.type = COMMAND_MOVE_SIDE_12_MM;
-        resolved.name = "Start2 -> QR area direct";
-      } else {
-        resolved.type = COMMAND_MOVE_SIDE_34_MM;
-        resolved.name = "Start1 -> QR area direct";
-      }
-      resolved.value = START_TO_QR_PASS_MM;
-      break;
-
-    case ROUTE_BINDING_RETURN_TO_START_ROW:
-      if (selectedStartZone == START_ZONE_2) {
-        resolved.type = COMMAND_MOVE_SIDE_12_MM;
-        resolved.value = RETURN_TO_START_ZONE_2_Y_MM;
-        resolved.name = "Return lane -> Start2 row";
-      } else {
-        resolved.type = COMMAND_MOVE_SIDE_34_MM;
-        resolved.value = RETURN_TO_START_ZONE_1_Y_MM;
-        resolved.name = "Return lane -> Start1 row";
-      }
-      break;
-  }
-  return resolved;
+bool commandIsTurn(CommandType type) {
+  return type == COMMAND_TURN_COUNTERCLOCKWISE ||
+         type == COMMAND_TURN_CLOCKWISE;
 }
 
 float currentRouteCounterClockwiseHeading() {
-  return imuCounterClockwiseDegrees - routeImuReferenceDegrees;
+  return route_chassis::imuCounterClockwiseDegrees -
+         routeImuReferenceDegrees;
 }
 
 float headingErrorDegrees() {
@@ -1805,6 +1813,10 @@ void printCurrentCommand(const RouteCommand &command) {
   SerialDebug.print(static_cast<unsigned int>(routeIndex + 1));
   SerialDebug.print("/");
   SerialDebug.print(static_cast<unsigned int>(ROUTE_COMMAND_COUNT));
+  SerialDebug.print(", step=");
+  SerialDebug.print(command.specificationStep);
+  SerialDebug.print(", scale=");
+  SerialDebug.print(command.motionScale, 3);
   SerialDebug.print(": ");
   SerialDebug.println(command.name);
 }
@@ -1812,15 +1824,24 @@ void printCurrentCommand(const RouteCommand &command) {
 void emergencyStopArmLinearAxes();
 void stopMaixRequest();
 void invalidateArmLinearReference();
+void finishProgram();
 
 void routeFault(const char *reason) {
   resetQrScanActionState();
   invalidateArmLinearReference();
+  if (route_chassis::programState ==
+      route_chassis::PROGRAM_RUNNING) {
+    route_chassis::routeFault(reason);
+  } else {
+    route_chassis::disableDriveMotors();
+  }
   disableDriveMotors();
   disableArmBaseMotor();
   emergencyStopArmLinearAxes();
   stopMaixRequest();
   programState = PROGRAM_FAULT;
+  routeMotionPhase = ROUTE_MOTION_IDLE;
+  activeRouteTurnCommand = false;
   commandStarted = false;
   hmiSetRunStatus("FAULT");
 
@@ -1831,10 +1852,6 @@ void routeFault(const char *reason) {
       "manually return M6 to the fully retracted stop and M7 to the "
       "physical top before restarting.");
 }
-
-// ---------------------------------------------------------------------------
-// M6/M7串口步进、舵机与MaixCAM非阻塞底层
-// ---------------------------------------------------------------------------
 
 bool deadlineReached(uint32_t deadlineMs) {
   return static_cast<int32_t>(millis() - deadlineMs) >= 0;
@@ -1871,7 +1888,8 @@ enum LinearAxisTerminalVerificationReason : uint8_t {
   ARM_AXIS_VERIFY_HEALTHY_WITHOUT_COMMAND_EVIDENCE = 1U,
   ARM_AXIS_VERIFY_LOCKED_ON_POSITION = 2U,
   ARM_AXIS_VERIFY_REJECTED_ON_POSITION = 3U,
-  ARM_AXIS_VERIFY_EXPECTED_COMPLETION = 4U
+  ARM_AXIS_VERIFY_EXPECTED_COMPLETION = 4U,
+  ARM_AXIS_VERIFY_M7_FAST_ARRIVAL = 5U
 };
 
 struct LinearAxisMotion {
@@ -1912,6 +1930,9 @@ struct LinearAxisMotion {
   bool driverWorkingZeroAngleValid;
   uint32_t startMs;
   uint32_t lastStatusRequestMs;
+  uint8_t lastStatusFlags;
+  uint32_t lastStatusResponseMs;
+  uint32_t lastFastArrivalQueryMs;
   uint32_t timeoutMs;
 
   LinearAxisMotion(uint8_t axisAddress)
@@ -1951,11 +1972,28 @@ struct LinearAxisMotion {
         driverWorkingZeroAngleValid(false),
         startMs(0UL),
         lastStatusRequestMs(0UL),
+        lastStatusFlags(0U),
+        lastStatusResponseMs(0UL),
+        lastFastArrivalQueryMs(0UL),
         timeoutMs(ARM_AXIS_MINIMUM_TIMEOUT_MS) {}
 };
 
 LinearAxisMotion extensionAxis(ARM_EXTENSION_ADDRESS);
 LinearAxisMotion liftAxis(ARM_LIFT_ADDRESS);
+bool m6ContactSoftLandingPending = false;
+float m6ContactSoftLandingTargetMm = M6_STANDARD_EXTENSION_MM;
+float m6ContactSoftLandingMinimumMm = M6_STANDARD_EXTENSION_MM;
+uint16_t m6ContactSoftLandingSpeedRpm = M6_SPEED_RPM;
+uint8_t m6ContactSoftLandingAcceleration =
+    M6_CONTACT_SOFT_LANDING_ACCELERATION;
+bool m7SoftLandingPending = false;
+bool m7SoftLandingIsContact = false;
+float m7SoftLandingTargetMm = M7_STANDARD_HEIGHT_MM;
+float m7SoftLandingDistanceMm =
+    M7_ZERO_SOFT_LANDING_DISTANCE_MM;
+uint16_t m7SoftLandingSpeedRpm = M7_SPEED_RPM;
+uint8_t m7SoftLandingAcceleration =
+    M7_ZERO_SOFT_LANDING_ACCELERATION;
 bool armLinearReferenceValid = false;
 bool armLinearSerialInitialized = false;
 bool manipulationServosOnline = false;
@@ -1964,6 +2002,8 @@ uint8_t armLinearReceiveWindow[8] = {
 uint8_t armLinearReceiveCount = 0U;
 uint8_t armLinearExpectedFrameLength = 0U;
 LinearAxisMotion *armLinearPositionQueryAxis = nullptr;
+uint8_t armLinearStatusPollCursor = 0U;
+uint32_t armLinearNextStatusRequestMs = 0UL;
 
 LinearAxisMotion *linearAxisForAddress(uint8_t address) {
   if (address == extensionAxis.address) {
@@ -1989,10 +2029,7 @@ void writeArmLinearPosition(
     uint16_t speedRpm,
     uint8_t acceleration,
     uint32_t pulses) {
-  /*
-   * EMM V5位置帧：
-   *   byte10=0 相对运动；byte11=0 非多机同步。
-   */
+
   const uint8_t frame[13] = {
       address,
       0xFDU,
@@ -2113,10 +2150,7 @@ bool waitForArmLinearSimpleResponse(
 bool readArmLinearCurrentMotorAngleDegrees(
     uint8_t address,
     float &angleDegrees) {
-  /*
-   * 该阻塞式读取会独占共享串口并清空接收缓存，只允许在两轴都静止时用于
-   * 上电标定或停车后的恢复复测。运行中的终态核对使用下方异步0x36解析器。
-   */
+
   if (extensionAxis.active ||
       liftAxis.active ||
       armLinearPositionQueryAxis != nullptr) {
@@ -2202,6 +2236,23 @@ void resetLinearAxisTerminalVerification(
 }
 
 void markLinearAxisArrived(LinearAxisMotion &axis) {
+  if (axis.address == liftAxis.address) {
+    SerialDebug.print(
+        "[M7 TRACE] start/target/delta/rpm/acc/elapsed-ms=");
+    SerialDebug.print(axis.commandStartMm, 2);
+    SerialDebug.print("/");
+    SerialDebug.print(axis.targetMm, 2);
+    SerialDebug.print("/");
+    SerialDebug.print(
+        axis.targetMm - axis.commandStartMm,
+        2);
+    SerialDebug.print("/");
+    SerialDebug.print(axis.commandSpeedRpm);
+    SerialDebug.print("/");
+    SerialDebug.print(axis.commandAcceleration);
+    SerialDebug.print("/");
+    SerialDebug.println(millis() - axis.startMs);
+  }
   resetLinearAxisTerminalVerification(axis);
   axis.active = false;
   axis.currentMm = axis.targetMm;
@@ -2230,6 +2281,11 @@ void faultLinearAxis(
   axis.recoveryPending = false;
   axis.recoveryReason = ARM_AXIS_RECOVERY_NONE;
   axis.recoveryDeadlineMs = 0UL;
+  if (axis.address == extensionAxis.address) {
+    m6ContactSoftLandingPending = false;
+  } else if (axis.address == liftAxis.address) {
+    m7SoftLandingPending = false;
+  }
   SerialDebug.print("Arm axis M");
   SerialDebug.print(axis.address);
   SerialDebug.print(" fault: ");
@@ -2281,7 +2337,7 @@ bool linearAxisPositionMmFromMotorAngle(
     return true;
   }
   if (axis.address == liftAxis.address) {
-    // M7向下的工作坐标为负，而驱动器该方向的实时角度为正。
+
     positionMm =
         -relativeAngleDegrees *
         M7_TRAVEL_PER_REVOLUTION_MM / 360.0f;
@@ -2354,11 +2410,18 @@ void serviceLinearAxisRecovery(LinearAxisMotion &axis) {
   if (!deadlineReached(axis.recoveryReadyMs)) {
     return;
   }
-  /*
-   * 恢复会执行两次阻塞位置读取。无论故障轴是M6还是M7，只要M5仍在转，
-   * 就先保持恢复挂起，避免阻塞读取饿死M5的STEP脉冲服务。
-   */
+
   if (armMotors.isM5Running()) {
+    return;
+  }
+
+  const LinearAxisMotion &otherAxis =
+      axis.address == extensionAxis.address
+          ? liftAxis
+          : extensionAxis;
+  if (otherAxis.active ||
+      otherAxis.recoveryPending ||
+      armLinearPositionQueryAxis != nullptr) {
     return;
   }
 
@@ -2509,10 +2572,7 @@ void serviceLinearAxisRecovery(LinearAxisMotion &axis) {
   }
   axis.recoveryPending = false;
   axis.recoveryReason = ARM_AXIS_RECOVERY_NONE;
-  /*
-   * recoveryDeadlineMs覆盖“停车、双次实测、清保护、一次降档续跑”的
-   * 整条恢复链。这里进入续跑时不能刷新或清零，成功到位/FAULT才清理。
-   */
+
   if (!startLinearAxisMove(
           axis,
           retryTargetMm,
@@ -2552,6 +2612,13 @@ void requestLinearAxisTerminalVerification(
   axis.terminalFirstPositionMm = 0.0f;
   axis.terminalNextPositionRequestMs = millis();
 
+  // Fast M7 polling runs every 20 ms while approaching the target. Avoid
+  // flooding the debug UART and perturbing the very timing being measured;
+  // only near-target samples and the accepted arrival are printed later.
+  if (reason == ARM_AXIS_VERIFY_M7_FAST_ARRIVAL) {
+    return;
+  }
+
   SerialDebug.print("[EMM VERIFY] t=");
   SerialDebug.print(millis());
   SerialDebug.print(" ms, M");
@@ -2569,6 +2636,9 @@ void requestLinearAxisTerminalVerification(
       break;
     case ARM_AXIS_VERIFY_EXPECTED_COMPLETION:
       SerialDebug.print("expected-completion/no-terminal-frame");
+      break;
+    case ARM_AXIS_VERIFY_M7_FAST_ARRIVAL:
+      SerialDebug.print("M7 encoder fast-arrival");
       break;
     case ARM_AXIS_VERIFY_NONE:
       SerialDebug.print("none");
@@ -2646,6 +2716,11 @@ void handleArmLinearPositionFrame(const uint8_t *frame) {
           angleDegrees,
           measuredPositionMm) ||
       !isfinite(measuredPositionMm)) {
+    if (axis->terminalVerificationReason ==
+        ARM_AXIS_VERIFY_M7_FAST_ARRIVAL) {
+      cancelLinearAxisTerminalVerification(*axis);
+      return;
+    }
     noteLinearAxisTerminalVerificationFailure(
         *axis,
         "invalid encoder position");
@@ -2656,7 +2731,11 @@ void handleArmLinearPositionFrame(const uint8_t *frame) {
     axis->terminalFirstPositionMm = measuredPositionMm;
     axis->terminalPositionSamples = 1U;
     axis->terminalNextPositionRequestMs =
-        millis() + ARM_AXIS_RECOVERY_SAMPLE_SETTLE_MS;
+        millis() +
+        (axis->terminalVerificationReason ==
+                 ARM_AXIS_VERIFY_M7_FAST_ARRIVAL
+             ? M7_FAST_ARRIVAL_SAMPLE_GAP_MS
+             : ARM_AXIS_RECOVERY_SAMPLE_SETTLE_MS);
     return;
   }
 
@@ -2670,35 +2749,74 @@ void handleArmLinearPositionFrame(const uint8_t *frame) {
        axis->terminalFirstPositionMm);
   const float targetErrorMm =
       fabsf(axis->targetMm - averagedPositionMm);
-  const bool stable =
-      stabilityMm <=
-      ARM_AXIS_RECOVERY_POSITION_STABILITY_MM;
-  const bool targetVerified =
-      stable &&
-      targetErrorMm <=
-          ARM_AXIS_TERMINAL_VERIFY_TOLERANCE_MM;
-  const bool protectionLatched =
-      (axis->terminalStatusFlags & 0x08U) != 0U;
   const LinearAxisTerminalVerificationReason
       verificationReason =
           axis->terminalVerificationReason;
+  const bool m7FastArrival =
+      verificationReason ==
+      ARM_AXIS_VERIFY_M7_FAST_ARRIVAL;
+  const bool stable =
+      stabilityMm <=
+      (m7FastArrival
+           ? M7_FAST_ARRIVAL_STABILITY_MM
+           : ARM_AXIS_RECOVERY_POSITION_STABILITY_MM);
+  const bool targetVerified =
+      stable &&
+      targetErrorMm <=
+          (m7FastArrival
+               ? M7_FAST_ARRIVAL_TARGET_TOLERANCE_MM
+               : ARM_AXIS_TERMINAL_VERIFY_TOLERANCE_MM);
+  const bool protectionLatched =
+      (axis->terminalStatusFlags & 0x08U) != 0U;
+  const bool fastStatusFresh =
+      axis->lastStatusResponseMs != 0UL &&
+      millis() - axis->lastStatusResponseMs <=
+          M7_FAST_ARRIVAL_STATUS_FRESH_MS;
+  const bool fastStatusHealthy =
+      fastStatusFresh &&
+      (axis->terminalStatusFlags & 0x01U) != 0U &&
+      !protectionLatched &&
+      !axis->positionCommandRejected &&
+      (axis->commandAcknowledged || axis->motionObserved);
 
-  SerialDebug.print("[EMM VERIFY] M");
-  SerialDebug.print(axis->address);
-  SerialDebug.print(
-      " measured/target/error/stability/flags=");
-  SerialDebug.print(averagedPositionMm, 3);
-  SerialDebug.print("/");
-  SerialDebug.print(axis->targetMm, 3);
-  SerialDebug.print("/");
-  SerialDebug.print(targetErrorMm, 3);
-  SerialDebug.print("/");
-  SerialDebug.print(stabilityMm, 3);
-  SerialDebug.print("/0x");
-  SerialDebug.println(axis->terminalStatusFlags, HEX);
+  if (!m7FastArrival || targetErrorMm <= 2.0f) {
+    SerialDebug.print("[EMM VERIFY] M");
+    SerialDebug.print(axis->address);
+    SerialDebug.print(
+        " measured/target/error/stability/flags=");
+    SerialDebug.print(averagedPositionMm, 3);
+    SerialDebug.print("/");
+    SerialDebug.print(axis->targetMm, 3);
+    SerialDebug.print("/");
+    SerialDebug.print(targetErrorMm, 3);
+    SerialDebug.print("/");
+    SerialDebug.print(stabilityMm, 3);
+    SerialDebug.print("/0x");
+    SerialDebug.println(axis->terminalStatusFlags, HEX);
+  }
 
   axis->terminalVerificationPending = false;
   axis->terminalPositionSamples = 0U;
+  if (m7FastArrival) {
+    if (protectionLatched) {
+      scheduleLinearAxisRecovery(
+          *axis,
+          ARM_AXIS_RECOVERY_STALL);
+      return;
+    }
+    if (targetVerified && fastStatusHealthy) {
+      SerialDebug.print(
+          "[M7 FAST ARRIVAL] encoder stable; bypass delayed driver "
+          "terminal, elapsed/status-age-ms=");
+      SerialDebug.print(millis() - axis->startMs);
+      SerialDebug.print("/");
+      SerialDebug.println(
+          millis() - axis->lastStatusResponseMs);
+      axis->currentMm = axis->targetMm;
+      markLinearAxisArrived(*axis);
+    }
+    return;
+  }
   if (!stable) {
     noteLinearAxisTerminalVerificationFailure(
         *axis,
@@ -2707,10 +2825,7 @@ void handleArmLinearPositionFrame(const uint8_t *frame) {
   }
 
   if (protectionLatched) {
-    /*
-     * 0x08是已经锁存的堵转保护，任何编码器结果都不能覆盖它。正常逻辑
-     * 不会为0x0B/0x0F发起核对；这里保留防御性处理。
-     */
+
     if (!armLinearReferenceValid) {
       faultLinearAxis(
           *axis,
@@ -2747,12 +2862,6 @@ void handleArmLinearPositionFrame(const uint8_t *frame) {
     return;
   }
 
-  /*
-   * 0x03无ACK/运动证据可能只是命令刚发出时遗留的旧到位状态；0x07也可能
-   * 是到位瞬间locked位短暂滞留。编码器尚未到目标时不立即停车，允许第二次
-   * 核对，随后恢复普通3A/原运动deadline。这样不会把一次旧状态扩大成恢复，
-   * 也不会借编码器读数延长轴超时。
-   */
   noteLinearAxisTerminalVerificationFailure(
       *axis,
       verificationReason ==
@@ -2775,9 +2884,14 @@ void serviceLinearAxisTerminalVerification(
   if (axis.terminalPositionRequestSent) {
     if (deadlineReached(
             axis.terminalPositionRequestDeadlineMs)) {
-      noteLinearAxisTerminalVerificationFailure(
-          axis,
-          "encoder response timeout");
+      if (axis.terminalVerificationReason ==
+          ARM_AXIS_VERIFY_M7_FAST_ARRIVAL) {
+        cancelLinearAxisTerminalVerification(axis);
+      } else {
+        noteLinearAxisTerminalVerificationFailure(
+            axis,
+            "encoder response timeout");
+      }
     }
     return;
   }
@@ -2802,7 +2916,11 @@ void serviceLinearAxisTerminalVerification(
   armLinearPositionQueryAxis = &axis;
   axis.terminalPositionRequestSent = true;
   axis.terminalPositionRequestDeadlineMs =
-      nowMs + ARM_LINEAR_POSITION_READ_TIMEOUT_MS;
+      nowMs +
+      (axis.terminalVerificationReason ==
+               ARM_AXIS_VERIFY_M7_FAST_ARRIVAL
+           ? M7_FAST_ARRIVAL_RESPONSE_TIMEOUT_MS
+           : ARM_LINEAR_POSITION_READ_TIMEOUT_MS);
   writeArmLinearCurrentPositionRequest(axis.address);
   SerialArmLinear.flush();
 }
@@ -2845,11 +2963,7 @@ bool consumeArmLinearEnableResponse(
       } else {
         printArmLinearFrame(
             "enable condition not met", window);
-        /*
-         * 不在这里自动清堵转，也不把F3 E2直接当作路线故障：
-         * 某些固件对“已经使能”重复使能也可能返回条件不满足。继续发送
-         * FD，随后由FD结果和3A状态位安全地决定是否停止。
-         */
+
       }
     } else if (
         window[0] == axis.address &&
@@ -2869,20 +2983,14 @@ bool consumeArmLinearEnableResponse(
         millis() - waitStartMs >= additionalWaitMs) {
       break;
     }
-    /*
-     * M5使用软件STEP/DIR，不能在等待EMM应答时停服30~70 ms。
-     * 保持高频run()，使M5可与当前线性轴平滑重叠。
-     */
+
     armMotors.serviceM5();
   }
 
   armLinearReceiveCount = 0U;
   armLinearExpectedFrameLength = 0U;
   if (!enableResponseSeen) {
-    /*
-     * 某些驱动器可配置为不立即回复控制命令；继续发送FD，让FD ACK或
-     * 后续3A状态决定成败，但把缺少F3应答明确留在调试串口中。
-     */
+
     SerialDebug.print("[EMM ENABLE] t=");
     SerialDebug.print(millis());
     SerialDebug.print(" ms, M");
@@ -2899,11 +3007,31 @@ void handleArmLinearFrame(const uint8_t *frame) {
 
   LinearAxisMotion *axis =
       linearAxisForAddress(frame[0]);
-  if (axis == nullptr || !axis->active) {
+  if (axis == nullptr) {
+    return;
+  }
+  if (M7_ENCODER_FAST_ARRIVAL_ENABLED &&
+      axis->address == ARM_LIFT_ADDRESS &&
+      frame[1] == 0xFDU &&
+      frame[2] == 0x9FU) {
+    SerialDebug.print(
+        "[M7 DRIVER TERMINAL] t/active=");
+    SerialDebug.print(millis());
+    SerialDebug.print("/");
+    SerialDebug.print(axis->active ? 1 : 0);
+    SerialDebug.println(
+        "; ignored to prevent a delayed old frame completing a new M7 move");
+    return;
+  }
+  if (!axis->active) {
     return;
   }
 
   const uint32_t elapsedMs = millis() - axis->startMs;
+  const uint32_t minimumOnPositionMs =
+      axis->address == ARM_LIFT_ADDRESS
+          ? M7_AXIS_MINIMUM_ON_POSITION_MS
+          : ARM_AXIS_MINIMUM_ON_POSITION_MS;
 
   if (frame[1] == 0x00U && frame[2] == 0xEEU) {
     printArmLinearFrame("wrong command", frame);
@@ -2914,10 +3042,7 @@ void handleArmLinearFrame(const uint8_t *frame) {
   if (frame[1] == 0xFDU && frame[2] == 0xE2U) {
     printArmLinearFrame(
         "position condition not met", frame);
-    /*
-     * FD E2只表示位置命令条件不满足，并不等于堵转。先请求3A分类；
-     * 后续状态机再区分禁用、真实堵转/保护或一次可恢复的命令拒绝。
-     */
+
     resetLinearAxisTerminalVerification(*axis);
     axis->positionCommandRejected = true;
     axis->commandAcknowledged = false;
@@ -2946,6 +3071,8 @@ void handleArmLinearFrame(const uint8_t *frame) {
 
   if (frame[1] == 0x3AU) {
     const uint8_t flags = frame[2];
+    axis->lastStatusFlags = flags;
+    axis->lastStatusResponseMs = millis();
     const bool enabled = (flags & 0x01U) != 0U;
     const bool onPosition = (flags & 0x02U) != 0U;
     const bool locked = (flags & 0x04U) != 0U;
@@ -2957,14 +3084,10 @@ void handleArmLinearFrame(const uint8_t *frame) {
         !locked &&
         !protectionLatched &&
         !axis->positionCommandRejected &&
-        elapsedMs >= ARM_AXIS_MINIMUM_ON_POSITION_MS &&
+        elapsedMs >= minimumOnPositionMs &&
         (axis->commandAcknowledged ||
          axis->motionObserved);
 
-    /*
-     * 普通到位显式排除locked。0x07必须在120 ms后进入双次编码器核对，
-     * 不能再仅凭FD ACK/运动证据放行；门限前也不累计瞬态locked。
-     */
     if (verifiedOnPosition) {
       markLinearAxisArrived(*axis);
       return;
@@ -2973,17 +3096,12 @@ void handleArmLinearFrame(const uint8_t *frame) {
         protectionLatched ||
         (locked &&
          (!onPosition ||
-          elapsedMs >= ARM_AXIS_MINIMUM_ON_POSITION_MS));
+          elapsedMs >= minimumOnPositionMs));
     if ((protectionLatched || (locked && !onPosition)) &&
         axis->terminalVerificationPending) {
       cancelLinearAxisTerminalVerification(*axis);
     }
 
-    /*
-     * locked/protection必须是连续状态。旧逻辑在第1帧就FE停车、再原参数
-     * 续跑，实际完全绕过了“三帧确认”，也会把到位时的瞬态0x04扩大成
-     * 程序主动停机。现在前两帧只观察，任何健康帧都会立即清零。
-     */
     if (stallCandidate) {
       if (axis->stallProtectionSamples < 255U) {
         ++axis->stallProtectionSamples;
@@ -3005,7 +3123,7 @@ void handleArmLinearFrame(const uint8_t *frame) {
           onPosition &&
           !protectionLatched &&
           !axis->positionCommandRejected &&
-          elapsedMs >= ARM_AXIS_MINIMUM_ON_POSITION_MS;
+          elapsedMs >= minimumOnPositionMs;
       if (lockedOnPositionForVerification &&
           !axis->terminalVerificationPending &&
           axis->terminalVerificationFailures <
@@ -3015,10 +3133,7 @@ void handleArmLinearFrame(const uint8_t *frame) {
             flags,
             ARM_AXIS_VERIFY_LOCKED_ON_POSITION);
       }
-      /*
-       * 先让0x36双样本核对完成，再决定0x07是“确已到目标但locked位滞留”
-       * 还是实际堵转。查询期间暂停新的3A，因此不会无限压住三帧确认。
-       */
+
       if (lockedOnPositionForVerification &&
           axis->terminalVerificationPending) {
         return;
@@ -3056,7 +3171,7 @@ void handleArmLinearFrame(const uint8_t *frame) {
       SerialDebug.print(", healthy flags=0x");
       SerialDebug.println(flags, HEX);
       if (onPosition &&
-          elapsedMs >= ARM_AXIS_MINIMUM_ON_POSITION_MS) {
+          elapsedMs >= minimumOnPositionMs) {
         requestLinearAxisTerminalVerification(
             *axis,
             flags,
@@ -3076,17 +3191,13 @@ void handleArmLinearFrame(const uint8_t *frame) {
     }
 
     if (!onPosition) {
-      /*
-       * 只取消本轮查询，保留同一FD命令已经累计的核对失败次数。旧代码
-       * 在每个未到位3A帧上把失败计数清零，700 ms门限早已满足后便会
-       * 每约65 ms重新做两次0x36查询，最终形成日志中的无限刷屏。
-       */
+
       cancelLinearAxisTerminalVerification(*axis);
       axis->motionObserved = true;
       return;
     }
 
-    if (elapsedMs < ARM_AXIS_MINIMUM_ON_POSITION_MS) {
+    if (elapsedMs < minimumOnPositionMs) {
       axis->terminalOnPositionSamples = 0U;
       return;
     }
@@ -3109,7 +3220,6 @@ void handleArmLinearFrame(const uint8_t *frame) {
     return;
   }
 
-  // 部分EMM固件在相对位置运动结束时主动返回 id FD 9F 6B。
   if (frame[1] == 0xFDU &&
       frame[2] == 0x9FU) {
     markLinearAxisArrived(*axis);
@@ -3163,10 +3273,7 @@ void serviceArmLinearAxes() {
                armLinearExpectedFrameLength == 4U) {
       handleArmLinearFrame(armLinearReceiveWindow);
     }
-    /*
-     * 0x36的4字节位置payload中允许出现0x6B；只有收满固定8字节才结束，
-     * 因而不会把数据字节误当帧尾，也不会清掉前后相邻的FD/3A响应。
-     */
+
     armLinearReceiveCount = 0U;
     armLinearExpectedFrameLength = 0U;
   }
@@ -3174,7 +3281,11 @@ void serviceArmLinearAxes() {
   LinearAxisMotion *const axes[2] = {
       &extensionAxis, &liftAxis};
   const uint32_t nowMs = millis();
-  for (uint8_t i = 0U; i < 2U; ++i) {
+  bool statusRequestIssued = false;
+  for (uint8_t offset = 0U; offset < 2U; ++offset) {
+    const uint8_t i =
+        static_cast<uint8_t>(
+            (armLinearStatusPollCursor + offset) % 2U);
     LinearAxisMotion &axis = *axes[i];
     if (axis.recoveryDeadlineMs != 0UL &&
         deadlineReached(axis.recoveryDeadlineMs)) {
@@ -3198,20 +3309,47 @@ void serviceArmLinearAxes() {
       continue;
     }
 
-    /*
-     * 部分EMM短动作只回FD 02，既不回FD 9F，也不可靠回复3A到位帧。
-     * 到达保守的700 ms命令年龄后主动读取两次编码器；位置稳定且距目标
-     * 不超过0.60 mm即可结束，避免像实测日志一样无意义等待满5秒。
-     */
+    const uint32_t expectedCompletionVerifyMs =
+        axis.timeoutMs >
+                ARM_AXIS_EXPECTED_COMPLETION_VERIFY_MARGIN_MS
+            ? axis.timeoutMs -
+                  ARM_AXIS_EXPECTED_COMPLETION_VERIFY_MARGIN_MS
+            : axis.timeoutMs;
     if (!axis.terminalVerificationPending &&
         axis.terminalVerificationFailures <
             ARM_AXIS_TERMINAL_VERIFY_MAX_FAILURES &&
         nowMs - axis.startMs >=
-            ARM_AXIS_EXPECTED_COMPLETION_VERIFY_MS) {
+            expectedCompletionVerifyMs) {
       requestLinearAxisTerminalVerification(
           axis,
           0U,
           ARM_AXIS_VERIFY_EXPECTED_COMPLETION);
+    }
+    const bool m7FastArrivalStatusHealthy =
+        M7_ENCODER_FAST_ARRIVAL_ENABLED &&
+        axis.address == ARM_LIFT_ADDRESS &&
+        armLinearReferenceValid &&
+        axis.driverWorkingZeroAngleValid &&
+        axis.lastStatusResponseMs != 0UL &&
+        nowMs - axis.lastStatusResponseMs <=
+            M7_FAST_ARRIVAL_STATUS_FRESH_MS &&
+        (axis.lastStatusFlags & 0x01U) != 0U &&
+        (axis.lastStatusFlags & 0x08U) == 0U &&
+        !axis.positionCommandRejected &&
+        (axis.commandAcknowledged || axis.motionObserved);
+    if (!axis.terminalVerificationPending &&
+        armLinearPositionQueryAxis == nullptr &&
+        m7FastArrivalStatusHealthy &&
+        nowMs - axis.startMs >=
+            M7_AXIS_MINIMUM_ON_POSITION_MS &&
+        (axis.lastFastArrivalQueryMs == 0UL ||
+         nowMs - axis.lastFastArrivalQueryMs >=
+             M7_FAST_ARRIVAL_QUERY_INTERVAL_MS)) {
+      axis.lastFastArrivalQueryMs = nowMs;
+      requestLinearAxisTerminalVerification(
+          axis,
+          axis.lastStatusFlags,
+          ARM_AXIS_VERIFY_M7_FAST_ARRIVAL);
     }
     serviceLinearAxisTerminalVerification(
         axis,
@@ -3220,10 +3358,104 @@ void serviceArmLinearAxes() {
       continue;
     }
 
-    if (nowMs - axis.lastStatusRequestMs >=
-        ARM_AXIS_STATUS_INTERVAL_MS) {
+    if (!statusRequestIssued &&
+        armLinearPositionQueryAxis == nullptr &&
+        deadlineReached(armLinearNextStatusRequestMs) &&
+        nowMs - axis.lastStatusRequestMs >=
+            (axis.address == ARM_LIFT_ADDRESS
+                 ? M7_AXIS_STATUS_INTERVAL_MS
+                 : ARM_AXIS_STATUS_INTERVAL_MS)) {
       axis.lastStatusRequestMs = nowMs;
       writeArmLinearStatusRequest(axis.address);
+      statusRequestIssued = true;
+      armLinearStatusPollCursor =
+          static_cast<uint8_t>((i + 1U) % 2U);
+      armLinearNextStatusRequestMs = nowMs + 2UL;
+    }
+  }
+
+  if (m6ContactSoftLandingPending &&
+      !extensionAxis.active &&
+      !extensionAxis.recoveryPending) {
+    if (extensionAxis.fault ||
+        programState == PROGRAM_FAULT) {
+      m6ContactSoftLandingPending = false;
+      return;
+    }
+
+    const float finalTargetMm =
+        m6ContactSoftLandingTargetMm;
+    const float finalMinimumMm =
+        m6ContactSoftLandingMinimumMm;
+    const uint16_t finalSpeedRpm =
+        m6ContactSoftLandingSpeedRpm;
+    const uint8_t finalAcceleration =
+        m6ContactSoftLandingAcceleration;
+    m6ContactSoftLandingPending = false;
+    SerialDebug.print(
+        "[M6 CONTACT SOFT] final 2.0 mm, target/rpm/acc=");
+    SerialDebug.print(finalTargetMm, 2);
+    SerialDebug.print("/");
+    SerialDebug.print(finalSpeedRpm);
+    SerialDebug.print("/");
+    SerialDebug.println(finalAcceleration);
+    if (!startLinearAxisMove(
+            extensionAxis,
+            finalTargetMm,
+            finalMinimumMm,
+            M6_MAXIMUM_EXTENSION_MM,
+            M6_PULSES_PER_MM,
+            M6_EXTEND_DIRECTION,
+            M6_RETRACT_DIRECTION,
+            finalSpeedRpm,
+            finalAcceleration) &&
+        programState != PROGRAM_FAULT) {
+      routeFault("M6 contact-soft final segment rejected");
+    }
+  }
+
+  if (m7SoftLandingPending &&
+      !liftAxis.active &&
+      !liftAxis.recoveryPending) {
+    if (liftAxis.fault || programState == PROGRAM_FAULT) {
+      m7SoftLandingPending = false;
+      return;
+    }
+
+    const float finalTargetMm =
+        m7SoftLandingTargetMm;
+    const float finalDistanceMm =
+        m7SoftLandingDistanceMm;
+    const bool contactSegment =
+        m7SoftLandingIsContact;
+    const uint16_t finalSpeedRpm =
+        m7SoftLandingSpeedRpm;
+    const uint8_t finalAcceleration =
+        m7SoftLandingAcceleration;
+    m7SoftLandingPending = false;
+    SerialDebug.print(
+        contactSegment
+            ? "[M7 CONTACT SOFT] final "
+            : "[M7 SOFT ZERO] final ");
+    SerialDebug.print(finalDistanceMm, 1);
+    SerialDebug.print(" mm, target/rpm/acc=");
+    SerialDebug.print(finalTargetMm, 2);
+    SerialDebug.print("/");
+    SerialDebug.print(finalSpeedRpm);
+    SerialDebug.print("/");
+    SerialDebug.println(finalAcceleration);
+    if (!startLinearAxisMove(
+            liftAxis,
+            finalTargetMm,
+            M7_MINIMUM_HEIGHT_MM,
+            M7_STANDARD_HEIGHT_MM,
+            M7_PULSES_PER_MM,
+            M7_RAISE_DIRECTION,
+            M7_LOWER_DIRECTION,
+            finalSpeedRpm,
+            finalAcceleration) &&
+        programState != PROGRAM_FAULT) {
+      routeFault("M7 soft final segment rejected");
     }
   }
 }
@@ -3248,15 +3480,16 @@ bool startLinearAxisMove(
           ? liftAxis
           : extensionAxis;
   if (axis.active ||
+      axis.recoveryPending ||
       otherAxis.active ||
       otherAxis.recoveryPending ||
       armLinearPositionQueryAxis != nullptr) {
     routeFault(
-        "Concurrent M6/M7 command would corrupt shared EMM responses");
+        "Concurrent M6/M7 command rejected on shared EMM serial");
     return false;
   }
   resetLinearAxisTerminalVerification(axis);
-  // 堵转样本只允许在同一条FD命令的连续3A帧内累计。
+
   axis.stallProtectionSamples = 0U;
   axis.positionCommandRejected = false;
   if (!recoveryRetry) {
@@ -3275,6 +3508,15 @@ bool startLinearAxisMove(
     targetMm = minimumMm;
   } else if (targetMm > maximumMm) {
     targetMm = maximumMm;
+  }
+
+  // Apply the experiment at the one shared M7 command boundary so normal,
+  // RAW, endpoint, zeroing, recovery, pickup, placement, and return moves all
+  // use the same policy. M6 is deliberately unchanged.
+  if (axis.address == liftAxis.address) {
+    speedRpm = m7_experiment::doubledSpeedRpm(speedRpm);
+    acceleration =
+        m7_experiment::experimentalAcceleration(acceleration);
   }
 
   const float deltaMm = targetMm - axis.currentMm;
@@ -3306,10 +3548,7 @@ bool startLinearAxisMove(
       axis.address == extensionAxis.address
           ? M6_TRAVEL_PER_REVOLUTION_MM
           : M7_TRAVEL_PER_REVOLUTION_MM;
-  /*
-   * 超时按本轴真实脉冲/毫米反推，不再引用共享细分。这样M6=256、M7=16
-   * 时两轴仍分别得到正确的物理RPM和时间预算。
-   */
+
   const float pulsesPerSecond =
       static_cast<float>(speedRpm) *
       pulsesPerMm *
@@ -3326,18 +3565,10 @@ bool startLinearAxisMove(
   }
   axis.timeoutMs = estimatedMs;
 
-  /*
-   * 与已验证的ArmMotorController时序一致：每次运动前重新使能目标轴，
-   * 等待驱动器处理并回复后再发送位置命令。不能在EMM应答前背靠背发送
-   * 下一条3A查询，否则部分固件会返回FD E2或漏掉命令。
-   */
   clearArmLinearReceiveBuffer();
   writeArmLinearEnable(axis.address, true);
   SerialArmLinear.flush();
-  /*
-   * F3与FD之间仍保留30 ms驱动器保护间隔，但不再用阻塞delay饿死M5。
-   * 这样M7抬升后可以在M5继续转动时安全下发M6收缩命令。
-   */
+
   const uint32_t commandGuardStartMs = millis();
   while (millis() - commandGuardStartMs <
          ARM_AXIS_COMMAND_GUARD_MS) {
@@ -3353,6 +3584,9 @@ bool startLinearAxisMove(
   axis.motionObserved = false;
   axis.startMs = millis();
   axis.lastStatusRequestMs = axis.startMs;
+  axis.lastStatusFlags = 0U;
+  axis.lastStatusResponseMs = 0UL;
+  axis.lastFastArrivalQueryMs = 0UL;
 
   writeArmLinearPosition(
       axis.address,
@@ -3363,11 +3597,6 @@ bool startLinearAxisMove(
       acceleration,
       pulses);
   SerialArmLinear.flush();
-  /*
-   * 第一条3A状态查询由serviceArmLinearAxes在30 ms保护间隔后发送。
-   * 后续只有在收到FD命令ACK、观察过未到位，或收到明确FD 9F到位帧后
-   * 才承认完成，防止命令丢失时把旧的on-position状态误当成本次到位。
-   */
 
   SerialDebug.print("Arm axis M");
   SerialDebug.print(axis.address);
@@ -3403,7 +3632,7 @@ bool startExtensionToMm(float extensionMm) {
 }
 
 bool startMappedRingExtensionToMm(float extensionMm) {
-  // 只由已验证的圆环地图搬运调用；允许2号圈使用-6..0 mm近端工作区。
+
   return startLinearAxisMove(
       extensionAxis,
       extensionMm,
@@ -3432,8 +3661,147 @@ bool startExtensionToMmWithProfile(
       acceleration);
 }
 
-bool startLiftToHeightMm(float heightMm) {
-  // 高度以最高点为0，向上为正、向下为负。
+bool startExtensionToContactMmWithProfile(
+    float extensionMm,
+    float minimumMm,
+    uint16_t speedRpm,
+    uint8_t acceleration) {
+  const float deltaMm =
+      extensionMm - extensionAxis.currentMm;
+  const uint8_t finalAcceleration =
+      acceleration <
+              M6_CONTACT_SOFT_LANDING_ACCELERATION
+          ? acceleration
+          : M6_CONTACT_SOFT_LANDING_ACCELERATION;
+  if (fabsf(deltaMm) <=
+      M6_CONTACT_SOFT_LANDING_DISTANCE_MM +
+          ARM_AXIS_POSITION_TOLERANCE_MM) {
+    SerialDebug.print(
+        "[M6 CONTACT SOFT] direct short final, target/rpm/acc=");
+    SerialDebug.print(extensionMm, 2);
+    SerialDebug.print("/");
+    SerialDebug.print(speedRpm);
+    SerialDebug.print("/");
+    SerialDebug.println(finalAcceleration);
+    return startLinearAxisMove(
+        extensionAxis,
+        extensionMm,
+        minimumMm,
+        M6_MAXIMUM_EXTENSION_MM,
+        M6_PULSES_PER_MM,
+        M6_EXTEND_DIRECTION,
+        M6_RETRACT_DIRECTION,
+        speedRpm,
+        finalAcceleration);
+  }
+
+  const float directionSign =
+      deltaMm > 0.0f ? 1.0f : -1.0f;
+  const float approachMm =
+      extensionMm -
+      directionSign *
+          M6_CONTACT_SOFT_LANDING_DISTANCE_MM;
+  m6ContactSoftLandingPending = true;
+  m6ContactSoftLandingTargetMm = extensionMm;
+  m6ContactSoftLandingMinimumMm = minimumMm;
+  m6ContactSoftLandingSpeedRpm = speedRpm;
+  m6ContactSoftLandingAcceleration =
+      finalAcceleration;
+  SerialDebug.print(
+      "[M6 CONTACT SOFT] fast segment -> ");
+  SerialDebug.print(approachMm, 2);
+  SerialDebug.print(" mm; final ");
+  SerialDebug.print(
+      M6_CONTACT_SOFT_LANDING_DISTANCE_MM,
+      1);
+  SerialDebug.println(" mm low acceleration");
+  if (startLinearAxisMove(
+          extensionAxis,
+          approachMm,
+          minimumMm,
+          M6_MAXIMUM_EXTENSION_MM,
+          M6_PULSES_PER_MM,
+          M6_EXTEND_DIRECTION,
+          M6_RETRACT_DIRECTION,
+          speedRpm,
+          acceleration)) {
+    return true;
+  }
+  m6ContactSoftLandingPending = false;
+  return false;
+}
+
+bool startLiftMoveWithZeroSoftLanding(
+    float heightMm,
+    uint16_t speedRpm,
+    uint8_t acceleration) {
+
+  const bool returningToZero =
+      fabsf(heightMm - M7_STANDARD_HEIGHT_MM) <=
+          ARM_AXIS_POSITION_TOLERANCE_MM &&
+      liftAxis.currentMm <
+          M7_STANDARD_HEIGHT_MM -
+              ARM_AXIS_POSITION_TOLERANCE_MM;
+  if (!returningToZero) {
+    return startLinearAxisMove(
+        liftAxis,
+        heightMm,
+        M7_MINIMUM_HEIGHT_MM,
+        M7_STANDARD_HEIGHT_MM,
+        M7_PULSES_PER_MM,
+        M7_RAISE_DIRECTION,
+        M7_LOWER_DIRECTION,
+        speedRpm,
+        acceleration);
+  }
+
+  const uint16_t finalSpeedRpm =
+      speedRpm < M7_ZERO_SOFT_LANDING_SPEED_RPM
+          ? speedRpm
+          : M7_ZERO_SOFT_LANDING_SPEED_RPM;
+  const uint8_t finalAcceleration =
+      acceleration < M7_ZERO_SOFT_LANDING_ACCELERATION
+          ? acceleration
+          : M7_ZERO_SOFT_LANDING_ACCELERATION;
+  const float softLandingStartMm =
+      M7_STANDARD_HEIGHT_MM -
+      M7_ZERO_SOFT_LANDING_DISTANCE_MM;
+  if (liftAxis.currentMm <
+      softLandingStartMm -
+          ARM_AXIS_POSITION_TOLERANCE_MM) {
+    m7SoftLandingPending = true;
+    m7SoftLandingIsContact = false;
+    m7SoftLandingTargetMm = M7_STANDARD_HEIGHT_MM;
+    m7SoftLandingDistanceMm =
+        M7_ZERO_SOFT_LANDING_DISTANCE_MM;
+    m7SoftLandingSpeedRpm = finalSpeedRpm;
+    m7SoftLandingAcceleration =
+        finalAcceleration;
+    SerialDebug.print(
+        "[M7 SOFT ZERO] fast segment -> ");
+    SerialDebug.print(softLandingStartMm, 1);
+    SerialDebug.println(" mm");
+    if (startLinearAxisMove(
+            liftAxis,
+            softLandingStartMm,
+            M7_MINIMUM_HEIGHT_MM,
+            M7_STANDARD_HEIGHT_MM,
+            M7_PULSES_PER_MM,
+            M7_RAISE_DIRECTION,
+            M7_LOWER_DIRECTION,
+            speedRpm,
+            acceleration)) {
+      return true;
+    }
+    m7SoftLandingPending = false;
+    return false;
+  }
+
+  SerialDebug.print(
+      "[M7 SOFT ZERO] short final segment, rpm/acc=");
+  SerialDebug.print(finalSpeedRpm);
+  SerialDebug.print("/");
+  SerialDebug.println(finalAcceleration);
   return startLinearAxisMove(
       liftAxis,
       heightMm,
@@ -3442,6 +3810,90 @@ bool startLiftToHeightMm(float heightMm) {
       M7_PULSES_PER_MM,
       M7_RAISE_DIRECTION,
       M7_LOWER_DIRECTION,
+      finalSpeedRpm,
+      finalAcceleration);
+}
+
+bool startLiftMoveWithContactSoftLanding(
+    float heightMm,
+    uint16_t speedRpm,
+    uint8_t acceleration) {
+  const float deltaMm =
+      heightMm - liftAxis.currentMm;
+  if (deltaMm >=
+      -ARM_AXIS_POSITION_TOLERANCE_MM) {
+    return startLiftMoveWithZeroSoftLanding(
+        heightMm,
+        speedRpm,
+        acceleration);
+  }
+
+  const uint8_t finalAcceleration =
+      acceleration <
+              M7_CONTACT_SOFT_LANDING_ACCELERATION
+          ? acceleration
+          : M7_CONTACT_SOFT_LANDING_ACCELERATION;
+  if (fabsf(deltaMm) <=
+      M7_CONTACT_SOFT_LANDING_DISTANCE_MM +
+          ARM_AXIS_POSITION_TOLERANCE_MM) {
+    SerialDebug.print(
+        "[M7 CONTACT SOFT] direct short final, target/rpm/acc=");
+    SerialDebug.print(heightMm, 2);
+    SerialDebug.print("/");
+    SerialDebug.print(speedRpm);
+    SerialDebug.print("/");
+    SerialDebug.println(finalAcceleration);
+    return startLinearAxisMove(
+        liftAxis,
+        heightMm,
+        M7_MINIMUM_HEIGHT_MM,
+        M7_STANDARD_HEIGHT_MM,
+        M7_PULSES_PER_MM,
+        M7_RAISE_DIRECTION,
+        M7_LOWER_DIRECTION,
+        speedRpm,
+        finalAcceleration);
+  }
+
+  const float approachHeightMm =
+      heightMm +
+      M7_CONTACT_SOFT_LANDING_DISTANCE_MM;
+  m7SoftLandingPending = true;
+  m7SoftLandingIsContact = true;
+  m7SoftLandingTargetMm = heightMm;
+  m7SoftLandingDistanceMm =
+      M7_CONTACT_SOFT_LANDING_DISTANCE_MM;
+  m7SoftLandingSpeedRpm = speedRpm;
+  m7SoftLandingAcceleration =
+      finalAcceleration;
+  SerialDebug.print(
+      "[M7 CONTACT SOFT] fast segment -> ");
+  SerialDebug.print(approachHeightMm, 2);
+  SerialDebug.print(" mm; final ");
+  SerialDebug.print(
+      M7_CONTACT_SOFT_LANDING_DISTANCE_MM,
+      1);
+  SerialDebug.println(" mm low acceleration");
+  if (startLinearAxisMove(
+          liftAxis,
+          approachHeightMm,
+          M7_MINIMUM_HEIGHT_MM,
+          M7_STANDARD_HEIGHT_MM,
+          M7_PULSES_PER_MM,
+          M7_RAISE_DIRECTION,
+          M7_LOWER_DIRECTION,
+          speedRpm,
+          acceleration)) {
+    return true;
+  }
+  m7SoftLandingPending = false;
+  return false;
+}
+
+bool startLiftToHeightMm(float heightMm) {
+
+  return startLiftMoveWithZeroSoftLanding(
+      heightMm,
       M7_SPEED_RPM,
       M7_ACCELERATION);
 }
@@ -3450,15 +3902,9 @@ bool startLiftToHeightMmWithProfile(
     float heightMm,
     uint16_t speedRpm,
     uint8_t acceleration) {
-  // 只供需要独立速度曲线的短距离M7动作使用。
-  return startLinearAxisMove(
-      liftAxis,
+
+  return startLiftMoveWithZeroSoftLanding(
       heightMm,
-      M7_MINIMUM_HEIGHT_MM,
-      M7_STANDARD_HEIGHT_MM,
-      M7_PULSES_PER_MM,
-      M7_RAISE_DIRECTION,
-      M7_LOWER_DIRECTION,
       speedRpm,
       acceleration);
 }
@@ -3466,13 +3912,15 @@ bool startLiftToHeightMmWithProfile(
 bool extensionMoveFinished() {
   return !extensionAxis.active &&
          !extensionAxis.fault &&
-         !extensionAxis.recoveryPending;
+         !extensionAxis.recoveryPending &&
+         !m6ContactSoftLandingPending;
 }
 
 bool liftMoveFinished() {
   return !liftAxis.active &&
          !liftAxis.fault &&
-         !liftAxis.recoveryPending;
+         !liftAxis.recoveryPending &&
+         !m7SoftLandingPending;
 }
 
 void emergencyStopArmLinearAxes() {
@@ -3492,16 +3940,14 @@ void emergencyStopArmLinearAxes() {
   liftAxis.recoveryAttemptCount = 0U;
   liftAxis.recoveryReason = ARM_AXIS_RECOVERY_NONE;
   liftAxis.recoveryDeadlineMs = 0UL;
+  m6ContactSoftLandingPending = false;
+  m7SoftLandingPending = false;
   armLinearReceiveCount = 0U;
   armLinearExpectedFrameLength = 0U;
 }
 
 void resetArmLinearSoftwareOrigin() {
-  /*
-   * 本机没有M6/M7限位开关寻零：上电前仍需人工确认M6抵住完全回缩端、
-   * M7位于物理最高点。这里先把这两个机械端点当作临时零点；只有M6向外
-   * 10 mm、M7向下10 mm并分别重新标零成功后，参考才允许置真。
-   */
+
   extensionAxis.currentMm = M6_STANDARD_EXTENSION_MM;
   extensionAxis.targetMm = M6_STANDARD_EXTENSION_MM;
   extensionAxis.active = false;
@@ -3534,6 +3980,20 @@ void resetArmLinearSoftwareOrigin() {
   liftAxis.recoveryDeadlineMs = 0UL;
   liftAxis.driverWorkingZeroAngleDegrees = 0.0f;
   liftAxis.driverWorkingZeroAngleValid = false;
+  m6ContactSoftLandingPending = false;
+  m6ContactSoftLandingTargetMm = M6_STANDARD_EXTENSION_MM;
+  m6ContactSoftLandingMinimumMm = M6_STANDARD_EXTENSION_MM;
+  m6ContactSoftLandingSpeedRpm = M6_SPEED_RPM;
+  m6ContactSoftLandingAcceleration =
+      M6_CONTACT_SOFT_LANDING_ACCELERATION;
+  m7SoftLandingPending = false;
+  m7SoftLandingIsContact = false;
+  m7SoftLandingTargetMm = M7_STANDARD_HEIGHT_MM;
+  m7SoftLandingDistanceMm =
+      M7_ZERO_SOFT_LANDING_DISTANCE_MM;
+  m7SoftLandingSpeedRpm = M7_SPEED_RPM;
+  m7SoftLandingAcceleration =
+      M7_ZERO_SOFT_LANDING_ACCELERATION;
   armLinearReferenceValid = false;
   armLinearReceiveCount = 0U;
   armLinearExpectedFrameLength = 0U;
@@ -3685,11 +4145,6 @@ bool establishLinearAxisSafeWorkingZero(
     return false;
   }
 
-  /*
-   * 上电探测期间尚未建立最终工作零，先把机械端点读数作为临时编码器参考。
-   * 这样短动作即使FD 02/FD 9F都丢失，也能由健康3A+异步0x36确认完成；
-   * 随后的角度比例校验仍会独立拒绝方向或细分错误。
-   */
   axis.driverWorkingZeroAngleDegrees =
       angleBeforeDegrees;
   axis.driverWorkingZeroAngleValid = true;
@@ -3742,11 +4197,6 @@ bool establishLinearAxisSafeWorkingZero(
   SerialDebug.print(probeTargetMm, 3);
   SerialDebug.println(" mm");
 
-  /*
-   * 不能直接用10 mm检查细分：代码256而面板仍16时，10 mm命令会先实际
-   * 冲出约160 mm。先用0.5 mm探测，最坏256/8错配也只移动约16 mm；
-   * 编码器比例通过后才补足到10 mm工作零点。
-   */
   if (!startLinearAxisMove(
           axis,
           probeTargetMm,
@@ -3845,10 +4295,7 @@ bool establishLinearAxisSafeWorkingZero(
           0x0AU,
           ARM_LINEAR_POSITION_READ_TIMEOUT_MS);
   if (!driverZeroAcknowledged) {
-    /*
-     * 后续全是相对位置命令，软件零点仍然有效；驱动器内部清零只用于
-     * 诊断读数，因此不因缺少该ACK再次向机械端点运动。
-     */
+
     SerialDebug.print("[");
     SerialDebug.print(axisLabel);
     SerialDebug.println(
@@ -3857,11 +4304,6 @@ bool establishLinearAxisSafeWorkingZero(
   }
   clearArmLinearReceiveBuffer();
 
-  /*
-   * 无论驱动器清零ACK是否丢失，都再次读取“工作零点”对应的真实电机
-   * 角度。后续堵转恢复只使用相对此角度的差值，不再假设驱动器内部零点
-   * 一定与软件零点相同。
-   */
   float workingZeroAngleDegrees = 0.0f;
   bool workingZeroAngleValid =
       readArmLinearCurrentMotorAngleDegrees(
@@ -3982,16 +4424,33 @@ void commandGripperClose() {
       GRIPPER_CLOSE_POWER_MW);
 }
 
+void commandGripperTargetPlaceOpen() {
+  gripperServo.setRawAngle(
+      GRIPPER_OPEN_ANGLE_DEGREES,
+      GRIPPER_TARGET_PLACE_OPEN_INTERVAL_MS,
+      GRIPPER_OPEN_POWER_MW);
+}
+
+void commandGripperDoubleSpeedOpen() {
+  gripperServo.setRawAngle(
+      GRIPPER_OPEN_ANGLE_DEGREES,
+      GRIPPER_DOUBLE_SPEED_INTERVAL_MS,
+      GRIPPER_OPEN_POWER_MW);
+}
+
+void commandGripperDoubleSpeedClose() {
+  gripperServo.setRawAngle(
+      GRIPPER_CLOSE_ANGLE_DEGREES,
+      GRIPPER_DOUBLE_SPEED_INTERVAL_MS,
+      GRIPPER_CLOSE_POWER_MW);
+}
+
 void commandStorageServoPosition(uint8_t positionIndex) {
   if (positionIndex > 3U) {
     routeFault("Invalid storage servo position");
     return;
   }
-  /*
-   * 作业序列为-5、-95、-185、-5度，对应顺时针90度、
-   * 再顺时针90度、最后逆时针180度回到工作零位。序列会越过
-   * 单圈角度边界，因此必须使用多圈绝对角度命令。
-   */
+
   storageServo.setRawAngleMTurn(
       STORAGE_SERVO_POSITIONS_DEGREES[positionIndex],
       STORAGE_SERVO_INTERVAL_MS);
@@ -4014,11 +4473,7 @@ void commandStorageServoParkingPosition() {
 }
 
 bool verifyManipulationServosOnline() {
-  /*
-   * 两次ping不能用&&短路，否则夹爪掉线时不会检查载物盘。
-   * 该检查只在启动前或工位停车后执行，最坏约2×100 ms，不影响
-   * 正在运行的软件步进脉冲。
-   */
+
   const bool gripperOnline = gripperServo.ping();
   const bool storageOnline = storageServo.ping();
   manipulationServosOnline =
@@ -4032,261 +4487,21 @@ bool verifyManipulationServosOnline() {
   return manipulationServosOnline;
 }
 
-struct MaixCoordinate {
-  uint8_t targetId;
-  uint8_t requestSequence;
-  uint8_t mode;
-  int16_t x;
-  int16_t y;
-  uint16_t metric;
-  uint16_t confidence;
-  uint32_t cameraTimestampMs;
-  uint32_t sequence;
-  uint32_t receivedMs;
-
-  MaixCoordinate()
-      : targetId(0U),
-        requestSequence(0U),
-        mode(0U),
-        x(0),
-        y(0),
-        metric(0U),
-        confidence(0U),
-        cameraTimestampMs(0UL),
-        sequence(0UL),
-        receivedMs(0UL) {}
-};
-
-bool maixcamSerialInitialized = false;
-uint8_t maixRequestedMode = MAIXCAM_STOP_REQUEST;
-uint8_t maixRequestSequence = 0U;
-bool maixModeCommandSent = false;
-uint32_t maixModeSwitchStartMs = 0UL;
-uint32_t maixLastRequestMs = 0UL;
-char maixReceiveLine[MAIXCAM_LINE_CAPACITY] = {0};
-size_t maixReceiveLength = 0U;
-bool maixReceiveOverflow = false;
-MaixCoordinate latestMaixCoordinate;
-
-void writeMaixRequestFrame(uint8_t request) {
-  uint8_t frame[vision_protocol::REQUEST_FRAME_SIZE] = {0U};
-  if (!vision_protocol::buildRequest(
-          maixRequestSequence,
-          request,
-          frame,
-          sizeof(frame))) {
-    routeFault("Vision request frame build failed");
-    return;
-  }
-  const size_t queuedBytes =
-      SerialMaixcam.write(frame, sizeof(frame));
-
-  /*
-   * 诊断日志记录真正执行SerialMaixcam.write()的时刻。
-   * “MaixCAM mode request”只代表状态机计划切换模式，不能证明已经走到TX。
-   */
-  SerialDebug.print("[MAIX TX] t=");
-  SerialDebug.print(millis());
-  SerialDebug.print(" ms, v2 seq/mode=");
-  SerialDebug.print(maixRequestSequence);
-  SerialDebug.print("/");
-  if (request < 0x10U) {
-    SerialDebug.print("0");
-  }
-  SerialDebug.print(request, HEX);
-  SerialDebug.print(", crc=");
-  if (frame[4] < 0x10U) {
-    SerialDebug.print("0");
-  }
-  SerialDebug.print(frame[4], HEX);
-  SerialDebug.print(", queued=");
-  SerialDebug.println(
-      static_cast<unsigned int>(queuedBytes));
-}
+gongchuang::MaixCamClient maixCam(
+    SerialMaixcam,
+    SerialDebug,
+    routeFault);
 
 void stopMaixRequest() {
-  if (maixcamSerialInitialized) {
-    writeMaixRequestFrame(MAIXCAM_STOP_REQUEST);
-  }
-  maixRequestedMode = MAIXCAM_STOP_REQUEST;
-  maixModeCommandSent = false;
-  maixReceiveLength = 0U;
-  maixReceiveOverflow = false;
+  maixCam.stopRequest();
 }
 
 void beginMaixRequest(uint8_t request) {
-  if (request != MAIXCAM_ALL_COLORS_REQUEST &&
-      request != MAIXCAM_HOUGH_CIRCLE_REQUEST &&
-      request != MAIXCAM_ENDPOINT_CIRCLE_REQUEST) {
-    routeFault("Invalid MaixCAM request");
-    return;
-  }
-
-  stopMaixRequest();
-  while (SerialMaixcam.available()) {
-    SerialMaixcam.read();
-  }
-  maixRequestSequence =
-      static_cast<uint8_t>(maixRequestSequence + 1U);
-  maixRequestedMode = request;
-  maixModeSwitchStartMs = millis();
-  maixLastRequestMs = 0UL;
-  maixModeCommandSent = false;
-
-  SerialDebug.print("[MAIX PLAN] t=");
-  SerialDebug.print(millis());
-  SerialDebug.print(" ms, mode=");
-  SerialDebug.print(request);
-  SerialDebug.print(", seq=");
-  SerialDebug.print(maixRequestSequence);
-  SerialDebug.print(", TX after guard=");
-  SerialDebug.print(MAIXCAM_MODE_SWITCH_GUARD_MS);
-  SerialDebug.println(" ms");
-}
-
-void finishMaixCoordinateLine() {
-  if (maixReceiveOverflow) {
-    SerialDebug.println(
-        "MaixCAM response discarded: line too long");
-    maixReceiveLength = 0U;
-    maixReceiveOverflow = false;
-    return;
-  }
-
-  maixReceiveLine[maixReceiveLength] = '\0';
-  vision_protocol::VisionResponse response;
-  const vision_protocol::ParseError parseError =
-      vision_protocol::parseResponse(
-          maixReceiveLine,
-          maixReceiveLength,
-          response);
-  maixReceiveLength = 0U;
-  if (parseError != vision_protocol::PARSE_OK) {
-    SerialDebug.print(
-        "MaixCAM response rejected: ");
-    SerialDebug.println(
-        vision_protocol::parseErrorText(parseError));
-    return;
-  }
-
-  if (!maixModeCommandSent ||
-      maixRequestedMode == MAIXCAM_STOP_REQUEST ||
-      response.sequence != maixRequestSequence ||
-      response.mode != maixRequestedMode) {
-    SerialDebug.print(
-        "MaixCAM stale/mismatched seq/mode received=");
-    SerialDebug.print(response.sequence);
-    SerialDebug.print("/");
-    SerialDebug.print(response.mode);
-    SerialDebug.print(", expected=");
-    SerialDebug.print(maixRequestSequence);
-    SerialDebug.print("/");
-    SerialDebug.println(maixRequestedMode);
-    return;
-  }
-
-  if (response.status != vision_protocol::STATUS_OK) {
-    SerialDebug.print("MaixCAM status=");
-    SerialDebug.println(response.status);
-    if (response.status ==
-        vision_protocol::STATUS_CAMERA_ERROR) {
-      routeFault("MaixCAM reported camera error");
-    }
-    return;
-  }
-
-  const bool targetMatchesMode =
-      (maixRequestedMode ==
-           MAIXCAM_ALL_COLORS_REQUEST &&
-       response.target >= 1U &&
-       response.target <= 4U) ||
-      (maixRequestedMode ==
-           MAIXCAM_HOUGH_CIRCLE_REQUEST &&
-       response.target == 2U) ||
-      (maixRequestedMode ==
-           MAIXCAM_ENDPOINT_CIRCLE_REQUEST &&
-       response.target == 1U);
-  if (!targetMatchesMode) {
-    SerialDebug.println(
-        "MaixCAM target identity does not match mode");
-    return;
-  }
-
-  latestMaixCoordinate.targetId = response.target;
-  latestMaixCoordinate.requestSequence =
-      response.sequence;
-  latestMaixCoordinate.mode = response.mode;
-  latestMaixCoordinate.x =
-      static_cast<int16_t>(response.x);
-  latestMaixCoordinate.y =
-      static_cast<int16_t>(response.y);
-  latestMaixCoordinate.metric = response.metric;
-  latestMaixCoordinate.confidence =
-      response.confidence;
-  latestMaixCoordinate.cameraTimestampMs =
-      response.timestamp;
-  ++latestMaixCoordinate.sequence;
-  latestMaixCoordinate.receivedMs = millis();
-
-  SerialDebug.print("MaixCAM v2 seq/mode/target=");
-  SerialDebug.print(response.sequence);
-  SerialDebug.print("/");
-  SerialDebug.print(response.mode);
-  SerialDebug.print("/");
-  SerialDebug.print(response.target);
-  SerialDebug.print(", xy=");
-  SerialDebug.print(response.x);
-  SerialDebug.print(",");
-  SerialDebug.print(response.y);
-  SerialDebug.print(", metric/confidence=");
-  SerialDebug.print(response.metric);
-  SerialDebug.print("/");
-  SerialDebug.println(response.confidence);
+  maixCam.beginRequest(request);
 }
 
 void serviceMaixcam() {
-  while (SerialMaixcam.available()) {
-    const char incoming =
-        static_cast<char>(SerialMaixcam.read());
-    if (incoming == '\r') {
-      continue;
-    }
-    if (incoming == '\n') {
-      finishMaixCoordinateLine();
-      continue;
-    }
-    if (maixReceiveOverflow) {
-      continue;
-    }
-    if (maixReceiveLength < MAIXCAM_LINE_CAPACITY - 1U) {
-      maixReceiveLine[maixReceiveLength++] = incoming;
-    } else {
-      maixReceiveOverflow = true;
-      maixReceiveLength = 0U;
-    }
-  }
-
-  if (maixRequestedMode == MAIXCAM_STOP_REQUEST) {
-    return;
-  }
-
-  const uint32_t nowMs = millis();
-  if (!maixModeCommandSent) {
-    if (nowMs - maixModeSwitchStartMs <
-        MAIXCAM_MODE_SWITCH_GUARD_MS) {
-      return;
-    }
-    writeMaixRequestFrame(maixRequestedMode);
-    maixModeCommandSent = true;
-    maixLastRequestMs = nowMs;
-    return;
-  }
-
-  if (nowMs - maixLastRequestMs >=
-      MAIXCAM_REQUEST_REPEAT_MS) {
-    writeMaixRequestFrame(maixRequestedMode);
-    maixLastRequestMs = nowMs;
-  }
+  maixCam.service();
 }
 
 bool readNewMaixCoordinate(
@@ -4294,23 +4509,35 @@ bool readNewMaixCoordinate(
     uint8_t &targetId,
     int16_t &x,
     int16_t &y) {
-  if (latestMaixCoordinate.sequence == lastSequence ||
-      millis() - latestMaixCoordinate.receivedMs >
-          MAIXCAM_COORDINATE_STALE_MS) {
-    return false;
-  }
-  lastSequence = latestMaixCoordinate.sequence;
-  targetId = latestMaixCoordinate.targetId;
-  x = latestMaixCoordinate.x;
-  y = latestMaixCoordinate.y;
-  return true;
+  return maixCam.readNewCoordinate(
+      lastSequence,
+      targetId,
+      x,
+      y);
 }
 
 void advanceRoute() {
+  const uint8_t completedStep =
+      activeRouteCommand.specificationStep;
   stopAllMotorsImmediately();
+  routeMotionPhase = ROUTE_MOTION_IDLE;
+  activeRouteTurnCommand = false;
+
+  if (completedStep != 0U) {
+    SerialDebug.print("[ROUTE DONE] step=");
+    SerialDebug.print(completedStep);
+    SerialDebug.print("/21, heading target/actual/error=");
+    SerialDebug.print(targetCounterClockwiseHeadingDegrees, 2);
+    SerialDebug.print("/");
+    SerialDebug.print(currentRouteCounterClockwiseHeading(), 2);
+    SerialDebug.print("/");
+    SerialDebug.println(headingErrorDegrees(), 2);
+  }
+
   ++routeIndex;
   commandStarted = false;
   commandStartMs = millis();
+  routeHeadingLockStartMs = 0UL;
   headingStableStartMs = 0;
   motorsArrivedStartMs = 0;
   markMissionProgress();
@@ -4342,7 +4569,6 @@ void startHeadingCorrection(
     correction = -minimumCorrection;
   }
 
-  // IMU与运动学均为逆时针正，误差可以直接换算为运动学角度。
   const float correctionCounterClockwiseRadians =
       correction * PI_F / 180.0f;
   if (turnMotionEnabled) {
@@ -4355,10 +4581,23 @@ void startHeadingCorrection(
       0.0f, 0.0f, correctionCounterClockwiseRadians);
 }
 
-bool updateHeadingLock(uint32_t timeoutMs) {
+bool updateHeadingLock(
+    uint32_t timeoutMs,
+    uint32_t postMotionSettleTimeMs =
+        IMU_POST_MOTION_SETTLE_TIME_MS,
+    uint32_t stableTimeOverrideMs = 0UL) {
   if (!imuIsFresh()) {
     routeFault("IMU data timeout");
     return false;
+  }
+
+  if (ROUGH_PROCESSING_CALIBRATION_MODE) {
+
+    (void)timeoutMs;
+    stopAllMotorsImmediately();
+    headingStableStartMs = 0UL;
+    motorsArrivedStartMs = 0UL;
+    return true;
   }
 
   if (!allMotorsArrived()) {
@@ -4377,7 +4616,7 @@ bool updateHeadingLock(uint32_t timeoutMs) {
   }
 
   if (millis() - motorsArrivedStartMs <
-      IMU_POST_MOTION_SETTLE_TIME_MS) {
+      postMotionSettleTimeMs) {
     return false;
   }
 
@@ -4395,13 +4634,15 @@ bool updateHeadingLock(uint32_t timeoutMs) {
                         ? WORKSTATION_HEADING_TOLERANCE_DEGREES
                         : TRANSLATION_HEADING_TOLERANCE_DEGREES));
   const uint32_t stableTimeMs =
-      preciseMotionEnabled
-          ? FINAL_HEADING_STABLE_TIME_MS
-          : (turnMotionEnabled
-                 ? TURN_HEADING_STABLE_TIME_MS
-                 : (workstationApproachEnabled
-                        ? WORKSTATION_HEADING_STABLE_TIME_MS
-                        : TRANSLATION_HEADING_STABLE_TIME_MS));
+      stableTimeOverrideMs != 0UL
+          ? stableTimeOverrideMs
+          : (preciseMotionEnabled
+                 ? FINAL_HEADING_STABLE_TIME_MS
+                 : (turnMotionEnabled
+                        ? TURN_HEADING_STABLE_TIME_MS
+                        : (workstationApproachEnabled
+                               ? WORKSTATION_HEADING_STABLE_TIME_MS
+                               : TRANSLATION_HEADING_STABLE_TIME_MS)));
 
   const float error = headingErrorDegrees();
   if (fabsf(error) <= tolerance) {
@@ -4433,6 +4674,407 @@ bool updateHeadingLock(uint32_t timeoutMs) {
   return false;
 }
 
+void startRouteVehicleDisplacement(
+    float userForwardMm,
+    float userRightMm,
+    float counterClockwiseDegrees) {
+
+  startBodyDisplacement(
+      -userForwardMm / 1000.0f,
+      userRightMm / 1000.0f,
+      counterClockwiseDegrees * PI_F / 180.0f);
+}
+
+void beginRouteCoarseMotion(bool turnCommand) {
+  routeMotionPhase = ROUTE_MOTION_COARSE;
+  activeRouteTurnCommand = turnCommand;
+  turnMotionEnabled = turnCommand;
+  preciseMotionEnabled = false;
+  workstationApproachEnabled = false;
+  routeHeadingLockStartMs = 0UL;
+  headingStableStartMs = 0UL;
+  motorsArrivedStartMs = 0UL;
+  commandStartMs = millis();
+}
+
+void startRouteFastLongitudinalTranslation(
+    float nominalForwardMm,
+    float motionScale) {
+  const float commandedForwardMm =
+      nominalForwardMm * motionScale;
+  const float commandedMaximumStepRate =
+      ROUTE_FAST_MAXIMUM_STEP_RATE *
+      motionScale *
+      ROUTE_NON_07_15_LINEAR_PROFILE_INCREASE_SCALE;
+  const float commandedAcceleration =
+      ROUTE_FAST_STEP_ACCELERATION *
+      motionScale *
+      ROUTE_NON_07_15_LINEAR_PROFILE_INCREASE_SCALE;
+
+  SerialDebug.print(
+      "[SEGMENT LONG] nominal/commanded/scale mm=");
+  SerialDebug.print(nominalForwardMm, 1);
+  SerialDebug.print("/");
+  SerialDebug.print(commandedForwardMm, 1);
+  SerialDebug.print("/");
+  SerialDebug.print(motionScale, 3);
+  SerialDebug.print(", vmax/acc=");
+  SerialDebug.print(commandedMaximumStepRate, 1);
+  SerialDebug.print("/");
+  SerialDebug.println(commandedAcceleration, 1);
+
+  setRouteDriveMotionProfile(
+      commandedMaximumStepRate,
+      commandedAcceleration);
+  startRouteVehicleDisplacement(
+      commandedForwardMm, 0.0f, 0.0f);
+  beginRouteCoarseMotion(false);
+}
+
+void startRouteFastLateralTranslation(
+    float nominalRightMm,
+    float motionScale,
+    float maximumSpeedProfileScale,
+    float accelerationProfileScale) {
+  const float commandedRightMm =
+      nominalRightMm * motionScale;
+  const float commandedMaximumStepRate =
+      ROUTE_FAST_MAXIMUM_STEP_RATE *
+      motionScale *
+      maximumSpeedProfileScale;
+  const float lateralAccelerationProfileLimit =
+      ROUTE_NON_07_15_LINEAR_PROFILE_INCREASE_SCALE *
+      ROUTE_LATERAL_ACCELERATION_LIMIT_RELATIVE_TO_LONGITUDINAL;
+  const float limitedAccelerationProfileScale =
+      fminf(
+          accelerationProfileScale,
+          lateralAccelerationProfileLimit);
+  const float commandedAcceleration =
+      ROUTE_FAST_STEP_ACCELERATION *
+      motionScale *
+      limitedAccelerationProfileScale;
+
+  SerialDebug.print(
+      "[SEGMENT LATERAL] nominal/commanded/scale mm=");
+  SerialDebug.print(nominalRightMm, 1);
+  SerialDebug.print("/");
+  SerialDebug.print(commandedRightMm, 1);
+  SerialDebug.print("/");
+  SerialDebug.print(motionScale, 3);
+  SerialDebug.print(
+      ", profile speed/requested-acc/limited-acc scale=");
+  SerialDebug.print(maximumSpeedProfileScale, 3);
+  SerialDebug.print("/");
+  SerialDebug.print(accelerationProfileScale, 3);
+  SerialDebug.print("/");
+  SerialDebug.print(limitedAccelerationProfileScale, 3);
+  SerialDebug.print(", vmax/acc=");
+  SerialDebug.print(commandedMaximumStepRate, 1);
+  SerialDebug.print("/");
+  SerialDebug.println(commandedAcceleration, 1);
+
+  setRouteDriveMotionProfile(
+      commandedMaximumStepRate,
+      commandedAcceleration);
+  startRouteVehicleDisplacement(
+      0.0f, commandedRightMm, 0.0f);
+  beginRouteCoarseMotion(false);
+}
+
+void startRouteTurn(
+    float nominalCounterClockwiseDegrees,
+    float motionScale) {
+  const float commandedCounterClockwiseDegrees =
+      nominalCounterClockwiseDegrees * motionScale;
+  activeTurnStartHeadingDegrees =
+      currentRouteCounterClockwiseHeading();
+  activeTurnCommandDegrees =
+      commandedCounterClockwiseDegrees;
+  activeTurnCorrectionCount = 0U;
+  turnCoarseTelemetryPending = true;
+  targetCounterClockwiseHeadingDegrees +=
+      commandedCounterClockwiseDegrees;
+
+  SerialDebug.print(
+      "[SEGMENT TURN] nominal/commanded/scale/target deg=");
+  SerialDebug.print(nominalCounterClockwiseDegrees, 1);
+  SerialDebug.print("/");
+  SerialDebug.print(commandedCounterClockwiseDegrees, 1);
+  SerialDebug.print("/");
+  SerialDebug.print(motionScale, 3);
+  SerialDebug.print("/");
+  SerialDebug.println(
+      targetCounterClockwiseHeadingDegrees, 2);
+
+  integratedTurnControlActive = true;
+  integratedTurnBrakeCommandIssued = false;
+  integratedTurnDirectionSign =
+      commandedCounterClockwiseDegrees >= 0.0f ? +1 : -1;
+  activeTurnPulsesPerDegree =
+      rotationPulsesPerDegree(
+          integratedTurnDirectionSign);
+  if (activeTurnPulsesPerDegree <= 0.0f) {
+    routeFault("Invalid turn pulse/degree conversion");
+    return;
+  }
+
+  setRouteDriveMotionProfile(
+      ROUTE_TURN_MAXIMUM_STEP_RATE * motionScale,
+      ROUTE_TURN_STEP_ACCELERATION * motionScale);
+  startRouteVehicleDisplacement(
+      0.0f, 0.0f,
+      commandedCounterClockwiseDegrees);
+  beginRouteCoarseMotion(true);
+  hmiSetRunStatus("TURNIMU");
+}
+
+void beginRouteHeadingLock() {
+  routeMotionPhase = ROUTE_MOTION_HEADING_LOCK;
+  routeHeadingLockStartMs = millis();
+  headingStableStartMs = 0UL;
+  motorsArrivedStartMs = 0UL;
+  hmiSetRunStatus("IMULOCK");
+}
+
+void startRouteHeadingCorrection(float errorDegrees) {
+  float correction = errorDegrees;
+  if (correction >
+      ROUTE_MAXIMUM_HEADING_CORRECTION_DEGREES) {
+    correction =
+        ROUTE_MAXIMUM_HEADING_CORRECTION_DEGREES;
+  } else if (
+      correction <
+      -ROUTE_MAXIMUM_HEADING_CORRECTION_DEGREES) {
+    correction =
+        -ROUTE_MAXIMUM_HEADING_CORRECTION_DEGREES;
+  }
+
+  if (correction > 0.0f &&
+      correction <
+          ROUTE_MINIMUM_HEADING_CORRECTION_DEGREES) {
+    correction =
+        ROUTE_MINIMUM_HEADING_CORRECTION_DEGREES;
+  } else if (
+      correction < 0.0f &&
+      correction >
+          -ROUTE_MINIMUM_HEADING_CORRECTION_DEGREES) {
+    correction =
+        -ROUTE_MINIMUM_HEADING_CORRECTION_DEGREES;
+  }
+
+  if (activeRouteTurnCommand) {
+    ++activeTurnCorrectionCount;
+  }
+  SerialDebug.print(
+      "[ROUTE IMU] target/actual/error/correction=");
+  SerialDebug.print(
+      targetCounterClockwiseHeadingDegrees, 2);
+  SerialDebug.print("/");
+  SerialDebug.print(
+      currentRouteCounterClockwiseHeading(), 2);
+  SerialDebug.print("/");
+  SerialDebug.print(errorDegrees, 2);
+  SerialDebug.print("/");
+  SerialDebug.println(correction, 2);
+
+  setRouteDriveMotionProfile(
+      ROUTE_HEADING_CORRECTION_MAXIMUM_STEP_RATE,
+      ROUTE_HEADING_CORRECTION_STEP_ACCELERATION);
+  startRouteVehicleDisplacement(
+      0.0f, 0.0f, correction);
+  headingStableStartMs = 0UL;
+  motorsArrivedStartMs = 0UL;
+}
+
+bool serviceRouteHeadingLock() {
+  if (!imuIsFresh()) {
+    routeFault("IMU data timeout during route heading lock");
+    return false;
+  }
+  if (millis() - routeHeadingLockStartMs >
+      ROUTE_HEADING_LOCK_TIMEOUT_MS) {
+    routeFault("Route heading lock timeout");
+    return false;
+  }
+  if (!allMotorsArrived()) {
+    headingStableStartMs = 0UL;
+    motorsArrivedStartMs = 0UL;
+    return false;
+  }
+
+  const uint32_t nowMs = millis();
+  if (motorsArrivedStartMs == 0UL) {
+    motorsArrivedStartMs = nowMs;
+    return false;
+  }
+
+  const float tolerance =
+      activeRouteTurnCommand
+          ? ROUTE_TURN_HEADING_TOLERANCE_DEGREES
+          : ROUTE_TRANSLATION_HEADING_TOLERANCE_DEGREES;
+  const float error = headingErrorDegrees();
+  if (fabsf(error) <= tolerance) {
+    if (headingStableStartMs == 0UL) {
+      headingStableStartMs = nowMs;
+    }
+
+    return true;
+  }
+
+  headingStableStartMs = 0UL;
+  startRouteHeadingCorrection(error);
+  return false;
+}
+
+bool nextRouteCommandIsTurn() {
+  return routeIndex + 1U < ROUTE_COMMAND_COUNT &&
+         commandIsTurn(route[routeIndex + 1U].type);
+}
+
+void beginIntegratedTurnBraking() {
+
+  for (uint8_t i = 0U; i < 4U; ++i) {
+    motors[i]->setAcceleration(activeDriveDeceleration);
+  }
+  driveDecelerationActive = true;
+
+  for (uint8_t i = 0U; i < 4U; ++i) {
+    motors[i]->stop();
+  }
+  integratedTurnBrakeCommandIssued = true;
+}
+
+void serviceIntegratedTurnCommand() {
+  if (routeMotionPhase != ROUTE_MOTION_COARSE ||
+      !integratedTurnControlActive) {
+    routeFault("Integrated turn state missing");
+    return;
+  }
+
+  if (!imuIsFresh()) {
+    routeFault("IMU data timeout during integrated turn");
+    return;
+  }
+
+  if (ENABLE_MOTION_TIMEOUTS &&
+      millis() - commandStartMs >
+          ROUTE_MOTION_TIMEOUT_MS) {
+    routeFault("Integrated turn timeout");
+    return;
+  }
+
+  const float errorDegrees = headingErrorDegrees();
+  if (!integratedTurnBrakeCommandIssued &&
+      !allMotorsArrived()) {
+    float maximumAbsoluteStepRate = 0.0f;
+    for (uint8_t i = 0U; i < 4U; ++i) {
+      const float stepRate = fabsf(motors[i]->speed());
+      if (stepRate > maximumAbsoluteStepRate) {
+        maximumAbsoluteStepRate = stepRate;
+      }
+    }
+
+    const float predictedAngularRateDegreesPerSecond =
+        maximumAbsoluteStepRate /
+        activeTurnPulsesPerDegree;
+    const float predictedBrakingDegrees =
+        maximumAbsoluteStepRate *
+            maximumAbsoluteStepRate /
+        (2.0f * activeDriveDeceleration *
+         activeTurnPulsesPerDegree);
+    const float predictedLatencyDegrees =
+        predictedAngularRateDegreesPerSecond *
+        TURN_IMU_CONTROL_LATENCY_SECONDS;
+    const float remainingDegrees = fabsf(errorDegrees);
+    const bool targetReachedOrPassed =
+        errorDegrees *
+            static_cast<float>(
+                integratedTurnDirectionSign) <=
+        0.0f;
+
+    if (targetReachedOrPassed ||
+        remainingDegrees <=
+            predictedBrakingDegrees +
+                predictedLatencyDegrees +
+                TURN_PREDICTIVE_BRAKE_MARGIN_DEGREES) {
+      beginIntegratedTurnBraking();
+    }
+  }
+
+  if (!allMotorsArrived()) {
+    return;
+  }
+
+  if (turnCoarseTelemetryPending) {
+    printTurnCoarseTelemetry();
+    turnCoarseTelemetryPending = false;
+  }
+
+  const float stoppedErrorDegrees = headingErrorDegrees();
+  if (fabsf(stoppedErrorDegrees) <=
+      ROUTE_TURN_HEADING_TOLERANCE_DEGREES) {
+    printTurnLockTelemetry();
+    integratedTurnControlActive = false;
+    integratedTurnBrakeCommandIssued = false;
+    integratedTurnDirectionSign = 0;
+    hmiSetRunStatus("RUN");
+    advanceRoute();
+    return;
+  }
+
+  integratedTurnBrakeCommandIssued = false;
+  integratedTurnDirectionSign =
+      stoppedErrorDegrees >= 0.0f ? +1 : -1;
+  activeTurnPulsesPerDegree =
+      rotationPulsesPerDegree(
+          integratedTurnDirectionSign);
+  if (activeTurnPulsesPerDegree <= 0.0f) {
+    routeFault("Invalid correction pulse/degree conversion");
+    return;
+  }
+  startRouteHeadingCorrection(stoppedErrorDegrees);
+  hmiSetRunStatus("TURNIMU");
+}
+
+void serviceRoutePhysicalCommand() {
+  if (routeMotionPhase == ROUTE_MOTION_COARSE) {
+    if (!allMotorsArrived()) {
+      if (ENABLE_MOTION_TIMEOUTS &&
+          millis() - commandStartMs >
+              ROUTE_MOTION_TIMEOUT_MS) {
+        routeFault("Route coarse motion timeout");
+      }
+      return;
+    }
+
+    if (activeRouteTurnCommand &&
+        turnCoarseTelemetryPending) {
+      printTurnCoarseTelemetry();
+      turnCoarseTelemetryPending = false;
+    }
+
+    if (nextRouteCommandIsTurn()) {
+      SerialDebug.println(
+          "[ROUTE IMU] skipped before explicit turn");
+      advanceRoute();
+      return;
+    }
+
+    beginRouteHeadingLock();
+    return;
+  }
+
+  if (routeMotionPhase ==
+          ROUTE_MOTION_HEADING_LOCK &&
+      serviceRouteHeadingLock()) {
+    if (activeRouteTurnCommand) {
+      printTurnLockTelemetry();
+    }
+    hmiSetRunStatus("RUN");
+    advanceRoute();
+  }
+}
+
 MotorPulses currentDriveMotorPositions() {
   return MotorPulses(
       motor1.currentPosition(),
@@ -4441,141 +5083,161 @@ MotorPulses currentDriveMotorPositions() {
       motor4.currentPosition());
 }
 
-void startQrScanReturnToOrigin() {
-  SerialDebug.println(
-      "[QR SWEEP] code acquired; returning to saved origin");
+float forwardTravelFromOriginMm(
+    const MotorPulses &origin) {
+  const MotorPulses now = currentDriveMotorPositions();
+  const float projectedPulses =
+      (static_cast<float>(now.motor1 - origin.motor1) -
+       static_cast<float>(now.motor2 - origin.motor2) +
+       static_cast<float>(now.motor3 - origin.motor3) -
+       static_cast<float>(now.motor4 - origin.motor4)) /
+      4.0f;
+  return projectedPulses /
+         FORWARD_PULSES_PER_METER * 1000.0f;
+}
 
-  /*
-   * 直接把四轮绝对目标改回各自扫码点脉冲原点。AccelStepper会按当前
-   * 低速参数先减速、再反转；不能固定反走500 mm，因为可能在途中扫码。
-   */
-  setDriveMotionProfile(
-      QR_SCAN_MAXIMUM_STEP_RATE,
-      QR_SCAN_STEP_ACCELERATION);
-  motor1.moveTo(qrScanOriginMotorPositions.motor1);
-  motor2.moveTo(qrScanOriginMotorPositions.motor2);
-  motor3.moveTo(qrScanOriginMotorPositions.motor3);
-  motor4.moveTo(qrScanOriginMotorPositions.motor4);
-  commandStartMs = millis();
-  headingStableStartMs = 0UL;
-  motorsArrivedStartMs = 0UL;
-  hmiSetRunStatus("QRBACK");
-  qrScanPhase = QR_SCAN_RETURNING;
+void captureScanDistanceB() {
+  if (!scanOriginValid) {
+    routeFault("QR scan origin missing");
+    return;
+  }
+
+  scanDistanceBmm =
+      selectedStartZoneDirection() *
+      forwardTravelFromOriginMm(
+          qrScanOriginMotorPositions);
+  if (scanDistanceBmm < 0.0f) {
+    scanDistanceBmm = 0.0f;
+  } else if (
+      scanDistanceBmm >
+      scanCommandedMaximumDistanceMm) {
+    scanDistanceBmm =
+        scanCommandedMaximumDistanceMm;
+  }
+
+  SerialDebug.print("[SCAN] captured b=");
+  SerialDebug.print(scanDistanceBmm, 1);
+  SerialDebug.print(" mm, QR=");
+  SerialDebug.println(scanFlag ? 1 : 0);
 }
 
 void startQrScanAction() {
   qrScanActionStartMs = millis();
   qrScanOriginMotorPositions =
       currentDriveMotorPositions();
+  scanOriginValid = true;
+  scanDistanceBmm = 0.0f;
+  scanCommandedMaximumDistanceMm = fminf(
+      static_cast<float>(
+          MAXIMUM_SCAN_DISTANCE_B_MM) *
+          activeRouteCommand.motionScale,
+      static_cast<float>(
+          MAXIMUM_SCAN_DISTANCE_B_MM));
   hmiSetRunStatus("SCAN");
 
-  /*
-   * 二维码串口在行驶途中也一直监听。若到扫码点前已经得到并校验了完整
-   * 任务码，就保留该有效结果，不再做没有必要的附加位移。
-   */
   if (scanFlag) {
     SerialDebug.println(
-        "[QR SWEEP] valid code already available; no sweep needed");
-    qrScanPhase = QR_SCAN_COMPLETE;
+        "[SCAN] valid code already present, b=0 mm");
+    activeRouteTurnCommand = false;
+    turnMotionEnabled = false;
+    beginRouteHeadingLock();
+    qrScanPhase = QR_SCAN_LOCK_AFTER_CODE;
     return;
   }
 
-  // 测试旁路保持原行为：只定时停车，不额外产生扫码位移。
-  if (!REQUIRE_QR_SUCCESS) {
-    qrScanPhase = QR_SCAN_IDLE;
-    return;
-  }
+  const float commandedMaximumStepRate =
+      ROUTE_SCAN_MAXIMUM_STEP_RATE *
+      activeRouteCommand.motionScale *
+      ROUTE_NON_07_15_LINEAR_PROFILE_INCREASE_SCALE;
+  const float commandedAcceleration =
+      ROUTE_SCAN_STEP_ACCELERATION *
+      activeRouteCommand.motionScale *
+      ROUTE_NON_07_15_LINEAR_PROFILE_INCREASE_SCALE;
 
-  setDriveMotionProfile(
-      QR_SCAN_MAXIMUM_STEP_RATE,
-      QR_SCAN_STEP_ACCELERATION);
-  /*
-   * 扫码前探延续所选启停区到二维码行的进入方向，避免Start2到Y=1200
-   * 后折返、只重复搜索南半段。回位仍保存四轮绝对脉冲原点，与方向无关。
-   */
-  const float qrSweepForwardSign =
-      selectedStartZone == START_ZONE_1
-          ? -1.0f
-          : 1.0f;
-  startBodyDisplacement(
-      qrSweepForwardSign *
-          static_cast<float>(
-          QR_SCAN_SWEEP_MAXIMUM_MM) /
-          1000.0f,
-      0.0f,
-      0.0f);
-  commandStartMs = millis();
-  headingStableStartMs = 0UL;
-  motorsArrivedStartMs = 0UL;
+  setRouteDriveMotionProfile(
+      commandedMaximumStepRate,
+      commandedAcceleration);
+  startRouteVehicleDisplacement(
+      selectedStartZoneDirection() *
+          scanCommandedMaximumDistanceMm,
+      0.0f, 0.0f);
+  beginRouteCoarseMotion(false);
   qrScanPhase = QR_SCAN_FORWARD;
-  SerialDebug.print("[QR SWEEP] signed forward limit=");
   SerialDebug.print(
-      qrSweepForwardSign *
-      static_cast<float>(QR_SCAN_SWEEP_MAXIMUM_MM),
-      0);
-  SerialDebug.print(", magnitude=");
-  SerialDebug.print(QR_SCAN_SWEEP_MAXIMUM_MM);
-  SerialDebug.println(" mm");
+      "[SCAN] maximum/scale/vmax/acc=");
+  SerialDebug.print(
+      scanCommandedMaximumDistanceMm, 1);
+  SerialDebug.print("/");
+  SerialDebug.print(
+      activeRouteCommand.motionScale, 3);
+  SerialDebug.print("/");
+  SerialDebug.print(
+      commandedMaximumStepRate, 1);
+  SerialDebug.print("/");
+  SerialDebug.println(commandedAcceleration, 1);
 }
 
 bool updateQrScanAction() {
-  if (REQUIRE_QR_SUCCESS &&
-      !scanFlag &&
-      (qrScanPhase == QR_SCAN_FORWARD ||
-       qrScanPhase == QR_SCAN_WAIT_AT_LIMIT) &&
-      qrScanActionStartMs != 0UL &&
-      millis() - qrScanActionStartMs >=
-          QR_SCAN_ACTION_TIMEOUT_MS) {
-    routeFault("QR scan action timeout");
-    return false;
-  }
-
-  if (!REQUIRE_QR_SUCCESS &&
-      (scanFlag ||
-       millis() - qrScanActionStartMs >=
-           QR_TEST_HOLD_MS)) {
-    qrScanPhase = QR_SCAN_COMPLETE;
-  }
-
   switch (qrScanPhase) {
     case QR_SCAN_IDLE:
       return false;
 
     case QR_SCAN_FORWARD:
+
       if (scanFlag) {
-        startQrScanReturnToOrigin();
-        return false;
-      }
-      if (!imuIsFresh()) {
-        routeFault("IMU data timeout during QR sweep");
+        stopAllMotorsImmediately();
+        captureScanDistanceB();
+        if (programState != PROGRAM_RUNNING) {
+          return false;
+        }
+        beginRouteHeadingLock();
+        qrScanPhase = QR_SCAN_LOCK_AFTER_CODE;
         return false;
       }
       if (!allMotorsArrived()) {
         if (ENABLE_MOTION_TIMEOUTS &&
-            millis() - commandStartMs >=
-                MOTION_TIMEOUT_MS) {
-          routeFault("QR sweep motion timeout");
+            millis() - commandStartMs >
+                ROUTE_MOTION_TIMEOUT_MS) {
+          routeFault("QR slow scan motion timeout");
         }
         return false;
       }
 
-      qrScanPhase = QR_SCAN_WAIT_AT_LIMIT;
-      hmiSetRunStatus("SCANMAX");
-      SerialDebug.println(
-          "[QR SWEEP] 500 mm limit reached; waiting for valid code");
+      captureScanDistanceB();
+      if (programState != PROGRAM_RUNNING) {
+        return false;
+      }
+      beginRouteHeadingLock();
+      qrScanPhase = QR_SCAN_LOCK_AFTER_MOTION;
+      return false;
+
+    case QR_SCAN_LOCK_AFTER_MOTION:
+      if (serviceRouteHeadingLock()) {
+        routeMotionPhase = ROUTE_MOTION_IDLE;
+        qrScanPhase = QR_SCAN_WAIT_AT_LIMIT;
+        hmiSetRunStatus("SCANMAX");
+        SerialDebug.print(
+            "[SCAN] ");
+        SerialDebug.print(
+            scanCommandedMaximumDistanceMm, 1);
+        SerialDebug.println(
+            " mm limit reached; waiting in place");
+      }
       return false;
 
     case QR_SCAN_WAIT_AT_LIMIT:
       if (scanFlag) {
-        startQrScanReturnToOrigin();
+        beginRouteHeadingLock();
+        qrScanPhase = QR_SCAN_LOCK_AFTER_CODE;
       }
       return false;
 
-    case QR_SCAN_RETURNING:
-      if (updateHeadingLock(MOTION_TIMEOUT_MS)) {
+    case QR_SCAN_LOCK_AFTER_CODE:
+      if (serviceRouteHeadingLock()) {
+        routeMotionPhase = ROUTE_MOTION_IDLE;
         qrScanPhase = QR_SCAN_COMPLETE;
         SerialDebug.println(
-            "[QR SWEEP] returned to scan origin");
+            "[SCAN] code accepted; step 2 complete");
         return true;
       }
       return false;
@@ -4587,101 +5249,6 @@ bool updateQrScanAction() {
   routeFault("Invalid QR sweep phase");
   return false;
 }
-
-bool isTranslationCommand(CommandType type) {
-  return type == COMMAND_MOVE_SIDE_12_MM ||
-         type == COMMAND_MOVE_SIDE_34_MM ||
-         type == COMMAND_MOVE_SIDE_13_MM ||
-         type == COMMAND_MOVE_SIDE_24_MM;
-}
-
-void startTranslationSegment(CommandType type) {
-  /*
-   * 中央通道同一直线最多2000 mm一段直达，非中央通道仍保留原1100 mm
-   * 上限。remaining只是“尚未发送的命令距离”，不是里程计或世界坐标
-   * 反馈；轮胎打滑不会自动修改它。
-   */
-  const uint16_t maximumSegmentMm =
-      translationCentralChannelEnabled
-          ? CENTRAL_CHANNEL_MAX_TRANSLATION_SEGMENT_MM
-          : MAX_TRANSLATION_SEGMENT_MM;
-  const uint16_t segmentMm =
-      translationRemainingMm > maximumSegmentMm
-          ? maximumSegmentMm
-          : translationRemainingMm;
-  /*
-   * 精靠段必须从静止状态就使用低速低加速度，严禁在高速运动中突然降低
-   * acceleration；否则 AccelStepper 会因剩余刹车距离不足越过目标再反向。
-   */
-  workstationApproachEnabled =
-      translationPreciseArrivalEnabled;
-  translationRemainingMm -= segmentMm;
-
-  const float distanceMeters =
-      static_cast<float>(segmentMm) / 1000.0f;
-
-  const float translationMaximumStepRate =
-      preciseMotionEnabled
-          ? FINAL_MAXIMUM_STEP_RATE
-          : (workstationApproachEnabled
-                 ? WORKSTATION_MAXIMUM_STEP_RATE
-                 : (translationCentralChannelEnabled
-                        ? CENTRAL_CHANNEL_MAXIMUM_STEP_RATE
-                        : MAXIMUM_STEP_RATE));
-  const float translationStepAcceleration =
-      preciseMotionEnabled
-          ? FINAL_STEP_ACCELERATION
-          : (workstationApproachEnabled
-                 ? WORKSTATION_STEP_ACCELERATION
-                 : STEP_ACCELERATION);
-  setDriveMotionProfile(
-      translationMaximumStepRate,
-      translationStepAcceleration);
-
-  switch (type) {
-    case COMMAND_MOVE_SIDE_12_MM:
-      // 朝当前车体1、2侧移动；世界方向取决于当前车身姿态。
-      startBodyDisplacement(distanceMeters, 0.0f, 0.0f);
-      break;
-    case COMMAND_MOVE_SIDE_34_MM:
-      // 朝当前车体3、4侧移动；起步时该方向为场地南侧。
-      startBodyDisplacement(-distanceMeters, 0.0f, 0.0f);
-      break;
-    case COMMAND_MOVE_SIDE_13_MM:
-      // 朝当前车体1、3侧横移。
-      startBodyDisplacement(0.0f, distanceMeters, 0.0f);
-      break;
-    case COMMAND_MOVE_SIDE_24_MM:
-      // 朝当前车体2、4侧横移；也是机械臂伸出侧的工位精靠方向。
-      startBodyDisplacement(0.0f, -distanceMeters, 0.0f);
-      break;
-    default:
-      routeFault("Invalid translation command");
-      return;
-  }
-
-  commandStartMs = millis();
-  headingStableStartMs = 0;
-  motorsArrivedStartMs = 0;
-}
-
-// ---------------------------------------------------------------------------
-// 机械臂动作与三个工作区流程
-// ---------------------------------------------------------------------------
-
-struct ArmPose {
-  float standardFrameAngleDegrees;
-  float extensionMm;
-  float heightMm;
-
-  ArmPose(
-      float angleDegrees = 0.0f,
-      float extension = 0.0f,
-      float height = 0.0f)
-      : standardFrameAngleDegrees(angleDegrees),
-        extensionMm(extension),
-        heightMm(height) {}
-};
 
 struct PlanarPoint {
   float outwardMm;
@@ -4710,6 +5277,7 @@ float endpointMapLockedHeadingDegrees = 0.0f;
 
 enum ArmStandardPhase {
   ARM_STANDARD_IDLE,
+  ARM_STANDARD_WAIT_PRE_OPEN_GAP,
   ARM_STANDARD_WAIT_OPEN,
   ARM_STANDARD_WAIT_LIFT,
   ARM_STANDARD_WAIT_RETRACT,
@@ -4722,16 +5290,39 @@ enum ArmStandardPhase {
 ArmStandardPhase armStandardPhase = ARM_STANDARD_IDLE;
 uint32_t armStandardDeadlineMs = 0UL;
 float armStandardBaseTargetDegrees = 0.0f;
+float armStandardExtensionTargetMm =
+    M6_STANDARD_EXTENSION_MM;
 bool armStandardEndpointPreparation = false;
 bool armStandardKeepBaseAngle = false;
+bool armGripperLiftIsolationEnabled = false;
 
 void beginArmStandardization(
     float baseTargetDegrees = 0.0f,
-    bool keepBaseAngle = false) {
-  useArmBaseTransferMotionProfile();
+    bool keepBaseAngle = false,
+    float extensionTargetMm =
+        M6_STANDARD_EXTENSION_MM) {
+  if (extensionTargetMm <
+          M6_STANDARD_EXTENSION_MM -
+              ARM_AXIS_POSITION_TOLERANCE_MM ||
+      extensionTargetMm >
+          M6_MAXIMUM_EXTENSION_MM +
+              ARM_AXIS_POSITION_TOLERANCE_MM) {
+    routeFault("Arm standard extension outside M6 travel");
+    return;
+  }
+  const bool rawViewPreparation =
+      fabsf(extensionTargetMm -
+            RAW_VIEW_EXTENSION_MM) <=
+      ARM_AXIS_POSITION_TOLERANCE_MM;
+  if (rawViewPreparation) {
+    useArmBaseRawTransferMotionProfile();
+  } else {
+    useArmBaseTransferMotionProfile();
+  }
   armStandardEndpointPreparation = false;
   armStandardKeepBaseAngle = keepBaseAngle;
   armStandardBaseTargetDegrees = baseTargetDegrees;
+  armStandardExtensionTargetMm = extensionTargetMm;
   SerialDebug.print("[ARM STD] t=");
   SerialDebug.print(millis());
   SerialDebug.print(
@@ -4748,16 +5339,26 @@ void beginArmStandardization(
         armStandardBaseTargetDegrees,
         2);
   }
-  commandGripperOpen();
-  armStandardDeadlineMs =
-      millis() + GRIPPER_OPEN_SETTLE_MS;
-  armStandardPhase = ARM_STANDARD_WAIT_OPEN;
+  if (armGripperLiftIsolationEnabled) {
+    armStandardDeadlineMs = 0UL;
+    armStandardPhase = ARM_STANDARD_WAIT_PRE_OPEN_GAP;
+    SerialDebug.println(
+        "[WORK INTERLOCK] standardization waits for M7 short handoff "
+        "before gripper open");
+  } else {
+    commandGripperOpen();
+    armStandardDeadlineMs =
+        millis() + GRIPPER_OPEN_SETTLE_MS;
+    armStandardPhase = ARM_STANDARD_WAIT_OPEN;
+  }
 }
 
 void beginArmEndpointPreparation() {
   useArmBaseEndpointTravelMotionProfile();
   armStandardEndpointPreparation = true;
   armStandardKeepBaseAngle = false;
+  armStandardExtensionTargetMm =
+      M6_STANDARD_EXTENSION_MM;
   armStandardBaseTargetDegrees =
       ENDPOINT_RING1_SEARCH_SEED_ANGLE_DEGREES;
   SerialDebug.print("[ARM ENDPOINT PREP] t=");
@@ -4769,16 +5370,45 @@ void beginArmEndpointPreparation() {
   SerialDebug.println(
       armStandardBaseTargetDegrees,
       2);
-  commandGripperOpen();
-  armStandardDeadlineMs =
-      millis() + GRIPPER_OPEN_SETTLE_MS;
-  armStandardPhase = ARM_STANDARD_WAIT_OPEN;
+  if (armGripperLiftIsolationEnabled) {
+    armStandardDeadlineMs = 0UL;
+    armStandardPhase = ARM_STANDARD_WAIT_PRE_OPEN_GAP;
+    SerialDebug.println(
+        "[WORK INTERLOCK] endpoint preparation waits for M7 short "
+        "handoff before gripper open");
+  } else {
+    commandGripperOpen();
+    armStandardDeadlineMs =
+        millis() + GRIPPER_OPEN_SETTLE_MS;
+    armStandardPhase = ARM_STANDARD_WAIT_OPEN;
+  }
 }
 
 bool serviceArmStandardization() {
   switch (armStandardPhase) {
     case ARM_STANDARD_IDLE:
       return false;
+
+    case ARM_STANDARD_WAIT_PRE_OPEN_GAP:
+      if (!liftMoveFinished()) {
+        break;
+      }
+      if (armStandardDeadlineMs == 0UL) {
+        armStandardDeadlineMs =
+            millis() + WORK_M7_TO_GRIPPER_GAP_MS;
+        break;
+      }
+      if (deadlineReached(armStandardDeadlineMs)) {
+        commandGripperOpen();
+        armStandardDeadlineMs =
+            millis() + GRIPPER_OPEN_SETTLE_MS +
+            WORK_GRIPPER_TO_M7_GAP_MS;
+        armStandardPhase = ARM_STANDARD_WAIT_OPEN;
+        SerialDebug.println(
+            "[WORK INTERLOCK] M7 handoff -> gripper open; "
+            "M7 remains blocked through open completion + short handoff");
+      }
+      break;
 
     case ARM_STANDARD_WAIT_OPEN:
       if (deadlineReached(armStandardDeadlineMs)) {
@@ -4794,10 +5424,7 @@ bool serviceArmStandardization() {
                 "Endpoint preparation requires M6 safe working zero");
             break;
           }
-          /*
-           * M6/M7共用EMM串口，先完成M7命令握手，再启动独立STEP/DIR的
-           * M5，避免30~70 ms串口等待饿死M5脉冲服务；随后两轴并行运动。
-           */
+
           if (!startLiftToHeightMm(
                   HOUGH_VISION_HEIGHT_MM)) {
             break;
@@ -4824,9 +5451,26 @@ bool serviceArmStandardization() {
       if (liftMoveFinished()) {
         SerialDebug.print("[ARM STD] t=");
         SerialDebug.print(millis());
-        SerialDebug.println(
-            " ms, M7 complete -> M6 safe working zero");
-        startExtensionToMm(M6_STANDARD_EXTENSION_MM);
+        SerialDebug.print(
+            " ms, M7 complete -> M6 target ");
+        SerialDebug.print(
+            armStandardExtensionTargetMm,
+            2);
+        SerialDebug.println(" mm");
+        const bool rawViewTarget =
+            fabsf(
+                armStandardExtensionTargetMm -
+                RAW_VIEW_EXTENSION_MM) <=
+            ARM_AXIS_POSITION_TOLERANCE_MM;
+        if (rawViewTarget) {
+          startExtensionToMmWithProfile(
+              armStandardExtensionTargetMm,
+              RAW_M6_SPEED_RPM,
+              RAW_M6_ACCELERATION);
+        } else {
+          startExtensionToMm(
+              armStandardExtensionTargetMm);
+        }
         armStandardPhase = ARM_STANDARD_WAIT_RETRACT;
       }
       break;
@@ -4879,7 +5523,7 @@ bool serviceArmStandardization() {
         SerialDebug.println(
             " ms, coarse height and ring-1 angle ready -> settle");
         armStandardDeadlineMs =
-            millis() + ARM_BASE_SETTLE_MS;
+            millis() + FIRST_ENDPOINT_M7_SETTLE_MS;
         armStandardPhase =
             ARM_STANDARD_WAIT_BASE_SETTLE;
       }
@@ -4902,25 +5546,24 @@ bool serviceArmStandardization() {
 
 enum ArmTransferPhase {
   ARM_TRANSFER_IDLE,
+  ARM_TRANSFER_WAIT_PRE_SOURCE_OPEN_GAP,
   ARM_TRANSFER_WAIT_SOURCE_OPEN,
+  ARM_TRANSFER_WAIT_PREPARE_CLEARANCE,
   ARM_TRANSFER_WAIT_PREPARE_LIFT,
   ARM_TRANSFER_WAIT_SOURCE_ROTATION,
   ARM_TRANSFER_WAIT_SOURCE_ROTATION_SETTLE,
-  ARM_TRANSFER_WAIT_SOURCE_EXTENSION,
   ARM_TRANSFER_WAIT_SOURCE_LOWER,
+  ARM_TRANSFER_WAIT_SOURCE_GRIPPER_GAP,
   ARM_TRANSFER_WAIT_GRIP_CLOSE,
-  ARM_TRANSFER_WAIT_LOADED_LIFT,
+  ARM_TRANSFER_WAIT_LOADED_CLEARANCE,
   ARM_TRANSFER_WAIT_DESTINATION_ROTATION,
   ARM_TRANSFER_WAIT_DESTINATION_ROTATION_SETTLE,
-  ARM_TRANSFER_WAIT_DESTINATION_EXTENSION,
-  ARM_TRANSFER_WAIT_DESTINATION_EXTENSION_SETTLE,
   ARM_TRANSFER_WAIT_DESTINATION_APPROACH,
   ARM_TRANSFER_WAIT_DESTINATION_LOWER,
-  ARM_TRANSFER_WAIT_DESTINATION_LOWER_SETTLE,
+  ARM_TRANSFER_WAIT_DESTINATION_GRIPPER_GAP,
   ARM_TRANSFER_WAIT_DESTINATION_OPEN,
-  ARM_TRANSFER_WAIT_FINAL_LIFT,
+  ARM_TRANSFER_WAIT_FINAL_CLEARANCE,
   ARM_TRANSFER_WAIT_FINAL_RETRACT,
-  ARM_TRANSFER_WAIT_STANDARD_ROTATION,
   ARM_TRANSFER_WAIT_STANDARD_SETTLE,
   ARM_TRANSFER_COMPLETE
 };
@@ -4929,6 +5572,7 @@ ArmTransferPhase armTransferPhase = ARM_TRANSFER_IDLE;
 ArmPose armTransferSourcePose;
 ArmPose armTransferDestinationPose;
 uint32_t armTransferDeadlineMs = 0UL;
+uint32_t armTransferM7HandoffStartMs = 0UL;
 bool armTransferGentleDestinationRelease = false;
 bool armTransferMapSource = false;
 bool armTransferMapDestination = false;
@@ -4936,13 +5580,442 @@ bool armTransferConcurrentSourcePreparation = false;
 bool armTransferSourceAlreadyPrepared = false;
 bool armTransferPrepareNextSource = false;
 ArmPose armTransferNextSourcePose;
+bool armTransferNextSourceMapped = false;
 int8_t armTransferNextStorageSlot = -1;
 uint32_t armTransferNextStorageDeadlineMs = 0UL;
+uint32_t armTransferStorageCommandDueMs = 0UL;
 bool armTransferNextStorageCommanded = false;
 bool armTransferNextSourcePreparedAtEnd = false;
 bool armTransferReturnToRawViewAtEnd = false;
+bool armTransferSourceRotationStarted = false;
+bool armTransferDestinationRotationStarted = false;
+bool armTransferFinalRotationStarted = false;
+arm_transfer::MotionProfile armTransferMotionProfile =
+    arm_transfer::PROFILE_STANDARD;
+
+bool armTransferUsesRawProfile() {
+  return armTransferMotionProfile ==
+         arm_transfer::PROFILE_RAW;
+}
+
+bool armTransferUsesPlaceProfile() {
+  return armTransferMotionProfile ==
+         arm_transfer::PROFILE_RING_PLACE;
+}
+
+bool armTransferUsesReturnProfile() {
+  return armTransferMotionProfile ==
+         arm_transfer::PROFILE_RING_RETURN;
+}
+
+bool armTransferUsesFastWorkGripperProfile() {
+  return armTransferUsesPlaceProfile() ||
+         armTransferUsesReturnProfile();
+}
+
+uint32_t armTransferDestinationM7ToGripperGapMs() {
+  return armTransferUsesPlaceProfile()
+             ? WORK_TARGET_PLACE_M7_TO_GRIPPER_GAP_MS
+             : WORK_M7_TO_GRIPPER_GAP_MS;
+}
+
+void commandArmTransferGripperOpen() {
+  // Command-only boundary: phase/deadline changes belong to the transfer
+  // state machine. Mixing orchestration into this function can suppress the
+  // physical open command and let M7 reverse before the material is released.
+  if (armTransferUsesReturnProfile()) {
+    SerialDebug.println(
+        "[DOUBLE GRIPPER] tray release -> 20 ms open command");
+    commandGripperDoubleSpeedOpen();
+    return;
+  }
+  if (armTransferUsesPlaceProfile()) {
+    SerialDebug.println(
+        "[TARGET RELEASE] keep 40 ms open command");
+    commandGripperTargetPlaceOpen();
+    return;
+  }
+  commandGripperOpen();
+}
+
+void commandArmTransferGripperClose() {
+  // Keep this symmetric with commandArmTransferGripperOpen(): issue only the
+  // servo command; the caller owns both short M7/gripper handoffs and the
+  // full mechanical close-completion gate.
+  if (armTransferUsesFastWorkGripperProfile()) {
+    SerialDebug.println(
+        "[DOUBLE GRIPPER] pickup -> 20 ms close command");
+    commandGripperDoubleSpeedClose();
+    return;
+  }
+  commandGripperClose();
+}
+
+uint32_t armTransferTransitionSettleMs() {
+  return armTransferUsesFastWorkGripperProfile()
+             ? ARM_TRANSFER_RETURN_SETTLE_MS
+             : ARM_TRANSFER_BASE_SETTLE_MS;
+}
+
+uint32_t armTransferGripperOpenSettleMs() {
+  if (armTransferUsesReturnProfile()) {
+    return GRIPPER_TRAY_RELEASE_OPEN_SETTLE_MS;
+  }
+  if (armTransferUsesPlaceProfile()) {
+    return GRIPPER_TARGET_PLACE_OPEN_SETTLE_MS;
+  }
+  return GRIPPER_OPEN_SETTLE_MS;
+}
+
+uint32_t armTransferGripperCloseSettleMs() {
+  if (armTransferUsesPlaceProfile()) {
+    return GRIPPER_TRAY_PICK_CLOSE_SETTLE_MS;
+  }
+  if (armTransferUsesReturnProfile()) {
+    return GRIPPER_TARGET_PICK_CLOSE_SETTLE_MS;
+  }
+  return GRIPPER_CLOSE_SETTLE_MS;
+}
+
+float armTransferRotationClearanceHeightMm(
+    bool mappedRingSide) {
+  return mappedRingSide
+             ? arm_config::RING_ROTATION_CLEARANCE_HEIGHT_MM
+             : arm_config::TRAY_ROTATION_CLEARANCE_HEIGHT_MM;
+}
 
 bool ringMapHeadingStillValid();
+
+float armTransferExtensionMinimumMm(
+    float extensionMm,
+    bool mappedRingPose = false) {
+
+  const bool pathUsesMappedNearSideRange =
+      mappedRingPose ||
+      extensionMm <
+          M6_STANDARD_EXTENSION_MM -
+              ARM_AXIS_POSITION_TOLERANCE_MM ||
+      extensionAxis.currentMm <
+          M6_STANDARD_EXTENSION_MM -
+              ARM_AXIS_POSITION_TOLERANCE_MM;
+  return
+      pathUsesMappedNearSideRange
+          ? M6_RING2_MINIMUM_EXTENSION_MM
+          : M6_STANDARD_EXTENSION_MM;
+}
+
+bool startArmTransferSourceExtensionToMm(
+    float extensionMm,
+    bool mappedRingPose = false) {
+  const float minimumMm =
+      armTransferExtensionMinimumMm(
+          extensionMm,
+          mappedRingPose);
+  if (armTransferUsesRawProfile()) {
+    return startExtensionToContactMmWithProfile(
+        extensionMm,
+        minimumMm,
+        RAW_M6_SPEED_RPM,
+        RAW_M6_ACCELERATION);
+  }
+  if (armTransferUsesReturnProfile() ||
+      mappedRingPose) {
+    return startLinearAxisMove(
+        extensionAxis,
+        extensionMm,
+        minimumMm,
+        M6_MAXIMUM_EXTENSION_MM,
+        M6_PULSES_PER_MM,
+        M6_EXTEND_DIRECTION,
+        M6_RETRACT_DIRECTION,
+        RETURN_M6_SPEED_RPM,
+        RETURN_M6_ACCELERATION);
+  }
+  if (armTransferUsesPlaceProfile()) {
+    return startLinearAxisMove(
+        extensionAxis,
+        extensionMm,
+        minimumMm,
+        M6_MAXIMUM_EXTENSION_MM,
+        M6_PULSES_PER_MM,
+        M6_EXTEND_DIRECTION,
+        M6_RETRACT_DIRECTION,
+        PLACE_M6_SPEED_RPM,
+        PLACE_M6_ACCELERATION);
+  }
+  return startLinearAxisMove(
+      extensionAxis,
+      extensionMm,
+      minimumMm,
+      M6_MAXIMUM_EXTENSION_MM,
+      M6_PULSES_PER_MM,
+      M6_EXTEND_DIRECTION,
+      M6_RETRACT_DIRECTION,
+      M6_SPEED_RPM,
+      M6_ACCELERATION);
+}
+
+bool startArmTransferDestinationExtensionToMm(
+    float extensionMm,
+    bool mappedRingPose = false,
+    bool loadedReturnMotion = false) {
+  const float minimumMm =
+      armTransferExtensionMinimumMm(
+          extensionMm,
+          mappedRingPose);
+  if (armTransferUsesRawProfile()) {
+    return startExtensionToContactMmWithProfile(
+        extensionMm,
+        minimumMm,
+        RAW_M6_SPEED_RPM,
+        RAW_M6_ACCELERATION);
+  }
+  if (armTransferUsesPlaceProfile()) {
+    return startLinearAxisMove(
+        extensionAxis,
+        extensionMm,
+        minimumMm,
+        M6_MAXIMUM_EXTENSION_MM,
+        M6_PULSES_PER_MM,
+        M6_EXTEND_DIRECTION,
+        M6_RETRACT_DIRECTION,
+        PLACE_M6_SPEED_RPM,
+        PLACE_M6_ACCELERATION);
+  }
+  if (armTransferUsesReturnProfile()) {
+    return startLinearAxisMove(
+        extensionAxis,
+        extensionMm,
+        minimumMm,
+        M6_MAXIMUM_EXTENSION_MM,
+        M6_PULSES_PER_MM,
+        M6_EXTEND_DIRECTION,
+        M6_RETRACT_DIRECTION,
+        loadedReturnMotion
+            ? arm_config::M6_LOADED_RETURN_SPEED_RPM
+            : RETURN_M6_SPEED_RPM,
+        loadedReturnMotion
+            ? arm_config::M6_LOADED_RETURN_ACCELERATION
+            : RETURN_M6_ACCELERATION);
+  }
+  return startExtensionToContactMmWithProfile(
+      extensionMm,
+      minimumMm,
+      M6_SPEED_RPM,
+      M6_ACCELERATION);
+}
+
+float armTransferClearanceTargetMm(bool mappedDepartureSide) {
+  const float requiredClearanceMm =
+      armTransferRotationClearanceHeightMm(
+          mappedDepartureSide);
+  return liftAxis.currentMm > requiredClearanceMm
+             ? liftAxis.currentMm
+             : requiredClearanceMm;
+}
+
+bool armTransferPlanarMoveIsSafe(
+    bool mappedDepartureSide) {
+  const float requiredClearanceMm =
+      armTransferRotationClearanceHeightMm(
+          mappedDepartureSide);
+  if (!liftMoveFinished() ||
+      liftAxis.currentMm <
+          requiredClearanceMm -
+              ARM_AXIS_POSITION_TOLERANCE_MM) {
+    routeFault(
+        "M5/M6 planar move requested below M7 clearance");
+    return false;
+  }
+  if (extensionAxis.active ||
+      extensionAxis.recoveryPending ||
+      extensionAxis.fault ||
+      armMotors.isM5Running()) {
+    routeFault(
+        "M5/M6 planar move requested while an axis is busy");
+    return false;
+  }
+  return true;
+}
+
+bool startArmTransferPlanarMove(
+    const ArmPose &pose,
+    bool mappedPose,
+    bool mappedDepartureSide,
+    bool sourceExtensionPolicy,
+    bool &rotationStarted,
+    const char *label,
+    bool loadedReturnMotion = false) {
+  if (!armTransferPlanarMoveIsSafe(
+          mappedDepartureSide)) {
+    return false;
+  }
+  if (mappedPose && !ringMapHeadingStillValid()) {
+    return false;
+  }
+
+  if (armTransferUsesReturnProfile()) {
+    if (loadedReturnMotion) {
+      useArmBaseLoadedReturnMotionProfile();
+    } else {
+      useArmBaseReturnMotionProfile();
+    }
+  }
+  startArmBaseStandardFrameDegrees(
+      pose.standardFrameAngleDegrees);
+  rotationStarted = true;
+  const bool extensionStarted =
+      sourceExtensionPolicy
+          ? startArmTransferSourceExtensionToMm(
+                pose.extensionMm,
+                mappedPose)
+          : startArmTransferDestinationExtensionToMm(
+                pose.extensionMm,
+                mappedPose,
+                loadedReturnMotion);
+  if (!extensionStarted) {
+    if (programState != PROGRAM_FAULT) {
+      stopArmBaseImmediately();
+      routeFault("M5/M6 planar parallel start rejected");
+    }
+    return false;
+  }
+
+  SerialDebug.print("[TRANSFER PLANAR] ");
+  SerialDebug.print(label);
+  SerialDebug.println(
+      ": M5 rotation + M6 extension/retraction started together");
+  if (loadedReturnMotion) {
+    SerialDebug.print(
+        "[RING RETURN LOADED] M5/M6 profile matched to tray-to-ring, "
+        "speed=");
+    SerialDebug.print(
+        arm_config::M5_LOADED_RETURN_MAXIMUM_STEP_RATE,
+        0);
+    SerialDebug.print("/");
+    SerialDebug.print(
+        arm_config::M6_LOADED_RETURN_SPEED_RPM);
+    SerialDebug.print("; acceleration=");
+    SerialDebug.print(
+        arm_config::M5_LOADED_RETURN_STEP_ACCELERATION,
+        0);
+    SerialDebug.print("/");
+    SerialDebug.println(
+        arm_config::M6_LOADED_RETURN_ACCELERATION);
+  }
+  return true;
+}
+
+bool startArmTransferLiftToHeightMm(float heightMm) {
+  if (armTransferUsesReturnProfile()) {
+    return startLinearAxisMove(
+        liftAxis,
+        heightMm,
+        M7_MINIMUM_HEIGHT_MM,
+        M7_STANDARD_HEIGHT_MM,
+        M7_PULSES_PER_MM,
+        M7_RAISE_DIRECTION,
+        M7_LOWER_DIRECTION,
+        RETURN_M7_SPEED_RPM,
+        RETURN_M7_ACCELERATION);
+  }
+  if (armTransferUsesRawProfile()) {
+    return startLiftToHeightMmWithProfile(
+        heightMm,
+        RAW_M7_SPEED_RPM,
+        RAW_M7_ACCELERATION);
+  }
+  return startLiftToHeightMm(heightMm);
+}
+
+bool startArmTransferLiftToSourceHeightMm(
+    float heightMm) {
+  if (armTransferUsesReturnProfile()) {
+    SerialDebug.println(
+        "[RING RETURN] direct single-segment source descent");
+    return startLinearAxisMove(
+        liftAxis,
+        heightMm,
+        M7_MINIMUM_HEIGHT_MM,
+        M7_STANDARD_HEIGHT_MM,
+        M7_PULSES_PER_MM,
+        M7_RAISE_DIRECTION,
+        M7_LOWER_DIRECTION,
+        RETURN_M7_SPEED_RPM,
+        RETURN_M7_ACCELERATION);
+  }
+  if (armTransferUsesRawProfile()) {
+    SerialDebug.println(
+        "[RAW PICK] test-matched direct single-segment M7 descent");
+    return startLinearAxisMove(
+        liftAxis,
+        heightMm,
+        M7_MINIMUM_HEIGHT_MM,
+        M7_STANDARD_HEIGHT_MM,
+        M7_PULSES_PER_MM,
+        M7_RAISE_DIRECTION,
+        M7_LOWER_DIRECTION,
+        M7_SPEED_RPM,
+        M7_ACCELERATION);
+  }
+  if (!armTransferMapSource) {
+    SerialDebug.println(
+        "[TRAY PICK] direct single-segment descent; no contact cushion");
+    return startLinearAxisMove(
+        liftAxis,
+        heightMm,
+        M7_MINIMUM_HEIGHT_MM,
+        M7_STANDARD_HEIGHT_MM,
+        M7_PULSES_PER_MM,
+        M7_RAISE_DIRECTION,
+        M7_LOWER_DIRECTION,
+        M7_SPEED_RPM,
+        M7_ACCELERATION);
+  }
+  if (armTransferMapSource) {
+    return startLiftToHeightMmWithProfile(
+        heightMm,
+        RAW_M7_SPEED_RPM,
+        RAW_M7_ACCELERATION);
+  }
+  return startLiftToHeightMm(heightMm);
+}
+
+bool startArmTransferLiftToContactHeightMm(
+    float heightMm) {
+  if (armTransferUsesReturnProfile()) {
+    SerialDebug.println(
+        "[RING RETURN] direct single-segment tray descent");
+    return startLinearAxisMove(
+        liftAxis,
+        heightMm,
+        M7_MINIMUM_HEIGHT_MM,
+        M7_STANDARD_HEIGHT_MM,
+        M7_PULSES_PER_MM,
+        M7_RAISE_DIRECTION,
+        M7_LOWER_DIRECTION,
+        RETURN_M7_SPEED_RPM,
+        RETURN_M7_ACCELERATION);
+  }
+  if (armTransferUsesRawProfile()) {
+    SerialDebug.println(
+        "[TRAY PLACE] RAW direct single-segment descent; no contact cushion");
+    return startLinearAxisMove(
+        liftAxis,
+        heightMm,
+        M7_MINIMUM_HEIGHT_MM,
+        M7_STANDARD_HEIGHT_MM,
+        M7_PULSES_PER_MM,
+        M7_RAISE_DIRECTION,
+        M7_LOWER_DIRECTION,
+        RAW_M7_SPEED_RPM,
+        RAW_M7_ACCELERATION);
+  }
+  return startLiftMoveWithContactSoftLanding(
+      heightMm,
+      M7_SPEED_RPM,
+      M7_ACCELERATION);
+}
 
 bool armPoseIsValid(
     const ArmPose &pose,
@@ -4975,22 +6048,30 @@ void beginArmTransfer(
     bool sourceAlreadyPrepared = false,
     const ArmPose *nextSourcePreparation = nullptr,
     int8_t nextStorageSlot = -1,
-    bool returnToRawViewAtEnd = false) {
+    bool returnToRawViewAtEnd = false,
+    bool rawFastProfile = false,
+    bool sourceGripperAlreadyOpen = false,
+    bool nextSourceMapped = false) {
+  const bool effectiveConcurrentSourcePreparation =
+      concurrentSourcePreparation &&
+      !armGripperLiftIsolationEnabled;
   if (!armPoseIsValid(source, mapSource) ||
       !armPoseIsValid(destination, mapDestination)) {
     routeFault("Transfer pose outside arm travel");
     return;
   }
   if (sourceAlreadyPrepared &&
-      concurrentSourcePreparation) {
+      effectiveConcurrentSourcePreparation) {
     routeFault("Transfer source preparation mode conflict");
     return;
   }
   if (nextSourcePreparation != nullptr &&
-      (!armPoseIsValid(*nextSourcePreparation, false) ||
+      (!armPoseIsValid(
+           *nextSourcePreparation,
+           nextSourceMapped) ||
        nextStorageSlot < 0 ||
        nextStorageSlot > 2)) {
-    routeFault("Next container pickup preparation is invalid");
+    routeFault("Next pickup preparation is invalid");
     return;
   }
   if (returnToRawViewAtEnd &&
@@ -4998,9 +6079,28 @@ void beginArmTransfer(
     routeFault("Transfer final M5 target is ambiguous");
     return;
   }
+  if (sourceAlreadyPrepared &&
+      !sourceGripperAlreadyOpen) {
+    routeFault(
+        "Prepared transfer source requires gripper already open");
+    return;
+  }
 
-  // 普通搬运保持安全顺序；3号识别后的首次抓料必须M7先到0，再并行M5/M6。
-  useArmBaseTransferMotionProfile();
+  armTransferMotionProfile =
+      arm_transfer::selectMotionProfile(
+          rawFastProfile,
+          mapSource,
+          mapDestination,
+          gentleDestinationRelease);
+  if (armTransferUsesRawProfile()) {
+    useArmBaseRawTransferMotionProfile();
+  } else if (armTransferUsesPlaceProfile()) {
+    useArmBasePlaceMotionProfile();
+  } else if (armTransferUsesReturnProfile()) {
+    useArmBaseReturnMotionProfile();
+  } else {
+    useArmBaseTransferMotionProfile();
+  }
   armTransferSourcePose = source;
   armTransferDestinationPose = destination;
   armTransferGentleDestinationRelease =
@@ -5008,7 +6108,7 @@ void beginArmTransfer(
   armTransferMapSource = mapSource;
   armTransferMapDestination = mapDestination;
   armTransferConcurrentSourcePreparation =
-      concurrentSourcePreparation;
+      effectiveConcurrentSourcePreparation;
   armTransferSourceAlreadyPrepared =
       sourceAlreadyPrepared;
   armTransferPrepareNextSource =
@@ -5019,12 +6119,20 @@ void beginArmTransfer(
   } else {
     armTransferNextSourcePose = ArmPose();
   }
+  armTransferNextSourceMapped =
+      armTransferPrepareNextSource &&
+      nextSourceMapped;
   armTransferNextStorageSlot = nextStorageSlot;
   armTransferNextStorageDeadlineMs = 0UL;
+  armTransferStorageCommandDueMs = 0UL;
   armTransferNextStorageCommanded = false;
+  armTransferM7HandoffStartMs = 0UL;
   armTransferNextSourcePreparedAtEnd = false;
   armTransferReturnToRawViewAtEnd =
       returnToRawViewAtEnd;
+  armTransferSourceRotationStarted = false;
+  armTransferDestinationRotationStarted = false;
+  armTransferFinalRotationStarted = false;
 
   SerialDebug.print("Transfer source angle/ext/height: ");
   SerialDebug.print(source.standardFrameAngleDegrees, 2);
@@ -5050,13 +6158,17 @@ void beginArmTransfer(
   SerialDebug.print("/");
   SerialDebug.println(
       armTransferPrepareNextSource ? 1 : 0);
+  if (concurrentSourcePreparation &&
+      !effectiveConcurrentSourcePreparation) {
+    SerialDebug.println(
+        "[WORK INTERLOCK] concurrent gripper/M7 source preparation "
+        "disabled");
+  }
 
   if (armTransferSourceAlreadyPrepared) {
-    /*
-     * 上一件放置结束时已把M7抬到安全零点，同时把M5转到物料盘，
-     * 随后把M6直接收到抓料伸长量。料盘换槽完成后无需重复开爪等待、
-     * M7空回零、M6先回0再伸出，直接下降抓下一件。
-     */
+    const float requiredClearanceMm =
+        armTransferRotationClearanceHeightMm(
+            armTransferMapSource);
     if (liftAxis.active ||
         liftAxis.recoveryPending ||
         liftAxis.fault ||
@@ -5064,10 +6176,9 @@ void beginArmTransfer(
         extensionAxis.recoveryPending ||
         extensionAxis.fault ||
         armMotors.isM5Running() ||
-        fabsf(
-            liftAxis.currentMm -
-            M7_STANDARD_HEIGHT_MM) >
-            ARM_AXIS_POSITION_TOLERANCE_MM ||
+        liftAxis.currentMm <
+            requiredClearanceMm -
+                ARM_AXIS_POSITION_TOLERANCE_MM ||
         fabsf(
             extensionAxis.currentMm -
             armTransferSourcePose.extensionMm) >
@@ -5077,9 +6188,9 @@ void beginArmTransfer(
       return;
     }
     SerialDebug.println(
-        "[TRANSFER SAFE] retained M5/M6 source pose at M7=0; "
-        "lower M7 directly for next pickup");
-    if (!startLiftToHeightMm(
+        "[TRANSFER SAFE] retained M5/M6 source pose and open gripper "
+        "at/above M7 clearance; lower directly for next pickup");
+    if (!startArmTransferLiftToSourceHeightMm(
             armTransferSourcePose.heightMm)) {
       return;
     }
@@ -5088,24 +6199,51 @@ void beginArmTransfer(
     return;
   }
 
-  commandGripperOpen();
-  if (armTransferConcurrentSourcePreparation) {
-    /*
-     * 端点扫描期间夹爪始终已打开。3号确认后M7必须先单独快速升到0；
-     * M6仍伸在圈侧时严禁M5旋转，避免长臂扫倒物料。
-     */
-    if (!startLiftToHeightMm(
-            M7_STANDARD_HEIGHT_MM)) {
+  if (sourceGripperAlreadyOpen) {
+    if (!startArmTransferLiftToHeightMm(
+            armTransferClearanceTargetMm(
+                armTransferMapSource))) {
       return;
     }
     SerialDebug.println(
-        "[TRANSFER SAFE] ring 3 accepted: fast M7 raise first; "
-        "hold M5 until M7 is fully safe");
+        "[TRANSFER DIRECT] gripper already open; "
+        "skip source-open settle");
     armTransferPhase =
         ARM_TRANSFER_WAIT_PREPARE_LIFT;
+    return;
+  }
+
+  if (armGripperLiftIsolationEnabled) {
+    // New safe path: this pre-source wait is orchestration and must stay here,
+    // never inside commandArmTransferGripperOpen(). The old direct-open path
+    // remains below for non-workstation/manual callers with isolation off.
+    armTransferDeadlineMs = 0UL;
+    armTransferPhase =
+        ARM_TRANSFER_WAIT_PRE_SOURCE_OPEN_GAP;
+    SerialDebug.println(
+        "[WORK INTERLOCK] unprepared source waits for M7 short "
+        "handoff before gripper open");
+    return;
+  }
+
+  commandArmTransferGripperOpen();
+  if (armTransferConcurrentSourcePreparation) {
+
+    if (!startArmTransferLiftToHeightMm(
+            arm_config::RING_ROTATION_CLEARANCE_HEIGHT_MM)) {
+      return;
+    }
+    SerialDebug.println(
+        "[TRANSFER PIPELINE] ring 3 accepted: M7 raises to "
+        "rotation clearance before first tray pickup");
+    armTransferPhase =
+        ARM_TRANSFER_WAIT_PREPARE_CLEARANCE;
   } else {
     armTransferDeadlineMs =
-        millis() + GRIPPER_OPEN_SETTLE_MS;
+        millis() + armTransferGripperOpenSettleMs() +
+        (armGripperLiftIsolationEnabled
+             ? WORK_GRIPPER_TO_M7_GAP_MS
+             : 0UL);
     armTransferPhase =
         ARM_TRANSFER_WAIT_SOURCE_OPEN;
   }
@@ -5113,10 +6251,11 @@ void beginArmTransfer(
 
 void startArmTransferDestinationDescent() {
   if (!armTransferGentleDestinationRelease) {
-    startLiftToHeightMm(
-        armTransferDestinationPose.heightMm);
-    armTransferPhase =
-        ARM_TRANSFER_WAIT_DESTINATION_LOWER;
+    if (startArmTransferLiftToContactHeightMm(
+            armTransferDestinationPose.heightMm)) {
+      armTransferPhase =
+          ARM_TRANSFER_WAIT_DESTINATION_LOWER;
+    }
     return;
   }
 
@@ -5131,17 +6270,16 @@ void startArmTransferDestinationDescent() {
   SerialDebug.print(" mm; final ");
   SerialDebug.print(RING_PLACE_FINAL_DESCENT_MM, 1);
   SerialDebug.println(" mm will use mild slow profile");
-  startLiftToHeightMm(approachHeightMm);
-  armTransferPhase =
-      ARM_TRANSFER_WAIT_DESTINATION_APPROACH;
+  if (startLiftToHeightMm(approachHeightMm)) {
+    armTransferPhase =
+        ARM_TRANSFER_WAIT_DESTINATION_APPROACH;
+  }
 }
 
 void releaseArmTransferDestination() {
-  if (armTransferPrepareNextSource) {
-    /*
-     * 松爪时物料已到圆环，料盘可立即换到下一槽；把300 ms舵机等待隐藏在
-     * M7先上升、随后M5/M6不经0直接并行到下一抓料姿态的流水中。
-     */
+  if (armTransferPrepareNextSource &&
+      !armTransferUsesReturnProfile()) {
+
     commandStorageServoPosition(
         static_cast<uint8_t>(
             armTransferNextStorageSlot));
@@ -5154,27 +6292,79 @@ void releaseArmTransferDestination() {
         static_cast<int>(
             armTransferNextStorageSlot));
   }
-  commandGripperOpen();
+  commandArmTransferGripperOpen();
+  const uint32_t gripperOpenCommandMs = millis();
+  if (armTransferUsesReturnProfile()) {
+    armTransferStorageCommandDueMs =
+        gripperOpenCommandMs +
+        armTransferGripperOpenSettleMs() +
+        RING_RETURN_STORAGE_COMMAND_DELAY_MS;
+    SerialDebug.println(
+        "[RING RETURN STORAGE] gripper release completion + 500 ms "
+        "required before turntable command");
+  }
   armTransferDeadlineMs =
-      millis() + GRIPPER_OPEN_SETTLE_MS;
+      gripperOpenCommandMs +
+      armTransferGripperOpenSettleMs() +
+      (armGripperLiftIsolationEnabled
+           ? WORK_GRIPPER_TO_M7_GAP_MS
+           : 0UL);
   armTransferPhase =
       ARM_TRANSFER_WAIT_DESTINATION_OPEN;
 }
 
+void serviceArmTransferDeferredStorageCommand() {
+  if (!armTransferUsesReturnProfile() ||
+      !armTransferPrepareNextSource ||
+      armTransferNextStorageCommanded ||
+      armTransferStorageCommandDueMs == 0UL ||
+      !deadlineReached(armTransferStorageCommandDueMs)) {
+    return;
+  }
+
+  commandStorageServoPosition(
+      static_cast<uint8_t>(armTransferNextStorageSlot));
+  armTransferNextStorageDeadlineMs =
+      millis() + STORAGE_SERVO_SETTLE_MS;
+  armTransferNextStorageCommanded = true;
+  SerialDebug.print(
+      "[RING RETURN STORAGE] 500 ms post-release delay complete; "
+      "turntable commanded, arrival-gate-ms=");
+  SerialDebug.println(STORAGE_SERVO_SETTLE_MS);
+}
+
 void serviceArmTransfer() {
+  serviceArmTransferDeferredStorageCommand();
   switch (armTransferPhase) {
     case ARM_TRANSFER_IDLE:
     case ARM_TRANSFER_COMPLETE:
       return;
 
+    case ARM_TRANSFER_WAIT_PRE_SOURCE_OPEN_GAP:
+      if (!liftMoveFinished()) {
+        break;
+      }
+      if (armTransferDeadlineMs == 0UL) {
+        armTransferDeadlineMs =
+            millis() + WORK_M7_TO_GRIPPER_GAP_MS;
+        break;
+      }
+      if (deadlineReached(armTransferDeadlineMs)) {
+        commandArmTransferGripperOpen();
+        armTransferDeadlineMs =
+            millis() + armTransferGripperOpenSettleMs() +
+            WORK_GRIPPER_TO_M7_GAP_MS;
+        armTransferPhase =
+            ARM_TRANSFER_WAIT_SOURCE_OPEN;
+      }
+      break;
+
     case ARM_TRANSFER_WAIT_SOURCE_OPEN:
       if (deadlineReached(armTransferDeadlineMs)) {
-        /*
-         * 线性轴命令握手会短暂阻塞，必须先启动M7，再启动独立的M5。
-         * M6仍等M7完成后再收回，保留共享EMM串口互斥。
-         */
-        if (!startLiftToHeightMm(
-                M7_STANDARD_HEIGHT_MM)) {
+
+        if (!startArmTransferLiftToHeightMm(
+                armTransferClearanceTargetMm(
+                    armTransferMapSource))) {
           break;
         }
         armTransferPhase =
@@ -5182,25 +6372,30 @@ void serviceArmTransfer() {
       }
       break;
 
+    case ARM_TRANSFER_WAIT_PREPARE_CLEARANCE:
+      if (liftMoveFinished()) {
+        if (startArmTransferPlanarMove(
+                armTransferSourcePose,
+                armTransferMapSource,
+                armTransferMapSource,
+                true,
+                armTransferSourceRotationStarted,
+                "clearance -> source")) {
+          armTransferPhase =
+              ARM_TRANSFER_WAIT_SOURCE_ROTATION;
+        }
+      }
+      break;
+
     case ARM_TRANSFER_WAIT_PREPARE_LIFT:
       if (liftMoveFinished()) {
-        /*
-         * M7到0后，M6不再经过0 mm、M5也不再经过0°。先完成M6目标
-         * 命令握手，再让M5从当前角直接转源角，两轴物理运动并行。
-         */
-        const bool extensionStarted =
-            armTransferMapSource
-                ? startMappedRingExtensionToMm(
-                      armTransferSourcePose.extensionMm)
-                : startExtensionToMm(
-                      armTransferSourcePose.extensionMm);
-        if (extensionStarted) {
-          startArmBaseStandardFrameDegrees(
-              armTransferSourcePose
-                  .standardFrameAngleDegrees);
-          SerialDebug.println(
-              "[TRANSFER DIRECT] M7 safe: M6 direct source + "
-              "M5 direct source angle in parallel; no M5 zero");
+        if (startArmTransferPlanarMove(
+                armTransferSourcePose,
+                armTransferMapSource,
+                armTransferMapSource,
+                true,
+                armTransferSourceRotationStarted,
+                "M7 safe -> source")) {
           armTransferPhase =
               ARM_TRANSFER_WAIT_SOURCE_ROTATION;
         }
@@ -5209,9 +6404,10 @@ void serviceArmTransfer() {
 
     case ARM_TRANSFER_WAIT_SOURCE_ROTATION:
       if (!armMotors.isM5Running() &&
-          extensionMoveFinished()) {
+          extensionMoveFinished() &&
+          liftMoveFinished()) {
         armTransferDeadlineMs =
-            millis() + ARM_BASE_SETTLE_MS;
+            millis() + armTransferTransitionSettleMs();
         armTransferPhase =
             ARM_TRANSFER_WAIT_SOURCE_ROTATION_SETTLE;
       }
@@ -5219,69 +6415,89 @@ void serviceArmTransfer() {
 
     case ARM_TRANSFER_WAIT_SOURCE_ROTATION_SETTLE:
       if (deadlineReached(armTransferDeadlineMs)) {
-        const bool extensionStarted =
-            armTransferMapSource
-                ? startMappedRingExtensionToMm(
-                      armTransferSourcePose.extensionMm)
-                : startExtensionToMm(
-                      armTransferSourcePose.extensionMm);
-        if (extensionStarted) {
-          armTransferPhase =
-              ARM_TRANSFER_WAIT_SOURCE_EXTENSION;
-        }
-      }
-      break;
-
-    case ARM_TRANSFER_WAIT_SOURCE_EXTENSION:
-      if (extensionMoveFinished()) {
         if (armTransferMapSource &&
             !ringMapHeadingStillValid()) {
           return;
         }
-        startLiftToHeightMm(
-            armTransferSourcePose.heightMm);
-        armTransferPhase =
-            ARM_TRANSFER_WAIT_SOURCE_LOWER;
+        if (startArmTransferLiftToSourceHeightMm(
+                armTransferSourcePose.heightMm)) {
+          armTransferPhase =
+              ARM_TRANSFER_WAIT_SOURCE_LOWER;
+        }
       }
       break;
 
     case ARM_TRANSFER_WAIT_SOURCE_LOWER:
       if (liftMoveFinished()) {
-        commandGripperClose();
+        if (armGripperLiftIsolationEnabled) {
+          armTransferM7HandoffStartMs = millis();
+          armTransferDeadlineMs =
+              millis() + WORK_M7_TO_GRIPPER_GAP_MS;
+          armTransferPhase =
+              ARM_TRANSFER_WAIT_SOURCE_GRIPPER_GAP;
+          SerialDebug.println(
+              "[WORK INTERLOCK] M7 source stop -> short handoff "
+              "before gripper close");
+        } else {
+          commandArmTransferGripperClose();
+          armTransferDeadlineMs =
+              millis() + armTransferGripperCloseSettleMs();
+          armTransferPhase =
+              ARM_TRANSFER_WAIT_GRIP_CLOSE;
+        }
+      }
+      break;
+
+    case ARM_TRANSFER_WAIT_SOURCE_GRIPPER_GAP:
+      if (deadlineReached(armTransferDeadlineMs)) {
+        SerialDebug.print(
+            "[WORK TIMING] M7 verified source stop -> gripper close "
+            "command ms=");
+        SerialDebug.print(
+            millis() - armTransferM7HandoffStartMs);
+        SerialDebug.print(" (limit ");
+        SerialDebug.print(WORK_M7_TO_GRIPPER_RESPONSE_LIMIT_MS);
+        SerialDebug.println(" ms)");
+        commandArmTransferGripperClose();
+        armTransferM7HandoffStartMs = 0UL;
         armTransferDeadlineMs =
-            millis() + GRIPPER_CLOSE_SETTLE_MS;
+            millis() + armTransferGripperCloseSettleMs() +
+            WORK_GRIPPER_TO_M7_GAP_MS;
         armTransferPhase =
             ARM_TRANSFER_WAIT_GRIP_CLOSE;
+        SerialDebug.println(
+            "[WORK INTERLOCK] source gap complete -> gripper close; "
+            "M7 blocked through close completion + short handoff");
       }
       break;
 
     case ARM_TRANSFER_WAIT_GRIP_CLOSE:
       if (deadlineReached(armTransferDeadlineMs)) {
-        startLiftToHeightMm(M7_STANDARD_HEIGHT_MM);
-        armTransferPhase =
-            ARM_TRANSFER_WAIT_LOADED_LIFT;
+        const float clearanceHeightMm =
+            armTransferRotationClearanceHeightMm(
+                armTransferMapSource);
+        if (startArmTransferLiftToHeightMm(
+                clearanceHeightMm)) {
+          SerialDebug.print(
+              "[TRANSFER PIPELINE] loaded M7 -> rotation "
+              "clearance ");
+          SerialDebug.println(clearanceHeightMm, 1);
+          armTransferPhase =
+              ARM_TRANSFER_WAIT_LOADED_CLEARANCE;
+        }
       }
       break;
 
-    case ARM_TRANSFER_WAIT_LOADED_LIFT:
+    case ARM_TRANSFER_WAIT_LOADED_CLEARANCE:
       if (liftMoveFinished()) {
-        /*
-         * 带料升到安全高度后，M6不再先回0，M5也不经过0°。
-         * M6直接去目的伸长量，完成握手后M5从当前源角直转目的角。
-         */
-        const bool extensionStarted =
-            armTransferMapDestination
-                ? startMappedRingExtensionToMm(
-                      armTransferDestinationPose.extensionMm)
-                : startExtensionToMm(
-                      armTransferDestinationPose.extensionMm);
-        if (extensionStarted) {
-          startArmBaseStandardFrameDegrees(
-              armTransferDestinationPose
-                  .standardFrameAngleDegrees);
-          SerialDebug.println(
-              "[TRANSFER DIRECT] M7 safe: M6 direct destination + "
-              "M5 direct destination angle in parallel; no M5 zero");
+        if (startArmTransferPlanarMove(
+                armTransferDestinationPose,
+                armTransferMapDestination,
+                armTransferMapSource,
+                false,
+                armTransferDestinationRotationStarted,
+                "loaded clearance -> destination",
+                armTransferUsesReturnProfile())) {
           armTransferPhase =
               ARM_TRANSFER_WAIT_DESTINATION_ROTATION;
         }
@@ -5290,48 +6506,16 @@ void serviceArmTransfer() {
 
     case ARM_TRANSFER_WAIT_DESTINATION_ROTATION:
       if (!armMotors.isM5Running() &&
-          extensionMoveFinished()) {
+          extensionMoveFinished() &&
+          liftMoveFinished()) {
         armTransferDeadlineMs =
-            millis() + ARM_BASE_SETTLE_MS;
+            millis() + armTransferTransitionSettleMs();
         armTransferPhase =
             ARM_TRANSFER_WAIT_DESTINATION_ROTATION_SETTLE;
       }
       break;
 
     case ARM_TRANSFER_WAIT_DESTINATION_ROTATION_SETTLE:
-      if (deadlineReached(armTransferDeadlineMs)) {
-        const bool extensionStarted =
-            armTransferMapDestination
-                ? startMappedRingExtensionToMm(
-                      armTransferDestinationPose.extensionMm)
-                : startExtensionToMm(
-                      armTransferDestinationPose.extensionMm);
-        if (extensionStarted) {
-          armTransferPhase =
-              ARM_TRANSFER_WAIT_DESTINATION_EXTENSION;
-        }
-      }
-      break;
-
-    case ARM_TRANSFER_WAIT_DESTINATION_EXTENSION:
-      if (extensionMoveFinished()) {
-        if (armTransferMapDestination &&
-            !ringMapHeadingStillValid()) {
-          return;
-        }
-        if (armTransferGentleDestinationRelease) {
-          armTransferDeadlineMs =
-              millis() +
-              RING_PLACE_EXTENSION_SETTLE_MS;
-          armTransferPhase =
-              ARM_TRANSFER_WAIT_DESTINATION_EXTENSION_SETTLE;
-        } else {
-          startArmTransferDestinationDescent();
-        }
-      }
-      break;
-
-    case ARM_TRANSFER_WAIT_DESTINATION_EXTENSION_SETTLE:
       if (deadlineReached(armTransferDeadlineMs)) {
         if (armTransferMapDestination &&
             !ringMapHeadingStillValid()) {
@@ -5353,88 +6537,110 @@ void serviceArmTransfer() {
         SerialDebug.print("/");
         SerialDebug.println(
             M7_RING_PLACE_ACCELERATION);
-        startLiftToHeightMmWithProfile(
-            armTransferDestinationPose.heightMm,
-            M7_RING_PLACE_SPEED_RPM,
-            M7_RING_PLACE_ACCELERATION);
-        armTransferPhase =
-            ARM_TRANSFER_WAIT_DESTINATION_LOWER;
+        if (startLiftToHeightMmWithProfile(
+                armTransferDestinationPose.heightMm,
+                M7_RING_PLACE_SPEED_RPM,
+                M7_RING_PLACE_ACCELERATION)) {
+          armTransferPhase =
+              ARM_TRANSFER_WAIT_DESTINATION_LOWER;
+        }
       }
       break;
 
     case ARM_TRANSFER_WAIT_DESTINATION_LOWER:
       if (liftMoveFinished()) {
-        if (armTransferGentleDestinationRelease) {
-          SerialDebug.println(
-              "[RING PLACE] final height reached; "
-              "settle before release");
+        if (armGripperLiftIsolationEnabled) {
+          const uint32_t destinationGapMs =
+              armTransferDestinationM7ToGripperGapMs();
+          armTransferM7HandoffStartMs = millis();
           armTransferDeadlineMs =
-              millis() +
-              RING_PLACE_LOWER_SETTLE_MS;
+              millis() + destinationGapMs;
           armTransferPhase =
-              ARM_TRANSFER_WAIT_DESTINATION_LOWER_SETTLE;
+              ARM_TRANSFER_WAIT_DESTINATION_GRIPPER_GAP;
+          SerialDebug.println(
+              "[WORK INTERLOCK] M7 destination stop -> short handoff "
+              "before gripper open");
         } else {
           releaseArmTransferDestination();
         }
       }
       break;
 
-    case ARM_TRANSFER_WAIT_DESTINATION_LOWER_SETTLE:
+    case ARM_TRANSFER_WAIT_DESTINATION_GRIPPER_GAP:
       if (deadlineReached(armTransferDeadlineMs)) {
+        SerialDebug.print(
+            "[WORK TIMING] M7 verified destination stop -> gripper open "
+            "command ms=");
+        SerialDebug.print(
+            millis() - armTransferM7HandoffStartMs);
+        SerialDebug.print(" (limit ");
+        SerialDebug.print(WORK_M7_TO_GRIPPER_RESPONSE_LIMIT_MS);
+        SerialDebug.println(" ms)");
         releaseArmTransferDestination();
+        armTransferM7HandoffStartMs = 0UL;
+        SerialDebug.println(
+            "[WORK INTERLOCK] destination gap complete -> gripper "
+            "open; M7 blocked through open completion + short handoff");
       }
       break;
 
     case ARM_TRANSFER_WAIT_DESTINATION_OPEN:
       if (deadlineReached(armTransferDeadlineMs)) {
-        /*
-         * 无论是否还有下一件，先让M7单独快速升到0。M6仍伸在圆环侧时，
-         * M5保持不动，彻底取消上一版会扫倒物料的提前旋转。
-         */
-        if (!startLiftToHeightMm(
-                M7_STANDARD_HEIGHT_MM)) {
-          break;
+        const float clearanceHeightMm =
+            armTransferRotationClearanceHeightMm(
+                armTransferMapDestination);
+        if (startArmTransferLiftToHeightMm(
+                clearanceHeightMm)) {
+          SerialDebug.print(
+              "[TRANSFER PIPELINE] released M7 -> rotation "
+              "clearance ");
+          SerialDebug.println(clearanceHeightMm, 1);
+          armTransferPhase =
+              ARM_TRANSFER_WAIT_FINAL_CLEARANCE;
         }
-        if (armTransferPrepareNextSource) {
-          SerialDebug.println(
-              "[TRANSFER SAFE] release complete: fast M7 raise "
-              "first; M5 locked until full height");
-        }
-        armTransferPhase =
-            ARM_TRANSFER_WAIT_FINAL_LIFT;
       }
       break;
 
-    case ARM_TRANSFER_WAIT_FINAL_LIFT:
+    case ARM_TRANSFER_WAIT_FINAL_CLEARANCE:
       if (liftMoveFinished()) {
+        if (armTransferPrepareNextSource &&
+            !armTransferUsesReturnProfile() &&
+            !armTransferNextStorageCommanded) {
+          commandStorageServoPosition(
+              static_cast<uint8_t>(
+                  armTransferNextStorageSlot));
+          armTransferNextStorageDeadlineMs =
+              millis() + STORAGE_SERVO_SETTLE_MS;
+          armTransferNextStorageCommanded = true;
+        }
         const float extensionTargetMm =
             armTransferPrepareNextSource
                 ? armTransferNextSourcePose.extensionMm
-                : M6_STANDARD_EXTENSION_MM;
-        if (startExtensionToMm(
-                extensionTargetMm)) {
-          if (armTransferPrepareNextSource) {
-            /*
-             * M7确认到0后，M6直接去抓料6 mm；握手完成后M5从当前
-             * 放料角直接转-103°。两者并行，完全删除M5中间0°。
-             */
-            startArmBaseStandardFrameDegrees(
-                armTransferNextSourcePose
-                    .standardFrameAngleDegrees);
-            SerialDebug.println(
-                "[TRANSFER DIRECT] M7 safe: M6 direct pickup + "
-                "M5 direct pickup angle in parallel; no M5 zero");
-          } else if (armTransferReturnToRawViewAtEnd) {
-            /*
-             * RAW相机标定以标准坐标0°为实际拍摄姿态。前两件放入料盘后，
-             * 这里把它作为下一次识别的真实目标，而不是搬运中间点；
-             * M6握手后M5立刻并行转向，转到即开始下一次视觉。
-             */
-            startArmBaseStandardFrameDegrees(0.0f);
-            SerialDebug.println(
-                "[RAW PIPELINE] M7 safe: M6 retract + "
-                "M5 direct next-view target in parallel");
-          }
+                : (armTransferReturnToRawViewAtEnd
+                       ? RAW_VIEW_EXTENSION_MM
+                       : M6_STANDARD_EXTENSION_MM);
+        const float angleTargetDegrees =
+            armTransferPrepareNextSource
+                ? armTransferNextSourcePose
+                      .standardFrameAngleDegrees
+                : (armTransferReturnToRawViewAtEnd
+                       ? 0.0f
+                       : armTransferDestinationPose
+                             .standardFrameAngleDegrees);
+        const bool mappedNextPose =
+            armTransferPrepareNextSource &&
+            armTransferNextSourceMapped;
+        const ArmPose finalPose(
+            angleTargetDegrees,
+            extensionTargetMm,
+            liftAxis.currentMm);
+        if (startArmTransferPlanarMove(
+                finalPose,
+                mappedNextPose,
+                armTransferMapDestination,
+                true,
+                armTransferFinalRotationStarted,
+                "release clearance -> next pose")) {
           armTransferPhase =
               ARM_TRANSFER_WAIT_FINAL_RETRACT;
         }
@@ -5443,26 +6649,24 @@ void serviceArmTransfer() {
 
     case ARM_TRANSFER_WAIT_FINAL_RETRACT:
       if (extensionMoveFinished() &&
+          liftMoveFinished() &&
           (!(armTransferPrepareNextSource ||
              armTransferReturnToRawViewAtEnd) ||
            !armMotors.isM5Running())) {
-        armTransferPhase =
-            ARM_TRANSFER_WAIT_STANDARD_ROTATION;
-      }
-      break;
-
-    case ARM_TRANSFER_WAIT_STANDARD_ROTATION:
-      if (!armMotors.isM5Running() &&
-          extensionMoveFinished()) {
         armTransferDeadlineMs =
-            millis() + ARM_BASE_SETTLE_MS;
+            millis() + armTransferTransitionSettleMs();
         armTransferPhase =
             ARM_TRANSFER_WAIT_STANDARD_SETTLE;
       }
       break;
 
     case ARM_TRANSFER_WAIT_STANDARD_SETTLE:
-      if (deadlineReached(armTransferDeadlineMs)) {
+      if (deadlineReached(armTransferDeadlineMs) &&
+          (!armTransferUsesReturnProfile() ||
+           (armTransferStorageCommandDueMs != 0UL &&
+            deadlineReached(armTransferStorageCommandDueMs))) &&
+          (!armTransferPrepareNextSource ||
+           armTransferNextStorageCommanded)) {
         if (armTransferPrepareNextSource) {
           armTransferNextSourcePreparedAtEnd = true;
           SerialDebug.println(
@@ -5481,39 +6685,25 @@ bool armTransferFinished() {
 
 void consumeArmTransferCompletion() {
   armTransferPhase = ARM_TRANSFER_IDLE;
+  armTransferM7HandoffStartMs = 0UL;
   armTransferMapSource = false;
   armTransferMapDestination = false;
   armTransferConcurrentSourcePreparation = false;
   armTransferSourceAlreadyPrepared = false;
   armTransferPrepareNextSource = false;
   armTransferNextSourcePose = ArmPose();
+  armTransferNextSourceMapped = false;
   armTransferNextStorageSlot = -1;
   armTransferNextStorageDeadlineMs = 0UL;
+  armTransferStorageCommandDueMs = 0UL;
   armTransferNextStorageCommanded = false;
   armTransferNextSourcePreparedAtEnd = false;
   armTransferReturnToRawViewAtEnd = false;
-}
-
-ArmPose containerPose(
-    float angleDegrees,
-    float lowerMm) {
-  return ArmPose(
-      angleDegrees,
-      M6_STANDARD_EXTENSION_MM,
-      -lowerMm);
-}
-
-ArmPose containerPickPose() {
-  return ArmPose(
-      ARM_CONTAINER_PICK_ANGLE_DEGREES,
-      ARM_CONTAINER_PICK_EXTENSION_MM,
-      -CONTAINER_PICK_LOWER_MM);
-}
-
-ArmPose containerPlacePose() {
-  return containerPose(
-      ARM_CONTAINER_PLACE_ANGLE_DEGREES,
-      CONTAINER_PLACE_LOWER_MM);
+  armTransferSourceRotationStarted = false;
+  armTransferDestinationRotationStarted = false;
+  armTransferFinalRotationStarted = false;
+  armTransferMotionProfile =
+      arm_transfer::PROFILE_STANDARD;
 }
 
 bool nominalRingPose(
@@ -5525,10 +6715,6 @@ bool nominalRingPose(
     return false;
   }
 
-  /*
-   * 1号按+30°～+60°从+45°/90 mm首看；3号按-60°～-30°从-45°
-   * 首看。这里只负责首次看见圆，最终点仍由视觉闭环测量。
-   */
   pose.standardFrameAngleDegrees =
       ringPosition == 1U
           ? ENDPOINT_RING1_SEARCH_SEED_ANGLE_DEGREES
@@ -5559,9 +6745,12 @@ bool planarPointToRingPose(
   const float angleDegrees =
       atan2f(point.leftMm, point.outwardMm) *
       180.0f / PI_F;
-  const float extensionMm =
+  const float rawExtensionMm =
       radialDistanceMm -
       ARM_PIVOT_TO_GRIPPER_CENTER_MM;
+  const float correctedExtensionMm =
+      rawExtensionMm -
+      arm_config::MAPPED_RING_EXTENSION_REDUCTION_MM;
   const bool ring2 = ringPosition == 2U;
   const float minimumExtensionMm =
       ring2
@@ -5569,10 +6758,10 @@ bool planarPointToRingPose(
           : M6_STANDARD_EXTENSION_MM;
 
   if ((!ring2 &&
-       extensionMm <
+       correctedExtensionMm <
            minimumExtensionMm -
                ARM_AXIS_POSITION_TOLERANCE_MM) ||
-      extensionMm >
+      correctedExtensionMm >
           M6_MAXIMUM_EXTENSION_MM +
               ARM_AXIS_POSITION_TOLERANCE_MM ||
       angleDegrees <
@@ -5580,7 +6769,7 @@ bool planarPointToRingPose(
       angleDegrees >
           RING_TARGET_MAXIMUM_ANGLE_DEGREES) {
     SerialDebug.print(
-        "[RING MAP] unreachable xy/r/angle/ext=");
+        "[RING MAP] unreachable xy/r/angle/raw-ext/corrected-ext=");
     SerialDebug.print(point.outwardMm, 2);
     SerialDebug.print(",");
     SerialDebug.print(point.leftMm, 2);
@@ -5589,19 +6778,25 @@ bool planarPointToRingPose(
     SerialDebug.print("/");
     SerialDebug.print(angleDegrees, 2);
     SerialDebug.print("/");
-    SerialDebug.println(extensionMm, 2);
+    SerialDebug.print(rawExtensionMm, 2);
+    SerialDebug.print("/");
+    SerialDebug.println(correctedExtensionMm, 2);
     routeFault("Measured ring outside safe arm workspace");
     return false;
   }
 
-  float commandedExtensionMm = extensionMm;
+  float commandedExtensionMm = correctedExtensionMm;
   if (commandedExtensionMm < minimumExtensionMm) {
     commandedExtensionMm = minimumExtensionMm;
   }
-  if (ring2 && extensionMm < M6_STANDARD_EXTENSION_MM) {
+  if (ring2 &&
+      correctedExtensionMm < M6_STANDARD_EXTENSION_MM) {
     SerialDebug.print(
-        "[RING MAP] ring 2 near-side M6 raw/command/physical-margin=");
-    SerialDebug.print(extensionMm, 2);
+        "[RING MAP] ring 2 near-side M6 raw/corrected/command/"
+        "physical-margin=");
+    SerialDebug.print(rawExtensionMm, 2);
+    SerialDebug.print("/");
+    SerialDebug.print(correctedExtensionMm, 2);
     SerialDebug.print("/");
     SerialDebug.print(commandedExtensionMm, 2);
     SerialDebug.print("/");
@@ -5614,6 +6809,13 @@ bool planarPointToRingPose(
   pose.standardFrameAngleDegrees = angleDegrees;
   pose.extensionMm = commandedExtensionMm;
   pose.heightMm = -lowerMm;
+  SerialDebug.print(
+      "[RING MAP] M6 visual raw/-8mm/command=");
+  SerialDebug.print(rawExtensionMm, 2);
+  SerialDebug.print("/");
+  SerialDebug.print(correctedExtensionMm, 2);
+  SerialDebug.print("/");
+  SerialDebug.println(commandedExtensionMm, 2);
   return true;
 }
 
@@ -5670,11 +6872,6 @@ bool predictedRing3SearchPose(ArmPose &pose) {
     return false;
   }
 
-  /*
-   * 底盘已锁定工位航向，圆排在机械臂标准坐标的left轴上。1号压中后，
-   * 直接沿该轴跨越两格（300 mm）得到3号高位搜索点；mode10闭环负责
-   * 消除停车姿态和圆排轻微倾斜造成的剩余误差。
-   */
   const PlanarPoint predictedPoint(
       measuredRingPoints[1U].outwardMm,
       measuredRingPoints[1U].leftMm -
@@ -5691,9 +6888,7 @@ bool predictedRing3SearchPose(ArmPose &pose) {
     routeFault("Predicted ring 3 is not on the expected M5 side");
     return false;
   }
-  /*
-   * 预测结果只保留M6半径；3号M5固定为-45°，失败时只看-60°、-30°。
-   */
+
   pose.standardFrameAngleDegrees =
       ENDPOINT_RING3_SEARCH_SEED_ANGLE_DEGREES;
 
@@ -5729,12 +6924,31 @@ bool ringPose(
     return false;
   }
 
-  /*
-   * 实际取放只允许使用停车后由相机实测1/3并插值得到的机械臂局部地图。
-   * 场地坐标和开环路线只负责把车送到可达范围，绝不参与这里的M5/M6解算。
-   */
   pose = measuredRingPoses[ringPosition];
   pose.heightMm = -lowerMm;
+  return true;
+}
+
+bool applyTargetPlacementExtraLower(ArmPose &pose) {
+  const float correctedHeightMm =
+      pose.heightMm -
+      arm_config::TARGET_PLACE_EXTRA_LOWER_MM;
+  if (correctedHeightMm <
+      M7_MINIMUM_HEIGHT_MM -
+          ARM_AXIS_POSITION_TOLERANCE_MM) {
+    routeFault("Target placement extra lower exceeds M7 travel");
+    return false;
+  }
+  SerialDebug.print(
+      "[TARGET PLACE Z] mapped/extra/corrected-mm=");
+  SerialDebug.print(pose.heightMm, 2);
+  SerialDebug.print("/-");
+  SerialDebug.print(
+      arm_config::TARGET_PLACE_EXTRA_LOWER_MM,
+      1);
+  SerialDebug.print("/");
+  SerialDebug.println(correctedHeightMm, 2);
+  pose.heightMm = correctedHeightMm;
   return true;
 }
 
@@ -5766,12 +6980,6 @@ bool endpointVisionToPlanarPoint(
     return false;
   }
 
-  /*
-   * 圆环中心线实测半径41.75 mm，因此同一帧的mm/px可由41.75/r
-   * 自适应得到。
-   * 局部坐标：图像+y向下对应机械臂向内，图像+x向右对应顺时针，
-   * 所以标准坐标的向外/逆时针切向偏移都取负号。
-   */
   const float mmPerPixel =
       RING_PHYSICAL_RADIUS_MM /
       static_cast<float>(radiusPixels);
@@ -5799,7 +7007,7 @@ bool endpointVisionToPlanarPoint(
       localLeftMm * cosine;
 
   SerialDebug.print(
-      "[ENDPOINT MAP] image xy/r, scale, arm xy=");
+      "[ENDPOINT MAP] image-xy/r/scale, scan-M5/M6/M7, arm-xy=");
   SerialDebug.print(imageX);
   SerialDebug.print(",");
   SerialDebug.print(imageY);
@@ -5807,6 +7015,14 @@ bool endpointVisionToPlanarPoint(
   SerialDebug.print(radiusPixels);
   SerialDebug.print(", ");
   SerialDebug.print(mmPerPixel, 4);
+  SerialDebug.print(", ");
+  SerialDebug.print(
+      scanPose.standardFrameAngleDegrees,
+      2);
+  SerialDebug.print("/");
+  SerialDebug.print(scanPose.extensionMm, 2);
+  SerialDebug.print("/");
+  SerialDebug.print(scanPose.heightMm, 2);
   SerialDebug.print(", ");
   SerialDebug.print(point.outwardMm, 2);
   SerialDebug.print(",");
@@ -6005,38 +7221,35 @@ bool buildMeasuredRingMap() {
   return true;
 }
 
-bool rawTargetPose(
+enum RawTargetPoseResult {
+  RAW_TARGET_POSE_VALID,
+  RAW_TARGET_WAIT_TOO_NEAR,
+  RAW_TARGET_WAIT_TOO_FAR
+};
+
+RawTargetPoseResult rawTargetPose(
     float pixelX,
     float pixelY,
     ArmPose &pose) {
-  /*
-   * 只在稳定窗口完成后计算一次：
-   *   图像是x向右、y向下为正的左手系；
-   *   x>160时，为使目标横坐标减小到160，M5必须顺时针，故标准角取负；
-   *   y>120时，为使目标纵坐标减小到120，M6应缩短；
-   *   y<120时，为使目标纵坐标增大到120，M6应伸长。
-   *   因此图像+y与机械臂向外方向相反，使用
-   *   IMAGE_Y_TO_ARM_OUTWARD_SIGN=-1换算。
-   */
+
   const float pixelDeltaX =
       pixelX - static_cast<float>(IMAGE_CENTER_X);
   const float pixelDeltaY =
       pixelY - static_cast<float>(IMAGE_CENTER_Y);
   const float pixelRadius =
       hypotf(pixelDeltaX, pixelDeltaY);
-  /*
-   * 横纵偏差共用同一档比例，避免分别选档后改变偏移向量方向。
-   * 到画面中心的距离不超过50像素用40/72，超过50像素用70/72。
-   * 这仍是两档实调模型；正式版应由标定数据替换为连续单应性/多项式。
-   */
+
   const float rawMmPerPixel =
       pixelRadius <= PIXEL_MAPPING_SWITCH_RADIUS_PIXELS
           ? RAW_NEAR_MM_PER_PIXEL
           : RAW_FAR_MM_PER_PIXEL;
   const float clockwiseTangentMm =
       pixelDeltaX * rawMmPerPixel;
-  const float radialMm =
+  const float cameraRadiusMm =
       ARM_PIVOT_TO_CAMERA_CENTER_MM +
+      RAW_VIEW_EXTENSION_MM;
+  const float radialMm =
+      cameraRadiusMm +
       pixelDeltaY *
           rawMmPerPixel *
           IMAGE_Y_TO_ARM_OUTWARD_SIGN;
@@ -6044,31 +7257,64 @@ bool rawTargetPose(
       hypotf(radialMm, clockwiseTangentMm);
   const float extensionMm =
       targetRadiusMm -
-      ARM_PIVOT_TO_CAMERA_CENTER_MM;
+      ARM_PIVOT_TO_GRIPPER_CENTER_MM;
+  const float standardFrameAngleDegrees =
+      -atan2f(clockwiseTangentMm, radialMm) *
+      180.0f / PI_F;
+
+  SerialDebug.print(
+      "[RAW VISION CAL] xy/dxy/r/scale/tan/rad/target-r/M5/M6=");
+  SerialDebug.print(pixelX, 1);
+  SerialDebug.print(",");
+  SerialDebug.print(pixelY, 1);
+  SerialDebug.print("/");
+  SerialDebug.print(pixelDeltaX, 1);
+  SerialDebug.print(",");
+  SerialDebug.print(pixelDeltaY, 1);
+  SerialDebug.print("/");
+  SerialDebug.print(pixelRadius, 2);
+  SerialDebug.print("/");
+  SerialDebug.print(rawMmPerPixel, 4);
+  SerialDebug.print("/");
+  SerialDebug.print(clockwiseTangentMm, 2);
+  SerialDebug.print("/");
+  SerialDebug.print(radialMm, 2);
+  SerialDebug.print("/");
+  SerialDebug.print(targetRadiusMm, 2);
+  SerialDebug.print("/");
+  SerialDebug.print(standardFrameAngleDegrees, 2);
+  SerialDebug.print("/");
+  SerialDebug.println(extensionMm, 2);
 
   if (extensionMm <
-          M6_STANDARD_EXTENSION_MM -
-              ARM_AXIS_POSITION_TOLERANCE_MM ||
-      extensionMm >
-          M6_MAXIMUM_EXTENSION_MM +
-              ARM_AXIS_POSITION_TOLERANCE_MM) {
-    SerialDebug.print("Raw target unreachable: radius=");
+      M6_STANDARD_EXTENSION_MM -
+          ARM_AXIS_POSITION_TOLERANCE_MM) {
+    SerialDebug.print(
+        "[RAW WAIT REACH] target too near, radius/ext=");
     SerialDebug.print(targetRadiusMm, 2);
-    SerialDebug.print(", extension=");
+    SerialDebug.print("/");
     SerialDebug.println(extensionMm, 2);
-    routeFault("Raw target outside M6 reach");
-    return false;
+    return RAW_TARGET_WAIT_TOO_NEAR;
+  }
+  if (extensionMm >
+      M6_MAXIMUM_EXTENSION_MM +
+          ARM_AXIS_POSITION_TOLERANCE_MM) {
+    SerialDebug.print(
+        "[RAW WAIT REACH] target too far, radius/ext=");
+    SerialDebug.print(targetRadiusMm, 2);
+    SerialDebug.print("/");
+    SerialDebug.println(extensionMm, 2);
+    return RAW_TARGET_WAIT_TOO_FAR;
   }
 
   pose.standardFrameAngleDegrees =
-      -atan2f(clockwiseTangentMm, radialMm) *
-      180.0f / PI_F;
+      standardFrameAngleDegrees;
   pose.extensionMm =
       extensionMm < M6_STANDARD_EXTENSION_MM
           ? M6_STANDARD_EXTENSION_MM
           : extensionMm;
   pose.heightMm = -RAW_PICK_LOWER_MM;
-  return true;
+  return RAW_TARGET_POSE_VALID;
 }
 
 enum WorkActionKind {
@@ -6082,7 +7328,11 @@ enum WorkActionPhase {
   WORK_PHASE_IDLE,
   WORK_PHASE_PREPARE,
   WORK_PHASE_RAW_WAIT_RESULT,
-  WORK_PHASE_RAW_WAIT_STORAGE_POSITION,
+  WORK_PHASE_RAW_WAIT_EXPECTED_SLOT,
+  WORK_PHASE_RAW_WAIT_TRAVEL_LINEAR_ZERO,
+  WORK_PHASE_RAW_WAIT_TRAVEL_PARK,
+  WORK_PHASE_PROCESS_WAIT_TRAVEL_M5_ZERO,
+  WORK_PHASE_PROCESS_WAIT_TRAVEL_M5_ZERO_SETTLE,
   WORK_PHASE_ENDPOINT_WAIT_PRE_SCAN_HEADING,
   WORK_PHASE_ENDPOINT_WAIT_SEARCH_BASE,
   WORK_PHASE_ENDPOINT_WAIT_SEARCH_BASE_SETTLE,
@@ -6122,6 +7372,7 @@ TransferPurpose activeTransferPurpose = TRANSFER_PURPOSE_NONE;
 bool endpointDirectContainerPickupPending = false;
 bool endpointInitialStorageCommanded = false;
 bool containerPickupPrepositionedPending = false;
+bool ringPickupPrepositionedPending = false;
 uint8_t workRoundIndex = 0U;
 uint8_t workItemIndex = 0U;
 uint32_t workActionStartMs = 0UL;
@@ -6153,21 +7404,14 @@ uint8_t endpointServoMoveCounts[4] = {
 float endpointFinalCenterErrorsPixels[4] = {
     0.0f, 0.0f, 0.0f, 0.0f};
 
-bool visionYanyanPlacementSequenceComplete = false;
-uint32_t visionYanyanTestStartMs = 0UL;
-uint32_t visionYanyanPositioningCompleteMs = 0UL;
-
 uint8_t rawFilledSlotMask = 0U;
 uint8_t rawCollectedCount = 0U;
 uint8_t rawPendingSlotIndex = 0U;
 uint8_t rawPendingColor = 0U;
 ArmPose rawPendingSourcePose;
-uint8_t rawConfirmationSampleCounts[4] = {
-    0U, 0U, 0U, 0U};
-int16_t rawConfirmationX[4] = {0, 0, 0, 0};
-int16_t rawConfirmationY[4] = {0, 0, 0, 0};
-uint32_t rawConfirmationLastMs[4] = {
-    0UL, 0UL, 0UL, 0UL};
+
+bool rawTravelM5ZeroPending = false;
+uint32_t processM5ZeroSettleDeadlineMs = 0UL;
 
 uint32_t circleStableStartMs = 0UL;
 uint32_t circleLastStableSampleMs = 0UL;
@@ -6186,6 +7430,23 @@ int8_t rawStorageSlotForColor(uint8_t color) {
     }
   }
   return -1;
+}
+
+bool processItemIndexForSequence(
+    uint8_t sequenceIndex,
+    uint8_t &itemIndex) {
+  if (sequenceIndex >= 3U) {
+    routeFault("Process transfer sequence index overflow");
+    return false;
+  }
+  const uint8_t destinationRing =
+      taskPositions[workRoundIndex][sequenceIndex];
+  if (destinationRing < 1U || destinationRing > 3U) {
+    routeFault("Process QR destination ring is invalid");
+    return false;
+  }
+  itemIndex = sequenceIndex;
+  return true;
 }
 
 uint8_t storageRingForItem(
@@ -6296,11 +7557,6 @@ bool completeEndpointMapAndStartTransfers() {
 
   endpointMapCompleteMs = millis();
   workItemIndex = 0U;
-  if (VISION_YANYAN_TEST_MODE &&
-      visionYanyanPositioningCompleteMs == 0UL) {
-    visionYanyanPositioningCompleteMs =
-        endpointMapCompleteMs;
-  }
   printMeasuredRingMapSummary();
   SerialDebug.println(
       "[ENDPOINT MAP] complete; skip M5 standard 0 deg, "
@@ -6312,11 +7568,6 @@ bool completeEndpointMapAndStartTransfers() {
 
 void finishActiveWorkAction() {
   const WorkActionKind completedAction = activeWorkAction;
-  const uint32_t completedAtMs = millis();
-  const uint32_t workElapsedMs =
-      workActionStartMs == 0UL
-          ? 0UL
-          : completedAtMs - workActionStartMs;
   stopMaixRequest();
   switch (activeWorkAction) {
     case WORK_ACTION_RAW:
@@ -6333,158 +7584,69 @@ void finishActiveWorkAction() {
   }
 
   activeWorkAction = WORK_ACTION_NONE;
+  armGripperLiftIsolationEnabled = false;
   workActionPhase = WORK_PHASE_IDLE;
   activeTransferPurpose = TRANSFER_PURPOSE_NONE;
   armStandardPhase = ARM_STANDARD_IDLE;
   armStandardEndpointPreparation = false;
   armStandardKeepBaseAngle = false;
+  armStandardExtensionTargetMm =
+      M6_STANDARD_EXTENSION_MM;
   armTransferPhase = ARM_TRANSFER_IDLE;
+  armTransferM7HandoffStartMs = 0UL;
   armTransferMapSource = false;
   armTransferMapDestination = false;
   armTransferConcurrentSourcePreparation = false;
   armTransferSourceAlreadyPrepared = false;
   armTransferPrepareNextSource = false;
   armTransferNextSourcePose = ArmPose();
+  armTransferNextSourceMapped = false;
   armTransferNextStorageSlot = -1;
   armTransferNextStorageDeadlineMs = 0UL;
+  armTransferStorageCommandDueMs = 0UL;
   armTransferNextStorageCommanded = false;
   armTransferNextSourcePreparedAtEnd = false;
   armTransferReturnToRawViewAtEnd = false;
+  armTransferSourceRotationStarted = false;
+  armTransferDestinationRotationStarted = false;
+  armTransferFinalRotationStarted = false;
+  armTransferMotionProfile =
+      arm_transfer::PROFILE_STANDARD;
   endpointDirectContainerPickupPending = false;
   endpointInitialStorageCommanded = false;
   containerPickupPrepositionedPending = false;
+  ringPickupPrepositionedPending = false;
   workActionStartMs = 0UL;
   workVisionRequestStartMs = 0UL;
   workVisionRetryCount = 0U;
   markMissionProgress();
   SerialDebug.println("Workstation action complete");
 
-  if (VISION_YANYAN_TEST_MODE &&
-      visionYanyanPlacementSequenceComplete &&
+  if (ROUGH_PROCESSING_CALIBRATION_MODE &&
       completedAction == WORK_ACTION_PROCESS) {
-    disableDriveMotors();
+
+    stopAllMotorsImmediately();
+    enableDriveMotors();
     disableArmBaseMotor();
     commandGripperClose();
     programState = PROGRAM_FINISHED;
+    routeMotionPhase = ROUTE_MOTION_IDLE;
     commandStarted = false;
     startRequested = false;
-    hmiSetRunStatus("MEASURE");
+    hmiSetRunStatus("CALDONE");
     hmiSetText("t1", "RING123");
     hmiSetTaskCounts();
-
-    const uint32_t positioningElapsedMs =
-        visionYanyanPositioningCompleteMs >=
-                visionYanyanTestStartMs
-            ? visionYanyanPositioningCompleteMs -
-                  visionYanyanTestStartMs
-            : 0UL;
-    SerialDebug.println(
-        "===== VISION YANYAN MEASUREMENT READY =====");
     printMeasuredRingMapSummary();
-    SerialDebug.print(
-        "[VISION YANYAN SUMMARY] positioning/work/total ms=");
-    SerialDebug.print(positioningElapsedMs);
-    SerialDebug.print("/");
-    SerialDebug.print(workElapsedMs);
-    SerialDebug.print("/");
     SerialDebug.println(
-        completedAtMs - visionYanyanTestStartMs);
-    SerialDebug.print(
-        "[VISION YANYAN SUMMARY] final xy/r/confidence=");
-    SerialDebug.print(latestMaixCoordinate.x);
-    SerialDebug.print(",");
-    SerialDebug.print(latestMaixCoordinate.y);
-    SerialDebug.print("/");
-    SerialDebug.print(latestMaixCoordinate.metric);
-    SerialDebug.print("/");
-    SerialDebug.println(latestMaixCoordinate.confidence);
-    SerialDebug.print(
-        "[VISION YANYAN SUMMARY] correction moves/fwd/left mm=");
-    SerialDebug.print(visualCorrectionMoveCount);
-    SerialDebug.print("/");
-    SerialDebug.print(visualCorrectionForwardMm, 2);
-    SerialDebug.print("/");
-    SerialDebug.println(visualCorrectionLeftMm, 2);
-    SerialDebug.println(
-        "Measure ring 1/2/3 offsets now; power-cycle before "
-        "another run.");
+        "Rough-processing calibration complete: "
+        "three placements and three pickups finished; "
+        "power-cycle before another run.");
   }
-}
-
-void resetRawConfirmationWindow() {
-  memset(
-      rawConfirmationSampleCounts,
-      0,
-      sizeof(rawConfirmationSampleCounts));
-  memset(
-      rawConfirmationX,
-      0,
-      sizeof(rawConfirmationX));
-  memset(
-      rawConfirmationY,
-      0,
-      sizeof(rawConfirmationY));
-  memset(
-      rawConfirmationLastMs,
-      0,
-      sizeof(rawConfirmationLastMs));
-}
-
-bool confirmRawCoordinate(
-    uint8_t color,
-    int16_t &x,
-    int16_t &y) {
-  if (color < 1U || color > 4U) {
-    return false;
-  }
-  const uint8_t colorIndex =
-      static_cast<uint8_t>(color - 1U);
-  const uint32_t nowMs = millis();
-  const bool startsNewWindow =
-      rawConfirmationSampleCounts[colorIndex] == 0U ||
-      nowMs - rawConfirmationLastMs[colorIndex] >
-          RAW_MAIN_CONFIRMATION_MAXIMUM_GAP_MS ||
-      abs(static_cast<int>(
-          x - rawConfirmationX[colorIndex])) >
-          RAW_MAIN_CONFIRMATION_MAX_DELTA_PIXELS ||
-      abs(static_cast<int>(
-          y - rawConfirmationY[colorIndex])) >
-          RAW_MAIN_CONFIRMATION_MAX_DELTA_PIXELS;
-
-  if (startsNewWindow) {
-    rawConfirmationSampleCounts[colorIndex] = 1U;
-    rawConfirmationX[colorIndex] = x;
-    rawConfirmationY[colorIndex] = y;
-    rawConfirmationLastMs[colorIndex] = nowMs;
-    return RAW_MAIN_CONFIRMATION_SAMPLES <= 1U;
-  }
-
-  if (rawConfirmationSampleCounts[colorIndex] < UINT8_MAX) {
-    ++rawConfirmationSampleCounts[colorIndex];
-  }
-  x = static_cast<int16_t>(
-      (static_cast<int32_t>(
-           rawConfirmationX[colorIndex]) +
-       x) /
-      2);
-  y = static_cast<int16_t>(
-      (static_cast<int32_t>(
-           rawConfirmationY[colorIndex]) +
-       y) /
-      2);
-  rawConfirmationX[colorIndex] = x;
-  rawConfirmationY[colorIndex] = y;
-  rawConfirmationLastMs[colorIndex] = nowMs;
-  return rawConfirmationSampleCounts[colorIndex] >=
-         RAW_MAIN_CONFIRMATION_SAMPLES;
 }
 
 void beginStorageParkingBeforeWorkFinish() {
   commandStorageServoParkingPosition();
-  /*
-   * 工位收尾只把M7/M6收回安全零点；M5保持当前作业角，不再额外转到
-   * 标准0°或旧坐标0°。下一工位从该角直接转它真正需要的首个目标。
-   */
+
   beginArmStandardization(0.0f, true);
   workStorageServoDeadlineMs =
       millis() + STORAGE_SERVO_SETTLE_MS;
@@ -6494,6 +7656,70 @@ void beginStorageParkingBeforeWorkFinish() {
   SerialDebug.println(
       " ms, storage -> 165 deg; M6/M7 -> safe-zero; "
       "M5 holds current angle");
+}
+
+void startRawTravelParkingAtSafeLinearZero() {
+  const bool linearAxesSafe =
+      extensionMoveFinished() &&
+      liftMoveFinished() &&
+      fabsf(
+          extensionAxis.currentMm -
+          M6_STANDARD_EXTENSION_MM) <=
+          ARM_AXIS_POSITION_TOLERANCE_MM &&
+      fabsf(
+          liftAxis.currentMm -
+          M7_STANDARD_HEIGHT_MM) <=
+          ARM_AXIS_POSITION_TOLERANCE_MM;
+  if (!linearAxesSafe) {
+    routeFault(
+        "RAW travel start requires M6/M7 safe zero");
+    return;
+  }
+
+  commandStorageServoParkingPosition();
+  workStorageServoDeadlineMs =
+      millis() + STORAGE_SERVO_SETTLE_MS;
+  useArmBaseRawTransferMotionProfile();
+  startArmBaseStandardFrameDegrees(0.0f);
+  if (programState != PROGRAM_RUNNING) {
+    return;
+  }
+  rawTravelM5ZeroPending = true;
+  workActionPhase = WORK_PHASE_RAW_WAIT_TRAVEL_PARK;
+  SerialDebug.print("[RAW TRAVEL] t=");
+  SerialDebug.print(millis());
+  SerialDebug.println(
+      " ms, M6/M7 safe; storage -> 165 deg; "
+      "M5 -> standard 0 deg while route is released");
+}
+
+void beginRawTravelParkingAfterFinalStore() {
+  const bool transferClearanceReady =
+      extensionMoveFinished() &&
+      liftMoveFinished() &&
+      fabsf(
+          extensionAxis.currentMm -
+          M6_STANDARD_EXTENSION_MM) <=
+          ARM_AXIS_POSITION_TOLERANCE_MM;
+  if (!transferClearanceReady) {
+    routeFault(
+        "RAW final store did not finish at M6 zero/M7 clearance");
+    return;
+  }
+
+  // The transfer state machine finishes a tray release with M7 at the
+  // -10 mm rotation-clearance height. The chassis travel gate requires the
+  // true 0 mm working zero, so explicitly complete that final lift before
+  // applying the strict M6/M7 safe-zero check and releasing the route.
+  if (!startLiftToHeightMm(M7_STANDARD_HEIGHT_MM)) {
+    return;
+  }
+  workActionPhase =
+      WORK_PHASE_RAW_WAIT_TRAVEL_LINEAR_ZERO;
+  SerialDebug.print("[RAW TRAVEL] t=");
+  SerialDebug.print(millis());
+  SerialDebug.println(
+      " ms, final tray release complete; M7 clearance -> safe zero");
 }
 
 void beginWorkAction(
@@ -6528,6 +7754,19 @@ void beginWorkAction(
   }
 
   activeWorkAction = kind;
+  // Every workstation transfer can command the same gripper and M7 pair.
+  // Keep a short nonzero two-way handoff active for RAW, PROCESS and STORAGE;
+  // servo motion completion is covered by the independent settle gates.
+  armGripperLiftIsolationEnabled =
+      kind != WORK_ACTION_NONE;
+  SerialDebug.print(
+      "[WORK INTERLOCK] mode=SHORT_HANDOFF_ALL_ACTIONS, "
+      "M7->gripper/gripper->M7 gap-ms=");
+  SerialDebug.print(WORK_M7_TO_GRIPPER_GAP_MS);
+  SerialDebug.print("/");
+  SerialDebug.print(WORK_GRIPPER_TO_M7_GAP_MS);
+  SerialDebug.println(
+      "; legacy direct mode disabled for RAW/PROCESS/STORAGE");
   workActionStartMs = millis();
   workVisionRequestStartMs = 0UL;
   workVisionRetryCount = 0U;
@@ -6536,20 +7775,27 @@ void beginWorkAction(
   workItemIndex = 0U;
   activeTransferPurpose = TRANSFER_PURPOSE_NONE;
   armTransferPhase = ARM_TRANSFER_IDLE;
+  armTransferM7HandoffStartMs = 0UL;
   armTransferMapSource = false;
   armTransferMapDestination = false;
   armTransferConcurrentSourcePreparation = false;
   armTransferSourceAlreadyPrepared = false;
   armTransferPrepareNextSource = false;
   armTransferNextSourcePose = ArmPose();
+  armTransferNextSourceMapped = false;
   armTransferNextStorageSlot = -1;
   armTransferNextStorageDeadlineMs = 0UL;
+  armTransferStorageCommandDueMs = 0UL;
   armTransferNextStorageCommanded = false;
   armTransferNextSourcePreparedAtEnd = false;
   armTransferReturnToRawViewAtEnd = false;
+  armTransferSourceRotationStarted = false;
+  armTransferDestinationRotationStarted = false;
+  armTransferFinalRotationStarted = false;
   endpointDirectContainerPickupPending = false;
   endpointInitialStorageCommanded = false;
   containerPickupPrepositionedPending = false;
+  ringPickupPrepositionedPending = false;
   visualCorrectionAccumulator = MotorPulses();
   visualCorrectionForwardMm = 0.0f;
   visualCorrectionLeftMm = 0.0f;
@@ -6588,59 +7834,128 @@ void beginWorkAction(
   rawPendingSlotIndex = 0U;
   rawPendingColor = 0U;
   rawPendingSourcePose = ArmPose();
-  resetRawConfirmationWindow();
   workLastMaixSequence =
-      latestMaixCoordinate.sequence;
+      maixCam.latest().sequence;
   resetCircleStabilityWindow();
 
   if (kind == WORK_ACTION_RAW) {
-    beginArmStandardization(0.0f);
-    // 原料识别结果尚未知，载物盘先保持行驶位置；识别后再转到颜色对应槽位。
+    beginArmStandardization(
+        0.0f,
+        false,
+        RAW_VIEW_EXTENSION_MM);
+
     commandStorageServoParkingPosition();
     workStorageServoDeadlineMs =
         millis() + STORAGE_SERVO_SETTLE_MS;
-  } else {
-    /*
-     * 载物盘内已有物料时，M5转向1号圈与载物盘从165°转到槽0不能并行，
-     * 否则长臂会扫到正在转动的物料。先让M5/M7完整到达1号粗识别姿态；
-     * 到位停稳后再转槽0，并把载物盘的300 ms动作隐藏在端点视觉识别中。
-     */
-    beginArmEndpointPreparation();
-    workStorageServoDeadlineMs = 0UL;
+    workActionPhase = WORK_PHASE_PREPARE;
+    SerialDebug.print("[WORK PREPARE] t=");
+    SerialDebug.print(millis());
+    SerialDebug.println(
+        " ms, M5 -> standard 0 deg and M6 -> "
+        "20 mm RAW view");
+    return;
   }
+
+  if (kind == WORK_ACTION_PROCESS) {
+
+    if (!rawTravelM5ZeroPending) {
+      useArmBaseRawTransferMotionProfile();
+      startArmBaseStandardFrameDegrees(0.0f);
+      rawTravelM5ZeroPending = true;
+      SerialDebug.println(
+          "[PROCESS ENTRY] standard M5 0 deg commanded "
+          "(calibration/direct entry)");
+    }
+    processM5ZeroSettleDeadlineMs = 0UL;
+    workStorageServoDeadlineMs = 0UL;
+    workActionPhase =
+        WORK_PHASE_PROCESS_WAIT_TRAVEL_M5_ZERO;
+    SerialDebug.print("[PROCESS ENTRY] t=");
+    SerialDebug.print(millis());
+    SerialDebug.println(
+        " ms, waiting for standard M5 0 deg before ring 1");
+    return;
+  }
+
+  beginArmEndpointPreparation();
+  workStorageServoDeadlineMs = 0UL;
   workActionPhase = WORK_PHASE_PREPARE;
   SerialDebug.print("[WORK PREPARE] t=");
   SerialDebug.print(millis());
   SerialDebug.println(
-      kind == WORK_ACTION_RAW
-          ? " ms, waiting for arm standardization"
-          : " ms, arm moves to ring-1 pose first; "
-            "storage remains parked");
+      " ms, arm moves to ring-1 pose first; "
+      "storage remains parked");
+}
+
+void beginRawExpectedSlotPreparation() {
+  if (rawCollectedCount >= 3U) {
+    routeFault("Raw slot preparation index overflow");
+    return;
+  }
+  const uint8_t expectedColor =
+      taskColors[workRoundIndex][rawCollectedCount];
+  const int8_t mappedSlot =
+      rawStorageSlotForColor(expectedColor);
+  if (mappedSlot < 0 ||
+      static_cast<uint8_t>(mappedSlot) !=
+          rawCollectedCount) {
+    routeFault("Raw expected color-to-slot mapping invalid");
+    return;
+  }
+
+  commandStorageServoPosition(
+      static_cast<uint8_t>(mappedSlot));
+  workStorageServoDeadlineMs =
+      millis() + STORAGE_SERVO_SETTLE_MS;
+  workActionPhase =
+      WORK_PHASE_RAW_WAIT_EXPECTED_SLOT;
+  SerialDebug.print(
+      "[RAW PREP] expected color/slot=");
+  SerialDebug.print(expectedColor);
+  SerialDebug.print("/");
+  SerialDebug.print(
+      static_cast<unsigned int>(mappedSlot));
+  SerialDebug.println(
+      "; settle tray before requesting fresh coordinates");
 }
 
 void beginRawItemVision() {
+  if (rawCollectedCount >= 3U) {
+    routeFault("Raw vision requested after all items stored");
+    return;
+  }
+  const uint8_t expectedColor =
+      taskColors[workRoundIndex][rawCollectedCount];
+  if (expectedColor < MAIXCAM_RED_REQUEST ||
+      expectedColor > MAIXCAM_GREEN_REQUEST) {
+    routeFault("Raw expected color is invalid");
+    return;
+  }
   workLastMaixSequence =
-      latestMaixCoordinate.sequence;
+      maixCam.latest().sequence;
   SerialDebug.print("[RAW VISION] t=");
   SerialDebug.print(millis());
   SerialDebug.print(" ms, collected=");
   SerialDebug.print(
       static_cast<unsigned int>(rawCollectedCount));
-  SerialDebug.println(
-      ", protocol-v2 request mode=8 (all colors)");
+  SerialDebug.print(", expected color/request mode=");
+  SerialDebug.print(expectedColor);
+  SerialDebug.print("/");
+  SerialDebug.println(MAIXCAM_ALL_COLORS_REQUEST);
+
+  // Keep the deployed legacy vision protocol: mode 8 reports any stable
+  // visible color. STM32 still enforces the QR order below and never grabs a
+  // different color.
   beginMaixRequest(MAIXCAM_ALL_COLORS_REQUEST);
   workVisionRequestStartMs = millis();
   workActionPhase = WORK_PHASE_RAW_WAIT_RESULT;
 }
 
 void beginCircleVision() {
-  /*
-   * 配套Vision 5在多个候选圆中先检查三圆共线、近似等间距和等半径，
-   * 协议v2以mode=9、target=2明确返回该三圆整体的中间成员。
-   */
+
   resetCircleStabilityWindow();
   workLastMaixSequence =
-      latestMaixCoordinate.sequence;
+      maixCam.latest().sequence;
   beginMaixRequest(MAIXCAM_HOUGH_CIRCLE_REQUEST);
   workVisionRequestStartMs = millis();
   workActionPhase =
@@ -6649,7 +7964,7 @@ void beginCircleVision() {
 
 void beginEndpointVision() {
   workLastMaixSequence =
-      latestMaixCoordinate.sequence;
+      maixCam.latest().sequence;
   SerialDebug.print("[ENDPOINT VISION] t/ring=");
   SerialDebug.print(millis());
   SerialDebug.print("/");
@@ -6687,10 +8002,7 @@ bool startEndpointSearchPlanarMove() {
     routeFault("Endpoint M5-first move requires idle M6");
     return false;
   }
-  /*
-   * 先在当前安全高度只转M5。M5停稳后由状态机单独伸M6，彻底消除首段
-   * 旋转+90 mm伸出的机械耦合和电源峰值。
-   */
+
   startArmBaseStandardFrameDegrees(
       activeEndpointScanPose.standardFrameAngleDegrees);
   workActionPhase =
@@ -6726,18 +8038,9 @@ void beginEndpointScan(uint8_t ringPosition) {
     return;
   }
   initializeEndpointScanState(ringPosition, searchPose);
-  /*
-   * M5和M7已在工位准备阶段并行到达+45°/-80 mm；这里只平滑接入
-   * M6粗搜索伸出，不再重复旋转M5或重复下降M7。
-   */
-  if (!startExtensionToMmWithProfile(
-          searchPose.extensionMm,
-          ENDPOINT_COARSE_M6_SPEED_RPM,
-          ENDPOINT_COARSE_M6_ACCELERATION)) {
+  if (!startEndpointSearchPlanarMove()) {
     return;
   }
-  workActionPhase =
-      WORK_PHASE_ENDPOINT_WAIT_SEARCH_EXTENSION;
 
   SerialDebug.print(
       "[ENDPOINT SCAN] prepared seed ring/M5/M6/M7=");
@@ -6793,10 +8096,7 @@ bool startEndpointSearchFallbackMove() {
       endpointSearchFallbackMoveCount == 1U
           ? (scanningRing1 ? 1.0f : -1.0f)
           : (scanningRing1 ? -1.0f : 1.0f);
-  /*
-   * 1号候选固定+60°、+30°；3号候选固定-60°、-30°。
-   * 两个端点继续使用独立窗口。
-   */
+
   const float fallbackAngleDegrees =
       seedAngleDegrees +
       fallbackOffsetDirection *
@@ -6876,10 +8176,9 @@ bool ringMapHeadingStillValid() {
   }
 
   SerialDebug.print(
-      "[RING MAP] invalidated by heading drift=");
+      "[RING MAP] heading drift warning; continue=");
   SerialDebug.println(driftDegrees, 2);
-  routeFault("Chassis moved after endpoint mapping");
-  return false;
+  return true;
 }
 
 bool startAccumulatedWorkstationMove(
@@ -6936,7 +8235,7 @@ bool startAccumulatedWorkstationMove(
 }
 
 float circleMmPerPixelForRadius(float pixelRadius) {
-  // 霍夫圆全部距离统一按72像素=41.75 mm换算；保留参数以维持调用接口。
+
   (void)pixelRadius;
   return CIRCLE_MM_PER_PIXEL;
 }
@@ -6983,10 +8282,7 @@ void startVisualCorrection(
 }
 
 void startPostVisionHeadingCorrection() {
-  /*
-   * 霍夫闭环已经满足像素条件，且机械臂已恢复标准状态。这里不改变XY
-   * 累计量，只按当前路线目标航向进行一次静止IMU锁向。
-   */
+
   setDriveMotionProfile(
       WORKSTATION_MAXIMUM_STEP_RATE,
       WORKSTATION_STEP_ACCELERATION);
@@ -7010,11 +8306,7 @@ void beginUnloadingTransfer() {
     return;
   }
   if (endpointDirectContainerPickupPending) {
-    /*
-     * 正常情况下1/3号端点识别早已覆盖载物盘转槽时间；仍保留首次抓料
-     * 的硬门槛。显式标志保证槽0命令确实是在1号完整姿态停稳后发出的，
-     * 不能把deadline=0误判成已经到位。
-     */
+
     if (!endpointInitialStorageCommanded ||
         workStorageServoDeadlineMs == 0UL) {
       routeFault(
@@ -7032,12 +8324,28 @@ void beginUnloadingTransfer() {
 
   ArmPose destination;
   uint8_t ringPosition = 0U;
+  uint8_t transferItemIndex = workItemIndex;
   float lowerMm = PROCESS_PLACE_LOWER_MM;
 
   if (activeWorkAction == WORK_ACTION_PROCESS) {
+    if (!processItemIndexForSequence(
+            workItemIndex,
+            transferItemIndex)) {
+      return;
+    }
     ringPosition =
-        taskPositions[workRoundIndex][workItemIndex];
+        taskPositions[workRoundIndex][transferItemIndex];
     lowerMm = PROCESS_PLACE_LOWER_MM;
+    SerialDebug.print(
+        "[PROCESS PLACE QR] item/color/ring/slot=");
+    SerialDebug.print(workItemIndex);
+    SerialDebug.print("/");
+    SerialDebug.print(
+        taskColors[workRoundIndex][transferItemIndex]);
+    SerialDebug.print("/");
+    SerialDebug.print(ringPosition);
+    SerialDebug.print("/");
+    SerialDebug.println(transferItemIndex);
   } else if (activeWorkAction == WORK_ACTION_STORAGE) {
     ringPosition =
         storageRingForItem(
@@ -7054,6 +8362,9 @@ void beginUnloadingTransfer() {
   if (!ringPose(ringPosition, lowerMm, destination)) {
     return;
   }
+  if (!applyTargetPlacementExtraLower(destination)) {
+    return;
+  }
   const bool concurrentSourcePreparation =
       endpointDirectContainerPickupPending;
   endpointDirectContainerPickupPending = false;
@@ -7062,25 +8373,84 @@ void beginUnloadingTransfer() {
   containerPickupPrepositionedPending = false;
   const bool prepareNextContainerPickup =
       workItemIndex < 2U;
-  ArmPose nextContainerPickupPose;
+  const bool prepareFirstPlacedRingPickup =
+      activeWorkAction == WORK_ACTION_PROCESS &&
+      workItemIndex == 2U;
+  const bool prepareNextSource =
+      prepareNextContainerPickup ||
+      prepareFirstPlacedRingPickup;
+  const ArmPose currentContainerPickupPose =
+      arm_transfer::containerPickPose(workItemIndex);
+  ArmPose nextSourcePose;
+  uint8_t nextStorageSlot =
+      static_cast<uint8_t>(workItemIndex + 1U);
   if (prepareNextContainerPickup) {
-    nextContainerPickupPose = containerPickPose();
+    nextSourcePose =
+        arm_transfer::containerPickPose(
+            static_cast<uint8_t>(
+                workItemIndex + 1U));
+    if (activeWorkAction == WORK_ACTION_PROCESS &&
+        !processItemIndexForSequence(
+            static_cast<uint8_t>(
+                workItemIndex + 1U),
+             nextStorageSlot)) {
+      return;
+    }
+  } else if (prepareFirstPlacedRingPickup) {
+    uint8_t firstTransferItemIndex = 0U;
+    if (!processItemIndexForSequence(
+            0U,
+            firstTransferItemIndex)) {
+      return;
+    }
+    const uint8_t firstRingPosition =
+        taskPositions[workRoundIndex][firstTransferItemIndex];
+    if (!ringPose(
+            firstRingPosition,
+            PROCESS_PLACE_LOWER_MM +
+                arm_config::RING_RETURN_PICK_EXTRA_LOWER_MM,
+            nextSourcePose)) {
+      return;
+    }
+    nextStorageSlot = firstTransferItemIndex;
+    SerialDebug.print(
+        "[PLACE->PICK PIPELINE] final placement immediately "
+        "prepositions first ring/slot=");
+    SerialDebug.print(firstRingPosition);
+    SerialDebug.print("/");
+    SerialDebug.println(nextStorageSlot);
+  }
+  if (workItemIndex == 1U) {
+    SerialDebug.print(
+        "[TRAY PICK 2] extra M7 lower/target-mm=");
+    SerialDebug.print(
+        arm_config::SECOND_PICK_EXTRA_LOWER_MM,
+        1);
+    SerialDebug.print("/");
+    SerialDebug.println(
+        currentContainerPickupPose.heightMm,
+        1);
   }
   beginArmTransfer(
-      containerPickPose(),
+      currentContainerPickupPose,
       destination,
       true,
       false,
       true,
       concurrentSourcePreparation,
       sourceAlreadyPrepared,
-      prepareNextContainerPickup
-          ? &nextContainerPickupPose
+      prepareNextSource
+          ? &nextSourcePose
           : nullptr,
-      prepareNextContainerPickup
+      prepareNextSource
           ? static_cast<int8_t>(
-                workItemIndex + 1U)
-          : static_cast<int8_t>(-1));
+                nextStorageSlot)
+          : static_cast<int8_t>(-1),
+      false,
+      false,
+      sourceAlreadyPrepared ||
+          concurrentSourcePreparation,
+      prepareFirstPlacedRingPickup);
   activeTransferPurpose =
       TRANSFER_PURPOSE_CONTAINER_TO_RING;
   workActionPhase = WORK_PHASE_WAIT_TRANSFER;
@@ -7091,22 +8461,89 @@ void beginReloadingTransfer() {
     return;
   }
 
+  uint8_t transferItemIndex = 0U;
+  if (!processItemIndexForSequence(
+          workItemIndex,
+          transferItemIndex)) {
+    return;
+  }
   ArmPose source;
   const uint8_t ringPosition =
-      taskPositions[workRoundIndex][workItemIndex];
+      taskPositions[workRoundIndex][transferItemIndex];
+  SerialDebug.print(
+      "[PROCESS PICK QR] item/color/ring/slot=");
+  SerialDebug.print(workItemIndex);
+  SerialDebug.print("/");
+  SerialDebug.print(
+      taskColors[workRoundIndex][transferItemIndex]);
+  SerialDebug.print("/");
+  SerialDebug.print(ringPosition);
+  SerialDebug.print("/");
+  SerialDebug.println(transferItemIndex);
   if (!ringPose(
           ringPosition,
-          PROCESS_PLACE_LOWER_MM,
+          PROCESS_PLACE_LOWER_MM +
+              arm_config::RING_RETURN_PICK_EXTRA_LOWER_MM,
           source)) {
     return;
+  }
+  SerialDebug.print(
+      "[RING RETURN PICK] extra M7 lower/target-mm=");
+  SerialDebug.print(
+      arm_config::RING_RETURN_PICK_EXTRA_LOWER_MM,
+      1);
+  SerialDebug.print("/");
+  SerialDebug.println(source.heightMm, 1);
+
+  const bool sourceAlreadyPrepared =
+      ringPickupPrepositionedPending;
+  ringPickupPrepositionedPending = false;
+  const bool prepareNextRingPickup =
+      workItemIndex < 2U;
+  ArmPose nextRingPickupPose;
+  uint8_t nextStorageSlot = 0U;
+  if (prepareNextRingPickup) {
+    uint8_t nextTransferItemIndex = 0U;
+    if (!processItemIndexForSequence(
+            static_cast<uint8_t>(workItemIndex + 1U),
+            nextTransferItemIndex)) {
+      return;
+    }
+    const uint8_t nextRingPosition =
+        taskPositions[workRoundIndex][nextTransferItemIndex];
+    if (!ringPose(
+            nextRingPosition,
+            PROCESS_PLACE_LOWER_MM +
+                arm_config::RING_RETURN_PICK_EXTRA_LOWER_MM,
+            nextRingPickupPose)) {
+      return;
+    }
+    nextStorageSlot = nextTransferItemIndex;
+    SerialDebug.print(
+        "[RETURN PIPELINE] next ring/slot preposition=");
+    SerialDebug.print(nextRingPosition);
+    SerialDebug.print("/");
+    SerialDebug.println(nextStorageSlot);
   }
 
   beginArmTransfer(
       source,
-      containerPlacePose(),
+      arm_transfer::containerReturnPlacePose(),
       false,
       true,
-      false);
+      false,
+      false,
+      sourceAlreadyPrepared,
+      prepareNextRingPickup
+          ? &nextRingPickupPose
+          : nullptr,
+      prepareNextRingPickup
+          ? static_cast<int8_t>(nextStorageSlot)
+          : static_cast<int8_t>(-1),
+      false,
+      false,
+      true,
+      true);
   activeTransferPurpose =
       TRANSFER_PURPOSE_RING_TO_CONTAINER;
   workActionPhase = WORK_PHASE_WAIT_TRANSFER;
@@ -7133,11 +8570,11 @@ void completeTransferAndRotateStorage() {
       SerialDebug.println(rawCollectedCount);
 
       if (rawCollectedCount >= 3U) {
-        // 第三件放好后不再经过-5°，立即命令载物盘回到行驶位置165°。
-        beginStorageParkingBeforeWorkFinish();
+
+        beginRawTravelParkingAfterFinalStore();
       } else {
         workVisionRetryCount = 0U;
-        beginRawItemVision();
+        beginRawExpectedSlotPreparation();
       }
       return;
     }
@@ -7156,59 +8593,54 @@ void completeTransferAndRotateStorage() {
   }
   hmiSetTaskCounts();
 
-  const bool preparedNextContainerPickup =
-      activeTransferPurpose ==
-          TRANSFER_PURPOSE_CONTAINER_TO_RING &&
+  const bool preparedNextSource =
+      (activeTransferPurpose ==
+           TRANSFER_PURPOSE_CONTAINER_TO_RING ||
+       activeTransferPurpose ==
+           TRANSFER_PURPOSE_RING_TO_CONTAINER) &&
       armTransferNextSourcePreparedAtEnd &&
       armTransferNextStorageCommanded;
+  const bool preparedFirstPlacedRingPickup =
+      preparedNextSource &&
+      activeWorkAction == WORK_ACTION_PROCESS &&
+      activeTransferPurpose ==
+          TRANSFER_PURPOSE_CONTAINER_TO_RING &&
+      workItemIndex == 2U;
   const uint32_t preparedStorageDeadlineMs =
       armTransferNextStorageDeadlineMs;
   consumeArmTransferCompletion();
   ++workItemIndex;
-  if (VISION_YANYAN_TEST_MODE &&
-      activeWorkAction == WORK_ACTION_PROCESS &&
-      activeTransferPurpose ==
-          TRANSFER_PURPOSE_CONTAINER_TO_RING &&
-      workItemIndex >= 3U) {
-    /*
-     * 测量模式只放下三个物料。第三次传送已把M6/M7收回，M5保持最后
-     * 放料角；正式收尾继续保持该角，随后停在MEASURE。
-     * 不执行正式粗加工流程中的“三件重新抓回”。
-     */
-    visionYanyanPlacementSequenceComplete = true;
-    SerialDebug.println(
-        "[VISION YANYAN] three placements complete; "
-        "park arm/storage and hold for measurement");
-    beginStorageParkingBeforeWorkFinish();
-    return;
-  }
 
-  if (preparedNextContainerPickup) {
-    if (workItemIndex >= 3U) {
+  if (preparedNextSource) {
+    if (preparedFirstPlacedRingPickup) {
+      workItemIndex = 0U;
+      containerPickupPrepositionedPending = false;
+      ringPickupPrepositionedPending = true;
+      activeTransferPurpose =
+          TRANSFER_PURPOSE_RING_TO_CONTAINER;
+      SerialDebug.println(
+          "[PLACE->PICK PIPELINE] three placements complete; "
+          "first ring pose retained while tray finishes rotating");
+    } else if (workItemIndex >= 3U) {
       routeFault(
           "Unexpected next-pick preparation after final item");
       return;
+    } else if (activeTransferPurpose ==
+               TRANSFER_PURPOSE_CONTAINER_TO_RING) {
+      containerPickupPrepositionedPending = true;
+    } else {
+      ringPickupPrepositionedPending = true;
     }
-    /*
-     * 料盘换槽已在松爪瞬间启动；M7先上升，M5/M6随后不经中间0直接并行
-     * 到抓料姿态。此处只等尚未覆盖完的舵机余量，不再重复准备三轴。
-     */
-    containerPickupPrepositionedPending = true;
     workStorageServoDeadlineMs =
         preparedStorageDeadlineMs;
     workActionPhase =
         WORK_PHASE_WAIT_STORAGE_SERVO;
     SerialDebug.println(
-        "[TRANSFER PIPELINE] handoff retained; "
+        "[TRANSFER PIPELINE] next source handoff retained; "
         "wait only remaining storage-servo time");
     return;
   }
 
-  /*
-   * 粗加工卸完第三件后还要从槽0开始重新装盘，因此仅该情况回槽0。
-   * 粗加工重新装盘的第三件以及暂存最终卸料的第三件完成后，立即转165°；
-   * 下一工位仍会显式转到槽0并等待，不依赖此处留下的角度。
-   */
   const bool finishedFinalContainerSequence =
       workItemIndex >= 3U &&
       (activeTransferPurpose ==
@@ -7219,7 +8651,19 @@ void completeTransferAndRotateStorage() {
   if (finishedFinalContainerSequence) {
     commandStorageServoParkingPosition();
   } else {
-    commandStorageServoPosition(workItemIndex);
+    uint8_t nextStorageSlot = workItemIndex;
+    if (activeWorkAction == WORK_ACTION_PROCESS) {
+      const uint8_t nextSequenceIndex =
+          workItemIndex >= 3U
+              ? 0U
+              : workItemIndex;
+      if (!processItemIndexForSequence(
+              nextSequenceIndex,
+              nextStorageSlot)) {
+        return;
+      }
+    }
+    commandStorageServoPosition(nextStorageSlot);
   }
   workStorageServoDeadlineMs =
       millis() + STORAGE_SERVO_SETTLE_MS;
@@ -7228,12 +8672,20 @@ void completeTransferAndRotateStorage() {
 
 void startVisualCorrectionRestore() {
   stopMaixRequest();
+  if (ROUGH_PROCESSING_CALIBRATION_MODE) {
+
+    stopAllMotorsImmediately();
+    visualCorrectionAccumulator = MotorPulses();
+    visualCorrectionForwardMm = 0.0f;
+    visualCorrectionLeftMm = 0.0f;
+    visualCorrectionMoveCount = 0U;
+    beginStorageParkingBeforeWorkFinish();
+    return;
+  }
+
   if (motorPulsesAreZero(
           visualCorrectionAccumulator)) {
-    /*
-     * 即使没有发生视觉平移，也在机械臂三次搬运后重新锁定路线目标航向。
-     * 否则臂的惯性造成的车体偏航会被带入下一段长距离开环平移。
-     */
+
     setDriveMotionProfile(
         WORKSTATION_MAXIMUM_STEP_RATE,
         WORKSTATION_STEP_ACCELERATION);
@@ -7264,9 +8716,18 @@ void startVisualCorrectionRestore() {
 }
 
 uint32_t activeWorkActionTimeoutMs() {
+
+  if (ROUGH_PROCESSING_CALIBRATION_MODE) {
+    return 0UL;
+  }
+
   switch (activeWorkAction) {
     case WORK_ACTION_RAW:
-      return RAW_ACTION_TIMEOUT_MS;
+      // A missing RAW target is a valid stationary wait. Mechanical RAW
+      // phases retain the normal timeout after a target is accepted.
+      return workActionPhase == WORK_PHASE_RAW_WAIT_RESULT
+                 ? 0UL
+                 : RAW_ACTION_TIMEOUT_MS;
     case WORK_ACTION_PROCESS:
       return PROCESS_ACTION_TIMEOUT_MS;
     case WORK_ACTION_STORAGE:
@@ -7292,10 +8753,24 @@ void serviceCompetitionAction() {
     return;
   }
 
-  if ((workActionPhase == WORK_PHASE_RAW_WAIT_RESULT ||
-       workActionPhase == WORK_PHASE_CIRCLE_WAIT_COORDINATE ||
+  if (workActionPhase == WORK_PHASE_RAW_WAIT_RESULT &&
+      workVisionRequestStartMs != 0UL &&
+      nowMs - workVisionRequestStartMs >=
+          RAW_TARGET_REQUEST_REFRESH_MS) {
+
+    if (workVisionRetryCount < UINT8_MAX) {
+      ++workVisionRetryCount;
+    }
+    SerialDebug.print(
+        "[RAW WAIT] refresh same expected color, count=");
+    SerialDebug.println(workVisionRetryCount);
+    beginRawItemVision();
+    return;
+  }
+
+  if ((workActionPhase == WORK_PHASE_CIRCLE_WAIT_COORDINATE ||
        workActionPhase ==
-           WORK_PHASE_ENDPOINT_WAIT_COORDINATE) &&
+            WORK_PHASE_ENDPOINT_WAIT_COORDINATE) &&
       workVisionRequestStartMs != 0UL &&
       nowMs - workVisionRequestStartMs >=
           (workActionPhase ==
@@ -7330,10 +8805,7 @@ void serviceCompetitionAction() {
     SerialDebug.print(workVisionRetryCount);
     SerialDebug.print("/");
     SerialDebug.println(visionRetryLimit);
-    if (workActionPhase == WORK_PHASE_RAW_WAIT_RESULT) {
-      beginRawItemVision();
-    } else if (
-        workActionPhase ==
+    if (workActionPhase ==
         WORK_PHASE_ENDPOINT_WAIT_COORDINATE) {
       beginEndpointVision();
     } else {
@@ -7348,6 +8820,39 @@ void serviceCompetitionAction() {
     case WORK_PHASE_IDLE:
       break;
 
+    case WORK_PHASE_PROCESS_WAIT_TRAVEL_M5_ZERO:
+      if (armMotors.isM5Running() ||
+          armBaseMotionWatchdogActive) {
+        break;
+      }
+      processM5ZeroSettleDeadlineMs =
+          millis() + ARM_BASE_SETTLE_MS;
+      workActionPhase =
+          WORK_PHASE_PROCESS_WAIT_TRAVEL_M5_ZERO_SETTLE;
+      SerialDebug.print("[PROCESS ENTRY] t=");
+      SerialDebug.print(millis());
+      SerialDebug.println(
+          " ms, standard M5 0 deg pulse target reached; "
+          "confirming 20 ms vision settle");
+      break;
+
+    case WORK_PHASE_PROCESS_WAIT_TRAVEL_M5_ZERO_SETTLE:
+      if (!deadlineReached(
+              processM5ZeroSettleDeadlineMs) ||
+          armMotors.isM5Running() ||
+          armBaseMotionWatchdogActive) {
+        break;
+      }
+      rawTravelM5ZeroPending = false;
+      processM5ZeroSettleDeadlineMs = 0UL;
+      beginArmEndpointPreparation();
+      workActionPhase = WORK_PHASE_PREPARE;
+      SerialDebug.print("[PROCESS ENTRY] t=");
+      SerialDebug.print(millis());
+      SerialDebug.println(
+          " ms, standard M5 0 deg confirmed -> ring 1");
+      break;
+
     case WORK_PHASE_PREPARE:
       if (activeWorkAction == WORK_ACTION_RAW) {
         if (!serviceArmStandardization() ||
@@ -7360,27 +8865,19 @@ void serviceCompetitionAction() {
         SerialDebug.println(
             " ms, arm and storage settle complete");
         armStandardPhase = ARM_STANDARD_IDLE;
-        beginRawItemVision();
+        beginRawExpectedSlotPreparation();
         break;
       }
 
       if (serviceArmStandardization()) {
         armStandardPhase = ARM_STANDARD_IDLE;
-        /*
-         * 这里只完成M5到1号种子角和M7到粗识别高度；M6还没有伸到1号
-         * 搜索半径，因此载物盘继续保持165°。先锁定停车后的当前航向，
-         * 再伸M6；三轴全部到位并额外停稳后才允许载物盘转槽0。
-         */
+
         SerialDebug.print("[WORK PREPARE] t=");
         SerialDebug.print(millis());
         SerialDebug.println(
             " ms, M5/M7 ring-1 pre-pose ready; "
             "storage remains parked until M6 arrives");
-        /*
-         * 粗加工区和暂存区都冻结底盘后顺序实测1、3号端点，
-         * 由两端中点计算2号。正常流程不再进入旧mode9中圆
-         * 定位，也不在端点建图后修正底盘。
-         */
+
         startPreEndpointHeadingCorrection();
       }
       break;
@@ -7404,22 +8901,16 @@ void serviceCompetitionAction() {
         break;
       }
 
-      if (REQUIRE_RAW_PICK_QR_ORDER) {
-        const uint8_t expectedColor =
-            taskColors[workRoundIndex][rawCollectedCount];
-        if (detectedColor != expectedColor) {
-          /*
-           * 严格顺序模式下，非目标色只丢弃本次结果，不能清掉尚未过期的
-           * 目标色首样本。
-           */
-          SerialDebug.print(
-              "[RAW WAIT] expected/detected color=");
-          SerialDebug.print(expectedColor);
-          SerialDebug.print("/");
-          SerialDebug.println(detectedColor);
-          beginRawItemVision();
-          break;
-        }
+      const uint8_t expectedColor =
+          taskColors[workRoundIndex][rawCollectedCount];
+      if (detectedColor != expectedColor) {
+        SerialDebug.print(
+            "[RAW WAIT] expected/detected color=");
+        SerialDebug.print(expectedColor);
+        SerialDebug.print("/");
+        SerialDebug.println(detectedColor);
+        beginRawItemVision();
+        break;
       }
 
       const int8_t slot =
@@ -7434,18 +8925,13 @@ void serviceCompetitionAction() {
 
       const uint8_t slotIndex =
           static_cast<uint8_t>(slot);
-      if (REQUIRE_RAW_PICK_QR_ORDER &&
-          slotIndex != rawCollectedCount) {
+      if (slotIndex != rawCollectedCount) {
         routeFault("Raw color-to-slot order mismatch");
         break;
       }
       const uint8_t slotBit =
           static_cast<uint8_t>(1U << slotIndex);
       if ((rawFilledSlotMask & slotBit) != 0U) {
-        /*
-         * 任意顺序模式下，同一颜色可能继续可见；槽位掩码保证每个任务色
-         * 只抓一次，并保持“颜色 -> 二维码槽位”的后续加工映射。
-         */
         SerialDebug.print(
             "[RAW IGNORE] slot already filled, color/slot=");
         SerialDebug.print(detectedColor);
@@ -7455,36 +8941,28 @@ void serviceCompetitionAction() {
         break;
       }
 
-      if (!confirmRawCoordinate(
-              detectedColor, x, y)) {
-        SerialDebug.println(
-            "[RAW CONFIRM] first stable sample accepted; "
-            "requesting independent confirmation");
-        beginRawItemVision();
-        break;
-      }
-      resetRawConfirmationWindow();
-
       ArmPose source;
-      if (!rawTargetPose(
+      const RawTargetPoseResult poseResult =
+          rawTargetPose(
               static_cast<float>(x),
               static_cast<float>(y),
-              source)) {
+              source);
+      if (poseResult != RAW_TARGET_POSE_VALID) {
+
+        beginRawItemVision();
         break;
       }
 
       stopMaixRequest();
       workVisionRetryCount = 0U;
+      // The vision wait can be indefinite. Start a fresh mechanical-action
+      // timeout only after an expected, reachable target is accepted.
+      workActionStartMs = millis();
       rawPendingColor = detectedColor;
       rawPendingSlotIndex = slotIndex;
       rawPendingSourcePose = source;
-      commandStorageServoPosition(rawPendingSlotIndex);
-      workStorageServoDeadlineMs =
-          millis() + STORAGE_SERVO_SETTLE_MS;
-      workActionPhase =
-          WORK_PHASE_RAW_WAIT_STORAGE_POSITION;
       SerialDebug.print(
-          "[RAW SLOT] color/QR slot/angle=");
+          "[RAW DIRECT] latest two-frame color/slot/angle=");
       SerialDebug.print(rawPendingColor);
       SerialDebug.print("/");
       SerialDebug.print(rawPendingSlotIndex);
@@ -7493,17 +8971,9 @@ void serviceCompetitionAction() {
           STORAGE_SERVO_POSITIONS_DEGREES[
               rawPendingSlotIndex],
           1);
-      break;
-    }
-
-    case WORK_PHASE_RAW_WAIT_STORAGE_POSITION:
-      if (!deadlineReached(
-              workStorageServoDeadlineMs)) {
-        break;
-      }
       beginArmTransfer(
           rawPendingSourcePose,
-          containerPlacePose(),
+          arm_transfer::containerPlacePose(),
           false,
           false,
           false,
@@ -7511,14 +8981,48 @@ void serviceCompetitionAction() {
           false,
           nullptr,
           -1,
-          rawCollectedCount < 2U);
+          rawCollectedCount < 2U,
+          true,
+          true);
       activeTransferPurpose =
           TRANSFER_PURPOSE_RAW_TO_CONTAINER;
       workActionPhase = WORK_PHASE_WAIT_TRANSFER;
       break;
+    }
+
+    case WORK_PHASE_RAW_WAIT_EXPECTED_SLOT:
+      if (!deadlineReached(
+              workStorageServoDeadlineMs)) {
+        break;
+      }
+      beginRawItemVision();
+      break;
+
+    case WORK_PHASE_RAW_WAIT_TRAVEL_LINEAR_ZERO:
+      if (!liftMoveFinished()) {
+        break;
+      }
+      startRawTravelParkingAtSafeLinearZero();
+      break;
+
+    case WORK_PHASE_RAW_WAIT_TRAVEL_PARK:
+      if (!deadlineReached(
+              workStorageServoDeadlineMs)) {
+        break;
+      }
+      SerialDebug.print("[RAW TRAVEL] t=");
+      SerialDebug.print(millis());
+      SerialDebug.println(
+          " ms, storage parked; release chassis route "
+          "without waiting for M5");
+      finishActiveWorkAction();
+      break;
 
     case WORK_PHASE_ENDPOINT_WAIT_PRE_SCAN_HEADING:
-      if (updateHeadingLock(MOTION_TIMEOUT_MS)) {
+      if (updateHeadingLock(
+              MOTION_TIMEOUT_MS,
+              ENDPOINT_PRE_SCAN_POST_MOTION_SETTLE_TIME_MS,
+              ENDPOINT_PRE_SCAN_HEADING_STABLE_TIME_MS)) {
         endpointMapLockedHeadingDegrees =
             currentRouteCounterClockwiseHeading();
         SerialDebug.print(
@@ -7535,7 +9039,7 @@ void serviceCompetitionAction() {
     case WORK_PHASE_ENDPOINT_WAIT_SEARCH_BASE:
       if (!armMotors.isM5Running()) {
         armStandardDeadlineMs =
-            millis() + ARM_BASE_SETTLE_MS;
+            millis() + ENDPOINT_BASE_TO_EXTENSION_SETTLE_MS;
         workActionPhase =
             WORK_PHASE_ENDPOINT_WAIT_SEARCH_BASE_SETTLE;
       }
@@ -7587,9 +9091,10 @@ void serviceCompetitionAction() {
             millis() + ENDPOINT_LOCAL_MOVE_SETTLE_MS;
         workActionPhase =
             WORK_PHASE_ENDPOINT_WAIT_LOCAL_SETTLE;
-        SerialDebug.println(
+        SerialDebug.print(
             "[ENDPOINT SCAN] full coarse pose reached; "
-            "settle before vision/storage handoff");
+            "re-recognition settle-ms=");
+        SerialDebug.println(ENDPOINT_LOCAL_MOVE_SETTLE_MS);
       }
       break;
 
@@ -7613,9 +9118,9 @@ void serviceCompetitionAction() {
       }
 
       const uint16_t radiusPixels =
-          latestMaixCoordinate.metric;
+          maixCam.latest().metric;
       const uint16_t confidence =
-          latestMaixCoordinate.confidence;
+          maixCam.latest().confidence;
       if (confidence <
           RING_ENDPOINT_MINIMUM_CONFIDENCE) {
         SerialDebug.print(
@@ -7648,8 +9153,6 @@ void serviceCompetitionAction() {
         break;
       }
 
-      // 只有通过置信度、半径/几何和航向检查的帧才续期；垃圾帧不能
-      // 无限推迟2.5 s局部fallback，更不能虚假喂活任务进度看门狗。
       workVisionRequestStartMs = millis();
       markMissionProgress();
       const uint8_t ring = activeEndpointScanRing;
@@ -7704,10 +9207,7 @@ void serviceCompetitionAction() {
         stopMaixRequest();
         workVisionRequestStartMs = 0UL;
         workVisionRetryCount = 0U;
-        /*
-         * 闭环小修正也保持M5先转、M6后伸缩；两轴不再在任何端点定位
-         * 阶段并发，减少齿条侧向载荷和相机停稳后的回弹。
-         */
+
         if (endpointFineVisionActive) {
           useArmBaseEndpointMotionProfile();
         } else {
@@ -7779,7 +9279,23 @@ void serviceCompetitionAction() {
         break;
       }
 
-      if (endpointCenteredConfirmationCount < 255U) {
+      const bool fastAcceptedStableCenter =
+          centerErrorPixels <=
+              ENDPOINT_FAST_ACCEPT_CENTER_TOLERANCE_PIXELS &&
+          confidence >=
+              ENDPOINT_FAST_ACCEPT_MINIMUM_CONFIDENCE;
+      if (fastAcceptedStableCenter) {
+        endpointCenteredConfirmationCount =
+            ENDPOINT_FINAL_CENTER_CONFIRMATIONS;
+        SerialDebug.print(
+            "[ENDPOINT SERVO] strict fast acceptance "
+            "ring/error-px/conf=");
+        SerialDebug.print(ring);
+        SerialDebug.print("/");
+        SerialDebug.print(centerErrorPixels, 2);
+        SerialDebug.print("/");
+        SerialDebug.println(confidence);
+      } else if (endpointCenteredConfirmationCount < 255U) {
         ++endpointCenteredConfirmationCount;
       }
       if (endpointCenteredConfirmationCount <
@@ -7846,10 +9362,6 @@ void serviceCompetitionAction() {
         break;
       }
 
-      /*
-       * 3号圈最终结果已经记录，立即建图并进入物料盘抓取。搬运状态机会
-       * 先让M7单独快速升到0，再让M5/M6直接并行到抓料姿态，不经M5 0°。
-       */
       (void)completeEndpointMapAndStartTransfers();
       break;
     }
@@ -7857,7 +9369,7 @@ void serviceCompetitionAction() {
     case WORK_PHASE_ENDPOINT_WAIT_LOCAL_BASE:
       if (!armMotors.isM5Running()) {
         armStandardDeadlineMs =
-            millis() + ARM_BASE_SETTLE_MS;
+            millis() + ENDPOINT_BASE_TO_EXTENSION_SETTLE_MS;
         workActionPhase =
             WORK_PHASE_ENDPOINT_WAIT_LOCAL_BASE_SETTLE;
       }
@@ -7886,6 +9398,9 @@ void serviceCompetitionAction() {
             millis() + ENDPOINT_LOCAL_MOVE_SETTLE_MS;
         workActionPhase =
             WORK_PHASE_ENDPOINT_WAIT_LOCAL_SETTLE;
+        SerialDebug.print(
+            "[ENDPOINT SERVO] correction reached; next vision in ms=");
+        SerialDebug.println(ENDPOINT_LOCAL_MOVE_SETTLE_MS);
       }
       break;
 
@@ -7894,21 +9409,27 @@ void serviceCompetitionAction() {
           endpointLocalSettleDeadlineMs)) {
         if (activeEndpointScanRing == 1U &&
             !endpointInitialStorageCommanded) {
-          /*
-           * 1号完整粗识别姿态已经满足：M5到种子角、M6到搜索半径、
-           * M7到粗识别高度并额外停稳。此时长臂已离开载物盘扫掠区，
-           * 才允许载物盘从165°转槽0；随即开始识别，用视觉时间覆盖
-           * 载物盘动作，但首次抓料前仍会再次检查300 ms门槛。
-           */
-          commandStorageServoPosition(0U);
+
+          uint8_t initialStorageSlot = 0U;
+          if (activeWorkAction == WORK_ACTION_PROCESS &&
+              !processItemIndexForSequence(
+                  0U,
+                  initialStorageSlot)) {
+            break;
+          }
+          commandStorageServoPosition(
+              initialStorageSlot);
           workStorageServoDeadlineMs =
               millis() + STORAGE_SERVO_SETTLE_MS;
           endpointInitialStorageCommanded = true;
           SerialDebug.print("[WORK SAFE] t=");
           SerialDebug.print(millis());
-          SerialDebug.println(
+          SerialDebug.print(
               " ms, ring-1 full pose settled -> "
-              "storage slot 0 starts with endpoint vision");
+              "initial storage slot ");
+          SerialDebug.print(initialStorageSlot);
+          SerialDebug.println(
+              " starts with endpoint vision");
         }
         beginEndpointVision();
       }
@@ -8014,7 +9535,10 @@ void serviceCompetitionAction() {
     }
 
     case WORK_PHASE_CIRCLE_WAIT_CHASSIS:
-      if (updateHeadingLock(MOTION_TIMEOUT_MS)) {
+      if (updateHeadingLock(
+              MOTION_TIMEOUT_MS,
+              VISION_POST_MOTION_SETTLE_TIME_MS,
+              VISION_HEADING_STABLE_TIME_MS)) {
         beginCircleVision();
       }
       break;
@@ -8031,7 +9555,10 @@ void serviceCompetitionAction() {
       break;
 
     case WORK_PHASE_CIRCLE_WAIT_POST_VISION_HEADING:
-      if (updateHeadingLock(MOTION_TIMEOUT_MS)) {
+      if (updateHeadingLock(
+              MOTION_TIMEOUT_MS,
+              VISION_POST_MOTION_SETTLE_TIME_MS,
+              VISION_HEADING_STABLE_TIME_MS)) {
         SerialDebug.print("[VISION IMU] t=");
         SerialDebug.print(millis());
         SerialDebug.print(" ms, complete; target/actual/error=");
@@ -8042,10 +9569,6 @@ void serviceCompetitionAction() {
             currentRouteCounterClockwiseHeading(), 2);
         SerialDebug.print("/");
         SerialDebug.println(headingErrorDegrees(), 2);
-        if (VISION_YANYAN_TEST_MODE &&
-            visionYanyanPositioningCompleteMs == 0UL) {
-          visionYanyanPositioningCompleteMs = millis();
-        }
         workActionPhase = WORK_PHASE_START_UNLOAD;
       }
       break;
@@ -8123,26 +9646,38 @@ void serviceCompetitionAction() {
 
 void cancelCompetitionAction() {
   activeWorkAction = WORK_ACTION_NONE;
+  armGripperLiftIsolationEnabled = false;
   workActionPhase = WORK_PHASE_IDLE;
   activeTransferPurpose = TRANSFER_PURPOSE_NONE;
   armStandardPhase = ARM_STANDARD_IDLE;
   armStandardEndpointPreparation = false;
   armStandardKeepBaseAngle = false;
+  armStandardExtensionTargetMm =
+      M6_STANDARD_EXTENSION_MM;
   armTransferPhase = ARM_TRANSFER_IDLE;
+  armTransferM7HandoffStartMs = 0UL;
   armTransferMapSource = false;
   armTransferMapDestination = false;
   armTransferConcurrentSourcePreparation = false;
   armTransferSourceAlreadyPrepared = false;
   armTransferPrepareNextSource = false;
   armTransferNextSourcePose = ArmPose();
+  armTransferNextSourceMapped = false;
   armTransferNextStorageSlot = -1;
   armTransferNextStorageDeadlineMs = 0UL;
+  armTransferStorageCommandDueMs = 0UL;
   armTransferNextStorageCommanded = false;
   armTransferNextSourcePreparedAtEnd = false;
   armTransferReturnToRawViewAtEnd = false;
+  armTransferSourceRotationStarted = false;
+  armTransferDestinationRotationStarted = false;
+  armTransferFinalRotationStarted = false;
+  armTransferMotionProfile =
+      arm_transfer::PROFILE_STANDARD;
   endpointDirectContainerPickupPending = false;
   endpointInitialStorageCommanded = false;
   containerPickupPrepositionedPending = false;
+  ringPickupPrepositionedPending = false;
   workActionStartMs = 0UL;
   workVisionRequestStartMs = 0UL;
   workVisionRetryCount = 0U;
@@ -8179,7 +9714,8 @@ void cancelCompetitionAction() {
       sizeof(endpointFinalCenterErrorsPixels));
   endpointMapLockedHeadingDegrees = 0.0f;
   resetMeasuredRingMap();
-  resetRawConfirmationWindow();
+  rawTravelM5ZeroPending = false;
+  processM5ZeroSettleDeadlineMs = 0UL;
   stopMaixRequest();
 }
 
@@ -8191,11 +9727,7 @@ bool plannedFinalFootprintIsInsideSelectedZone() {
           selectedStartZone == START_ZONE_1
               ? START_ZONE_1_CENTER_Y_MM
               : START_ZONE_2_CENTER_Y_MM);
-  /*
-   * 回区时2、4侧朝西（180°），因此外廓X/Y半尺寸仍分别为115/150 mm。
-   * 这是名义路线门禁，不是实际定位反馈；接入位置/边线传感器后必须用
-   * 实测位姿替换centerX/centerY。
-   */
+
   const competition::StartZone zone =
       selectedStartZone == START_ZONE_1
           ? competition::START_ZONE_1
@@ -8217,139 +9749,138 @@ bool plannedFinalFootprintIsInsideSelectedZone() {
 }
 
 void startMotionCommand(const RouteCommand &command) {
-  /*
-   * 路线命令只在这里转换为“开始做什么”。函数不会阻塞等待完成；
-   * loop()持续服务四轮、IMU和二维码，updateRoute()负责判断何时推进。
-   */
+
   turnMotionEnabled = false;
+  activeRouteTurnCommand = false;
+  routeMotionPhase = ROUTE_MOTION_IDLE;
   workstationApproachEnabled = false;
   translationPreciseArrivalEnabled = false;
   translationCentralChannelEnabled = false;
 
-  if (isTranslationCommand(command.type)) {
-    translationRemainingMm = command.value;
-    translationPreciseArrivalEnabled =
-        command.preciseArrival;
-    translationCentralChannelEnabled =
-        command.centralChannel;
-    startTranslationSegment(command.type);
-    return;
-  }
-
   switch (command.type) {
-    case COMMAND_ARM_BASE_HOME:
-      hmiSetRunStatus("ARM0");
-      startArmBaseRotationToDegrees(
-          static_cast<float>(command.value));
+    case COMMAND_ZONE_LONGITUDINAL_FAST:
+      startRouteFastLongitudinalTranslation(
+          selectedStartZoneDirection() *
+              static_cast<float>(command.value),
+          command.motionScale);
       break;
 
-    case COMMAND_TURN_COUNTERCLOCKWISE_DEGREES:
-    case COMMAND_TURN_CLOCKWISE_DEGREES: {
-      turnMotionEnabled = true;
-      setDriveMotionProfile(
-          TURN_MAXIMUM_STEP_RATE, TURN_STEP_ACCELERATION);
-      const float counterClockwiseDegrees =
-          static_cast<float>(command.value) *
-          (command.type ==
-                   COMMAND_TURN_COUNTERCLOCKWISE_DEGREES
-                ? 1.0f
-                : -1.0f);
-      activeTurnStartHeadingDegrees =
-          currentRouteCounterClockwiseHeading();
-      activeTurnCommandDegrees =
-          counterClockwiseDegrees;
-      activeTurnCorrectionCount = 0;
-      turnCoarseTelemetryPending = true;
-      targetCounterClockwiseHeadingDegrees +=
-          counterClockwiseDegrees;
-      startBodyDisplacement(
-          0.0f, 0.0f,
-          counterClockwiseDegrees * PI_F / 180.0f);
-      break;
-    }
-
-    case COMMAND_SET_PRECISE_MOTION:
-      preciseMotionEnabled = true;
-      setDriveMotionProfile(
-          FINAL_MAXIMUM_STEP_RATE, FINAL_STEP_ACCELERATION);
-      hmiSetRunStatus("SLOW");
-      break;
-
-    case COMMAND_QR_ACTION:
-      // 停稳后最多前探500 mm；只有扫码并回到停车点后才允许推进路线。
+    case COMMAND_SCAN_SLOW:
       startQrScanAction();
       break;
 
+    case COMMAND_ADJUST_TO_POINT_A: {
+      if (!scanFlag || !scanOriginValid) {
+        routeFault(
+            "Step 3 requires valid QR code and scan origin");
+        break;
+      }
+      const float deltaAlongScanDirectionMm =
+          static_cast<float>(
+              SCAN_START_TO_POINT_A_MM) -
+          scanDistanceBmm;
+      const float vehicleForwardMm =
+          selectedStartZoneDirection() *
+          deltaAlongScanDirectionMm;
+      SerialDebug.print(
+          "[SCAN->A] b/delta/vehicle-forward=");
+      SerialDebug.print(scanDistanceBmm, 1);
+      SerialDebug.print("/");
+      SerialDebug.print(deltaAlongScanDirectionMm, 1);
+      SerialDebug.print("/");
+      SerialDebug.print(vehicleForwardMm, 1);
+      SerialDebug.println(" mm");
+      startRouteFastLongitudinalTranslation(
+          vehicleForwardMm,
+          command.motionScale);
+      break;
+    }
+
+    case COMMAND_FORWARD_FAST:
+      startRouteFastLongitudinalTranslation(
+          static_cast<float>(command.value),
+          command.motionScale);
+      break;
+
+    case COMMAND_BACKWARD_FAST:
+      startRouteFastLongitudinalTranslation(
+          -static_cast<float>(command.value),
+          command.motionScale);
+      break;
+
+    case COMMAND_RIGHT_FAST: {
+      float speedProfileScale =
+          ROUTE_NON_07_15_LINEAR_PROFILE_INCREASE_SCALE;
+      float accelerationProfileScale =
+          ROUTE_NON_07_15_LINEAR_PROFILE_INCREASE_SCALE;
+      if (command.specificationStep == 7U) {
+        speedProfileScale =
+            STEP_07_LATERAL_MAX_SPEED_SCALE;
+        accelerationProfileScale =
+            STEP_07_LATERAL_ACCELERATION_SCALE;
+      } else if (command.specificationStep == 15U) {
+        speedProfileScale =
+            STEP_15_LATERAL_MAX_SPEED_SCALE;
+        accelerationProfileScale =
+            STEP_15_LATERAL_ACCELERATION_SCALE;
+      }
+      startRouteFastLateralTranslation(
+          static_cast<float>(command.value),
+          command.motionScale,
+          speedProfileScale,
+          accelerationProfileScale);
+      break;
+    }
+
+    case COMMAND_TURN_COUNTERCLOCKWISE:
+      startRouteTurn(
+          static_cast<float>(command.value),
+          command.motionScale);
+      break;
+
+    case COMMAND_TURN_CLOCKWISE:
+      startRouteTurn(
+          -static_cast<float>(command.value),
+          command.motionScale);
+      break;
+
     case COMMAND_RAW_ACTION:
-      // value=1/2表示同一次比赛的第一批/第二批。
+
       activeCompetitionRound =
           static_cast<uint8_t>(command.value);
       rawActionFinished = false;
       hmiSetRunStatus(
           command.value == 1 ? "RAW1" : "RAW2");
-      if (!PATH_ONLY_TEST) {
-        beginWorkAction(
-            WORK_ACTION_RAW,
-            static_cast<uint8_t>(command.value));
-      }
+      beginWorkAction(
+          WORK_ACTION_RAW,
+          static_cast<uint8_t>(command.value));
       break;
 
     case COMMAND_PROCESS_ACTION:
-      // 霍夫圆定位后，按任务码放3个，再按同一顺序抓回载物盘。
+
       activeCompetitionRound =
           static_cast<uint8_t>(command.value);
       processActionFinished = false;
       hmiSetRunStatus(
           command.value == 1 ? "PROCESS1" : "PROCESS2");
-      if (!PATH_ONLY_TEST) {
-        beginWorkAction(
-            WORK_ACTION_PROCESS,
-            static_cast<uint8_t>(command.value));
-      }
+      beginWorkAction(
+          WORK_ACTION_PROCESS,
+          static_cast<uint8_t>(command.value));
       break;
 
     case COMMAND_STORAGE_ACTION:
-      // 第一批按第二组位置平放；第二批按颜色映射到第一批上码垛。
+
       activeCompetitionRound =
           static_cast<uint8_t>(command.value);
       storageActionFinished = false;
       hmiSetRunStatus(
           command.value == 1 ? "STORAGE1" : "STORAGE2");
-      if (!PATH_ONLY_TEST) {
-        beginWorkAction(
-            WORK_ACTION_STORAGE,
-            static_cast<uint8_t>(command.value));
-      }
-      break;
-
-    case COMMAND_FINAL_ALIGN:
-      /*
-       * 先把旧版“无条件完成”升级为完整外廓的名义几何门禁。当前硬件
-       * 未给出向下红外/XY协议，故不能伪称实测闭环；正式比赛接入后应在
-       * 此状态持续微调，并仅在实测四角均入区时置完成。
-       */
-      hmiSetRunStatus("ALIGN");
-      if (!plannedFinalFootprintIsInsideSelectedZone()) {
-        routeFault("Planned final footprint outside selected zone");
-      } else {
-        finalAlignmentFinished = true;
-        SerialDebug.println(
-            "Final planned footprint is inside selected start zone");
-      }
-      break;
-
-    case COMMAND_HOLD:
-      hmiSetRunStatus("HOLD");
+      beginWorkAction(
+          WORK_ACTION_STORAGE,
+          static_cast<uint8_t>(command.value));
       break;
 
     case COMMAND_FINISH:
-      break;
-
-    case COMMAND_MOVE_SIDE_12_MM:
-    case COMMAND_MOVE_SIDE_34_MM:
-    case COMMAND_MOVE_SIDE_13_MM:
-    case COMMAND_MOVE_SIDE_24_MM:
-      // 纯平移已在switch之前分段启动。
       break;
   }
 }
@@ -8359,8 +9890,9 @@ void startCurrentCommand() {
     return;
   }
 
-  activeRouteCommand = resolveRouteCommand(route[routeIndex]);
+  activeRouteCommand = route[routeIndex];
   commandStartMs = millis();
+  routeHeadingLockStartMs = 0UL;
   headingStableStartMs = 0;
   motorsArrivedStartMs = 0;
   printCurrentCommand(activeRouteCommand);
@@ -8368,44 +9900,6 @@ void startCurrentCommand() {
   if (programState == PROGRAM_RUNNING) {
     commandStarted = true;
     markMissionProgress();
-  }
-}
-
-bool timedActionFinished(
-    bool externalFeedback,
-    uint32_t testDurationMs) {
-  /*
-   * 路径测试模式按固定时间伪造工位完成；正式接入机械臂后必须由对应
-   * 动作状态机设置externalFeedback，不能把固定测试等待当作规则任务完成。
-   */
-  if (PATH_ONLY_TEST) {
-    return millis() - commandStartMs >= testDurationMs;
-  }
-  return externalFeedback;
-}
-
-void finishRawActionIfNeeded() {
-  if (PATH_ONLY_TEST) {
-    // 每批原料区抓取3个；这里只更新显示计数，没有验证颜色或抓取成功。
-    correctGrabCount += 3;
-    hmiSetTaskCounts();
-  }
-}
-
-void finishProcessActionIfNeeded() {
-  if (PATH_ONLY_TEST) {
-    // 每批粗加工区先放下3个、再抓回3个；这里只模拟统计结果。
-    correctPlacementCount += 3;
-    correctGrabCount += 3;
-    hmiSetTaskCounts();
-  }
-}
-
-void finishStorageActionIfNeeded() {
-  if (PATH_ONLY_TEST) {
-    // 每批暂存区放置3个；第二批的同色码垛正确性在此模式下未验证。
-    correctPlacementCount += 3;
-    hmiSetTaskCounts();
   }
 }
 
@@ -8418,6 +9912,8 @@ void finishProgram() {
   commandGripperClose();
   commandStorageServoParkingPosition();
   programState = PROGRAM_FINISHED;
+  routeMotionPhase = ROUTE_MOTION_IDLE;
+  activeRouteTurnCommand = false;
   commandStarted = false;
   hmiSetRunStatus("FINISH");
 
@@ -8430,16 +9926,8 @@ void finishProgram() {
 }
 
 void updateRoute() {
-  /*
-   * 固定路线状态机的统一“完成判定”：
-   *   平移/转向 -> 四轮到达脉冲目标且IMU航向稳定；
-   *   二维码     -> scanFlag有效（或明确关闭强制扫码）；
-   *   三个工位   -> 路径测试定时，或正式机械臂反馈；
-   *   最终对齐   -> 不增加位移的启停区同步点；
-   *   HOLD       -> 定时结束。
-   * advanceRoute()只推进数组下标，不做坐标重定位。
-   */
-  if (VISION_YANYAN_TEST_MODE) {
+
+  if (ROUGH_PROCESSING_CALIBRATION_MODE) {
     return;
   }
 
@@ -8458,85 +9946,46 @@ void updateRoute() {
   const RouteCommand &command = activeRouteCommand;
 
   switch (command.type) {
-    case COMMAND_MOVE_SIDE_12_MM:
-    case COMMAND_MOVE_SIDE_34_MM:
-    case COMMAND_MOVE_SIDE_13_MM:
-    case COMMAND_MOVE_SIDE_24_MM:
-      // 中央直线最多2000 mm一段，非中央最多1100 mm；段末只锁航向。
-      if (updateHeadingLock(MOTION_TIMEOUT_MS)) {
-        if (translationRemainingMm > 0) {
-          startTranslationSegment(command.type);
-        } else {
-          advanceRoute();
-        }
-      }
+    case COMMAND_ZONE_LONGITUDINAL_FAST:
+    case COMMAND_ADJUST_TO_POINT_A:
+    case COMMAND_FORWARD_FAST:
+    case COMMAND_BACKWARD_FAST:
+    case COMMAND_RIGHT_FAST:
+      serviceRoutePhysicalCommand();
       break;
 
-    case COMMAND_ARM_BASE_HOME:
-      if (!armMotors.isM5Running()) {
-        SerialDebug.println(
-            "Arm base confirmed at travel old 0");
-        disableArmBaseMotor();
-        hmiSetRunStatus("RUN");
-        advanceRoute();
-      }
+    case COMMAND_TURN_COUNTERCLOCKWISE:
+    case COMMAND_TURN_CLOCKWISE:
+      serviceIntegratedTurnCommand();
       break;
 
-    case COMMAND_TURN_COUNTERCLOCKWISE_DEGREES:
-    case COMMAND_TURN_CLOCKWISE_DEGREES:
-      if (updateHeadingLock(TURN_TIMEOUT_MS)) {
-        printTurnLockTelemetry();
-        advanceRoute();
-      }
-      break;
-
-    case COMMAND_SET_PRECISE_MOTION:
-      advanceRoute();
-      break;
-
-    case COMMAND_QR_ACTION:
+    case COMMAND_SCAN_SLOW:
       if (updateQrScanAction()) {
         hmiSetRunStatus("RUN");
-        resetQrScanActionState();
+
+        qrScanPhase = QR_SCAN_IDLE;
+        qrScanActionStartMs = 0UL;
         advanceRoute();
       }
       break;
 
     case COMMAND_RAW_ACTION:
-      if (timedActionFinished(
-              rawActionFinished, WORKSTATION_TEST_HOLD_MS)) {
-        finishRawActionIfNeeded();
+      if (rawActionFinished) {
         hmiSetRunStatus("RUN");
         advanceRoute();
       }
       break;
 
     case COMMAND_PROCESS_ACTION:
-      if (timedActionFinished(
-              processActionFinished, WORKSTATION_TEST_HOLD_MS)) {
-        finishProcessActionIfNeeded();
+      if (processActionFinished) {
         hmiSetRunStatus("RUN");
         advanceRoute();
       }
       break;
 
     case COMMAND_STORAGE_ACTION:
-      if (timedActionFinished(
-              storageActionFinished, WORKSTATION_TEST_HOLD_MS)) {
-        finishStorageActionIfNeeded();
+      if (storageActionFinished) {
         hmiSetRunStatus("RUN");
-        advanceRoute();
-      }
-      break;
-
-    case COMMAND_FINAL_ALIGN:
-      if (PATH_ONLY_TEST || finalAlignmentFinished) {
-        advanceRoute();
-      }
-      break;
-
-    case COMMAND_HOLD:
-      if (millis() - commandStartMs >= command.value) {
         advanceRoute();
       }
       break;
@@ -8547,20 +9996,12 @@ void updateRoute() {
   }
 }
 
-// ---------------------------------------------------------------------------
-// 启动、停止与周期服务
-// ---------------------------------------------------------------------------
-
 void onStartButtonClick() {
   if (programState != PROGRAM_RUNNING) {
     abortRequested = false;
     startRequested = true;
     imuWaitStatusDisplayed = false;
-    /*
-     * 对应规则的“一键式启动”。机械臂保持上电/行驶姿态（旧坐标0°）；
-     * 实际摆放正确时该命令不产生M5位移，只使库目标与行驶姿态一致。
-     * beginRoute()仍要求先收到有效IMU帧。
-     */
+
     startArmBaseRotationToDegrees(
         static_cast<float>(
             ARM_BASE_TRAVEL_OLD_FRAME_DEGREES));
@@ -8569,6 +10010,13 @@ void onStartButtonClick() {
 
 void onStartButtonDoubleClick() {
   if (programState != PROGRAM_WAITING || startRequested) {
+    return;
+  }
+
+  if (ROUGH_PROCESSING_CALIBRATION_MODE) {
+    hmiSetRunStatus("CALREADY");
+    SerialDebug.println(
+        "Calibration mode ignores start-zone selection");
     return;
   }
 
@@ -8589,44 +10037,54 @@ void onStartButtonLongPress() {
   abortRequested = true;
 }
 
-bool configureVisionYanyanTask() {
-  /*
-   * 槽0/1/2依次放到环1/2/3；颜色值只用于满足正式TaskPlan契约，
-   * 测量模式不进行颜色识别。使用正式解析器可避免测试路径绕过数组边界。
-   */
-  constexpr char TEST_TASK_CODE[] =
-      "123+123+123+123";
-  competition::TaskPlan testPlan;
+bool configureRoughProcessingCalibrationTask() {
+
+  constexpr char CALIBRATION_TASK_CODE[] =
+      "123+132+123+132";
+  competition::TaskPlan calibrationPlan;
   if (competition::parseTaskCode(
-          TEST_TASK_CODE, testPlan) !=
+          CALIBRATION_TASK_CODE,
+          calibrationPlan) !=
       competition::TASK_CODE_OK) {
-    routeFault("Vision Yanyan test task is invalid");
+    routeFault("Rough-processing calibration task is invalid");
     return false;
   }
 
-  taskPlan = testPlan;
+  taskPlan = calibrationPlan;
   memcpy(
       qrData,
-      TEST_TASK_CODE,
-      sizeof(TEST_TASK_CODE));
+      CALIBRATION_TASK_CODE,
+      sizeof(CALIBRATION_TASK_CODE));
   scanFlag = true;
   taskCodeDecoded = true;
-  hmiSetText("t1", "LOAD123");
-  hmiShowTaskCode(TEST_TASK_CODE);
-  SerialDebug.println(
-      "[VISION YANYAN] fixed mapping: tray slot 0/1/2 "
-      "-> ring 1/2/3");
+  hmiSetText("t1", "CAL132");
+  hmiShowTaskCode(CALIBRATION_TASK_CODE);
   return true;
 }
 
-void beginRoute() {
+void suspendRouteChassisProfileForWorkstation() {
   /*
-   * PB9回调保持原一键启动主体；真正的单次比赛门控放在这里。FAULT/FINISHED
-   * 状态不能把当前终点姿态重新当作所选启停区的发车姿态，必须断电并人工恢复上电
-   * 行驶姿态（M5旧0°、M6抵住回缩端、M7位于物理最高点）；上电后程序
-   * 会自动将M6向外、M7向下各移动10 mm并建立两个安全工作零点。
+   * route_chassis::runAllMotors()必须持续产生M1～M4脉冲，但工位暂停后
+   * 位置目标和运动参数属于GC视觉修正。把route上一段遗留的S形/制动
+   * 包络置为中性，避免它在暂停期间覆盖GC设置的maxSpeed/acceleration。
+   * 下一路线段的startCurrentCommand()会通过route原有
+   * setDriveMotionProfile()完整重建这些状态。
    */
-  if (programState != PROGRAM_WAITING) {
+  route_chassis::activeDriveProfileShape =
+      route_chassis::DRIVE_PROFILE_ASYMMETRIC_TRAPEZOID;
+  route_chassis::activeDriveDeceleration = 0.0f;
+  route_chassis::driveDecelerationActive = false;
+  route_chassis::driveAccelerationDistanceSteps = 0.0f;
+  route_chassis::driveDecelerationStartStepRate = 0.0f;
+  route_chassis::driveDecelerationStartRemainingSteps = 0.0f;
+}
+
+void beginRoute() {
+
+  if (programState != PROGRAM_WAITING ||
+      (!ROUGH_PROCESSING_CALIBRATION_MODE &&
+       route_chassis::programState !=
+           route_chassis::PROGRAM_WAITING)) {
     startRequested = false;
     return;
   }
@@ -8658,18 +10116,18 @@ void beginRoute() {
     return;
   }
 
-  /*
-   * 这里把命令下标、IMU相对航向和软件脉冲位置清零，默认机器人已经按
-   * 注释放在已选择启停区的设计起点。它不是回零/定位过程，不会测量当前世界坐标；
-   * 若实际摆放位置或朝向不同，整条开环路线会整体带偏。
-   */
   routeIndex = 0;
+  integratedWorkPause = INTEGRATED_WORK_NONE;
+  integratedWorkPauseStartMs = 0UL;
   activeCompetitionRound = 0;
   commandStarted = false;
+  routeMotionPhase = ROUTE_MOTION_IDLE;
+  activeRouteTurnCommand = false;
   resetQrScanActionState();
-  competitionStartMs = millis();
-  commandStartMs = competitionStartMs;
-  lastMissionProgressMs = competitionStartMs;
+  const uint32_t runStartMs = millis();
+  commandStartMs = runStartMs;
+  lastMissionProgressMs = runStartMs;
+  routeHeadingLockStartMs = 0UL;
   headingStableStartMs = 0;
   motorsArrivedStartMs = 0;
   translationRemainingMm = 0;
@@ -8684,7 +10142,8 @@ void beginRoute() {
   activeTurnCorrectionCount = 0;
   cancelCompetitionAction();
 
-  routeImuReferenceDegrees = imuCounterClockwiseDegrees;
+  routeImuReferenceDegrees =
+      route_chassis::imuCounterClockwiseDegrees;
   targetCounterClockwiseHeadingDegrees = 0.0f;
 
   correctGrabCount = 0;
@@ -8693,64 +10152,84 @@ void beginRoute() {
   processActionFinished = false;
   storageActionFinished = false;
   finalAlignmentFinished = false;
-
-  if (ENABLE_QR_RECEIVER &&
-      !VISION_YANYAN_TEST_MODE) {
-    resetQrReceiver();
-  }
+  resetQrReceiver();
   hmiSetTaskCounts();
-  if (VISION_YANYAN_TEST_MODE) {
-    if (!configureVisionYanyanTask()) {
+  hmiSetText("t3", "000+000+");
+  hmiSetText("t8", "000+000");
+  if (ROUGH_PROCESSING_CALIBRATION_MODE) {
+    if (!configureRoughProcessingCalibrationTask()) {
       startRequested = false;
       return;
     }
-    hmiSetRunStatus("VTEST");
+    hmiSetRunStatus("CALRUN");
   } else {
-    hmiSetText(
-        "t1",
-        ENABLE_QR_RECEIVER ? "QRWAIT" : "BYPASS");
-    hmiSetText("t3", "000+000+");
-    hmiSetText("t8", "000+000");
+    hmiSetText("t1", "QRWAIT");
     hmiSetRunStatus("RUN");
   }
   commandGripperClose();
   commandStorageServoParkingPosition();
 
-  for (uint8_t i = 0; i < 4; ++i) {
-    motors[i]->setCurrentPosition(0);
-  }
-
-  // 上一次运行结束时可能停留在最终低速档，每次启动都恢复巡航参数。
-  setDriveMotionProfile(MAXIMUM_STEP_RATE, STEP_ACCELERATION);
-  enableDriveMotors();
-  programState = PROGRAM_RUNNING;
-  startRequested = false;
-  imuWaitStatusDisplayed = false;
-
-  if (VISION_YANYAN_TEST_MODE) {
-    visionYanyanPlacementSequenceComplete = false;
-    visionYanyanTestStartMs = millis();
-    visionYanyanPositioningCompleteMs = 0UL;
+  if (ROUGH_PROCESSING_CALIBRATION_MODE) {
+    for (uint8_t i = 0; i < 4; ++i) {
+      motors[i]->setCurrentPosition(0);
+    }
+    setDriveMotionProfile(
+        ROUTE_FAST_MAXIMUM_STEP_RATE,
+        ROUTE_FAST_STEP_ACCELERATION);
+    enableDriveMotors();
+    programState = PROGRAM_RUNNING;
+    startRequested = false;
+    route_chassis::startRequested = false;
+    imuWaitStatusDisplayed = false;
+    route_chassis::stopAllMotorsImmediately();
+    suspendRouteChassisProfileForWorkstation();
+    stopAllMotorsImmediately();
     SerialDebug.println(
-        "===== VISION YANYAN TEST START =====");
-    SerialDebug.println(
-        "Assumption: M5 old 0 deg / M6 safe zero "
-        "at retract stop / M7 physical highest; startup will "
-        "move both axes 10 mm, slots loaded");
-    SerialDebug.println(
-        "Vision 5.2.1 mode10: scan ring 1, scan ring 3, "
-        "derive ring 2; chassis stays frozen");
+        "Rough-processing calibration started: "
+        "wheels locked; scan rings 1/3, derive ring 2, "
+        "QR place/pick ring order 1/3/2");
     beginWorkAction(WORK_ACTION_PROCESS, 1U);
     return;
   }
 
-  SerialDebug.println("Route started");
+  /*
+   * 正常比赛的四轮清零、使能、速度档、IMU参考和21步路线状态，只由
+   * GongChuang_route建立。当前文件随后只镜像航向供机械臂视觉使用。
+   */
+  route_chassis::beginRoute();
+  if (route_chassis::programState !=
+      route_chassis::PROGRAM_RUNNING) {
+    startRequested = false;
+    return;
+  }
+  routeImuReferenceDegrees =
+      route_chassis::routeImuReferenceDegrees;
+  targetCounterClockwiseHeadingDegrees =
+      route_chassis::targetCounterClockwiseHeadingDegrees;
+  selectedStartZone =
+      route_chassis::START_ZONE_SELECTION == 1U
+          ? START_ZONE_1
+          : START_ZONE_2;
+  programState = PROGRAM_RUNNING;
+  startRequested = false;
+  imuWaitStatusDisplayed = false;
+
+  SerialDebug.println(
+      "GongChuang_route 21-step chassis + GC arm/vision started");
   SerialDebug.print("Locked start zone: ");
   SerialDebug.println(
       static_cast<unsigned int>(selectedStartZone));
 }
 
 void abortRoute() {
+  if (route_chassis::programState ==
+      route_chassis::PROGRAM_RUNNING) {
+    route_chassis::abortRoute();
+  } else {
+    route_chassis::disableDriveMotors();
+  }
+  route_chassis::startRequested = false;
+  route_chassis::abortRequested = false;
   resetQrScanActionState();
   invalidateArmLinearReference();
   cancelCompetitionAction();
@@ -8758,11 +10237,199 @@ void abortRoute() {
   disableDriveMotors();
   disableArmBaseMotor();
   programState = PROGRAM_FAULT;
+  routeMotionPhase = ROUTE_MOTION_IDLE;
+  activeRouteTurnCommand = false;
   commandStarted = false;
   abortRequested = false;
   startRequested = false;
   hmiSetRunStatus("STOP");
   SerialDebug.println("Route aborted by long press");
+}
+
+void synchronizeTaskCodeToRouteChassis() {
+  /*
+   * PE0/PE1由GC任务码解析器读取，因为机械臂需要四组颜色/位置数据；
+   * 完整解码后只把锁定结果交给route的第2步扫码状态机。
+   */
+  if (!scanFlag || route_chassis::scanFlag) {
+    return;
+  }
+
+  strncpy(
+      route_chassis::qrData,
+      qrData,
+      sizeof(route_chassis::qrData) - 1U);
+  route_chassis::qrData[
+      sizeof(route_chassis::qrData) - 1U] = '\0';
+  route_chassis::scanFlag = true;
+  SerialDebug.println(
+      "[CHASSIS BRIDGE] decoded task code released route scan step");
+}
+
+IntegratedWorkPause workPauseAfterRouteStep(
+    uint8_t completedStep) {
+  switch (completedStep) {
+    case 6U:
+      return INTEGRATED_WORK_RAW_1;
+    case 8U:
+      return INTEGRATED_WORK_PROCESS_1;
+    case 11U:
+      return INTEGRATED_WORK_STORAGE_1;
+    case 14U:
+      return INTEGRATED_WORK_RAW_2;
+    case 16U:
+      return INTEGRATED_WORK_PROCESS_2;
+    case 19U:
+      return INTEGRATED_WORK_STORAGE_2;
+    default:
+      return INTEGRATED_WORK_NONE;
+  }
+}
+
+void beginIntegratedWorkPause(IntegratedWorkPause pause) {
+  integratedWorkPause = pause;
+  integratedWorkPauseStartMs = millis();
+  commandStartMs = integratedWorkPauseStartMs;
+  commandStarted = true;
+
+  route_chassis::stopAllMotorsImmediately();
+  suspendRouteChassisProfileForWorkstation();
+  routeImuReferenceDegrees =
+      route_chassis::routeImuReferenceDegrees;
+  targetCounterClockwiseHeadingDegrees =
+      route_chassis::targetCounterClockwiseHeadingDegrees;
+
+  WorkActionKind kind = WORK_ACTION_NONE;
+  uint8_t roundNumber = 0U;
+  switch (pause) {
+    case INTEGRATED_WORK_RAW_1:
+      kind = WORK_ACTION_RAW;
+      roundNumber = 1U;
+      rawActionFinished = false;
+      hmiSetRunStatus("RAW1");
+      break;
+    case INTEGRATED_WORK_PROCESS_1:
+      kind = WORK_ACTION_PROCESS;
+      roundNumber = 1U;
+      processActionFinished = false;
+      hmiSetRunStatus("PROCESS1");
+      break;
+    case INTEGRATED_WORK_STORAGE_1:
+      kind = WORK_ACTION_STORAGE;
+      roundNumber = 1U;
+      storageActionFinished = false;
+      hmiSetRunStatus("STORAGE1");
+      break;
+    case INTEGRATED_WORK_RAW_2:
+      kind = WORK_ACTION_RAW;
+      roundNumber = 2U;
+      rawActionFinished = false;
+      hmiSetRunStatus("RAW2");
+      break;
+    case INTEGRATED_WORK_PROCESS_2:
+      kind = WORK_ACTION_PROCESS;
+      roundNumber = 2U;
+      processActionFinished = false;
+      hmiSetRunStatus("PROCESS2");
+      break;
+    case INTEGRATED_WORK_STORAGE_2:
+      kind = WORK_ACTION_STORAGE;
+      roundNumber = 2U;
+      storageActionFinished = false;
+      hmiSetRunStatus("STORAGE2");
+      break;
+    case INTEGRATED_WORK_NONE:
+      return;
+  }
+
+  activeCompetitionRound = roundNumber;
+  markMissionProgress();
+  SerialDebug.print(
+      "[CHASSIS BRIDGE] pause route for arm/vision kind/round=");
+  SerialDebug.print(static_cast<unsigned int>(kind));
+  SerialDebug.print("/");
+  SerialDebug.println(roundNumber);
+  beginWorkAction(kind, roundNumber);
+}
+
+bool integratedWorkPauseFinished() {
+  switch (integratedWorkPause) {
+    case INTEGRATED_WORK_RAW_1:
+    case INTEGRATED_WORK_RAW_2:
+      return rawActionFinished;
+    case INTEGRATED_WORK_PROCESS_1:
+    case INTEGRATED_WORK_PROCESS_2:
+      return processActionFinished;
+    case INTEGRATED_WORK_STORAGE_1:
+    case INTEGRATED_WORK_STORAGE_2:
+      return storageActionFinished;
+    case INTEGRATED_WORK_NONE:
+      return false;
+  }
+  return false;
+}
+
+void finishIntegratedWorkPause() {
+  SerialDebug.print(
+      "[CHASSIS BRIDGE] arm/vision complete, resume route after ms=");
+  SerialDebug.println(millis() - integratedWorkPauseStartMs);
+  integratedWorkPause = INTEGRATED_WORK_NONE;
+  integratedWorkPauseStartMs = 0UL;
+  commandStarted = false;
+  routeImuReferenceDegrees =
+      route_chassis::routeImuReferenceDegrees;
+  targetCounterClockwiseHeadingDegrees =
+      route_chassis::targetCounterClockwiseHeadingDegrees;
+  hmiSetRunStatus("RUN");
+  markMissionProgress();
+}
+
+void serviceIntegratedRoute() {
+  if (ROUGH_PROCESSING_CALIBRATION_MODE ||
+      programState != PROGRAM_RUNNING) {
+    return;
+  }
+
+  if (route_chassis::programState ==
+      route_chassis::PROGRAM_FAULT) {
+    routeFault("GongChuang_route chassis entered FAULT");
+    return;
+  }
+
+  if (integratedWorkPause != INTEGRATED_WORK_NONE) {
+    if (integratedWorkPauseFinished()) {
+      finishIntegratedWorkPause();
+    }
+    return;
+  }
+
+  const size_t previousIndex = route_chassis::routeIndex;
+  route_chassis::updateRoute();
+  routeIndex = route_chassis::routeIndex;
+
+  if (route_chassis::programState ==
+      route_chassis::PROGRAM_FAULT) {
+    routeFault("GongChuang_route chassis entered FAULT");
+    return;
+  }
+
+  if (route_chassis::programState ==
+      route_chassis::PROGRAM_FINISHED) {
+    finishProgram();
+    return;
+  }
+
+  if (route_chassis::routeIndex != previousIndex &&
+      previousIndex < route_chassis::ROUTE_COMMAND_COUNT) {
+    const uint8_t completedStep =
+        route_chassis::route[previousIndex].specificationStep;
+    markMissionProgress();
+    const IntegratedWorkPause pause =
+        workPauseAfterRouteStep(completedStep);
+    if (pause != INTEGRATED_WORK_NONE) {
+      beginIntegratedWorkPause(pause);
+    }
+  }
 }
 
 void serviceCompetitionWatchdogs() {
@@ -8771,11 +10438,21 @@ void serviceCompetitionWatchdogs() {
   }
 
   const uint32_t nowMs = millis();
-  if (ENABLE_COMPETITION_TIME_LIMIT &&
-      nowMs - competitionStartMs >=
-          COMPETITION_TIME_LIMIT_MS -
-              COMPETITION_HARD_STOP_MARGIN_MS) {
-    routeFault("Competition hard time limit");
+  const bool routeWaitingForQrCode =
+      route_chassis::programState ==
+          route_chassis::PROGRAM_RUNNING &&
+      route_chassis::routeIndex <
+          route_chassis::ROUTE_COMMAND_COUNT &&
+      route_chassis::route[
+          route_chassis::routeIndex].type ==
+          route_chassis::COMMAND_SCAN_SLOW &&
+      route_chassis::routePhase ==
+          route_chassis::ROUTE_PHASE_WAIT_SCAN_CODE;
+
+  if (routeWaitingForQrCode ||
+      qrScanPhase == QR_SCAN_WAIT_AT_LIMIT ||
+      (activeWorkAction == WORK_ACTION_RAW &&
+       workActionPhase == WORK_PHASE_RAW_WAIT_RESULT)) {
     return;
   }
 
@@ -8786,7 +10463,8 @@ void serviceCompetitionWatchdogs() {
 }
 
 void updateHmiYaw() {
-  if (!DISPLAY_YAW_ON_X0 || !imuInitialized) {
+  if (!DISPLAY_YAW_ON_X0 ||
+      !imuTracker.initialized()) {
     return;
   }
 
@@ -8803,32 +10481,13 @@ void updateHmiYaw() {
 }
 
 void initializeMotorOutputs() {
-  pinMode(DRIVE_ENABLE_PIN, OUTPUT);
-
-  // 初始化期间先保持所有步进驱动器失能。
-  digitalWrite(DRIVE_ENABLE_PIN, HIGH);
-
-  for (uint8_t i = 0; i < 4; ++i) {
-    // AccelStepper 的构造函数会配置引脚，但这里在全部串口初始化后
-    // 再明确配置一次，防止任何外设复用覆盖 STEP/DIR GPIO。
-    motors[i]->enableOutputs();
-    motors[i]->setMinPulseWidth(MINIMUM_STEP_WIDTH_US);
-  }
-
-  /*
-   * 仅初始化库中的 M5，明确不启动库内的 M6/M7 串口，避免与当前
-   * 非阻塞 M6/M7 状态机共用 PA2/PA3 时产生双重串口对象冲突。
-   */
+  /* M1～M4及公共使能已经由route_chassis::setup()完整初始化。 */
   armMotors.beginM5();
   useArmBaseEndpointMotionProfile();
-  /*
-   * 上电时必须人工保证M5位于旧坐标0°行驶姿态、M6抵住回缩端、M7升到
-   * 最高；稍后程序会令M6前伸10 mm并建立安全工作零点。
-   */
+
   armMotors.setM5CurrentAngle(0.0f);
   armMotors.disableM5();
 
-  setDriveMotionProfile(MAXIMUM_STEP_RATE, STEP_ACCELERATION);
 }
 
 void initializeHmi() {
@@ -8842,16 +10501,16 @@ void initializeHmi() {
   delay(50);
   hmiSetText(
       "t1",
-      VISION_YANYAN_TEST_MODE
-          ? "LOAD123"
-          : (ENABLE_QR_RECEIVER ? "QRWAIT" : "BYPASS"));
+      ROUGH_PROCESSING_CALIBRATION_MODE
+          ? "CAL132"
+          : "QRWAIT");
   hmiSetText("t3", "000+000+");
   hmiSetText("t8", "000+000");
   hmiSetRunStatus(
       !armLinearReferenceValid
           ? "M6INIT"
-          : (VISION_YANYAN_TEST_MODE
-                 ? "VREADY"
+          : (ROUGH_PROCESSING_CALIBRATION_MODE
+                 ? "CALREADY"
                  : (selectedStartZone == START_ZONE_1
                         ? "READY1"
                         : "READY2")));
@@ -8866,17 +10525,8 @@ void initializeHmi() {
 }
 
 void initializeManipulationHardware() {
-  SerialMaixcam.begin(MAIXCAM_BAUDRATE);
-  maixcamSerialInitialized = true;
-  while (SerialMaixcam.available()) {
-    SerialMaixcam.read();
-  }
-  stopMaixRequest();
+  maixCam.begin(MAIXCAM_BAUDRATE);
 
-  /*
-   * M6/M7驱动器与STM32通常同时上电；已验证的独立例程会先等待
-   * 1500 ms。保证驱动器完成自检后再发第一次使能命令。
-   */
   const uint32_t manipulationStartupMs = millis();
   if (manipulationStartupMs <
       ARM_LINEAR_POWER_ON_SETTLE_MS) {
@@ -8918,29 +10568,34 @@ void initializeManipulationHardware() {
   SerialDebug.print(M7_MICROSTEPS, 0);
   SerialDebug.print("/");
   SerialDebug.println(M7_PULSES_PER_MM, 4);
+  SerialDebug.print(
+      "[M7 EXPERIMENT] speed-2x/acceleration-4x flags, speed-cap="
+  );
+  SerialDebug.print(
+      m7_experiment::DOUBLE_SPEED_AND_ACCELERATION ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.print(
+      m7_experiment::DOUBLE_ACCELERATION_AGAIN ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.print(
+      m7_experiment::EMM42_V5_MAXIMUM_SPEED_RPM);
+  SerialDebug.println(" RPM");
 }
 
-} // namespace
+}
 
 void setup() {
-  SerialDebug.begin(DEBUG_BAUDRATE);
-  SerialHmi.begin(HMI_BAUDRATE);
-  SerialImu.begin(IMU_BAUDRATE);
-  if (ENABLE_QR_RECEIVER) {
-    SerialQr.begin(QR_BAUDRATE);
-  }
+  /*
+   * 串口、PB9、M1～M4、IMU、二维码、HMI和电池先由route正式main初始化；
+   * GC随后只追加机械臂、舵机、MaixCAM和工位动作。
+   */
+  route_chassis::setup();
+  selectedStartZone =
+      route_chassis::START_ZONE_SELECTION == 1U
+          ? START_ZONE_1
+          : START_ZONE_2;
   initializeManipulationHardware();
-
-  analogReadResolution(12);
-  pinMode(BATTERY_ADC_PIN, INPUT_ANALOG);
-
-  // 串口初始化完成后最后配置电机 GPIO，确保 PA1 保持为 M4 STEP 输出。
   initializeMotorOutputs();
-
-  startButton.reset();
-  startButton.attachClick(onStartButtonClick);
-  startButton.attachDoubleClick(onStartButtonDoubleClick);
-  startButton.attachLongPressStart(onStartButtonLongPress);
 
   SerialDebug.println(
       "[ZERO SAFETY] Before this power-up M6 must be fully "
@@ -8951,15 +10606,13 @@ void setup() {
       establishArmLinearSafeWorkingZeros();
   hmiSetRunStatus(
       armWorkingZerosReady
-          ? (VISION_YANYAN_TEST_MODE
-                 ? "VREADY"
+          ? (ROUGH_PROCESSING_CALIBRATION_MODE
+                 ? "CALREADY"
                  : (selectedStartZone == START_ZONE_1
                         ? "READY1"
                         : "READY2"))
           : "ARMZEROERR");
-  if (ENABLE_QR_RECEIVER) {
-    resetQrReceiver();
-  }
+  resetQrReceiver();
 
   if (!armWorkingZerosReady) {
     SerialDebug.println(
@@ -8967,69 +10620,68 @@ void setup() {
         "their 10 mm safe working zeros");
     SerialDebug.println(
         "SAFETY: power off and manually restore both mechanical "
-        "start endpoints before another startup test");
-  } else if (VISION_YANYAN_TEST_MODE) {
+        "start endpoints before another startup");
+  } else if (ROUGH_PROCESSING_CALIBRATION_MODE) {
     SerialDebug.println(
-        "VISION YANYAN rough-station placement test ready");
+        "Rough-processing calibration ready: place the chassis "
+        "at D, face the three rings, and load tray slots 0/1/2");
     SerialDebug.println(
-        "[BUILD] M6 microsteps=256; M5-then-M6 endpoint v4; "
-        "ring1 +45/+60/+30; ring3 -45/-60/-30; "
-        "fine tolerance 5 px; "
-        "M6 normal 260/128, endpoint 160/96; "
-        "3-frame stall debounce + reduced one-shot recovery");
-    SerialDebug.println(
-        "Load tray slots 0/1/2; face the middle ring; "
-        "click PB9 to scan 1/3 and direct-place 1/2/3; "
+        "Click PB9 to detect rings 1/3, derive ring 2, "
+        "place three items and pick all three back; "
         "long-press to stop");
   } else {
-    SerialDebug.println("GongChuang route controller ready");
     SerialDebug.println(
-        "Double-click PB9 to select zone; click to start; "
+        "GongChuang_route chassis + GC arm/vision ready");
+    SerialDebug.println(
+        "START_ZONE_SELECTION comes from route main; click PB9 to start; "
         "long-press to stop");
-  }
-  if (!ENABLE_COMPETITION_TIME_LIMIT) {
-    SerialDebug.println(
-        "DEBUG: 180-second competition hard stop is disabled");
   }
 }
 
 void loop() {
-  /*
-   * 电机 run()、按钮、IMU、二维码和状态机都采用非阻塞服务。
-   * 运行过程中不要加入 delay()、舵机 wait() 或 runToPosition()。
-   */
-  runAllMotors();
+  route_chassis::runAllMotors();
   armMotors.serviceM5();
   serviceArmBaseMotionWatchdog();
-  startButton.tick();
-  receiveImuData();
+  route_chassis::startButton.tick();
+  route_chassis::receiveImuData();
   serviceArmLinearAxes();
   serviceMaixcam();
-  if (ENABLE_QR_RECEIVER) {
-    receiveQrData();
-  }
-  updateHmiYaw();
-  serviceBatteryVoltage();
+  receiveQrData();
+  synchronizeTaskCodeToRouteChassis();
+  route_chassis::updateHmiYaw();
+  route_chassis::serviceBatteryVoltage();
 
-  if (abortRequested) {
-    /*
-     * RUN阶段及点击后的IMUWAIT阶段立即急停；尚未点击、已完赛或已故障时
-     * 忽略长按，避免把FINISH结果页覆盖为STOP。
-     */
+  if (route_chassis::abortRequested || abortRequested) {
+
     if (programState == PROGRAM_RUNNING ||
+        route_chassis::programState ==
+            route_chassis::PROGRAM_RUNNING ||
         (programState == PROGRAM_WAITING &&
-         startRequested)) {
+         (startRequested ||
+          route_chassis::startRequested))) {
       abortRoute();
     } else {
       abortRequested = false;
+      route_chassis::abortRequested = false;
     }
+  }
+
+  if (route_chassis::startRequested &&
+      route_chassis::programState ==
+          route_chassis::PROGRAM_WAITING &&
+      programState == PROGRAM_WAITING) {
+    startRequested = true;
   }
 
   if (startRequested && programState != PROGRAM_RUNNING) {
     beginRoute();
+    if (!startRequested &&
+        programState != PROGRAM_RUNNING) {
+      route_chassis::startRequested = false;
+    }
   }
 
   serviceCompetitionWatchdogs();
   serviceCompetitionAction();
-  updateRoute();
+  serviceIntegratedRoute();
 }

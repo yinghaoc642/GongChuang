@@ -143,7 +143,7 @@ void testStartZoneFootprints() {
   assert(!rectangleContains(zone1, oldFinal));
 }
 
-} // namespace
+} 
 
 int main() {
   testAllLegalTaskCodes();

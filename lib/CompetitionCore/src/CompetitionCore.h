@@ -28,7 +28,6 @@ struct TaskPlan {
 
 TaskCodeStatus parseTaskCode(const char *code, TaskPlan &plan);
 
-// Return the first-batch storage ring for a second-batch color, or 0 if absent.
 uint8_t stackedRingForColor(
     const TaskPlan &plan, uint8_t secondBatchColor);
 
@@ -69,6 +68,6 @@ Rectangle axisAlignedFootprint(
 bool rectangleContains(
     const Rectangle &outer, const Rectangle &inner);
 
-} // namespace competition
+}
 
 #endif

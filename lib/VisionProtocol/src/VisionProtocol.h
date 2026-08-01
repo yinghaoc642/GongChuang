@@ -55,21 +55,15 @@ enum ParseError : uint8_t {
   PARSE_CONFIDENCE_OUT_OF_RANGE
 };
 
-// CRC-8, polynomial 0x07, initial value 0x00, no reflection or final XOR.
 uint8_t crc8(const uint8_t *data, size_t length);
 uint8_t crc8(const char *data, size_t length);
 
-// Builds [0xAA, 0x02, sequence, mode, CRC8(0x02|sequence|mode), 0xBB].
-// Returns false without writing if frame is null or capacity is less than 6.
 bool buildRequest(
     uint8_t sequence,
     uint8_t mode,
     uint8_t *frame,
     size_t frameCapacity);
 
-// Parses exactly one response without CR/LF:
-// V2,seq,mode,status,target,x,y,metric,confidence,timestamp*HH
-// The output object is changed only when parsing succeeds.
 ParseError parseResponse(
     const char *line,
     size_t length,
@@ -77,6 +71,6 @@ ParseError parseResponse(
 
 const char *parseErrorText(ParseError error);
 
-} // namespace vision_protocol
+}
 
 #endif

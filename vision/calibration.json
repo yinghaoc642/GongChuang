@@ -34,6 +34,8 @@
     "maximum_center_span_pixels": 2,
     "maximum_radius_span_pixels": 2,
     "fine_center_tolerance_pixels": 2,
+    "fast_accept_minimum_confidence": 1000,
+    "fast_accept_confirmations": 1,
     "fine_center_confirmations": 2
   },
   "notes": [
