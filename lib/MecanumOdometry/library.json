@@ -1,0 +1,17 @@
+{
+  "name": "MecanumOdometry",
+  "version": "1.0.0",
+  "description": "Four-wheel mecanum odometry from whole-turn and single-turn encoder feedback",
+  "keywords": [
+    "mecanum",
+    "odometry",
+    "encoder",
+    "robot",
+    "chassis"
+  ],
+  "frameworks": "*",
+  "platforms": "*",
+  "dependencies": {
+    "MecanumKinematics": "*"
+  }
+}

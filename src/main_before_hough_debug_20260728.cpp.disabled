@@ -1,0 +1,115 @@
+#include <Arduino.h>
+#include <ArmMotorController.h>
+
+/*
+ * 圆柱转台机械臂自动循环
+ *
+ * 顺序：
+ *   1. M5 转台逆时针 90°；
+ *   2. M7 上升 30 mm；
+ *   3. M6 伸长 30 mm；
+ *   4. M6 收缩 30 mm；
+ *   5. M7 下降 30 mm；
+ *   6. M5 转台顺时针 90°，回到起始位置；
+ *   7. 循环执行。
+ *
+ * 烧录后自动执行，无按键门控。
+ * M1～M4 的原引脚定义保持不变，本程序不会驱动它们。
+ */
+
+namespace {
+
+// 原 M1～M4 定义：保持不变。
+const uint8_t DRIVE_ENABLE_PIN = PE13;
+const uint8_t M1_STEP_PIN = PD4;
+const uint8_t M1_DIRECTION_PIN = PD6;
+const uint8_t M2_STEP_PIN = PE11;
+const uint8_t M2_DIRECTION_PIN = PE9;
+const uint8_t M3_STEP_PIN = PD15;
+const uint8_t M3_DIRECTION_PIN = PD14;
+const uint8_t M4_STEP_PIN = PA1;
+const uint8_t M4_DIRECTION_PIN = PC3_C;
+
+const uint8_t DEBUG_RX_PIN = PB12;
+const uint8_t DEBUG_TX_PIN = PB13;
+const uint32_t DEBUG_BAUDRATE = 115200UL;
+HardwareSerial SerialDebug(DEBUG_RX_PIN, DEBUG_TX_PIN);
+
+const float M5_ROTATION_DEGREES = 90.0f;
+const float M6_TRAVEL_MM = 30.0f;
+const float M7_TRAVEL_MM = 30.0f;
+// M7 已确认使用 T8x12 滚珠丝杠，导程为12 mm/圈。
+const float M7_LEAD_MM_PER_REVOLUTION = 12.0f;
+
+const uint32_t POWER_ON_SETTLE_TIME_MS = 1500UL;
+
+/*
+ * M6/M7 串口接口发完命令即返回，必须等待实际运动完成。
+ * 当前串口电机默认60 RPM：
+ *   M6移动30 mm理论约0.27 s，这里等待1.2 s；
+ *   M7移动30 mm需要2.5圈，理论约2.5 s，这里等待4 s。
+ */
+const uint32_t M6_MOVE_WAIT_TIME_MS = 1200UL;
+const uint32_t M7_MOVE_WAIT_TIME_MS = 4000UL;
+const uint32_t CYCLE_END_PAUSE_MS = 1500UL;
+
+ArmMotorController armMotors;
+
+} // namespace
+
+void setup() {
+  SerialDebug.begin(DEBUG_BAUDRATE);
+
+  // M1～M4 公共使能为低有效；保持高电平，确保四个底盘电机不动。
+  pinMode(DRIVE_ENABLE_PIN, OUTPUT);
+  digitalWrite(DRIVE_ENABLE_PIN, HIGH);
+
+  delay(POWER_ON_SETTLE_TIME_MS);
+  armMotors.begin();
+  armMotors.setM7LeadMillimetersPerRevolution(
+      M7_LEAD_MM_PER_REVOLUTION);
+
+  SerialDebug.println(
+      "Automatic arm sequence ready; starting now");
+  SerialDebug.print("M5 pulses/90deg=");
+  SerialDebug.println(
+      armMotors.m5PulsesForDegrees(
+          M5_ROTATION_DEGREES));
+  SerialDebug.print("M6 pulses/30mm=");
+  SerialDebug.println(
+      armMotors.m6PulsesForMillimeters(
+          M6_TRAVEL_MM));
+  SerialDebug.print("M7 pulses/30mm=");
+  SerialDebug.println(
+      armMotors.m7PulsesForMillimeters(
+          M7_TRAVEL_MM));
+}
+
+void loop() {
+  SerialDebug.println("1/6 M5 counter-clockwise 90deg");
+  armMotors.rotateM5CounterClockwiseByDegrees(
+      M5_ROTATION_DEGREES);
+
+  SerialDebug.println("2/6 M7 raise 30mm");
+  armMotors.moveM7ByMillimeters(M7_TRAVEL_MM);
+  delay(M7_MOVE_WAIT_TIME_MS);
+
+  SerialDebug.println("3/6 M6 extend 30mm");
+  armMotors.moveM6ByMillimeters(M6_TRAVEL_MM);
+  delay(M6_MOVE_WAIT_TIME_MS);
+
+  SerialDebug.println("4/6 M6 retract 30mm");
+  armMotors.moveM6ByMillimeters(-M6_TRAVEL_MM);
+  delay(M6_MOVE_WAIT_TIME_MS);
+
+  SerialDebug.println("5/6 M7 lower 30mm");
+  armMotors.moveM7ByMillimeters(-M7_TRAVEL_MM);
+  delay(M7_MOVE_WAIT_TIME_MS);
+
+  SerialDebug.println("6/6 M5 clockwise 90deg");
+  armMotors.rotateM5ClockwiseByDegrees(
+      M5_ROTATION_DEGREES);
+
+  SerialDebug.println("Cycle complete");
+  delay(CYCLE_END_PAUSE_MS);
+}

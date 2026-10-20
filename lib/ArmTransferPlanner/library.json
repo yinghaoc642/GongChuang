@@ -1,0 +1,7 @@
+{
+  "name": "ArmTransferPlanner",
+  "version": "1.0.0",
+  "description": "Pure pose and motion-profile planning for arm transfers",
+  "frameworks": "arduino",
+  "platforms": "ststm32"
+}

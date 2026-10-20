@@ -1,0 +1,8 @@
+{
+  "name": "CompetitionCore",
+  "version": "1.0.0",
+  "description": "Pure competition task parsing, mapping and zone geometry",
+  "build": {
+    "srcDir": "src"
+  }
+}
