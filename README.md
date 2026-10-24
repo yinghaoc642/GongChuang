@@ -1,11 +1,3 @@
-# 复赛版本（独立历史）
-
-本分支为 2026-10-20 当前工程快照，分支名：复赛。首个提交没有父提交，不继承 main 历史。请明确选择远程复赛分支并确认最新提交后再分析代码。
-
-正式入口、构建方法和当前参数见下文、CURRENT_VERSION.md 和 AGENTS.md。包含当前代码、调试入口、测试和文档，保留原已跟踪的历史资料；不包含新增本地 backups、编译缓存及临时文件。本次上传不代表重新构建或硬件验证。
-
----
-
 # Gongchuang STM32H750 搬运机器人
 
 当前有效工程：`C:\Users\Administrator\Documents\PlatformIO\Projects\Gongchuang (6)\Gongchuang`

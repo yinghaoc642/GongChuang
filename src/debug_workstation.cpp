@@ -5,7 +5,7 @@
 // Reuse the current production arm/vision state machines; never copy their
 // motion parameters into a second, drifting implementation.
 #ifndef GONGCHUANG_DEBUG_WORKSTATION_STATE
-#define GONGCHUANG_DEBUG_WORKSTATION_STATE 2
+#define GONGCHUANG_DEBUG_WORKSTATION_STATE 3
 #endif
 
 // 本入口只选择工位和诊断输出。夹取/放置、回收、M5/M6/M7运动曲线、

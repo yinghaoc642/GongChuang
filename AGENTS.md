@@ -155,6 +155,14 @@ STM32 `HardwareSerial` 构造参数顺序是 RX、TX。MaixCAM 接线为 STM32 P
 
 当前相机脚本是 `vision/yanyanview5.py`，标识为 `5.5.1-aggressive-latency`、协议 v2，标定状态仍是 `UNVERIFIED`。
 
+另有用户指定的相机脚本 `yan_2/main.py`，当前标识为 `5.3.0-find1,3-red-shape`。
+该脚本的 `MODE1_RED_DETECTION_LOGIC` 是Python顶部配置常量：0保留旧的最大红色色块选择，
+1默认启用红色圆/椭圆/近圆形状筛选。新逻辑以旋转最小包围框估算偏心率（上限0.85），
+并要求轮廓紧致度至少0.35；先过滤所有候选再按面积选择，拒绝后不能自动退回旧色块逻辑。
+只影响请求模式1，模式8中的红色仍走旧逻辑；模式1的两帧/12 px稳定条件、metric面积含义、
+协议帧和STM32坐标换算均保持原样。`[MODE1 RED SHAPE]`是MaixVision控制台诊断，非协议帧。
+本次只修改工作区中的该脚本，不能据此认定相机设备已经上传或正在运行它。
+
 - 请求帧：`AA 02 seq mode crc BB`，CRC-8 poly 0x07、init 0。
 - 响应：`V2,seq,mode,status,target,x,y,metric,confidence,timestamp*HH\n`。
 - 模式 0：停止。
