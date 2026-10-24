@@ -167,12 +167,12 @@ constexpr int32_t ARM_BASE_HOME_ANGLE_DEGREES =
 // 容器夹取/释放位：相对标准状态顺时针100°（标准坐标顺时针为负）。
 constexpr float ARM_CONTAINER_CLOCKWISE_DEGREES = -100.0f;
 /*
- * yyq5正式流程对M5使用60000 pulse/s、35000 pulse/s²；短行程受加速度
- * 限制，实际不会瞬间达到最高速度。这里只设置M5动作曲线，不设置全程
- * 运行时长停机限制。
+ * M5最高速度保持60000 pulse/s，加速度由35000减半为17500 pulse/s²；
+ * 短行程受加速度限制，实际不会瞬间达到最高速度。这里只设置M5动作
+ * 曲线，不设置全程运行时长停机限制。
  */
 const float ARM_BASE_MAXIMUM_STEP_RATE = 60000.0f;
-const float ARM_BASE_STEP_ACCELERATION = 35000.0f;
+const float ARM_BASE_STEP_ACCELERATION = 17500.0f;
 // M5脉冲到位后的环节衔接等待按原值减半，仍保留50 ms机械消振。
 constexpr uint32_t ARM_BASE_SETTLE_MS = 50UL;
 
@@ -180,7 +180,8 @@ constexpr uint32_t ARM_BASE_SETTLE_MS = 50UL;
 constexpr uint8_t ARM_EXTENSION_ADDRESS = 6U;
 constexpr uint8_t ARM_LIFT_ADDRESS = 7U;
 constexpr float FULL_STEPS_PER_REVOLUTION = 200.0f;
-constexpr float ARM_LINEAR_MICROSTEPS = 16.0f;
+// M6、M7驱动器均已设置为256细分；M5仍由独立库按其原16细分管理。
+constexpr float ARM_LINEAR_MICROSTEPS = 256.0f;
 const float M6_TRAVEL_PER_REVOLUTION_MM = PI_F * 35.0f;
 constexpr float M7_TRAVEL_PER_REVOLUTION_MM = 12.0f;
 const float M6_PULSES_PER_MM =
@@ -194,15 +195,25 @@ constexpr uint8_t M6_RETRACT_DIRECTION = 1U;
 constexpr uint8_t M7_RAISE_DIRECTION = 1U;
 constexpr uint8_t M7_LOWER_DIRECTION = 0U;
 constexpr uint16_t M6_SPEED_RPM = 290U;
-constexpr uint8_t M6_ACCELERATION = 246U;
+/*
+ * EMM使用0~255加速度档位。机械臂相关电机加速度统一减半：
+ * M6由235减半并四舍五入为118，M7由250减半为125；最高转速不变。
+ */
+constexpr uint8_t M6_ACCELERATION = 118U;
 constexpr uint16_t M7_SPEED_RPM = 2496U;
-constexpr uint8_t M7_ACCELERATION = 255U;
+constexpr uint8_t M7_ACCELERATION = 125U;
 constexpr uint32_t ARM_LINEAR_POWER_ON_SETTLE_MS = 1500UL;
 constexpr uint32_t ARM_AXIS_COMMAND_GUARD_MS = 30UL;
 constexpr uint32_t ARM_AXIS_STATUS_INTERVAL_MS = 30UL;
 constexpr uint32_t ARM_AXIS_MINIMUM_ON_POSITION_MS = 120UL;
 constexpr uint32_t ARM_AXIS_MINIMUM_TIMEOUT_MS = 5000UL;
 constexpr uint32_t ARM_AXIS_MAXIMUM_TIMEOUT_MS = 30000UL;
+constexpr uint32_t ARM_AXIS_STARTUP_RESPONSE_TIMEOUT_MS = 150UL;
+// 0x04堵转位或0x08堵转保护位都必须连续出现3帧才判定为持续堵转。
+constexpr uint8_t ARM_AXIS_STALL_CONFIRMATION_SAMPLES = 3U;
+static_assert(
+    ARM_AXIS_STALL_CONFIRMATION_SAMPLES >= 3U,
+    "Arm stall shutdown requires at least 3 consecutive samples");
 
 constexpr float M6_STANDARD_EXTENSION_MM = 0.0f;
 constexpr float M7_STANDARD_HEIGHT_MM = 0.0f;
@@ -213,12 +224,16 @@ constexpr float RAW_PICK_LOWER_MM = 73.0f;
 constexpr float HOUGH_VISION_LOWER_MM = 90.0f;
 constexpr float HOUGH_VISION_HEIGHT_MM =
     M7_STANDARD_HEIGHT_MM - HOUGH_VISION_LOWER_MM;
+// 容器抓取/释放时M6由原来的0 mm再伸长10 mm。
+constexpr float CONTAINER_EXTENSION_MM = 10.0f;
 // 从容器取料及向容器放料均相对最高点下降40 mm。
 constexpr float CONTAINER_PICK_LOWER_MM = 40.0f;
 constexpr float CONTAINER_PLACE_LOWER_MM = 40.0f;
 constexpr float PROCESS_PLACE_LOWER_MM = 150.0f;
 constexpr float STORAGE_ROUND1_PLACE_LOWER_MM = 150.0f;
 constexpr float STORAGE_ROUND2_PLACE_LOWER_MM = 90.0f;
+// 只调整向粗加工区/暂存区释放时的高度；随后从粗加工区抓回仍用原高度。
+constexpr float RING_RELEASE_LOWER_REDUCTION_MM = 5.0f;
 
 // 实机夹爪标定：闭合99°、打开37°；最大张开档暂保留但当前未调用。
 constexpr float GRIPPER_CLOSE_ANGLE_DEGREES = 99.0f;
@@ -262,6 +277,9 @@ constexpr float RAW_NEAR_MM_PER_PIXEL = 40.0f / 72.0f;
 constexpr float RAW_FAR_MM_PER_PIXEL = 70.0f / 72.0f;
 constexpr float CIRCLE_MM_PER_PIXEL = 35.0f / 72.0f;
 constexpr float ARM_PIVOT_TO_CAMERA_CENTER_MM = 135.0f;
+constexpr float SIDE_RING_CENTER_OFFSET_MM = 150.0f;
+// 1、3号侧圈在同类动作中始终比2号中圈少下降5 mm。
+constexpr float SIDE_RING_LOWER_REDUCTION_MM = 5.0f;
 /*
  * 相机安装实机标定：
  *   画面+x（向右）对应M5顺时针；
@@ -270,28 +288,14 @@ constexpr float ARM_PIVOT_TO_CAMERA_CENTER_MM = 135.0f;
  */
 constexpr float IMAGE_Y_TO_ARM_OUTWARD_SIGN = -1.0f;
 /*
- * 标准姿态下机械臂沿车体2、4侧伸出：
- *   画面+x（向右）对应车体3、4侧，故底盘forward为负；
- *   画面纵向先按上面的实机标定换算为“机械臂向外”为正；
- *   机械臂向外对应body-left为负。
- * 若实机图像被镜像，只改这两个符号，不改底盘既有标定参数。
+ * 霍夫闭环不再移动底盘。画面+x换算为机械臂局部顺时针切向，
+ * 画面+y先按上面的实机标定换算为机械臂径向伸缩，再由M5/M6完成对中。
  */
-constexpr float IMAGE_X_TO_BODY_FORWARD_SIGN = -1.0f;
-constexpr float IMAGE_Y_TO_BODY_LEFT_SIGN = -1.0f;
 constexpr float CIRCLE_CENTER_TOLERANCE_PIXELS = 3.0f;
 constexpr uint32_t CIRCLE_CENTER_STABILITY_MS = 500UL;
 constexpr uint8_t CIRCLE_STABILITY_MINIMUM_SAMPLES = 2U;
 constexpr uint32_t VISION_STABILITY_MAXIMUM_SAMPLE_GAP_MS =
     1200UL;
-constexpr float MAXIMUM_VISUAL_CORRECTION_MM = 150.0f;
-/*
- * 当前MaixCAM的0x09协议只返回“离画面中心最近的圆”，不返回1/2/3号。
- * 原路线两次暂存停车点按开环命令分别比几何中心偏南约70/90 mm，第二次会
- * 更靠近1号圆。暂存定位前先向画面右侧（车体负forward）移动30 mm，使2号
- * 中间圆确定成为最近圆；该脉冲计入视觉累计量，离站前会完整反向恢复。
- */
-constexpr float STORAGE_CENTER_CIRCLE_SELECTION_FORWARD_MM =
-    -30.0f;
 
 /*
  * M1～M4 电机安装方向。前进时原始驱动脉冲符号为 [-,+,-,+]。
@@ -423,20 +427,18 @@ static_assert(
         STORAGE_RING_CENTER_X_MM,
     "Storage arm center must hit the middle ring");
 
-constexpr uint16_t WORKSTATION_APPROACH_MM = 150U;
 /*
  * 起步Y方向实车手调只改这一行：
  *   走过头多少毫米就减多少，没走够多少毫米就加多少。
- * QR_PASS_TO_RAW_APPROACH_MM会自动反算，原料区最终坐标不会被带偏。
+ * QR_PASS_TO_RAW_MM会自动反算，原料区最终坐标不会被带偏。
  */
 constexpr uint16_t START_TO_QR_PASS_MM = 1050U;
 constexpr uint16_t QR_PASS_CENTER_Y_MM =
     START_CENTER_Y_MM - START_TO_QR_PASS_MM;                 // 1200
 constexpr uint16_t QR_PASS_TO_FIELD_CENTER_X_MM =
     QR_PASS_CENTER_X_MM - FIELD_CENTER_MM;                   // 1015
-constexpr uint16_t QR_PASS_TO_RAW_APPROACH_MM =
-    RAW_CENTER_Y_MM - WORKSTATION_APPROACH_MM -
-    QR_PASS_CENTER_Y_MM;                                     // 785
+constexpr uint16_t QR_PASS_TO_RAW_MM =
+    RAW_CENTER_Y_MM - QR_PASS_CENTER_Y_MM;                   // 935
 static_assert(
     START_TO_QR_PASS_MM >= 1000U &&
         START_TO_QR_PASS_MM <= 1100U,
@@ -474,16 +476,18 @@ const float WORKSTATION_MAXIMUM_STEP_RATE = 2080.0f;
 const float WORKSTATION_STEP_ACCELERATION = 700.0f;
 const float FINAL_MAXIMUM_STEP_RATE = 1040.0f; // 最后进入300×300启停区
 const float FINAL_STEP_ACCELERATION = 400.0f;
-// 扫码区低速前探约104 mm/s，最大只走500 mm。
+// 二维码前靠速度/加速度由原1040/400翻倍；返程仍保持原参数。
 constexpr uint16_t QR_SCAN_SWEEP_MAXIMUM_MM = 500U;
-const float QR_SCAN_MAXIMUM_STEP_RATE = 1040.0f;
-const float QR_SCAN_STEP_ACCELERATION = 400.0f;
+const float QR_SCAN_FORWARD_MAXIMUM_STEP_RATE = 2080.0f;
+const float QR_SCAN_FORWARD_STEP_ACCELERATION = 800.0f;
+const float QR_SCAN_RETURN_MAXIMUM_STEP_RATE = 1040.0f;
+const float QR_SCAN_RETURN_STEP_ACCELERATION = 400.0f;
 const uint16_t MINIMUM_STEP_WIDTH_US = 2U;
 
 /*
  * 非中央通道仍保留原1.1 m分段上限。中央通道允许单段最多2.0 m，
- * 覆盖当前最长的1885 mm同向直线，使原料区到粗加工区的1740/1760 mm
- * 以及最终1885 mm回程均不中途停车；转角处仍按独立路线命令停稳。
+ * 覆盖当前最长的1890 mm工位直达段和最终1885 mm回程，使它们均不在
+ * 直线中途停车；转角处仍按独立路线命令停稳。
  */
 constexpr uint16_t MAX_TRANSLATION_SEGMENT_MM = 1100U;
 constexpr uint16_t CENTRAL_CHANNEL_MAX_TRANSLATION_SEGMENT_MM = 2000U;
@@ -502,6 +506,15 @@ const uint32_t WORKSTATION_HEADING_STABLE_TIME_MS = 400UL;
 const uint32_t TURN_HEADING_STABLE_TIME_MS = 500UL;
 const uint32_t FINAL_HEADING_STABLE_TIME_MS = 600UL;
 const uint32_t IMU_POST_MOTION_SETTLE_TIME_MS = 120UL;
+/*
+ * 到达二维码扫码点后、进入前靠前的固定停顿减半：
+ * IMU机械消振120->60 ms，航向稳定确认200->100 ms。
+ * 只作用于下一条命令是COMMAND_QR_ACTION的路线平移。
+ */
+const uint32_t QR_SCAN_PRE_SWEEP_IMU_SETTLE_TIME_MS =
+    IMU_POST_MOTION_SETTLE_TIME_MS / 2U;
+const uint32_t QR_SCAN_PRE_SWEEP_HEADING_STABLE_TIME_MS =
+    TRANSLATION_HEADING_STABLE_TIME_MS / 2U;
 const uint32_t MOTION_TIMEOUT_MS = 20000UL;
 const uint32_t TURN_TIMEOUT_MS = 16000UL;
 const uint32_t IMU_STALE_TIMEOUT_MS = 600UL;
@@ -531,6 +544,8 @@ const uint32_t FINAL_HOLD_MS = 1500UL;
 const bool DISPLAY_YAW_ON_X0 = true;
 const bool DISPLAY_BATTERY_ON_X1 = true;
 const bool SHOW_RESULT_PAGE_ON_FINISH = true;
+// 仅在状态发生变化时输出，不在loop()中周期刷屏。
+const bool ENABLE_STATE_TRANSITION_FEEDBACK = true;
 
 // true_example uses a 10 kOhm + 1 kOhm divider on PC1 and sends V * 100 to x1.
 // Adjust BATTERY_CALIBRATION_SCALE after comparing x1 with a multimeter.
@@ -540,6 +555,8 @@ const float BATTERY_CALIBRATION_SCALE = 1.0f;
 const float BATTERY_FILTER_ALPHA = 0.10f;
 const uint32_t BATTERY_SAMPLE_INTERVAL_MS = 50UL;
 const uint32_t BATTERY_HMI_INTERVAL_MS = 500UL;
+const uint32_t BATTERY_DEBUG_INTERVAL_MS = 2000UL;
+const float BATTERY_SAG_WARNING_VOLTS = 1.5f;
 
 MecanumKinematics geometry =
     MecanumKinematics::fromMillimeters(
@@ -570,7 +587,11 @@ AccelStepper *const motors[4] = {
 uint32_t lastHmiRefreshMs = 0;
 uint32_t lastBatterySampleMs = 0;
 uint32_t lastBatteryHmiMs = 0;
+uint32_t lastBatteryDebugMs = 0;
+uint32_t latestBatteryRawAdc = 0U;
+float latestBatteryVoltage = 0.0f;
 float filteredBatteryVoltage = 0.0f;
+float minimumBatteryVoltage = 0.0f;
 bool batteryVoltageInitialized = false;
 uint8_t correctGrabCount = 0;
 uint8_t correctPlacementCount = 0;
@@ -616,14 +637,30 @@ void serviceBatteryVoltage() {
         static_cast<float>(rawAdc) *
         BATTERY_ADC_REFERENCE_VOLTAGE / 4095.0f *
         BATTERY_DIVIDER_RATIO * BATTERY_CALIBRATION_SCALE;
+    latestBatteryRawAdc = rawAdc;
+    latestBatteryVoltage = sampledVoltage;
 
     if (!batteryVoltageInitialized) {
       filteredBatteryVoltage = sampledVoltage;
+      minimumBatteryVoltage = sampledVoltage;
       batteryVoltageInitialized = true;
     } else {
+      if (filteredBatteryVoltage - sampledVoltage >=
+          BATTERY_SAG_WARNING_VOLTS) {
+        SerialDebug.print("[POWER WARN] t=");
+        SerialDebug.print(nowMs);
+        SerialDebug.print(" ms, battery instant/filtered=");
+        SerialDebug.print(sampledVoltage, 2);
+        SerialDebug.print("/");
+        SerialDebug.print(filteredBatteryVoltage, 2);
+        SerialDebug.println(" V");
+      }
       filteredBatteryVoltage +=
           BATTERY_FILTER_ALPHA *
           (sampledVoltage - filteredBatteryVoltage);
+      if (sampledVoltage < minimumBatteryVoltage) {
+        minimumBatteryVoltage = sampledVoltage;
+      }
     }
   }
 
@@ -634,6 +671,23 @@ void serviceBatteryVoltage() {
         static_cast<int32_t>(
             lroundf(filteredBatteryVoltage * 100.0f));
     hmiSetValue("x1", voltageTimes100);
+  }
+
+  if (batteryVoltageInitialized &&
+      nowMs - lastBatteryDebugMs >=
+          BATTERY_DEBUG_INTERVAL_MS) {
+    lastBatteryDebugMs = nowMs;
+    SerialDebug.print("[BATTERY] t=");
+    SerialDebug.print(nowMs);
+    SerialDebug.print(" ms, adc/instant/filtered/min=");
+    SerialDebug.print(latestBatteryRawAdc);
+    SerialDebug.print("/");
+    SerialDebug.print(latestBatteryVoltage, 2);
+    SerialDebug.print("/");
+    SerialDebug.print(filteredBatteryVoltage, 2);
+    SerialDebug.print("/");
+    SerialDebug.print(minimumBatteryVoltage, 2);
+    SerialDebug.println(" V");
   }
 }
 
@@ -742,6 +796,34 @@ void decodeTaskCode(const char *code) {
   taskCodeDecoded = true;
 }
 
+void printDecodedTaskCode() {
+  SerialDebug.print("[QR PLAN] round1 colors=");
+  SerialDebug.print(taskColors[0][0]);
+  SerialDebug.print("/");
+  SerialDebug.print(taskColors[0][1]);
+  SerialDebug.print("/");
+  SerialDebug.print(taskColors[0][2]);
+  SerialDebug.print(", positions=");
+  SerialDebug.print(taskPositions[0][0]);
+  SerialDebug.print("/");
+  SerialDebug.print(taskPositions[0][1]);
+  SerialDebug.print("/");
+  SerialDebug.println(taskPositions[0][2]);
+
+  SerialDebug.print("[QR PLAN] round2 colors=");
+  SerialDebug.print(taskColors[1][0]);
+  SerialDebug.print("/");
+  SerialDebug.print(taskColors[1][1]);
+  SerialDebug.print("/");
+  SerialDebug.print(taskColors[1][2]);
+  SerialDebug.print(", positions=");
+  SerialDebug.print(taskPositions[1][0]);
+  SerialDebug.print("/");
+  SerialDebug.print(taskPositions[1][1]);
+  SerialDebug.print("/");
+  SerialDebug.println(taskPositions[1][2]);
+}
+
 void resetQrReceiver() {
   qrDataIndex = 0;
   qrOverflow = false;
@@ -769,10 +851,17 @@ void finishQrFrame() {
     commandGripperOpen();
     hmiSetText("t1", "QROK");
     hmiShowTaskCode(qrData);
-    SerialDebug.print("QR OK: ");
+    SerialDebug.print("[QR] accepted code=");
     SerialDebug.println(qrData);
+    printDecodedTaskCode();
   } else {
     hmiSetText("t1", "QRERR");
+    SerialDebug.print("[QR] rejected: overflow=");
+    SerialDebug.print(qrOverflow ? 1 : 0);
+    SerialDebug.print(", length=");
+    SerialDebug.print(static_cast<unsigned int>(qrDataIndex));
+    SerialDebug.print(", data=");
+    SerialDebug.println(qrData);
   }
 
   qrDataIndex = 0;
@@ -840,6 +929,9 @@ void updateContinuousImuHeading(int16_t rawYawValue) {
     imuInitialized = true;
     imuLastSignedRawDegrees = counterClockwiseSignedRaw;
     imuCounterClockwiseDegrees = 0.0f;
+    SerialDebug.print("[IMU] first valid angle frame: raw_ccw=");
+    SerialDebug.print(counterClockwiseSignedRaw, 2);
+    SerialDebug.println(" deg, route heading zero pending");
     return;
   }
 
@@ -926,31 +1018,6 @@ struct MotorPulses {
               long m3 = 0, long m4 = 0)
       : motor1(m1), motor2(m2), motor3(m3), motor4(m4) {}
 };
-
-MotorPulses addMotorPulses(
-    const MotorPulses &left,
-    const MotorPulses &right) {
-  return MotorPulses(
-      left.motor1 + right.motor1,
-      left.motor2 + right.motor2,
-      left.motor3 + right.motor3,
-      left.motor4 + right.motor4);
-}
-
-MotorPulses negateMotorPulses(const MotorPulses &pulses) {
-  return MotorPulses(
-      -pulses.motor1,
-      -pulses.motor2,
-      -pulses.motor3,
-      -pulses.motor4);
-}
-
-bool motorPulsesAreZero(const MotorPulses &pulses) {
-  return pulses.motor1 == 0 &&
-         pulses.motor2 == 0 &&
-         pulses.motor3 == 0 &&
-         pulses.motor4 == 0;
-}
 
 long roundedPulseCount(float pulses) {
   return static_cast<long>(
@@ -1160,6 +1227,64 @@ enum CommandType {
   COMMAND_FINISH
 };
 
+const char *commandTypeName(CommandType type) {
+  switch (type) {
+    case COMMAND_ARM_BASE_HOME:
+      return "ARM_BASE_HOME";
+    case COMMAND_MOVE_SIDE_12_MM:
+      return "MOVE_SIDE_12";
+    case COMMAND_MOVE_SIDE_34_MM:
+      return "MOVE_SIDE_34";
+    case COMMAND_MOVE_SIDE_13_MM:
+      return "MOVE_SIDE_13";
+    case COMMAND_MOVE_SIDE_24_MM:
+      return "MOVE_SIDE_24";
+    case COMMAND_TURN_COUNTERCLOCKWISE_DEGREES:
+      return "TURN_CCW";
+    case COMMAND_TURN_CLOCKWISE_DEGREES:
+      return "TURN_CW";
+    case COMMAND_SET_PRECISE_MOTION:
+      return "SET_PRECISE";
+    case COMMAND_QR_ACTION:
+      return "QR_ACTION";
+    case COMMAND_RAW_ACTION:
+      return "RAW_ACTION";
+    case COMMAND_PROCESS_ACTION:
+      return "PROCESS_ACTION";
+    case COMMAND_STORAGE_ACTION:
+      return "STORAGE_ACTION";
+    case COMMAND_FINAL_ALIGN:
+      return "FINAL_ALIGN";
+    case COMMAND_HOLD:
+      return "HOLD";
+    case COMMAND_FINISH:
+      return "FINISH";
+  }
+  return "UNKNOWN";
+}
+
+const char *commandValueUnit(CommandType type) {
+  switch (type) {
+    case COMMAND_MOVE_SIDE_12_MM:
+    case COMMAND_MOVE_SIDE_34_MM:
+    case COMMAND_MOVE_SIDE_13_MM:
+    case COMMAND_MOVE_SIDE_24_MM:
+      return " mm";
+    case COMMAND_ARM_BASE_HOME:
+    case COMMAND_TURN_COUNTERCLOCKWISE_DEGREES:
+    case COMMAND_TURN_CLOCKWISE_DEGREES:
+      return " deg";
+    case COMMAND_RAW_ACTION:
+    case COMMAND_PROCESS_ACTION:
+    case COMMAND_STORAGE_ACTION:
+      return " round";
+    case COMMAND_HOLD:
+      return " ms";
+    default:
+      return "";
+  }
+}
+
 struct RouteCommand {
   CommandType type;
   int32_t value;
@@ -1223,8 +1348,8 @@ const RouteCommand route[] = {
     // -------------------- 第一批三个物料（代码中的第1轮） --------------------
     /*
      * 扫码点 -> 原料区：
-     * 先向1、3侧横移到X=1200，再向1、2侧到原料区前；逆时针转90°后，
-     * 2、4侧朝北，最后150 mm低速进入第1批原料动作点(1200,2135)。
+     * 先向1、3侧横移到X=1200，再向1、2侧一步直达原料动作点；
+     * 到点后逆时针转90°使2、4侧朝北，随后直接开始工作。
      *
      * 规则动作含义：按任务码第一组三位颜色顺序，每次抓取1个，并先把
      * 物料放到机器人载物位置，之后才能抓下一个；不得用手爪夹持跨区运输。
@@ -1236,18 +1361,16 @@ const RouteCommand route[] = {
     {COMMAND_MOVE_SIDE_13_MM, QR_PASS_TO_FIELD_CENTER_X_MM,
      "QR area -> raw centerline", false, true},
     {COMMAND_MOVE_SIDE_12_MM,
-     QR_PASS_TO_RAW_APPROACH_MM,
-     "QR Y=1200 -> raw approach round 1", false, true},
+     QR_PASS_TO_RAW_MM,
+     "QR Y=1200 -> raw work point round 1 direct", false, true},
     {COMMAND_TURN_COUNTERCLOCKWISE_DEGREES, 90,
      "Face side 2,4 north"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM,
-     "Precise entry to raw round 1", true},
     {COMMAND_RAW_ACTION, 1, "Raw action round 1"},
 
     /*
      * 第1批原料区 -> 粗加工区：
-     * 向1、3侧长距离南移；该1740 mm中央通道直线现在一段直达，
-     * 仅在终点IMU回正。随后逆时针180°，让2、4侧朝南，最后150 mm低速进入。
+     * 向1、3侧长距离南移并一步直达动作点，仅在终点IMU回正。
+     * 随后逆时针180°让2、4侧朝南，直接开始工作，不再低速精靠。
      * 当前+20 mm为已有实调补偿，按命令累计动作点约为(1200,245)。
      *
      * 规则动作含义：把第一批三个物料按任务码第二组三位指定的1/2/3号
@@ -1255,18 +1378,16 @@ const RouteCommand route[] = {
      * COMMAND_PROCESS_ACTION同时代表“放下3个并重新抓回3个”的接口。
      */
     {COMMAND_MOVE_SIDE_13_MM,
-     RAW_TO_PROCESS_MM - WORKSTATION_APPROACH_MM + 20U,
-     "Raw -> process approach round 1", false, true},
+     RAW_TO_PROCESS_MM + 20U,
+     "Raw -> process work point round 1 direct", false, true},
     {COMMAND_TURN_COUNTERCLOCKWISE_DEGREES, 180,
      "Face side 2,4 south"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM,
-     "Precise entry to process round 1", true},
     {COMMAND_PROCESS_ACTION, 1, "Process action round 1"},
 
     /*
      * 第1批粗加工区 -> 暂存区：
-     * 先向1、3侧北移，再向3、4侧西移至工位前；顺时针90°使2、4侧
-     * 朝西，最后150 mm低速进入。受现有-50 mm补偿影响，按命令累计
+     * 先向1、3侧北移，再向3、4侧西移并一步直达动作点；顺时针90°
+     * 使2、4侧朝西后直接工作。受现有-50 mm补偿影响，按命令累计
      * 暂存动作点约为(265,1130)，不是几何注释中的(265,1200)。
      *
      * 规则动作含义：将第一批三个物料按任务码第二组三位规定的位置，
@@ -1275,19 +1396,17 @@ const RouteCommand route[] = {
     {COMMAND_MOVE_SIDE_13_MM, PROCESS_TO_CENTER_MM - 50U,
      "Process -> field center round 1", false, true},
     {COMMAND_MOVE_SIDE_34_MM,
-     CENTER_TO_STORAGE_MM - WORKSTATION_APPROACH_MM,
-     "Center -> storage approach round 1", false, true},
+     CENTER_TO_STORAGE_MM,
+     "Center -> storage work point round 1 direct", false, true},
     {COMMAND_TURN_CLOCKWISE_DEGREES, 90,
      "Face side 2,4 west"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM,
-     "Precise entry to storage round 1", true},
     {COMMAND_STORAGE_ACTION, 1, "Storage action round 1"},
 
     // -------------------- 第二批三个物料（代码中的第2轮） --------------------
     /*
      * 暂存区 -> 原料区：
-     * 保持2、4侧朝西，先向1、3侧回到X=1200，再向3、4侧北移；
-     * 顺时针90°使2、4侧朝北，最后以150+40 mm进入。+40 mm是现有
+     * 保持2、4侧朝西，先向1、3侧回到X=1200，再向3、4侧一步直达；
+     * 顺时针90°使2、4侧朝北后直接工作。+40 mm是现有
      * 实调补偿，按命令累计第2批原料动作点约为(1200,2105)。
      *
      * 规则动作含义：按任务码第三组三位颜色顺序抓取第二批三个物料，
@@ -1296,35 +1415,31 @@ const RouteCommand route[] = {
     {COMMAND_MOVE_SIDE_13_MM, STORAGE_TO_CENTER_MM,
      "Storage -> field center round 2", false, true},
     {COMMAND_MOVE_SIDE_34_MM,
-     CENTER_TO_RAW_MM - WORKSTATION_APPROACH_MM,
-     "Field center -> raw approach round 2", false, true},
+     CENTER_TO_RAW_MM + 40U,
+     "Field center -> raw work point round 2 direct", false, true},
     {COMMAND_TURN_CLOCKWISE_DEGREES, 90,
      "Face side 2,4 north"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM + 40U,
-     "Precise entry to raw round 2", true},
     {COMMAND_RAW_ACTION, 2, "Raw action round 2"},
 
     /*
      * 第2批原料区 -> 粗加工区：
-     * 长移段+40 mm、精靠段-20 mm均为已有实调补偿；逆时针180°后
-     * 2、4侧朝南，按命令累计粗加工动作点约为(1200,215)。
+     * 原长移段+40 mm与精靠段-20 mm合并后净补偿为+20 mm；
+     * 逆时针180°后2、4侧朝南，直接开始工作。
      *
      * 规则动作含义：按任务码第四组三位指定的圆环位置放下第二批，
      * 再按搬运顺序重新抓回车上，准备送往暂存区。
      */
     {COMMAND_MOVE_SIDE_13_MM,
-     RAW_TO_PROCESS_MM - WORKSTATION_APPROACH_MM + 40U,
-     "Raw -> process approach round 2", false, true},
+     RAW_TO_PROCESS_MM + 20U,
+     "Raw -> process work point round 2 direct", false, true},
     {COMMAND_TURN_COUNTERCLOCKWISE_DEGREES, 180,
      "Face side 2,4 south"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM - 20U,
-     "Precise entry to process round 2", true},
     {COMMAND_PROCESS_ACTION, 2, "Process action round 2"},
 
     /*
      * 第2批粗加工区 -> 暂存区：
-     * 先北移、再西移，顺时针90°让2、4侧朝西后精靠；当前-40 mm
-     * 补偿使按命令累计暂存动作点约为(265,1110)。
+     * 先北移、再向西一步直达动作点，顺时针90°让2、4侧朝西后直接工作；
+     * 当前-40 mm补偿使按命令累计暂存动作点约为(265,1110)。
      *
      * 规则动作含义：第二批只能码垛在第一批已正确放置的同色物料上。
      * COMMAND_STORAGE_ACTION第2批接口应在实际机械臂完成三次码垛后反馈。
@@ -1332,12 +1447,10 @@ const RouteCommand route[] = {
     {COMMAND_MOVE_SIDE_13_MM, PROCESS_TO_CENTER_MM - 40U,
      "Process -> field center round 2", false, true},
     {COMMAND_MOVE_SIDE_34_MM,
-     CENTER_TO_STORAGE_MM - WORKSTATION_APPROACH_MM,
-     "Center -> storage approach round 2", false, true},
+     CENTER_TO_STORAGE_MM,
+     "Center -> storage work point round 2 direct", false, true},
     {COMMAND_TURN_CLOCKWISE_DEGREES, 90,
      "Face side 2,4 west"},
-    {COMMAND_MOVE_SIDE_24_MM, WORKSTATION_APPROACH_MM,
-     "Precise entry to storage round 2", true},
     {COMMAND_STORAGE_ACTION, 2, "Storage action round 2"},
 
     /*
@@ -1380,6 +1493,20 @@ enum ProgramState {
   PROGRAM_FAULT
 };
 
+const char *programStateName(ProgramState state) {
+  switch (state) {
+    case PROGRAM_WAITING:
+      return "WAITING";
+    case PROGRAM_RUNNING:
+      return "RUNNING";
+    case PROGRAM_FINISHED:
+      return "FINISHED";
+    case PROGRAM_FAULT:
+      return "FAULT";
+  }
+  return "UNKNOWN";
+}
+
 enum QrScanPhase {
   QR_SCAN_IDLE,
   QR_SCAN_FORWARD,
@@ -1387,6 +1514,22 @@ enum QrScanPhase {
   QR_SCAN_RETURNING,
   QR_SCAN_COMPLETE
 };
+
+const char *qrScanPhaseName(QrScanPhase phase) {
+  switch (phase) {
+    case QR_SCAN_IDLE:
+      return "IDLE";
+    case QR_SCAN_FORWARD:
+      return "FORWARD";
+    case QR_SCAN_WAIT_AT_LIMIT:
+      return "WAIT_AT_LIMIT";
+    case QR_SCAN_RETURNING:
+      return "RETURNING";
+    case QR_SCAN_COMPLETE:
+      return "COMPLETE";
+  }
+  return "UNKNOWN";
+}
 
 ProgramState programState = PROGRAM_WAITING;
 QrScanPhase qrScanPhase = QR_SCAN_IDLE;
@@ -1396,6 +1539,8 @@ size_t routeIndex = 0;
 uint8_t activeCompetitionRound = 0;
 bool commandStarted = false;
 uint32_t commandStartMs = 0;
+uint32_t routeCommandStartMs = 0;
+uint32_t routeRunStartMs = 0;
 uint32_t headingStableStartMs = 0;
 uint32_t motorsArrivedStartMs = 0;
 bool imuWaitStatusDisplayed = false;
@@ -1465,12 +1610,24 @@ void printTurnCoarseTelemetry() {
 }
 
 void printCurrentCommand() {
-  SerialDebug.print("Route ");
+  const RouteCommand &command = route[routeIndex];
+  SerialDebug.print("[ROUTE START] t=");
+  SerialDebug.print(millis());
+  SerialDebug.print(" ms, step=");
   SerialDebug.print(static_cast<unsigned int>(routeIndex + 1));
   SerialDebug.print("/");
   SerialDebug.print(static_cast<unsigned int>(ROUTE_COMMAND_COUNT));
-  SerialDebug.print(": ");
-  SerialDebug.println(route[routeIndex].name);
+  SerialDebug.print(", type=");
+  SerialDebug.print(commandTypeName(command.type));
+  SerialDebug.print(", value=");
+  SerialDebug.print(command.value);
+  SerialDebug.print(commandValueUnit(command.type));
+  SerialDebug.print(", precise=");
+  SerialDebug.print(command.preciseArrival ? 1 : 0);
+  SerialDebug.print(", central=");
+  SerialDebug.print(command.centralChannel ? 1 : 0);
+  SerialDebug.print(", name=");
+  SerialDebug.println(command.name);
 }
 
 void emergencyStopArmLinearAxes();
@@ -1478,6 +1635,7 @@ void stopMaixRequest();
 void invalidateArmLinearReference();
 
 void routeFault(const char *reason) {
+  const ProgramState stateBeforeFault = programState;
   resetQrScanActionState();
   invalidateArmLinearReference();
   disableDriveMotors();
@@ -1488,7 +1646,22 @@ void routeFault(const char *reason) {
   commandStarted = false;
   hmiSetRunStatus("FAULT");
 
-  SerialDebug.print("FAULT: ");
+  SerialDebug.print("[FAULT] t=");
+  SerialDebug.print(millis());
+  SerialDebug.print(" ms, state=");
+  SerialDebug.print(programStateName(stateBeforeFault));
+  if (routeIndex < ROUTE_COMMAND_COUNT) {
+    SerialDebug.print(", step=");
+    SerialDebug.print(static_cast<unsigned int>(routeIndex + 1));
+    SerialDebug.print("/");
+    SerialDebug.print(static_cast<unsigned int>(ROUTE_COMMAND_COUNT));
+    SerialDebug.print(", command=");
+    SerialDebug.print(commandTypeName(route[routeIndex].type));
+    SerialDebug.print(", elapsed=");
+    SerialDebug.print(millis() - routeCommandStartMs);
+    SerialDebug.print(" ms");
+  }
+  SerialDebug.print(", reason=");
   SerialDebug.println(reason);
 }
 
@@ -1508,6 +1681,7 @@ struct LinearAxisMotion {
   bool fault;
   bool commandAcknowledged;
   bool motionObserved;
+  uint8_t stallSampleCount;
   uint32_t startMs;
   uint32_t lastStatusRequestMs;
   uint32_t timeoutMs;
@@ -1520,6 +1694,7 @@ struct LinearAxisMotion {
         fault(false),
         commandAcknowledged(false),
         motionObserved(false),
+        stallSampleCount(0U),
         startMs(0UL),
         lastStatusRequestMs(0UL),
         timeoutMs(ARM_AXIS_MINIMUM_TIMEOUT_MS) {}
@@ -1583,6 +1758,13 @@ void writeArmLinearStatusRequest(uint8_t address) {
   SerialArmLinear.write(frame, sizeof(frame));
 }
 
+void writeArmLinearClearStallProtection(uint8_t address) {
+  // EMM V5“解除堵转保护”：地址 + 0E + 52 + 6B。
+  const uint8_t frame[4] = {
+      address, 0x0EU, 0x52U, 0x6BU};
+  SerialArmLinear.write(frame, sizeof(frame));
+}
+
 void writeArmLinearStop(uint8_t address) {
   const uint8_t frame[5] = {
       address, 0xFEU, 0x98U, 0x00U, 0x6BU};
@@ -1617,9 +1799,182 @@ void printArmLinearFrame(
   SerialDebug.println();
 }
 
+bool waitForArmLinearFrame(
+    uint8_t address,
+    uint8_t functionCode,
+    uint8_t *frame,
+    uint32_t timeoutMs) {
+  uint8_t window[4] = {0U, 0U, 0U, 0U};
+  uint8_t count = 0U;
+  const uint32_t startMs = millis();
+
+  do {
+    while (SerialArmLinear.available()) {
+      const uint8_t incoming =
+          static_cast<uint8_t>(SerialArmLinear.read());
+      if (count < 4U) {
+        window[count++] = incoming;
+      } else {
+        window[0] = window[1];
+        window[1] = window[2];
+        window[2] = window[3];
+        window[3] = incoming;
+      }
+
+      if (count != 4U || incoming != 0x6BU) {
+        continue;
+      }
+      if (window[0] == address &&
+          window[1] == functionCode) {
+        memcpy(frame, window, sizeof(window));
+        armLinearReceiveCount = 0U;
+        return true;
+      }
+      count = 0U;
+    }
+    delay(1);
+  } while (millis() - startMs < timeoutMs);
+
+  armLinearReceiveCount = 0U;
+  return false;
+}
+
+bool recoverAndVerifyArmLinearAxis(
+    LinearAxisMotion &axis) {
+  uint8_t response[4] = {0U, 0U, 0U, 0U};
+
+  /*
+   * MCU复位不一定会让EMM驱动器掉电；先停止，再清除上一次运行锁存的
+   * 堵转保护。这里只在上电初始化、轴未运动时清除；运行中的真实堵转
+   * 仍由状态机停机，绝不边运动边清故障后继续。
+   */
+  SerialDebug.print("[EMM BOOT] M");
+  SerialDebug.print(axis.address);
+  SerialDebug.println(" stop, clear latched stall protection");
+  clearArmLinearReceiveBuffer();
+  writeArmLinearStop(axis.address);
+  SerialArmLinear.flush();
+  delay(ARM_AXIS_COMMAND_GUARD_MS);
+  clearArmLinearReceiveBuffer();
+
+  writeArmLinearClearStallProtection(axis.address);
+  SerialArmLinear.flush();
+  if (waitForArmLinearFrame(
+          axis.address,
+          0x0EU,
+          response,
+          ARM_AXIS_STARTUP_RESPONSE_TIMEOUT_MS)) {
+    printArmLinearFrame("startup clear response", response);
+    if (response[2] != 0x02U) {
+      SerialDebug.print("[EMM BOOT] M");
+      SerialDebug.print(axis.address);
+      SerialDebug.println(
+          " clear command was not accepted");
+    }
+  } else {
+    SerialDebug.print("[EMM BOOT] M");
+    SerialDebug.print(axis.address);
+    SerialDebug.println(
+        " no clear ACK; verify with 3A status");
+  }
+
+  clearArmLinearReceiveBuffer();
+  writeArmLinearEnable(axis.address, true);
+  SerialArmLinear.flush();
+  if (waitForArmLinearFrame(
+          axis.address,
+          0xF3U,
+          response,
+          ARM_AXIS_STARTUP_RESPONSE_TIMEOUT_MS)) {
+    printArmLinearFrame("startup enable response", response);
+  } else {
+    SerialDebug.print("[EMM BOOT] M");
+    SerialDebug.print(axis.address);
+    SerialDebug.println(
+        " no enable ACK; verify with 3A status");
+  }
+
+  axis.stallSampleCount = 0U;
+  for (uint8_t attempt = 0U;
+       attempt <
+       ARM_AXIS_STALL_CONFIRMATION_SAMPLES;
+       ++attempt) {
+    clearArmLinearReceiveBuffer();
+    writeArmLinearStatusRequest(axis.address);
+    SerialArmLinear.flush();
+    if (!waitForArmLinearFrame(
+            axis.address,
+            0x3AU,
+            response,
+            ARM_AXIS_STARTUP_RESPONSE_TIMEOUT_MS)) {
+      SerialDebug.print("[EMM BOOT ERROR] M");
+      SerialDebug.print(axis.address);
+      SerialDebug.println(" no 3A status response");
+      axis.fault = true;
+      return false;
+    }
+
+    printArmLinearFrame("startup status", response);
+    const uint8_t flags = response[2];
+    SerialDebug.print("[EMM BOOT] M");
+    SerialDebug.print(axis.address);
+    SerialDebug.print(" enabled/on-position/stall/protect=");
+    SerialDebug.print((flags & 0x01U) != 0U ? 1 : 0);
+    SerialDebug.print("/");
+    SerialDebug.print((flags & 0x02U) != 0U ? 1 : 0);
+    SerialDebug.print("/");
+    SerialDebug.print((flags & 0x04U) != 0U ? 1 : 0);
+    SerialDebug.print("/");
+    SerialDebug.println((flags & 0x08U) != 0U ? 1 : 0);
+
+    if ((flags & 0x01U) == 0U) {
+      SerialDebug.print("[EMM BOOT ERROR] M");
+      SerialDebug.print(axis.address);
+      SerialDebug.println(" axis disabled after enable");
+      axis.fault = true;
+      return false;
+    }
+    if ((flags & 0x0CU) == 0U) {
+      if (axis.stallSampleCount != 0U) {
+        SerialDebug.print("[EMM BOOT] M");
+        SerialDebug.print(axis.address);
+        SerialDebug.println(
+            " stall indication recovered before 3 samples");
+      }
+      axis.stallSampleCount = 0U;
+      return true;
+    }
+
+    ++axis.stallSampleCount;
+    SerialDebug.print("[EMM BOOT STALL] M");
+    SerialDebug.print(axis.address);
+    SerialDebug.print(", sample=");
+    SerialDebug.print(axis.stallSampleCount);
+    SerialDebug.print("/");
+    SerialDebug.println(
+        ARM_AXIS_STALL_CONFIRMATION_SAMPLES);
+    if (axis.stallSampleCount >=
+        ARM_AXIS_STALL_CONFIRMATION_SAMPLES) {
+      SerialDebug.print("[EMM BOOT ERROR] M");
+      SerialDebug.print(axis.address);
+      SerialDebug.println(
+          " persistent stall after clear/enable");
+      axis.fault = true;
+      axis.stallSampleCount = 0U;
+      return false;
+    }
+    delay(ARM_AXIS_STATUS_INTERVAL_MS);
+  }
+
+  axis.fault = true;
+  axis.stallSampleCount = 0U;
+  return false;
+}
+
 void markLinearAxisArrived(LinearAxisMotion &axis) {
   axis.active = false;
   axis.currentMm = axis.targetMm;
+  axis.stallSampleCount = 0U;
   SerialDebug.print("Arm axis M");
   SerialDebug.print(axis.address);
   SerialDebug.print(" arrived at ");
@@ -1635,6 +1990,7 @@ void faultLinearAxis(
   }
   axis.active = false;
   axis.fault = true;
+  axis.stallSampleCount = 0U;
   SerialDebug.print("Arm axis M");
   SerialDebug.print(axis.address);
   SerialDebug.print(" fault: ");
@@ -1751,10 +2107,47 @@ void handleArmLinearFrame(const uint8_t *frame) {
       faultLinearAxis(*axis, "EMM axis is not enabled");
       return;
     }
-    if ((flags & 0x0CU) != 0U) {
-      printArmLinearFrame("stall/protection", frame);
-      faultLinearAxis(*axis, "EMM stall/protection flag");
+    const bool stallReported =
+        (flags & 0x04U) != 0U;
+    const bool stallProtectionActive =
+        (flags & 0x08U) != 0U;
+    if (stallReported || stallProtectionActive) {
+      if (axis->stallSampleCount < UINT8_MAX) {
+        ++axis->stallSampleCount;
+      }
+      SerialDebug.print("[EMM STALL] t=");
+      SerialDebug.print(millis());
+      SerialDebug.print(" ms, M");
+      SerialDebug.print(axis->address);
+      SerialDebug.print(", sample=");
+      SerialDebug.print(axis->stallSampleCount);
+      SerialDebug.print("/");
+      SerialDebug.print(ARM_AXIS_STALL_CONFIRMATION_SAMPLES);
+      SerialDebug.print(", stall/protection=");
+      SerialDebug.print(stallReported ? 1 : 0);
+      SerialDebug.print("/");
+      SerialDebug.print(
+          stallProtectionActive ? 1 : 0);
+      SerialDebug.println("; wait for confirmation");
+      if (axis->stallSampleCount >=
+          ARM_AXIS_STALL_CONFIRMATION_SAMPLES) {
+        printArmLinearFrame(
+            "persistent stall indication", frame);
+        faultLinearAxis(
+            *axis,
+            "EMM persistent stall indication");
+      }
       return;
+    }
+    if (axis->stallSampleCount != 0U) {
+      SerialDebug.print("[EMM STALL] t=");
+      SerialDebug.print(millis());
+      SerialDebug.print(" ms, M");
+      SerialDebug.print(axis->address);
+      SerialDebug.print(" recovered after ");
+      SerialDebug.print(axis->stallSampleCount);
+      SerialDebug.println(" sample(s)");
+      axis->stallSampleCount = 0U;
     }
     if ((flags & 0x02U) == 0U) {
       axis->motionObserved = true;
@@ -1897,6 +2290,7 @@ bool startLinearAxisMove(
   axis.active = true;
   axis.commandAcknowledged = false;
   axis.motionObserved = false;
+  axis.stallSampleCount = 0U;
   axis.startMs = millis();
   axis.lastStatusRequestMs = axis.startMs;
 
@@ -1990,12 +2384,14 @@ void resetArmLinearSoftwareOrigin() {
   extensionAxis.fault = false;
   extensionAxis.commandAcknowledged = false;
   extensionAxis.motionObserved = false;
+  extensionAxis.stallSampleCount = 0U;
   liftAxis.currentMm = M7_STANDARD_HEIGHT_MM;
   liftAxis.targetMm = M7_STANDARD_HEIGHT_MM;
   liftAxis.active = false;
   liftAxis.fault = false;
   liftAxis.commandAcknowledged = false;
   liftAxis.motionObserved = false;
+  liftAxis.stallSampleCount = 0U;
   armLinearReferenceValid = true;
 }
 
@@ -2008,6 +2404,8 @@ void commandGripperOpen() {
       GRIPPER_OPEN_ANGLE_DEGREES,
       GRIPPER_INTERVAL_MS,
       GRIPPER_OPEN_POWER_MW);
+  SerialDebug.print("[SERVO] gripper(ID4)=OPEN, angle=");
+  SerialDebug.println(GRIPPER_OPEN_ANGLE_DEGREES, 1);
 }
 
 void commandGripperMaxOpen() {
@@ -2015,6 +2413,8 @@ void commandGripperMaxOpen() {
       GRIPPER_MAX_OPEN_ANGLE_DEGREES,
       GRIPPER_INTERVAL_MS,
       GRIPPER_OPEN_POWER_MW);
+  SerialDebug.print("[SERVO] gripper(ID4)=MAX_OPEN, angle=");
+  SerialDebug.println(GRIPPER_MAX_OPEN_ANGLE_DEGREES, 1);
 }
 
 void commandGripperClose() {
@@ -2022,6 +2422,8 @@ void commandGripperClose() {
       GRIPPER_CLOSE_ANGLE_DEGREES,
       GRIPPER_INTERVAL_MS,
       GRIPPER_CLOSE_POWER_MW);
+  SerialDebug.print("[SERVO] gripper(ID4)=CLOSE, angle=");
+  SerialDebug.println(GRIPPER_CLOSE_ANGLE_DEGREES, 1);
 }
 
 void commandStorageServoPosition(uint8_t positionIndex) {
@@ -2037,7 +2439,7 @@ void commandStorageServoPosition(uint8_t positionIndex) {
   storageServo.setRawAngleMTurn(
       STORAGE_SERVO_POSITIONS_DEGREES[positionIndex],
       STORAGE_SERVO_INTERVAL_MS);
-  SerialDebug.print("Storage servo multi-turn index ");
+  SerialDebug.print("[SERVO] storage(ID5) index=");
   SerialDebug.print(positionIndex);
   SerialDebug.print(", angle=");
   SerialDebug.println(
@@ -2049,7 +2451,7 @@ void commandStorageServoParkingPosition() {
   storageServo.setRawAngleMTurn(
       STORAGE_SERVO_PARK_ANGLE_DEGREES,
       STORAGE_SERVO_INTERVAL_MS);
-  SerialDebug.print("Storage servo parking angle=");
+  SerialDebug.print("[SERVO] storage(ID5)=PARK, angle=");
   SerialDebug.println(
       STORAGE_SERVO_PARK_ANGLE_DEGREES,
       1);
@@ -2283,7 +2685,31 @@ bool readNewMaixCoordinate(
   return true;
 }
 
+void printRouteCommandCompletion() {
+  if (routeIndex >= ROUTE_COMMAND_COUNT) {
+    return;
+  }
+
+  SerialDebug.print("[ROUTE DONE] t=");
+  SerialDebug.print(millis());
+  SerialDebug.print(" ms, step=");
+  SerialDebug.print(static_cast<unsigned int>(routeIndex + 1));
+  SerialDebug.print("/");
+  SerialDebug.print(static_cast<unsigned int>(ROUTE_COMMAND_COUNT));
+  SerialDebug.print(", type=");
+  SerialDebug.print(commandTypeName(route[routeIndex].type));
+  SerialDebug.print(", elapsed=");
+  SerialDebug.print(millis() - routeCommandStartMs);
+  SerialDebug.print(" ms, heading target/actual/error=");
+  SerialDebug.print(targetCounterClockwiseHeadingDegrees, 2);
+  SerialDebug.print("/");
+  SerialDebug.print(currentRouteCounterClockwiseHeading(), 2);
+  SerialDebug.print("/");
+  SerialDebug.println(headingErrorDegrees(), 2);
+}
+
 void advanceRoute() {
+  printRouteCommandCompletion();
   stopAllMotorsImmediately();
   ++routeIndex;
   commandStarted = false;
@@ -2324,6 +2750,17 @@ void startHeadingCorrection(
   if (turnMotionEnabled) {
     ++activeTurnCorrectionCount;
   }
+  SerialDebug.print("[IMU LOCK] t=");
+  SerialDebug.print(millis());
+  SerialDebug.print(" ms, target/actual/error/correction=");
+  SerialDebug.print(targetCounterClockwiseHeadingDegrees, 2);
+  SerialDebug.print("/");
+  SerialDebug.print(currentRouteCounterClockwiseHeading(), 2);
+  SerialDebug.print("/");
+  SerialDebug.print(errorCounterClockwiseDegrees, 2);
+  SerialDebug.print("/");
+  SerialDebug.print(correction, 2);
+  SerialDebug.println(" deg");
   setDriveMotionProfile(
       HEADING_CORRECTION_MAXIMUM_STEP_RATE,
       HEADING_CORRECTION_STEP_ACCELERATION);
@@ -2332,6 +2769,14 @@ void startHeadingCorrection(
 }
 
 bool updateHeadingLock(uint32_t timeoutMs) {
+  const bool enteringQrSweepNext =
+      routeIndex + 1U < ROUTE_COMMAND_COUNT &&
+      route[routeIndex + 1U].type == COMMAND_QR_ACTION;
+  const uint32_t postMotionSettleTimeMs =
+      enteringQrSweepNext
+          ? QR_SCAN_PRE_SWEEP_IMU_SETTLE_TIME_MS
+          : IMU_POST_MOTION_SETTLE_TIME_MS;
+
   if (!imuIsFresh()) {
     routeFault("IMU data timeout");
     return false;
@@ -2349,11 +2794,17 @@ bool updateHeadingLock(uint32_t timeoutMs) {
 
   if (motorsArrivedStartMs == 0) {
     motorsArrivedStartMs = millis();
+    SerialDebug.print("[MOTION] t=");
+    SerialDebug.print(motorsArrivedStartMs);
+    SerialDebug.print(
+        " ms, pulse targets reached; IMU settle=");
+    SerialDebug.print(postMotionSettleTimeMs);
+    SerialDebug.println(" ms");
     return false;
   }
 
   if (millis() - motorsArrivedStartMs <
-      IMU_POST_MOTION_SETTLE_TIME_MS) {
+      postMotionSettleTimeMs) {
     return false;
   }
 
@@ -2371,18 +2822,30 @@ bool updateHeadingLock(uint32_t timeoutMs) {
                         ? WORKSTATION_HEADING_TOLERANCE_DEGREES
                         : TRANSLATION_HEADING_TOLERANCE_DEGREES));
   const uint32_t stableTimeMs =
-      preciseMotionEnabled
-          ? FINAL_HEADING_STABLE_TIME_MS
-          : (turnMotionEnabled
-                 ? TURN_HEADING_STABLE_TIME_MS
-                 : (workstationApproachEnabled
-                        ? WORKSTATION_HEADING_STABLE_TIME_MS
-                        : TRANSLATION_HEADING_STABLE_TIME_MS));
+      enteringQrSweepNext
+          ? QR_SCAN_PRE_SWEEP_HEADING_STABLE_TIME_MS
+          : (preciseMotionEnabled
+                 ? FINAL_HEADING_STABLE_TIME_MS
+                 : (turnMotionEnabled
+                        ? TURN_HEADING_STABLE_TIME_MS
+                        : (workstationApproachEnabled
+                               ? WORKSTATION_HEADING_STABLE_TIME_MS
+                               : TRANSLATION_HEADING_STABLE_TIME_MS)));
 
   const float error = headingErrorDegrees();
   if (fabsf(error) <= tolerance) {
     if (headingStableStartMs == 0) {
       headingStableStartMs = millis();
+      SerialDebug.print("[IMU LOCK] t=");
+      SerialDebug.print(headingStableStartMs);
+      SerialDebug.print(
+          " ms, inside tolerance; error/tolerance/stable=");
+      SerialDebug.print(error, 2);
+      SerialDebug.print("/");
+      SerialDebug.print(tolerance, 2);
+      SerialDebug.print("/");
+      SerialDebug.print(stableTimeMs);
+      SerialDebug.println(" ms");
     }
 
     if (millis() - headingStableStartMs >= stableTimeMs) {
@@ -2420,8 +2883,8 @@ void startQrScanReturnToOrigin() {
    * 低速参数先减速、再反转；不能固定反走500 mm，因为可能在途中扫码。
    */
   setDriveMotionProfile(
-      QR_SCAN_MAXIMUM_STEP_RATE,
-      QR_SCAN_STEP_ACCELERATION);
+      QR_SCAN_RETURN_MAXIMUM_STEP_RATE,
+      QR_SCAN_RETURN_STEP_ACCELERATION);
   motor1.moveTo(qrScanOriginMotorPositions.motor1);
   motor2.moveTo(qrScanOriginMotorPositions.motor2);
   motor3.moveTo(qrScanOriginMotorPositions.motor3);
@@ -2457,8 +2920,8 @@ void startQrScanAction() {
   }
 
   setDriveMotionProfile(
-      QR_SCAN_MAXIMUM_STEP_RATE,
-      QR_SCAN_STEP_ACCELERATION);
+      QR_SCAN_FORWARD_MAXIMUM_STEP_RATE,
+      QR_SCAN_FORWARD_STEP_ACCELERATION);
   /*
    * 新车头是3、4侧，与起点到扫码区的第一段方向相同；在旧运动学坐标
    * 中对应负forward。500 mm名义脉冲为+5000,-5000,+5000,-5000。
@@ -2475,7 +2938,10 @@ void startQrScanAction() {
   qrScanPhase = QR_SCAN_FORWARD;
   SerialDebug.print("[QR SWEEP] forward limit=");
   SerialDebug.print(QR_SCAN_SWEEP_MAXIMUM_MM);
-  SerialDebug.println(" mm");
+  SerialDebug.print(" mm, vmax/acc=");
+  SerialDebug.print(QR_SCAN_FORWARD_MAXIMUM_STEP_RATE, 0);
+  SerialDebug.print("/");
+  SerialDebug.println(QR_SCAN_FORWARD_STEP_ACCELERATION, 0);
 }
 
 bool updateQrScanAction() {
@@ -2587,6 +3053,25 @@ void startTranslationSegment(CommandType type) {
       translationMaximumStepRate,
       translationStepAcceleration);
 
+  SerialDebug.print("[MOTION] t=");
+  SerialDebug.print(millis());
+  SerialDebug.print(" ms, type=");
+  SerialDebug.print(commandTypeName(type));
+  SerialDebug.print(", segment=");
+  SerialDebug.print(segmentMm);
+  SerialDebug.print(" mm, remaining=");
+  SerialDebug.print(translationRemainingMm);
+  SerialDebug.print(" mm, vmax/acc=");
+  SerialDebug.print(translationMaximumStepRate, 0);
+  SerialDebug.print("/");
+  SerialDebug.print(translationStepAcceleration, 0);
+  SerialDebug.print(", precise/central=");
+  SerialDebug.print(
+      translationPreciseArrivalEnabled ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.println(
+      translationCentralChannelEnabled ? 1 : 0);
+
   switch (type) {
     case COMMAND_MOVE_SIDE_12_MM:
       // 朝当前车体1、2侧移动；世界方向取决于当前车身姿态。
@@ -2641,6 +3126,26 @@ enum ArmStandardPhase {
   ARM_STANDARD_WAIT_BASE_SETTLE,
   ARM_STANDARD_COMPLETE
 };
+
+const char *armStandardPhaseName(ArmStandardPhase phase) {
+  switch (phase) {
+    case ARM_STANDARD_IDLE:
+      return "IDLE";
+    case ARM_STANDARD_WAIT_OPEN:
+      return "WAIT_GRIPPER_OPEN";
+    case ARM_STANDARD_WAIT_LIFT:
+      return "WAIT_M7_HIGHEST";
+    case ARM_STANDARD_WAIT_RETRACT:
+      return "WAIT_M6_RETRACT";
+    case ARM_STANDARD_WAIT_BASE:
+      return "WAIT_M5_STANDARD";
+    case ARM_STANDARD_WAIT_BASE_SETTLE:
+      return "WAIT_M5_SETTLE";
+    case ARM_STANDARD_COMPLETE:
+      return "COMPLETE";
+  }
+  return "UNKNOWN";
+}
 
 ArmStandardPhase armStandardPhase = ARM_STANDARD_IDLE;
 uint32_t armStandardDeadlineMs = 0UL;
@@ -2750,10 +3255,59 @@ enum ArmTransferPhase {
   ARM_TRANSFER_COMPLETE
 };
 
+const char *armTransferPhaseName(ArmTransferPhase phase) {
+  switch (phase) {
+    case ARM_TRANSFER_IDLE:
+      return "IDLE";
+    case ARM_TRANSFER_WAIT_SOURCE_OPEN:
+      return "WAIT_SOURCE_OPEN";
+    case ARM_TRANSFER_WAIT_PREPARE_LIFT:
+      return "WAIT_PREPARE_LIFT";
+    case ARM_TRANSFER_WAIT_PREPARE_RETRACT:
+      return "WAIT_PREPARE_RETRACT";
+    case ARM_TRANSFER_WAIT_SOURCE_ROTATION:
+      return "WAIT_SOURCE_ROTATION";
+    case ARM_TRANSFER_WAIT_SOURCE_ROTATION_SETTLE:
+      return "WAIT_SOURCE_ROTATION_SETTLE";
+    case ARM_TRANSFER_WAIT_SOURCE_EXTENSION:
+      return "WAIT_SOURCE_EXTENSION";
+    case ARM_TRANSFER_WAIT_SOURCE_LOWER:
+      return "WAIT_SOURCE_LOWER";
+    case ARM_TRANSFER_WAIT_GRIP_CLOSE:
+      return "WAIT_GRIP_CLOSE";
+    case ARM_TRANSFER_WAIT_LOADED_LIFT:
+      return "WAIT_LOADED_LIFT";
+    case ARM_TRANSFER_WAIT_LOADED_RETRACT:
+      return "WAIT_LOADED_RETRACT";
+    case ARM_TRANSFER_WAIT_DESTINATION_ROTATION:
+      return "WAIT_DEST_ROTATION";
+    case ARM_TRANSFER_WAIT_DESTINATION_ROTATION_SETTLE:
+      return "WAIT_DEST_ROTATION_SETTLE";
+    case ARM_TRANSFER_WAIT_DESTINATION_EXTENSION:
+      return "WAIT_DEST_EXTENSION";
+    case ARM_TRANSFER_WAIT_DESTINATION_LOWER:
+      return "WAIT_DEST_LOWER";
+    case ARM_TRANSFER_WAIT_DESTINATION_OPEN:
+      return "WAIT_DEST_OPEN";
+    case ARM_TRANSFER_WAIT_FINAL_LIFT:
+      return "WAIT_FINAL_LIFT";
+    case ARM_TRANSFER_WAIT_FINAL_RETRACT:
+      return "WAIT_FINAL_RETRACT";
+    case ARM_TRANSFER_WAIT_STANDARD_ROTATION:
+      return "WAIT_STANDARD_ROTATION";
+    case ARM_TRANSFER_WAIT_STANDARD_SETTLE:
+      return "WAIT_STANDARD_SETTLE";
+    case ARM_TRANSFER_COMPLETE:
+      return "COMPLETE";
+  }
+  return "UNKNOWN";
+}
+
 ArmTransferPhase armTransferPhase = ARM_TRANSFER_IDLE;
 ArmPose armTransferSourcePose;
 ArmPose armTransferDestinationPose;
 uint32_t armTransferDeadlineMs = 0UL;
+uint32_t armTransferStartMs = 0UL;
 
 bool armPoseIsValid(const ArmPose &pose) {
   return pose.extensionMm >=
@@ -2781,18 +3335,22 @@ void beginArmTransfer(
 
   armTransferSourcePose = source;
   armTransferDestinationPose = destination;
+  armTransferStartMs = millis();
   commandGripperOpen();
   armTransferDeadlineMs =
       millis() + GRIPPER_OPEN_SETTLE_MS;
   armTransferPhase = ARM_TRANSFER_WAIT_SOURCE_OPEN;
 
-  SerialDebug.print("Transfer source angle/ext/height: ");
+  SerialDebug.print("[ARM TRANSFER] t=");
+  SerialDebug.print(armTransferStartMs);
+  SerialDebug.print(" ms, source angle/ext/height=");
   SerialDebug.print(source.standardFrameAngleDegrees, 2);
   SerialDebug.print(", ");
   SerialDebug.print(source.extensionMm, 2);
   SerialDebug.print(", ");
   SerialDebug.println(source.heightMm, 2);
-  SerialDebug.print("Transfer destination angle/ext/height: ");
+  SerialDebug.print(
+      "[ARM TRANSFER] destination angle/ext/height=");
   SerialDebug.print(destination.standardFrameAngleDegrees, 2);
   SerialDebug.print(", ");
   SerialDebug.print(destination.extensionMm, 2);
@@ -2968,6 +3526,11 @@ void serviceArmTransfer() {
     case ARM_TRANSFER_WAIT_STANDARD_SETTLE:
       if (deadlineReached(armTransferDeadlineMs)) {
         armTransferPhase = ARM_TRANSFER_COMPLETE;
+        SerialDebug.print("[ARM TRANSFER] t=");
+        SerialDebug.print(millis());
+        SerialDebug.print(" ms, COMPLETE, elapsed=");
+        SerialDebug.print(millis() - armTransferStartMs);
+        SerialDebug.println(" ms");
       }
       break;
   }
@@ -2984,25 +3547,28 @@ void consumeArmTransferCompletion() {
 ArmPose containerPose(float lowerMm) {
   return ArmPose(
       ARM_CONTAINER_CLOCKWISE_DEGREES,
-      M6_STANDARD_EXTENSION_MM,
+      CONTAINER_EXTENSION_MM,
       -lowerMm);
 }
 
-bool ringPose(
+bool nominalRingHorizontalPose(
     uint8_t ringPosition,
-    float lowerMm,
     ArmPose &pose) {
   if (ringPosition < 1U || ringPosition > 3U) {
     routeFault("Invalid ring position");
     return false;
   }
 
-  // 用户给定：1号在画面中心左150 mm，2号居中，3号在右150 mm。
+  /*
+   * 1号圈：逆时针 atan(150/135)，3号圈：顺时针同角度。
+   * 侧圈伸长量按勾股定理：
+   *   sqrt(150^2 + 135^2) - 135 = 66.804361 mm。
+   */
   float imageLeftMm = 0.0f;
   if (ringPosition == 1U) {
-    imageLeftMm = 150.0f;
+    imageLeftMm = SIDE_RING_CENTER_OFFSET_MM;
   } else if (ringPosition == 3U) {
-    imageLeftMm = -150.0f;
+    imageLeftMm = -SIDE_RING_CENTER_OFFSET_MM;
   }
 
   const float radialDistanceMm =
@@ -3017,8 +3583,19 @@ bool ringPose(
   pose.extensionMm =
       radialDistanceMm -
       ARM_PIVOT_TO_CAMERA_CENTER_MM;
-  pose.heightMm = -lowerMm;
+  pose.heightMm = M7_STANDARD_HEIGHT_MM;
   return true;
+}
+
+float ringWorkingHeightMm(
+    uint8_t ringPosition,
+    float lowerMm) {
+  const bool isSideRing =
+      ringPosition == 1U || ringPosition == 3U;
+  return -(lowerMm -
+           (isSideRing
+                ? SIDE_RING_LOWER_REDUCTION_MM
+                : 0.0f));
 }
 
 bool rawTargetPose(
@@ -3093,14 +3670,26 @@ enum WorkActionKind {
   WORK_ACTION_STORAGE
 };
 
+const char *workActionKindName(WorkActionKind kind) {
+  switch (kind) {
+    case WORK_ACTION_NONE:
+      return "NONE";
+    case WORK_ACTION_RAW:
+      return "RAW";
+    case WORK_ACTION_PROCESS:
+      return "PROCESS";
+    case WORK_ACTION_STORAGE:
+      return "STORAGE";
+  }
+  return "UNKNOWN";
+}
+
 enum WorkActionPhase {
   WORK_PHASE_IDLE,
   WORK_PHASE_PREPARE,
   WORK_PHASE_RAW_WAIT_RESULT,
   WORK_PHASE_RAW_WAIT_STORAGE_POSITION,
-  WORK_PHASE_CIRCLE_WAIT_ARM_LOWER,
-  WORK_PHASE_CIRCLE_WAIT_COORDINATE,
-  WORK_PHASE_CIRCLE_WAIT_CHASSIS,
+  WORK_PHASE_RING_CALIBRATION,
   WORK_PHASE_CIRCLE_WAIT_ARM_STANDARD,
   WORK_PHASE_CIRCLE_WAIT_POST_VISION_HEADING,
   WORK_PHASE_START_UNLOAD,
@@ -3114,12 +3703,64 @@ enum WorkActionPhase {
   WORK_PHASE_WAIT_RESTORE
 };
 
+const char *workActionPhaseName(WorkActionPhase phase) {
+  switch (phase) {
+    case WORK_PHASE_IDLE:
+      return "IDLE";
+    case WORK_PHASE_PREPARE:
+      return "PREPARE";
+    case WORK_PHASE_RAW_WAIT_RESULT:
+      return "RAW_WAIT_RESULT";
+    case WORK_PHASE_RAW_WAIT_STORAGE_POSITION:
+      return "RAW_WAIT_STORAGE_POSITION";
+    case WORK_PHASE_RING_CALIBRATION:
+      return "RING_CALIBRATION";
+    case WORK_PHASE_CIRCLE_WAIT_ARM_STANDARD:
+      return "CIRCLE_WAIT_ARM_STANDARD";
+    case WORK_PHASE_CIRCLE_WAIT_POST_VISION_HEADING:
+      return "CIRCLE_WAIT_HEADING";
+    case WORK_PHASE_START_UNLOAD:
+      return "START_UNLOAD";
+    case WORK_PHASE_START_RELOAD:
+      return "START_RELOAD";
+    case WORK_PHASE_WAIT_TRANSFER:
+      return "WAIT_TRANSFER";
+    case WORK_PHASE_WAIT_STORAGE_SERVO:
+      return "WAIT_STORAGE_SERVO";
+    case WORK_PHASE_WAIT_STORAGE_PARK:
+      return "WAIT_STORAGE_PARK";
+    case WORK_PHASE_WAIT_TRAVEL_BASE:
+      return "WAIT_TRAVEL_BASE";
+    case WORK_PHASE_WAIT_TRAVEL_BASE_SETTLE:
+      return "WAIT_TRAVEL_BASE_SETTLE";
+    case WORK_PHASE_START_RESTORE:
+      return "START_RESTORE";
+    case WORK_PHASE_WAIT_RESTORE:
+      return "WAIT_RESTORE";
+  }
+  return "UNKNOWN";
+}
+
 enum TransferPurpose {
   TRANSFER_PURPOSE_NONE,
   TRANSFER_PURPOSE_RAW_TO_CONTAINER,
   TRANSFER_PURPOSE_CONTAINER_TO_RING,
   TRANSFER_PURPOSE_RING_TO_CONTAINER
 };
+
+const char *transferPurposeName(TransferPurpose purpose) {
+  switch (purpose) {
+    case TRANSFER_PURPOSE_NONE:
+      return "NONE";
+    case TRANSFER_PURPOSE_RAW_TO_CONTAINER:
+      return "RAW_TO_CONTAINER";
+    case TRANSFER_PURPOSE_CONTAINER_TO_RING:
+      return "CONTAINER_TO_RING";
+    case TRANSFER_PURPOSE_RING_TO_CONTAINER:
+      return "RING_TO_CONTAINER";
+  }
+  return "UNKNOWN";
+}
 
 WorkActionKind activeWorkAction = WORK_ACTION_NONE;
 WorkActionPhase workActionPhase = WORK_PHASE_IDLE;
@@ -3128,7 +3769,6 @@ uint8_t workRoundIndex = 0U;
 uint8_t workItemIndex = 0U;
 uint32_t workStorageServoDeadlineMs = 0UL;
 uint32_t workLastMaixSequence = 0UL;
-MotorPulses visualCorrectionAccumulator;
 
 uint8_t rawFilledSlotMask = 0U;
 uint8_t rawCollectedCount = 0U;
@@ -3139,6 +3779,45 @@ ArmPose rawPendingSourcePose;
 uint32_t circleStableStartMs = 0UL;
 uint32_t circleLastStableSampleMs = 0UL;
 uint8_t circleStableSampleCount = 0U;
+
+enum RingCalibrationPhase {
+  RING_CALIBRATION_IDLE,
+  RING_CALIBRATION_WAIT_BASE,
+  RING_CALIBRATION_WAIT_BASE_SETTLE,
+  RING_CALIBRATION_WAIT_EXTENSION,
+  RING_CALIBRATION_WAIT_LOWER,
+  RING_CALIBRATION_WAIT_COORDINATE,
+  RING_CALIBRATION_WAIT_CORRECTION_BASE,
+  RING_CALIBRATION_WAIT_CORRECTION_BASE_SETTLE,
+  RING_CALIBRATION_WAIT_CORRECTION_EXTENSION,
+  RING_CALIBRATION_WAIT_SWITCH_LIFT,
+  RING_CALIBRATION_WAIT_SWITCH_RETRACT,
+  RING_CALIBRATION_COMPLETE
+};
+
+RingCalibrationPhase ringCalibrationPhase =
+    RING_CALIBRATION_IDLE;
+uint8_t calibratingRingPosition = 0U;
+uint32_t ringCalibrationDeadlineMs = 0UL;
+ArmPose ringCalibrationCurrentPose;
+ArmPose ringCalibrationTargetPose;
+ArmPose calibratedRingHorizontalPoses[3];
+bool calibratedRingPosesValid = false;
+
+bool beginRingCalibration();
+bool serviceRingCalibration();
+
+void resetRingCalibration() {
+  ringCalibrationPhase = RING_CALIBRATION_IDLE;
+  calibratingRingPosition = 0U;
+  ringCalibrationDeadlineMs = 0UL;
+  ringCalibrationCurrentPose = ArmPose();
+  ringCalibrationTargetPose = ArmPose();
+  for (uint8_t i = 0U; i < 3U; ++i) {
+    calibratedRingHorizontalPoses[i] = ArmPose();
+  }
+  calibratedRingPosesValid = false;
+}
 
 void resetCircleStabilityWindow() {
   circleStableStartMs = 0UL;
@@ -3252,7 +3931,6 @@ void beginWorkAction(
       static_cast<uint8_t>(roundNumber - 1U);
   workItemIndex = 0U;
   activeTransferPurpose = TRANSFER_PURPOSE_NONE;
-  visualCorrectionAccumulator = MotorPulses();
   rawFilledSlotMask = 0U;
   rawCollectedCount = 0U;
   rawPendingSlotIndex = 0U;
@@ -3261,6 +3939,7 @@ void beginWorkAction(
   workLastMaixSequence =
       latestMaixCoordinate.sequence;
   resetCircleStabilityWindow();
+  resetRingCalibration();
 
   beginArmStandardization();
   if (kind == WORK_ACTION_RAW) {
@@ -3295,100 +3974,484 @@ void beginRawItemVision() {
 
 void beginCircleVision() {
   /*
-   * 配套vision-3.py在多个圆中返回距离画面中心最近者。粗加工区的原路线
-   * 停车点已经让2号环最近；暂存区则在PREPARE阶段先做30 mm选圆偏置。
-   * 请求9的返回格式为9,x,y，定位后统一把该圆作为2号基准。
+   * 配套vision-3.py在多个圆中返回距离画面中心最近者。机械臂已经移动到
+   * 1号或3号圈的原始水平位置并下降到HOUGH_VISION_HEIGHT_MM后才会调用
+   * 本函数；请求9的返回格式为9,x,y。
    */
   resetCircleStabilityWindow();
   workLastMaixSequence =
       latestMaixCoordinate.sequence;
   beginMaixRequest(MAIXCAM_HOUGH_CIRCLE_REQUEST);
-  workActionPhase =
-      WORK_PHASE_CIRCLE_WAIT_COORDINATE;
 }
 
-bool startAccumulatedWorkstationMove(
-    float forwardMm,
-    float leftMm,
-    const char *reason) {
-  const MotorPulses correctionPulses =
-      bodyDisplacementToMotorPulses(
-          forwardMm / 1000.0f,
-          leftMm / 1000.0f,
-          0.0f);
-  if (motorPulsesAreZero(correctionPulses)) {
+const char *ringCalibrationPhaseName(
+    RingCalibrationPhase phase) {
+  switch (phase) {
+    case RING_CALIBRATION_IDLE:
+      return "IDLE";
+    case RING_CALIBRATION_WAIT_BASE:
+      return "WAIT_BASE";
+    case RING_CALIBRATION_WAIT_BASE_SETTLE:
+      return "WAIT_BASE_SETTLE";
+    case RING_CALIBRATION_WAIT_EXTENSION:
+      return "WAIT_EXTENSION";
+    case RING_CALIBRATION_WAIT_LOWER:
+      return "WAIT_LOWER";
+    case RING_CALIBRATION_WAIT_COORDINATE:
+      return "WAIT_COORDINATE";
+    case RING_CALIBRATION_WAIT_CORRECTION_BASE:
+      return "WAIT_CORRECTION_BASE";
+    case RING_CALIBRATION_WAIT_CORRECTION_BASE_SETTLE:
+      return "WAIT_CORRECTION_BASE_SETTLE";
+    case RING_CALIBRATION_WAIT_CORRECTION_EXTENSION:
+      return "WAIT_CORRECTION_EXTENSION";
+    case RING_CALIBRATION_WAIT_SWITCH_LIFT:
+      return "WAIT_SWITCH_LIFT";
+    case RING_CALIBRATION_WAIT_SWITCH_RETRACT:
+      return "WAIT_SWITCH_RETRACT";
+    case RING_CALIBRATION_COMPLETE:
+      return "COMPLETE";
+  }
+  return "UNKNOWN";
+}
+
+void setRingCalibrationPhase(
+    RingCalibrationPhase nextPhase) {
+  if (ringCalibrationPhase == nextPhase) {
+    return;
+  }
+  SerialDebug.print("[STATE] t=");
+  SerialDebug.print(millis());
+  SerialDebug.print(" ms, RING_CAL: ");
+  SerialDebug.print(
+      ringCalibrationPhaseName(ringCalibrationPhase));
+  SerialDebug.print(" -> ");
+  SerialDebug.println(
+      ringCalibrationPhaseName(nextPhase));
+  ringCalibrationPhase = nextPhase;
+}
+
+bool startRingCalibrationApproach(
+    uint8_t ringPosition) {
+  ArmPose nominalPose;
+  if (!nominalRingHorizontalPose(
+          ringPosition, nominalPose)) {
     return false;
   }
 
-  visualCorrectionAccumulator =
-      addMotorPulses(
-          visualCorrectionAccumulator,
-          correctionPulses);
-  stopMaixRequest();
-  setDriveMotionProfile(
-      WORKSTATION_MAXIMUM_STEP_RATE,
-      WORKSTATION_STEP_ACCELERATION);
-  turnMotionEnabled = false;
-  workstationApproachEnabled = true;
-  translationPreciseArrivalEnabled = true;
-  startRelativeMotorMove(correctionPulses);
-  commandStartMs = millis();
-  headingStableStartMs = 0UL;
-  motorsArrivedStartMs = 0UL;
-  workActionPhase = WORK_PHASE_CIRCLE_WAIT_CHASSIS;
+  calibratingRingPosition = ringPosition;
+  ringCalibrationTargetPose = nominalPose;
+  SerialDebug.print("[RING CAL] t=");
+  SerialDebug.print(millis());
+  SerialDebug.print(" ms, approach nominal ring ");
+  SerialDebug.print(
+      static_cast<unsigned int>(ringPosition));
+  SerialDebug.print(", angle/ext=");
+  SerialDebug.print(
+      nominalPose.standardFrameAngleDegrees, 3);
+  SerialDebug.print("/");
+  SerialDebug.print(nominalPose.extensionMm, 3);
+  SerialDebug.println(" deg/mm");
 
-  SerialDebug.print(reason);
-  SerialDebug.print(" mm fwd/left: ");
-  SerialDebug.print(forwardMm, 2);
-  SerialDebug.print(", ");
-  SerialDebug.println(leftMm, 2);
+  startArmBaseStandardFrameDegrees(
+      nominalPose.standardFrameAngleDegrees);
+  setRingCalibrationPhase(
+      RING_CALIBRATION_WAIT_BASE);
   return true;
 }
 
-float circleMmPerPixelForRadius(float pixelRadius) {
-  // 霍夫圆全部距离统一按72像素=35 mm换算；保留参数以维持调用接口。
-  (void)pixelRadius;
-  return CIRCLE_MM_PER_PIXEL;
+bool beginRingCalibration() {
+  if (activeWorkAction != WORK_ACTION_PROCESS &&
+      activeWorkAction != WORK_ACTION_STORAGE) {
+    routeFault(
+        "Ring calibration requested outside ring station");
+    return false;
+  }
+
+  resetRingCalibration();
+  SerialDebug.print("[RING CAL] t=");
+  SerialDebug.print(millis());
+  SerialDebug.println(
+      " ms, chassis fixed; calibrate ring 1 then ring 3");
+  return startRingCalibrationApproach(1U);
 }
 
-void startVisualCorrection(
+bool calculateArmCircleCorrection(
     int16_t imageX,
-    int16_t imageY) {
+    int16_t imageY,
+    ArmPose &targetPose) {
   const float pixelDeltaX =
       static_cast<float>(imageX - IMAGE_CENTER_X);
-  const float pixelDeltaY =
-      static_cast<float>(imageY - IMAGE_CENTER_Y);
-  const float pixelRadius =
-      hypotf(pixelDeltaX, pixelDeltaY);
-  const float circleMmPerPixel =
-      circleMmPerPixelForRadius(pixelRadius);
-  float forwardMm =
-      pixelDeltaX *
-      circleMmPerPixel *
-      IMAGE_X_TO_BODY_FORWARD_SIGN;
-  float leftMm =
-      pixelDeltaY *
-      circleMmPerPixel *
-      IMAGE_Y_TO_ARM_OUTWARD_SIGN *
-      IMAGE_Y_TO_BODY_LEFT_SIGN;
+  const float outwardCorrectionMm =
+      static_cast<float>(imageY - IMAGE_CENTER_Y) *
+      CIRCLE_MM_PER_PIXEL *
+      IMAGE_Y_TO_ARM_OUTWARD_SIGN;
+  const float currentRadiusMm =
+      ARM_PIVOT_TO_CAMERA_CENTER_MM +
+      ringCalibrationCurrentPose.extensionMm;
+  const float correctedLocalRadialMm =
+      currentRadiusMm + outwardCorrectionMm;
+  const float correctedLocalClockwiseMm =
+      pixelDeltaX * CIRCLE_MM_PER_PIXEL;
 
-  const float correctionMagnitudeMm =
-      hypotf(forwardMm, leftMm);
-  if (correctionMagnitudeMm >
-      MAXIMUM_VISUAL_CORRECTION_MM) {
-    const float scale =
-        MAXIMUM_VISUAL_CORRECTION_MM /
-        correctionMagnitudeMm;
-    forwardMm *= scale;
-    leftMm *= scale;
+  if (correctedLocalRadialMm <= 0.0f) {
+    routeFault("Circle correction crossed arm pivot");
+    return false;
   }
 
-  if (!startAccumulatedWorkstationMove(
-          forwardMm,
-          leftMm,
-          "Visual chassis correction")) {
-    beginCircleVision();
+  const float targetRadiusMm =
+      hypotf(
+          correctedLocalRadialMm,
+          correctedLocalClockwiseMm);
+  targetPose.standardFrameAngleDegrees =
+      ringCalibrationCurrentPose
+          .standardFrameAngleDegrees -
+      atan2f(
+          correctedLocalClockwiseMm,
+          correctedLocalRadialMm) *
+          180.0f / PI_F;
+  targetPose.extensionMm =
+      targetRadiusMm -
+      ARM_PIVOT_TO_CAMERA_CENTER_MM;
+  targetPose.heightMm = HOUGH_VISION_HEIGHT_MM;
+
+  if (!armPoseIsValid(targetPose)) {
+    SerialDebug.print(
+        "[RING CAL] correction outside reach, angle/ext=");
+    SerialDebug.print(
+        targetPose.standardFrameAngleDegrees, 3);
+    SerialDebug.print("/");
+    SerialDebug.println(targetPose.extensionMm, 3);
+    routeFault("Circle correction outside arm reach");
+    return false;
   }
+  return true;
+}
+
+void recordCalibratedSideRing() {
+  ArmPose recordedPose = ringCalibrationCurrentPose;
+  recordedPose.heightMm = M7_STANDARD_HEIGHT_MM;
+  calibratedRingHorizontalPoses[
+      calibratingRingPosition - 1U] = recordedPose;
+
+  SerialDebug.print("[RING CAL] ring ");
+  SerialDebug.print(
+      static_cast<unsigned int>(
+          calibratingRingPosition));
+  SerialDebug.print(
+      " centered; recorded angle/ext=");
+  SerialDebug.print(
+      recordedPose.standardFrameAngleDegrees, 4);
+  SerialDebug.print("/");
+  SerialDebug.print(recordedPose.extensionMm, 4);
+  SerialDebug.println(" deg/mm");
+}
+
+bool calculateCalibratedMiddleRing() {
+  const ArmPose &ring1 =
+      calibratedRingHorizontalPoses[0];
+  const ArmPose &ring3 =
+      calibratedRingHorizontalPoses[2];
+  const float ring1AngleRadians =
+      ring1.standardFrameAngleDegrees *
+      PI_F / 180.0f;
+  const float ring3AngleRadians =
+      ring3.standardFrameAngleDegrees *
+      PI_F / 180.0f;
+  const float ring1RadiusMm =
+      ARM_PIVOT_TO_CAMERA_CENTER_MM +
+      ring1.extensionMm;
+  const float ring3RadiusMm =
+      ARM_PIVOT_TO_CAMERA_CENTER_MM +
+      ring3.extensionMm;
+
+  // 先把两个侧圈圆柱坐标投影到平面直角坐标，再取两圆心的中点。
+  const float middleLeftMm =
+      (ring1RadiusMm * sinf(ring1AngleRadians) +
+       ring3RadiusMm * sinf(ring3AngleRadians)) *
+      0.5f;
+  const float middleOutwardMm =
+      (ring1RadiusMm * cosf(ring1AngleRadians) +
+       ring3RadiusMm * cosf(ring3AngleRadians)) *
+      0.5f;
+  const float middleRadiusMm =
+      hypotf(middleLeftMm, middleOutwardMm);
+
+  ArmPose middlePose;
+  middlePose.standardFrameAngleDegrees =
+      atan2f(middleLeftMm, middleOutwardMm) *
+      180.0f / PI_F;
+  middlePose.extensionMm =
+      middleRadiusMm -
+      ARM_PIVOT_TO_CAMERA_CENTER_MM;
+  middlePose.heightMm = M7_STANDARD_HEIGHT_MM;
+  if (!armPoseIsValid(middlePose)) {
+    routeFault(
+        "Calculated middle ring outside arm reach");
+    return false;
+  }
+
+  calibratedRingHorizontalPoses[1] = middlePose;
+  calibratedRingPosesValid = true;
+  SerialDebug.print(
+      "[RING CAL] ring 2 calculated from cylindrical midpoint, angle/ext=");
+  SerialDebug.print(
+      middlePose.standardFrameAngleDegrees, 4);
+  SerialDebug.print("/");
+  SerialDebug.print(middlePose.extensionMm, 4);
+  SerialDebug.println(" deg/mm");
+  return true;
+}
+
+bool finishCenteredRingCalibration() {
+  stopMaixRequest();
+  resetCircleStabilityWindow();
+  recordCalibratedSideRing();
+
+  if (calibratingRingPosition == 1U) {
+    SerialDebug.println(
+        "[RING CAL] ring 1 complete; lift and retract before ring 3");
+    if (startLiftToHeightMm(
+            M7_STANDARD_HEIGHT_MM)) {
+      setRingCalibrationPhase(
+          RING_CALIBRATION_WAIT_SWITCH_LIFT);
+      return true;
+    }
+    return false;
+  }
+
+  if (calibratingRingPosition != 3U) {
+    routeFault("Unexpected calibrated ring number");
+    return false;
+  }
+  if (!calculateCalibratedMiddleRing()) {
+    return false;
+  }
+  setRingCalibrationPhase(
+      RING_CALIBRATION_COMPLETE);
+  return true;
+}
+
+bool serviceRingCalibration() {
+  switch (ringCalibrationPhase) {
+    case RING_CALIBRATION_IDLE:
+      return false;
+
+    case RING_CALIBRATION_WAIT_BASE:
+      if (!armMotors.isM5Running()) {
+        ringCalibrationDeadlineMs =
+            millis() + ARM_BASE_SETTLE_MS;
+        setRingCalibrationPhase(
+            RING_CALIBRATION_WAIT_BASE_SETTLE);
+      }
+      break;
+
+    case RING_CALIBRATION_WAIT_BASE_SETTLE:
+      if (deadlineReached(
+              ringCalibrationDeadlineMs) &&
+          startExtensionToMm(
+              ringCalibrationTargetPose.extensionMm)) {
+        setRingCalibrationPhase(
+            RING_CALIBRATION_WAIT_EXTENSION);
+      }
+      break;
+
+    case RING_CALIBRATION_WAIT_EXTENSION:
+      if (extensionMoveFinished()) {
+        ringCalibrationCurrentPose =
+            ringCalibrationTargetPose;
+        ringCalibrationCurrentPose.heightMm =
+            M7_STANDARD_HEIGHT_MM;
+        /*
+         * 必须先下降M7，再发送AA 09 BB。1号圈和3号圈每次请求都经过
+         * 这一状态，不能把请求提前到水平运动过程中。
+         */
+        if (startLiftToHeightMm(
+                HOUGH_VISION_HEIGHT_MM)) {
+          setRingCalibrationPhase(
+              RING_CALIBRATION_WAIT_LOWER);
+        }
+      }
+      break;
+
+    case RING_CALIBRATION_WAIT_LOWER:
+      if (liftMoveFinished()) {
+        ringCalibrationCurrentPose.heightMm =
+            HOUGH_VISION_HEIGHT_MM;
+        SerialDebug.print("[RING CAL] ring ");
+        SerialDebug.print(
+            static_cast<unsigned int>(
+                calibratingRingPosition));
+        SerialDebug.print(
+            " M7 lowered to ");
+        SerialDebug.print(
+            HOUGH_VISION_HEIGHT_MM, 2);
+        SerialDebug.println(
+            " mm; request Hough circle");
+        beginCircleVision();
+        setRingCalibrationPhase(
+            RING_CALIBRATION_WAIT_COORDINATE);
+      }
+      break;
+
+    case RING_CALIBRATION_WAIT_COORDINATE: {
+      uint8_t resultId = 0U;
+      int16_t x = 0;
+      int16_t y = 0;
+      if (!readNewMaixCoordinate(
+              workLastMaixSequence,
+              resultId,
+              x,
+              y)) {
+        break;
+      }
+      (void)resultId;
+
+      const int32_t dx =
+          static_cast<int32_t>(x - IMAGE_CENTER_X);
+      const int32_t dy =
+          static_cast<int32_t>(y - IMAGE_CENTER_Y);
+      const float pixelRadius =
+          hypotf(
+              static_cast<float>(dx),
+              static_cast<float>(dy));
+      if (pixelRadius >
+          CIRCLE_CENTER_TOLERANCE_PIXELS) {
+        resetCircleStabilityWindow();
+        stopMaixRequest();
+        if (!calculateArmCircleCorrection(
+                x,
+                y,
+                ringCalibrationTargetPose)) {
+          break;
+        }
+
+        SerialDebug.print("[RING CAL] ring ");
+        SerialDebug.print(
+            static_cast<unsigned int>(
+                calibratingRingPosition));
+        SerialDebug.print(", circle=");
+        SerialDebug.print(x);
+        SerialDebug.print("/");
+        SerialDebug.print(y);
+        SerialDebug.print(
+            ", correct M5/M6 to angle/ext=");
+        SerialDebug.print(
+            ringCalibrationTargetPose
+                .standardFrameAngleDegrees,
+            4);
+        SerialDebug.print("/");
+        SerialDebug.println(
+            ringCalibrationTargetPose.extensionMm,
+            4);
+        startArmBaseStandardFrameDegrees(
+            ringCalibrationTargetPose
+                .standardFrameAngleDegrees);
+        setRingCalibrationPhase(
+            RING_CALIBRATION_WAIT_CORRECTION_BASE);
+        break;
+      }
+
+      if (circleStableSampleCount == 0U) {
+        circleStableStartMs = millis();
+        circleLastStableSampleMs =
+            circleStableStartMs;
+      } else if (
+          millis() - circleLastStableSampleMs >
+          VISION_STABILITY_MAXIMUM_SAMPLE_GAP_MS) {
+        circleStableStartMs = millis();
+        circleStableSampleCount = 0U;
+      }
+      circleLastStableSampleMs = millis();
+      if (circleStableSampleCount < 255U) {
+        ++circleStableSampleCount;
+      }
+      if (circleStableSampleCount >=
+              CIRCLE_STABILITY_MINIMUM_SAMPLES &&
+          millis() - circleStableStartMs >=
+              CIRCLE_CENTER_STABILITY_MS) {
+        finishCenteredRingCalibration();
+      }
+      break;
+    }
+
+    case RING_CALIBRATION_WAIT_CORRECTION_BASE:
+      if (!armMotors.isM5Running()) {
+        ringCalibrationDeadlineMs =
+            millis() + ARM_BASE_SETTLE_MS;
+        setRingCalibrationPhase(
+            RING_CALIBRATION_WAIT_CORRECTION_BASE_SETTLE);
+      }
+      break;
+
+    case RING_CALIBRATION_WAIT_CORRECTION_BASE_SETTLE:
+      if (deadlineReached(
+              ringCalibrationDeadlineMs) &&
+          startExtensionToMm(
+              ringCalibrationTargetPose.extensionMm)) {
+        setRingCalibrationPhase(
+            RING_CALIBRATION_WAIT_CORRECTION_EXTENSION);
+      }
+      break;
+
+    case RING_CALIBRATION_WAIT_CORRECTION_EXTENSION:
+      if (extensionMoveFinished()) {
+        ringCalibrationCurrentPose =
+            ringCalibrationTargetPose;
+        beginCircleVision();
+        setRingCalibrationPhase(
+            RING_CALIBRATION_WAIT_COORDINATE);
+      }
+      break;
+
+    case RING_CALIBRATION_WAIT_SWITCH_LIFT:
+      if (liftMoveFinished()) {
+        ringCalibrationCurrentPose.heightMm =
+            M7_STANDARD_HEIGHT_MM;
+        if (startExtensionToMm(
+                M6_STANDARD_EXTENSION_MM)) {
+          setRingCalibrationPhase(
+              RING_CALIBRATION_WAIT_SWITCH_RETRACT);
+        }
+      }
+      break;
+
+    case RING_CALIBRATION_WAIT_SWITCH_RETRACT:
+      if (extensionMoveFinished()) {
+        ringCalibrationCurrentPose.extensionMm =
+            M6_STANDARD_EXTENSION_MM;
+        startRingCalibrationApproach(3U);
+      }
+      break;
+
+    case RING_CALIBRATION_COMPLETE:
+      return true;
+  }
+  return ringCalibrationPhase ==
+         RING_CALIBRATION_COMPLETE;
+}
+
+bool calibratedRingPose(
+    uint8_t ringPosition,
+    float lowerMm,
+    ArmPose &pose) {
+  if (!calibratedRingPosesValid ||
+      ringPosition < 1U ||
+      ringPosition > 3U) {
+    routeFault("Ring pose requested before calibration");
+    return false;
+  }
+
+  pose = calibratedRingHorizontalPoses[
+      ringPosition - 1U];
+  pose.heightMm =
+      ringWorkingHeightMm(
+          ringPosition, lowerMm);
+  if (!armPoseIsValid(pose)) {
+    routeFault("Calibrated ring pose outside arm travel");
+    return false;
+  }
+  return true;
 }
 
 void startPostVisionHeadingCorrection() {
@@ -3436,7 +4499,24 @@ void beginUnloadingTransfer() {
     return;
   }
 
-  if (!ringPose(ringPosition, lowerMm, destination)) {
+  /*
+   * 用户要求只在释放时少下降5 mm。侧圈原有的5 mm高度补偿仍由
+   * ringWorkingHeightMm()叠加处理；粗加工区随后抓回时保持原抓取高度。
+   */
+  const float releaseLowerMm =
+      lowerMm - RING_RELEASE_LOWER_REDUCTION_MM;
+  SerialDebug.print("[RING RELEASE] station/ring/lower=");
+  SerialDebug.print(
+      activeWorkAction == WORK_ACTION_PROCESS
+          ? "PROCESS"
+          : "STORAGE");
+  SerialDebug.print("/");
+  SerialDebug.print(ringPosition);
+  SerialDebug.print("/");
+  SerialDebug.print(releaseLowerMm, 2);
+  SerialDebug.println(" mm");
+  if (!calibratedRingPose(
+          ringPosition, releaseLowerMm, destination)) {
     return;
   }
 
@@ -3452,7 +4532,7 @@ void beginReloadingTransfer() {
   ArmPose source;
   const uint8_t ringPosition =
       taskPositions[workRoundIndex][workItemIndex];
-  if (!ringPose(
+  if (!calibratedRingPose(
           ringPosition,
           PROCESS_PLACE_LOWER_MM,
           source)) {
@@ -3508,6 +4588,21 @@ void completeTransferAndRotateStorage() {
       return;
   }
   hmiSetTaskCounts();
+  SerialDebug.print("[TRANSFER DONE] action/round/item/purpose=");
+  SerialDebug.print(workActionKindName(activeWorkAction));
+  SerialDebug.print("/");
+  SerialDebug.print(
+      static_cast<unsigned int>(workRoundIndex + 1U));
+  SerialDebug.print("/");
+  SerialDebug.print(
+      static_cast<unsigned int>(workItemIndex + 1U));
+  SerialDebug.print("/");
+  SerialDebug.print(
+      transferPurposeName(activeTransferPurpose));
+  SerialDebug.print(", grabs/placements=");
+  SerialDebug.print(correctGrabCount);
+  SerialDebug.print("/");
+  SerialDebug.println(correctPlacementCount);
 
   consumeArmTransferCompletion();
   ++workItemIndex;
@@ -3535,39 +4630,25 @@ void completeTransferAndRotateStorage() {
 
 void startVisualCorrectionRestore() {
   stopMaixRequest();
-  if (motorPulsesAreZero(
-          visualCorrectionAccumulator)) {
-    /*
-     * 即使没有发生视觉平移，也在机械臂三次搬运后重新锁定路线目标航向。
-     * 否则臂的惯性造成的车体偏航会被带入下一段长距离开环平移。
-     */
-    setDriveMotionProfile(
-        WORKSTATION_MAXIMUM_STEP_RATE,
-        WORKSTATION_STEP_ACCELERATION);
-    turnMotionEnabled = false;
-    workstationApproachEnabled = true;
-    translationPreciseArrivalEnabled = true;
-    stopAllMotorsImmediately();
-    commandStartMs = millis();
-    headingStableStartMs = 0UL;
-    motorsArrivedStartMs = 0UL;
-    workActionPhase = WORK_PHASE_WAIT_RESTORE;
-    return;
-  }
-
+  /*
+   * 霍夫定位只移动机械臂，不再产生底盘XY累计量。三次搬运结束后仅重新
+   * 锁定路线目标航向，消除机械臂惯性带来的车体偏航。
+   */
   setDriveMotionProfile(
       WORKSTATION_MAXIMUM_STEP_RATE,
       WORKSTATION_STEP_ACCELERATION);
   turnMotionEnabled = false;
   workstationApproachEnabled = true;
   translationPreciseArrivalEnabled = true;
-  startRelativeMotorMove(
-      negateMotorPulses(
-          visualCorrectionAccumulator));
+  stopAllMotorsImmediately();
   commandStartMs = millis();
   headingStableStartMs = 0UL;
   motorsArrivedStartMs = 0UL;
   workActionPhase = WORK_PHASE_WAIT_RESTORE;
+  SerialDebug.print("[VISION IMU] t=");
+  SerialDebug.print(millis());
+  SerialDebug.println(
+      " ms, final heading lock; chassis XY unchanged");
 }
 
 void serviceCompetitionAction() {
@@ -3593,18 +4674,9 @@ void serviceCompetitionAction() {
         armStandardPhase = ARM_STANDARD_IDLE;
         if (activeWorkAction == WORK_ACTION_RAW) {
           beginRawItemVision();
-        } else {
-          SerialDebug.print("[HOUGH ARM] t=");
-          SerialDebug.print(millis());
-          SerialDebug.print(
-              " ms, lower M7 from standard to ");
-          SerialDebug.print(HOUGH_VISION_HEIGHT_MM, 2);
-          SerialDebug.println(" mm before circle vision");
-          if (startLiftToHeightMm(
-                  HOUGH_VISION_HEIGHT_MM)) {
-            workActionPhase =
-                WORK_PHASE_CIRCLE_WAIT_ARM_LOWER;
-          }
+        } else if (beginRingCalibration()) {
+          workActionPhase =
+              WORK_PHASE_RING_CALIBRATION;
         }
       }
       break;
@@ -3688,95 +4760,16 @@ void serviceCompetitionAction() {
       workActionPhase = WORK_PHASE_WAIT_TRANSFER;
       break;
 
-    case WORK_PHASE_CIRCLE_WAIT_ARM_LOWER:
-      if (!liftMoveFinished()) {
-        break;
-      }
-      SerialDebug.print("[HOUGH ARM] t=");
-      SerialDebug.print(millis());
-      SerialDebug.println(
-          " ms, M7 at -90 mm; start circle positioning");
-      if (activeWorkAction == WORK_ACTION_STORAGE) {
-        /*
-         * vision-3.py只返回最近圆。先利用原路线已知的暂存纵向偏差，
-         * 把画面中心向2号环方向偏置30 mm，再进入闭环Hough定位。
-         */
-        if (!startAccumulatedWorkstationMove(
-                STORAGE_CENTER_CIRCLE_SELECTION_FORWARD_MM,
-                0.0f,
-                "Storage center-circle selection bias")) {
-          beginCircleVision();
-        }
-      } else {
-        beginCircleVision();
-      }
-      break;
-
-    case WORK_PHASE_CIRCLE_WAIT_COORDINATE: {
-      uint8_t resultId = 0U;
-      int16_t x = 0;
-      int16_t y = 0;
-      if (!readNewMaixCoordinate(
-              workLastMaixSequence,
-              resultId,
-              x,
-              y)) {
-        break;
-      }
-      (void)resultId;
-
-      const int32_t dx =
-          static_cast<int32_t>(x - IMAGE_CENTER_X);
-      const int32_t dy =
-          static_cast<int32_t>(y - IMAGE_CENTER_Y);
-      const float pixelRadius =
-          hypotf(
-              static_cast<float>(dx),
-              static_cast<float>(dy));
-      const bool centered =
-          pixelRadius <=
-          CIRCLE_CENTER_TOLERANCE_PIXELS;
-
-      if (!centered) {
-        resetCircleStabilityWindow();
-        startVisualCorrection(x, y);
-        break;
-      }
-
-      if (circleStableSampleCount == 0U) {
-        circleStableStartMs = millis();
-        circleLastStableSampleMs =
-            circleStableStartMs;
-      } else if (
-          millis() - circleLastStableSampleMs >
-          VISION_STABILITY_MAXIMUM_SAMPLE_GAP_MS) {
-        circleStableStartMs = millis();
-        circleStableSampleCount = 0U;
-      }
-      circleLastStableSampleMs = millis();
-      if (circleStableSampleCount < 255U) {
-        ++circleStableSampleCount;
-      }
-      if (circleStableSampleCount >=
-              CIRCLE_STABILITY_MINIMUM_SAMPLES &&
-          millis() - circleStableStartMs >=
-              CIRCLE_CENTER_STABILITY_MS) {
-        stopMaixRequest();
+    case WORK_PHASE_RING_CALIBRATION:
+      if (serviceRingCalibration()) {
         workItemIndex = 0U;
-        SerialDebug.print("[HOUGH ARM] t=");
+        SerialDebug.print("[RING CAL] t=");
         SerialDebug.print(millis());
         SerialDebug.println(
-            " ms, positioning complete; restore arm standard");
+            " ms, rings 1/2/3 ready; restore arm standard");
         beginArmStandardization();
         workActionPhase =
             WORK_PHASE_CIRCLE_WAIT_ARM_STANDARD;
-      }
-      break;
-    }
-
-    case WORK_PHASE_CIRCLE_WAIT_CHASSIS:
-      if (updateHeadingLock(MOTION_TIMEOUT_MS)) {
-        beginCircleVision();
       }
       break;
 
@@ -3890,7 +4883,6 @@ void serviceCompetitionAction() {
 
     case WORK_PHASE_WAIT_RESTORE:
       if (updateHeadingLock(MOTION_TIMEOUT_MS)) {
-        visualCorrectionAccumulator = MotorPulses();
         beginStorageParkingBeforeWorkFinish();
       }
       break;
@@ -3903,8 +4895,122 @@ void cancelCompetitionAction() {
   activeTransferPurpose = TRANSFER_PURPOSE_NONE;
   armStandardPhase = ARM_STANDARD_IDLE;
   armTransferPhase = ARM_TRANSFER_IDLE;
-  visualCorrectionAccumulator = MotorPulses();
+  resetRingCalibration();
   stopMaixRequest();
+}
+
+void printStateTransition(
+    const char *stateMachine,
+    const char *previousState,
+    const char *nextState) {
+  SerialDebug.print("[STATE] t=");
+  SerialDebug.print(millis());
+  SerialDebug.print(" ms, ");
+  SerialDebug.print(stateMachine);
+  SerialDebug.print(": ");
+  SerialDebug.print(previousState);
+  SerialDebug.print(" -> ");
+  SerialDebug.println(nextState);
+}
+
+void serviceStateTransitionFeedback() {
+  if (!ENABLE_STATE_TRANSITION_FEEDBACK) {
+    return;
+  }
+
+  static bool initialized = false;
+  static ProgramState previousProgramState =
+      PROGRAM_WAITING;
+  static QrScanPhase previousQrScanPhase =
+      QR_SCAN_IDLE;
+  static ArmStandardPhase previousArmStandardPhase =
+      ARM_STANDARD_IDLE;
+  static ArmTransferPhase previousArmTransferPhase =
+      ARM_TRANSFER_IDLE;
+  static WorkActionKind previousWorkAction =
+      WORK_ACTION_NONE;
+  static WorkActionPhase previousWorkActionPhase =
+      WORK_PHASE_IDLE;
+  static TransferPurpose previousTransferPurpose =
+      TRANSFER_PURPOSE_NONE;
+
+  if (!initialized) {
+    previousProgramState = programState;
+    previousQrScanPhase = qrScanPhase;
+    previousArmStandardPhase = armStandardPhase;
+    previousArmTransferPhase = armTransferPhase;
+    previousWorkAction = activeWorkAction;
+    previousWorkActionPhase = workActionPhase;
+    previousTransferPurpose = activeTransferPurpose;
+    initialized = true;
+
+    SerialDebug.print("[STATE] baseline: program=");
+    SerialDebug.print(programStateName(programState));
+    SerialDebug.print(", qr=");
+    SerialDebug.print(qrScanPhaseName(qrScanPhase));
+    SerialDebug.print(", work=");
+    SerialDebug.println(workActionKindName(activeWorkAction));
+    return;
+  }
+
+  if (previousProgramState != programState) {
+    printStateTransition(
+        "PROGRAM",
+        programStateName(previousProgramState),
+        programStateName(programState));
+    previousProgramState = programState;
+  }
+  if (previousQrScanPhase != qrScanPhase) {
+    printStateTransition(
+        "QR_SCAN",
+        qrScanPhaseName(previousQrScanPhase),
+        qrScanPhaseName(qrScanPhase));
+    previousQrScanPhase = qrScanPhase;
+  }
+  if (previousArmStandardPhase != armStandardPhase) {
+    printStateTransition(
+        "ARM_STANDARD",
+        armStandardPhaseName(previousArmStandardPhase),
+        armStandardPhaseName(armStandardPhase));
+    previousArmStandardPhase = armStandardPhase;
+  }
+  if (previousArmTransferPhase != armTransferPhase) {
+    printStateTransition(
+        "ARM_TRANSFER",
+        armTransferPhaseName(previousArmTransferPhase),
+        armTransferPhaseName(armTransferPhase));
+    previousArmTransferPhase = armTransferPhase;
+  }
+  if (previousWorkAction != activeWorkAction) {
+    printStateTransition(
+        "WORK_ACTION",
+        workActionKindName(previousWorkAction),
+        workActionKindName(activeWorkAction));
+    previousWorkAction = activeWorkAction;
+  }
+  if (previousWorkActionPhase != workActionPhase) {
+    printStateTransition(
+        "WORK_PHASE",
+        workActionPhaseName(previousWorkActionPhase),
+        workActionPhaseName(workActionPhase));
+    SerialDebug.print("[WORK CONTEXT] round/item=");
+    SerialDebug.print(
+        static_cast<unsigned int>(workRoundIndex + 1U));
+    SerialDebug.print("/");
+    SerialDebug.print(
+        static_cast<unsigned int>(workItemIndex + 1U));
+    SerialDebug.print(", purpose=");
+    SerialDebug.println(
+        transferPurposeName(activeTransferPurpose));
+    previousWorkActionPhase = workActionPhase;
+  }
+  if (previousTransferPurpose != activeTransferPurpose) {
+    printStateTransition(
+        "TRANSFER_PURPOSE",
+        transferPurposeName(previousTransferPurpose),
+        transferPurposeName(activeTransferPurpose));
+    previousTransferPurpose = activeTransferPurpose;
+  }
 }
 
 void startMotionCommand(const RouteCommand &command) {
@@ -3930,6 +5036,9 @@ void startMotionCommand(const RouteCommand &command) {
   switch (command.type) {
     case COMMAND_ARM_BASE_HOME:
       hmiSetRunStatus("ARM0");
+      SerialDebug.print("[ARM M5] route home target=");
+      SerialDebug.print(command.value);
+      SerialDebug.println(" old-frame deg");
       startArmBaseRotationToDegrees(
           static_cast<float>(command.value));
       break;
@@ -3953,6 +5062,14 @@ void startMotionCommand(const RouteCommand &command) {
       turnCoarseTelemetryPending = true;
       targetCounterClockwiseHeadingDegrees +=
           counterClockwiseDegrees;
+      SerialDebug.print("[TURN] start/command/target=");
+      SerialDebug.print(activeTurnStartHeadingDegrees, 2);
+      SerialDebug.print("/");
+      SerialDebug.print(counterClockwiseDegrees, 2);
+      SerialDebug.print("/");
+      SerialDebug.print(
+          targetCounterClockwiseHeadingDegrees, 2);
+      SerialDebug.println(" deg");
       startBodyDisplacement(
           0.0f, 0.0f,
           counterClockwiseDegrees * PI_F / 180.0f);
@@ -3964,6 +5081,10 @@ void startMotionCommand(const RouteCommand &command) {
       setDriveMotionProfile(
           FINAL_MAXIMUM_STEP_RATE, FINAL_STEP_ACCELERATION);
       hmiSetRunStatus("SLOW");
+      SerialDebug.print("[MOTION] precise profile enabled: vmax/acc=");
+      SerialDebug.print(FINAL_MAXIMUM_STEP_RATE, 0);
+      SerialDebug.print("/");
+      SerialDebug.println(FINAL_STEP_ACCELERATION, 0);
       break;
 
     case COMMAND_QR_ACTION:
@@ -4020,10 +5141,15 @@ void startMotionCommand(const RouteCommand &command) {
        */
       hmiSetRunStatus("ALIGN");
       finalAlignmentFinished = true;
+      SerialDebug.println(
+          "[FINAL ALIGN] synchronization only; no sensor correction configured");
       break;
 
     case COMMAND_HOLD:
       hmiSetRunStatus("HOLD");
+      SerialDebug.print("[HOLD] duration=");
+      SerialDebug.print(command.value);
+      SerialDebug.println(" ms");
       break;
 
     case COMMAND_FINISH:
@@ -4043,7 +5169,8 @@ void startCurrentCommand() {
     return;
   }
 
-  commandStartMs = millis();
+  routeCommandStartMs = millis();
+  commandStartMs = routeCommandStartMs;
   headingStableStartMs = 0;
   motorsArrivedStartMs = 0;
   printCurrentCommand();
@@ -4090,6 +5217,7 @@ void finishStorageActionIfNeeded() {
 }
 
 void finishProgram() {
+  printRouteCommandCompletion();
   resetQrScanActionState();
   cancelCompetitionAction();
   emergencyStopArmLinearAxes();
@@ -4106,7 +5234,14 @@ void finishProgram() {
     hmiSetTaskCounts();
   }
 
-  SerialDebug.println("Route finished");
+  SerialDebug.print("[RUN COMPLETE] total=");
+  SerialDebug.print(millis() - routeRunStartMs);
+  SerialDebug.print(" ms, QR=");
+  SerialDebug.print(scanFlag ? 1 : 0);
+  SerialDebug.print(", grabs/placements=");
+  SerialDebug.print(correctGrabCount);
+  SerialDebug.print("/");
+  SerialDebug.println(correctPlacementCount);
 }
 
 void updateRoute() {
@@ -4228,6 +5363,8 @@ void updateRoute() {
 // ---------------------------------------------------------------------------
 
 void onStartButtonClick() {
+  SerialDebug.print("[INPUT] PB9 click, program=");
+  SerialDebug.println(programStateName(programState));
   if (programState != PROGRAM_RUNNING) {
     abortRequested = false;
     startRequested = true;
@@ -4240,10 +5377,15 @@ void onStartButtonClick() {
     startArmBaseRotationToDegrees(
         static_cast<float>(
             ARM_BASE_TRAVEL_OLD_FRAME_DEGREES));
+  } else {
+    SerialDebug.println(
+        "[INPUT] start ignored: route already running");
   }
 }
 
 void onStartButtonLongPress() {
+  SerialDebug.print("[INPUT] PB9 long press, program=");
+  SerialDebug.println(programStateName(programState));
   abortRequested = true;
 }
 
@@ -4330,11 +5472,18 @@ void beginRoute() {
   // 上一次运行结束时可能停留在最终低速档，每次启动都恢复巡航参数。
   setDriveMotionProfile(MAXIMUM_STEP_RATE, STEP_ACCELERATION);
   enableDriveMotors();
+  routeRunStartMs = millis();
   programState = PROGRAM_RUNNING;
   startRequested = false;
   imuWaitStatusDisplayed = false;
 
-  SerialDebug.println("Route started");
+  SerialDebug.print("[RUN START] t=");
+  SerialDebug.print(routeRunStartMs);
+  SerialDebug.print(" ms, IMU reference=");
+  SerialDebug.print(routeImuReferenceDegrees, 2);
+  SerialDebug.print(" deg, route steps=");
+  SerialDebug.println(
+      static_cast<unsigned int>(ROUTE_COMMAND_COUNT));
 }
 
 void abortRoute() {
@@ -4349,7 +5498,13 @@ void abortRoute() {
   abortRequested = false;
   startRequested = false;
   hmiSetRunStatus("STOP");
-  SerialDebug.println("Route aborted by long press");
+  SerialDebug.print("[RUN ABORT] t=");
+  SerialDebug.print(millis());
+  SerialDebug.print(" ms, step=");
+  SerialDebug.print(static_cast<unsigned int>(routeIndex + 1));
+  SerialDebug.print("/");
+  SerialDebug.print(static_cast<unsigned int>(ROUTE_COMMAND_COUNT));
+  SerialDebug.println(", reason=PB9 long press");
 }
 
 void updateHmiYaw() {
@@ -4369,7 +5524,72 @@ void updateHmiYaw() {
   hmiSetValue("x0", yawTimes100);
 }
 
+void printStartupConfiguration() {
+  SerialDebug.println("=== GongChuang controller boot ===");
+  SerialDebug.println(
+      "[BOOT] debug UART PB12/PB13 @ 115200");
+  SerialDebug.println(
+      "[BOOT] HMI PB15/PB14 @ 115200; IMU PD9/PD8 @ 115200");
+  SerialDebug.println(
+      "[BOOT] QR PE0/PE1 @ 9600; MaixCAM PE7/PE8 @ 115200");
+  SerialDebug.println(
+      "[BOOT] EMM M6/M7 PA3/PA2 @ 115200; servos PC7/PC6 @ 115200");
+  SerialDebug.print(
+      "[BOOT] path_only/QR_rx/QR_required/motion_timeouts=");
+  SerialDebug.print(PATH_ONLY_TEST ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.print(ENABLE_QR_RECEIVER ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.print(REQUIRE_QR_SUCCESS ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.println(ENABLE_MOTION_TIMEOUTS ? 1 : 0);
+  if (!ENABLE_MOTION_TIMEOUTS) {
+    SerialDebug.println(
+        "[BOOT WARN] chassis motion timeouts are disabled");
+  }
+}
+
+void printResetCause() {
+  const bool brownoutReset =
+      __HAL_RCC_GET_FLAG(RCC_FLAG_BORRST) != RESET;
+  const bool pinReset =
+      __HAL_RCC_GET_FLAG(RCC_FLAG_PINRST) != RESET;
+  const bool powerOnReset =
+      __HAL_RCC_GET_FLAG(RCC_FLAG_PORRST) != RESET;
+  const bool softwareReset =
+      __HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST) != RESET;
+  const bool independentWatchdogReset =
+      __HAL_RCC_GET_FLAG(RCC_FLAG_IWDG1RST) != RESET;
+  const bool windowWatchdogReset =
+      __HAL_RCC_GET_FLAG(RCC_FLAG_WWDG1RST) != RESET;
+  const bool lowPowerReset =
+      __HAL_RCC_GET_FLAG(RCC_FLAG_LPWR1RST) != RESET;
+
+  SerialDebug.print(
+      "[RESET] BOR/PIN/POR/SOFT/IWDG/WWDG/LPWR=");
+  SerialDebug.print(brownoutReset ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.print(pinReset ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.print(powerOnReset ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.print(softwareReset ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.print(independentWatchdogReset ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.print(windowWatchdogReset ? 1 : 0);
+  SerialDebug.print("/");
+  SerialDebug.println(lowPowerReset ? 1 : 0);
+  if (brownoutReset && !powerOnReset) {
+    SerialDebug.println(
+        "[RESET DIAG] brownout flag set; inspect battery, regulator and connectors");
+  }
+  __HAL_RCC_CLEAR_RESET_FLAGS();
+}
+
 void initializeMotorOutputs() {
+  SerialDebug.println(
+      "[BOOT] initialize M1-M4 and M5 outputs (disabled)");
   pinMode(DRIVE_ENABLE_PIN, OUTPUT);
 
   // 初始化期间先保持所有步进驱动器失能。
@@ -4398,9 +5618,11 @@ void initializeMotorOutputs() {
   armMotors.disableM5();
 
   setDriveMotionProfile(MAXIMUM_STEP_RATE, STEP_ACCELERATION);
+  SerialDebug.println("[BOOT] motor outputs ready");
 }
 
 void initializeHmi() {
+  SerialDebug.println("[BOOT] initialize HMI");
   delay(300);
 
   while (SerialHmi.available()) {
@@ -4423,15 +5645,18 @@ void initializeHmi() {
   if (DISPLAY_BATTERY_ON_X1) {
     hmiSetValue("x1", 0);
   }
+  SerialDebug.println("[BOOT] HMI ready");
 }
 
 void initializeManipulationHardware() {
+  SerialDebug.println("[BOOT] initialize MaixCAM UART");
   SerialMaixcam.begin(MAIXCAM_BAUDRATE);
   maixcamSerialInitialized = true;
   while (SerialMaixcam.available()) {
     SerialMaixcam.read();
   }
   stopMaixRequest();
+  SerialDebug.println("[BOOT] MaixCAM UART ready");
 
   /*
    * M6/M7驱动器与STM32通常同时上电；已验证的独立例程会先等待
@@ -4446,17 +5671,25 @@ void initializeManipulationHardware() {
   }
   SerialArmLinear.begin(ARM_LINEAR_BAUDRATE);
   armLinearSerialInitialized = true;
+  SerialDebug.println(
+      "[BOOT] EMM UART ready; recover M6/M7 and set software origins");
   clearArmLinearReceiveBuffer();
   resetArmLinearSoftwareOrigin();
-  writeArmLinearEnable(extensionAxis.address, true);
-  SerialArmLinear.flush();
-  delay(ARM_AXIS_COMMAND_GUARD_MS);
-  clearArmLinearReceiveBuffer();
-  writeArmLinearEnable(liftAxis.address, true);
-  SerialArmLinear.flush();
-  delay(ARM_AXIS_COMMAND_GUARD_MS);
+  const bool extensionReady =
+      recoverAndVerifyArmLinearAxis(extensionAxis);
+  const bool liftReady =
+      recoverAndVerifyArmLinearAxis(liftAxis);
+  if (!extensionReady || !liftReady) {
+    armLinearReferenceValid = false;
+    SerialDebug.println(
+        "[BOOT ERROR] M6/M7 recovery failed; PB9 start will be refused");
+  } else {
+    SerialDebug.println(
+        "[BOOT] M6/M7 clear/enable/status verification passed");
+  }
   clearArmLinearReceiveBuffer();
 
+  SerialDebug.println("[BOOT] initialize servo bus IDs 4/5");
   servoProtocol.init(&SerialServo, SERVO_BAUDRATE);
   delay(100);
   gripperServo.init();
@@ -4474,12 +5707,15 @@ void initializeManipulationHardware() {
   SerialDebug.println(M6_PULSES_PER_MM, 4);
   SerialDebug.print("M7 pulses/mm=");
   SerialDebug.println(M7_PULSES_PER_MM, 4);
+  SerialDebug.println("[BOOT] manipulation hardware initialized");
 }
 
 } // namespace
 
 void setup() {
   SerialDebug.begin(DEBUG_BAUDRATE);
+  printResetCause();
+  printStartupConfiguration();
   SerialHmi.begin(HMI_BAUDRATE);
   SerialImu.begin(IMU_BAUDRATE);
   if (ENABLE_QR_RECEIVER) {
@@ -4502,8 +5738,10 @@ void setup() {
     resetQrReceiver();
   }
 
-  SerialDebug.println("GongChuang route controller ready");
-  SerialDebug.println("Click PB9 to start; long-press PB9 to stop");
+  SerialDebug.println("[READY] controller initialization complete");
+  SerialDebug.println(
+      "[READY] click PB9 to start; long-press PB9 to stop");
+  serviceStateTransitionFeedback();
 }
 
 void loop() {
@@ -4543,4 +5781,5 @@ void loop() {
 
   serviceCompetitionAction();
   updateRoute();
+  serviceStateTransitionFeedback();
 }
