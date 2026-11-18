@@ -1,5 +1,6 @@
 #include <MobileRobotConfig.h>
 #include <RobotConfig.h>
+#include <Stm32SerialCompat.h>
 
 #include <AccelStepper.h>
 #include <ArmMotorController.h>
@@ -107,13 +108,13 @@ static_assert(
 #define GONGCHUANG_STEP06_FORWARD_CORRECTION_MM 10.0f
 #endif
 
-// 正式路线第7/15段的车头方向附加量。70 mm已合并本轮新增10 mm；是实车修正量，不是1835 mm
+// 正式路线第7/15段的车头方向附加量。原70 mm再加10 mm，共80 mm朝扫码区；不是1835 mm
 // 理论横移量，也不乘各段横移motionScale；由底盘入口合成为一次二维运动。
 #ifndef GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_ENABLED
 #define GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_ENABLED 1
 #endif
 #ifndef GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_MM
-#define GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_MM 70.0f
+#define GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_MM 80.0f
 #endif
 
 // 正式路线只在第7段越过50%后，把额外15 mm车头修正叠加到剩余运动。
@@ -127,7 +128,7 @@ static_assert(
 #endif
 
 // 第15段使用与第7段相同的连续剩余目标重建方式：越过50%后，在现有全段
-// +70 mm车头修正基础上，再把+40 mm车头修正加入剩余运动，不停车或重启。
+// +80 mm车头修正基础上，再把+40 mm车头修正加入剩余运动，不停车或重启。
 #ifndef GONGCHUANG_STEP15_SECOND_HALF_FORWARD_CORRECTION_ENABLED
 #define GONGCHUANG_STEP15_SECOND_HALF_FORWARD_CORRECTION_ENABLED 1
 #endif
@@ -201,10 +202,10 @@ HardwareSerial &SerialDebug = route_chassis::SerialDebug;
 HardwareSerial &SerialHmi = route_chassis::SerialHmi;
 HardwareSerial &SerialImu = route_chassis::SerialImu;
 HardwareSerial &SerialQr = route_chassis::SerialQr;
-HardwareSerial SerialMaixcam(MAIXCAM_RX_PIN, MAIXCAM_TX_PIN);
-HardwareSerial SerialArmLinear(
+gongchuang::Stm32HardwareSerial SerialMaixcam(MAIXCAM_RX_PIN, MAIXCAM_TX_PIN);
+gongchuang::Stm32HardwareSerial SerialArmLinear(
     ARM_LINEAR_RX_PIN, ARM_LINEAR_TX_PIN);
-HardwareSerial SerialServo(SERVO_RX_PIN, SERVO_TX_PIN);
+gongchuang::Stm32HardwareSerial SerialServo(SERVO_RX_PIN, SERVO_TX_PIN);
 gongchuang::ImuHeadingTracker imuTracker(SerialImu);
 
 constexpr uint8_t GRIPPER_SERVO_ID = 4U;
@@ -1477,8 +1478,8 @@ static_assert(
     "STORAGE2 outer-ring final placement M6 scale must remain 0.90x");
 static_assert(
     arm_config::STORAGE2_OUTER_RING_FINAL_PLACE_ADDITIONAL_EXTENSION_MM ==
-        5.0f,
-    "STORAGE2 outer-ring final placement correction must remain +5 mm");
+        0.0f,
+    "STORAGE2 outer-ring final placement offset is +5 mm minus 5 mm");
 static_assert(
     arm_config::STORAGE2_TARGET_COLOR_ROI_RADIUS_PIXELS > 0U &&
         arm_config::STORAGE2_TARGET_COLOR_ROI_RADIUS_PIXELS <= 160U,
@@ -1554,16 +1555,28 @@ static_assert(
         STORAGE2_SCAN_OUTER_RING_M6_EXTENSION_CORRECTION_MM >= 0.0f &&
         STORAGE2_SCAN_OUTER_RING_M6_EXTENSION_CORRECTION_MM <= 30.0f,
     "STORAGE2 debug scan-pose corrections exceed their tuning windows");
-// 以下都是相对视觉生成 measuredRingPoses 的最终净值：M5正数=物理逆时针，
-// M6正数=伸长、负数=回缩。所有增量均已合并成净值，本轮1号位再加
-// 顺时针1.00度；粗加工两轮、暂存两轮及工位调试共用。
-// 第二次暂存区外圈在公共值上扣除专用0.50度差值；回收和扫描使用各自的参数表。
+// 以下是视觉生成 measuredRingPoses 后的已有分位置净修正：M5正数=物理逆时针，
+// M6正数=伸长、负数=回缩。其后统一叠加顺时针1度、回缩5 mm及伸长15 mm，
+// 粗加工两轮、暂存两轮及工位调试共用。
+// 第二次暂存区外圈原各减0.50度；现1号位再顺时针0.50度、3号位再逆时针0.50度。
+// 下表按物理1/2/3号位给出合并后的差值；回收和扫描使用各自的参数表。
 constexpr float PROCESS_STORAGE1_RING_PLACE_M5_NET_CCW_DEGREES[3] = {
     1.92f, 2.75f, 1.62f};
-constexpr float STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES =
-    -0.50f;
+constexpr float STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES[3] = {
+    -1.0f, 0.0f, 0.0f};
 constexpr float WORKSTATION_RING_PLACE_M6_NET_EXTENSION_MM[3] = {
     -17.5f, -13.5f, -17.0f};
+// 全局放置追加量：粗加工两轮、暂存两轮的三个位置及其调试入口均应用。
+// 在现有视觉后修正之后、最终行程检查之前叠加；M5正数=逆时针。
+constexpr float WORKSTATION_PLACE_EXTRA_M5_CLOCKWISE_DEGREES = 1.0f;
+constexpr float WORKSTATION_PLACE_EXTRA_M6_RETRACTION_MM = 5.0f;
+// 已从工位调试同步到正式流程；与回缩5 mm合计净伸长10 mm。
+constexpr float WORKSTATION_PLACE_EXTRA_M6_EXTENSION_MM = 15.0f;
+// 全局2号位放置：已有修正后的标准角度超出[-3,+3]度，再回缩2 mm、顺时针0.3度。
+// 追加前判断且严格超出才应用；记录触发状态供保存基准还原，扫描和取回不应用。
+constexpr float WORKSTATION_RING2_PLACE_ANGLE_THRESHOLD_DEGREES = 3.0f;
+constexpr float WORKSTATION_RING2_PLACE_EXTRA_M6_RETRACTION_MM = 2.0f;
+constexpr float WORKSTATION_RING2_PLACE_EXTRA_M5_CLOCKWISE_DEGREES = 0.3f;
 // 第一次暂存区1号位放置专用附加量。它叠加在上面的公共最终净值之后：
 // M5正数定义为逆时针，因此“顺时针0.2度”在应用时做减法；M6正数为伸长。
 // 不得把这两个量并入公共数组，否则会同时改变粗加工区和第二次暂存区。
@@ -1580,10 +1593,10 @@ static_assert(
         PROCESS_STORAGE1_RING_PLACE_M5_NET_CCW_DEGREES[1] <= 3.0f &&
         PROCESS_STORAGE1_RING_PLACE_M5_NET_CCW_DEGREES[2] <= 3.0f &&
         PROCESS_STORAGE1_RING_PLACE_M5_NET_CCW_DEGREES[0] +
-                STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES >=
+                STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES[0] >=
             0.0f &&
         PROCESS_STORAGE1_RING_PLACE_M5_NET_CCW_DEGREES[2] +
-                STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES >=
+                STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES[2] >=
             0.0f &&
         WORKSTATION_RING_RETURN_M5_NET_CCW_DEGREES[0] >= 0.0f &&
         WORKSTATION_RING_RETURN_M5_NET_CCW_DEGREES[1] <= 3.0f &&
@@ -1927,7 +1940,7 @@ void finishQrFrame() {
     qrCandidate[0] = '\0';
     qrMatchingFrameCount = 0U;
     hmiSetText("t1", "QRERR");
-    SerialDebug.print("QR rejected, status=");
+    SerialDebug.print("QR reject,st=");
     SerialDebug.println(
         static_cast<unsigned int>(taskStatus));
   }
@@ -2111,7 +2124,7 @@ void startRelativeMotorMove(const MotorPulses &pulses) {
   if (LOCAL_WORKSTATION_SIMULATION_MODE &&
       !(RAW_WORKSTATION_SIMULATION_MODE &&
         GONGCHUANG_RAW_PICKUP_LOGIC_MODE == 1)) {
-    routeFault("Local workstation mode attempted chassis motion");
+    routeFault("Local station mode attempted chassis motion");
     return;
   }
 
@@ -2165,7 +2178,7 @@ void disableDriveMotors() {
 void startArmBaseLibraryDegrees(float libraryDegrees) {
   if (armBaseMotionLockedUntilReset) {
     SerialDebug.println(
-        "M5 command ignored until power-cycle reset");
+        "M5 cmd ignored until power-cycle reset");
     return;
   }
   armMotors.moveM5ToDegrees(libraryDegrees, false);
@@ -2173,7 +2186,7 @@ void startArmBaseLibraryDegrees(float libraryDegrees) {
   armBaseMotionDeadlineMs =
       millis() + ARM_BASE_MOTION_TIMEOUT_MS;
 
-  SerialDebug.print("Arm base library target: ");
+  SerialDebug.print("Arm base library tgt: ");
   SerialDebug.print(libraryDegrees, 1);
   SerialDebug.print(" deg, pulses=");
   SerialDebug.println(
@@ -2412,9 +2425,9 @@ void printTurnCoarseTelemetry() {
   const float coarseErrorDegrees =
       activeTurnCommandDegrees - actualTurnDegrees;
 
-  SerialDebug.print("Turn coarse: command=");
+  SerialDebug.print("Turn coarse: cmd=");
   SerialDebug.print(activeTurnCommandDegrees, 2);
-  SerialDebug.print(" deg, actual=");
+  SerialDebug.print(" deg, act=");
   SerialDebug.print(actualTurnDegrees, 2);
   SerialDebug.print(" deg, error=");
   SerialDebug.print(coarseErrorDegrees, 2);
@@ -2449,7 +2462,7 @@ void routeFault(const char *reason) {
   SerialDebug.print("FAULT: ");
   SerialDebug.println(reason);
   SerialDebug.println(
-      "Power off before reset: retract M6 fully; put M7 at physical top.");
+      "Before reset:power OFF;M6 retracted;M7 at top.");
 }
 
 bool deadlineReached(uint32_t deadlineMs) {
@@ -2793,7 +2806,7 @@ bool readArmLinearCurrentMotorAngleDegrees(
       liftAxis.active ||
       armLinearPositionQueryAxis != nullptr) {
     SerialDebug.println(
-        "[EMM POSITION] blocking read refused while axis/query active");
+        "[EMM POSITION] read refused:axis/query busy");
     return false;
   }
   clearArmLinearReceiveBuffer();
@@ -2876,7 +2889,7 @@ void resetLinearAxisTerminalVerification(
 void markLinearAxisArrived(LinearAxisMotion &axis) {
   if (axis.address == liftAxis.address) {
     SerialDebug.print(
-        "[M7 TRACE] start/target/delta/rpm/acc/elapsed-ms=");
+        "[M7 TRACE] start/tgt/d/rpm/acc/t-ms=");
     SerialDebug.print(axis.commandStartMm, 2);
     SerialDebug.print("/");
     SerialDebug.print(axis.targetMm, 2);
@@ -3135,7 +3148,7 @@ void serviceLinearAxisRecovery(LinearAxisMotion &axis) {
       measuredPositionMm < pathMinimumMm ||
       measuredPositionMm > pathMaximumMm) {
     SerialDebug.print(
-        "[EMM RECOVERY] rejected measured/path=");
+        "[EMM RECOVERY] reject meas/path=");
     SerialDebug.print(measuredPositionMm, 2);
     SerialDebug.print("/");
     SerialDebug.print(pathMinimumMm, 2);
@@ -3150,7 +3163,7 @@ void serviceLinearAxisRecovery(LinearAxisMotion &axis) {
   axis.currentMm = measuredPositionMm;
   SerialDebug.print("[EMM RECOVERY] M");
   SerialDebug.print(axis.address);
-  SerialDebug.print(" measured/stability=");
+  SerialDebug.print(" meas/stable=");
   SerialDebug.print(measuredPositionMm, 2);
   SerialDebug.print("/");
   SerialDebug.print(
@@ -3190,7 +3203,7 @@ void serviceLinearAxisRecovery(LinearAxisMotion &axis) {
     SerialDebug.print("[EMM RECOVERY] M");
     SerialDebug.print(axis.address);
     SerialDebug.println(
-        " target verified by real-time position");
+        " live pos verified");
     axis.currentMm = retryTargetMm;
     markLinearAxisArrived(axis);
     return;
@@ -3224,7 +3237,7 @@ void serviceLinearAxisRecovery(LinearAxisMotion &axis) {
     }
   }
 
-  SerialDebug.print(" retry remaining at reduced rpm/acc=");
+  SerialDebug.print(" retry remain,lower rpm/acc=");
   SerialDebug.print(retrySpeedRpm);
   SerialDebug.print("/");
   SerialDebug.println(retryAcceleration);
@@ -3293,16 +3306,16 @@ void requestLinearAxisTerminalVerification(
   SerialDebug.print(" reason=");
   switch (reason) {
     case ARM_AXIS_VERIFY_HEALTHY_WITHOUT_COMMAND_EVIDENCE:
-      SerialDebug.print("healthy/no-command-evidence");
+      SerialDebug.print("healthy/no-cmd-evidence");
       break;
     case ARM_AXIS_VERIFY_LOCKED_ON_POSITION:
-      SerialDebug.print("locked/on-position");
+      SerialDebug.print("locked/on-pos");
       break;
     case ARM_AXIS_VERIFY_REJECTED_ON_POSITION:
-      SerialDebug.print("rejected/on-position");
+      SerialDebug.print("reject/on-pos");
       break;
     case ARM_AXIS_VERIFY_EXPECTED_COMPLETION:
-      SerialDebug.print("expected-completion/no-terminal-frame");
+      SerialDebug.print("expect-done/no-end-frame");
       break;
     case ARM_AXIS_VERIFY_M7_FAST_ARRIVAL:
       SerialDebug.print("M7 encoder fast-arrival");
@@ -3346,7 +3359,7 @@ void noteLinearAxisTerminalVerificationFailure(
     axis.terminalVerificationPending = false;
     axis.terminalVerificationReason = ARM_AXIS_VERIFY_NONE;
     SerialDebug.println(
-        "[EMM VERIFY] verification exhausted; retain normal axis timeout");
+        "[EMM VERIFY] verify spent;keep axis timeout");
     return;
   }
   axis.terminalVerificationPending = true;
@@ -3469,7 +3482,7 @@ void handleArmLinearPositionFrame(const uint8_t *frame) {
     SerialDebug.print("[EMM VERIFY] M");
     SerialDebug.print(axis->address);
     SerialDebug.print(
-        " measured/target/error/stability/flags=");
+        " meas/tgt/err/stable/flags=");
     SerialDebug.print(averagedPositionMm, 3);
     SerialDebug.print("/");
     SerialDebug.print(axis->targetMm, 3);
@@ -3494,8 +3507,7 @@ void handleArmLinearPositionFrame(const uint8_t *frame) {
       SerialDebug.print("[M");
       SerialDebug.print(axis->address);
       SerialDebug.print(
-          " FAST ARRIVAL] encoder stable; bypass delayed driver "
-          "terminal, elapsed/status-age-ms=");
+        " FAST ARRIVAL] stable encoder;skip late end,t/age-ms=");
       SerialDebug.print(millis() - axis->startMs);
       SerialDebug.print("/");
       SerialDebug.println(
@@ -3531,7 +3543,7 @@ void handleArmLinearPositionFrame(const uint8_t *frame) {
     SerialDebug.print("[EMM VERIFY] M");
     SerialDebug.print(axis->address);
     SerialDebug.println(
-        " target accepted from two encoder samples");
+        " tgt OK,2 encoder samples");
     markLinearAxisArrived(*axis);
     return;
   }
@@ -3718,12 +3730,12 @@ void handleArmLinearFrame(const uint8_t *frame) {
       frame[2] == 0x9FU) {
     SerialDebug.print("[M");
     SerialDebug.print(axis->address);
-    SerialDebug.print(" DRIVER TERMINAL] t/active=");
+    SerialDebug.print(" DRIVER end] t/active=");
     SerialDebug.print(millis());
     SerialDebug.print("/");
     SerialDebug.print(axis->active ? 1 : 0);
     SerialDebug.println(
-        "; ignored to prevent a delayed old frame completing a new move");
+        ";stale frame ignored for new move");
     return;
   }
   if (!axis->active) {
@@ -3823,7 +3835,7 @@ void handleArmLinearFrame(const uint8_t *frame) {
     SerialDebug.print(millis());
     SerialDebug.print(" ms, M");
     SerialDebug.print(axis->address);
-    SerialDebug.println(" position accepted");
+    SerialDebug.println(" pos accepted");
     return;
   }
 
@@ -3926,7 +3938,7 @@ void handleArmLinearFrame(const uint8_t *frame) {
       SerialDebug.print(millis());
       SerialDebug.print(" ms, M");
       SerialDebug.print(axis->address);
-      SerialDebug.print(", healthy flags=0x");
+      SerialDebug.print(",healthy flags=0x");
       SerialDebug.println(flags, HEX);
       if (onPosition &&
           elapsedMs >= minimumOnPositionMs) {
@@ -4196,7 +4208,7 @@ void serviceArmLinearAxes() {
         m6ContactSoftLandingAcceleration;
     m6ContactSoftLandingPending = false;
     SerialDebug.print(
-        "[M6 CONTACT SOFT] final 2.0 mm, target/rpm/acc=");
+        "[M6 CONTACT SOFT] final 2.0 mm,tgt/rpm/acc=");
     SerialDebug.print(finalTargetMm, 2);
     SerialDebug.print("/");
     SerialDebug.print(finalSpeedRpm);
@@ -4216,7 +4228,7 @@ void serviceArmLinearAxes() {
             M7_PROFILE_APPLY_EXPERIMENT,
             false) &&
         programState != PROGRAM_FAULT) {
-      routeFault("M6 contact-soft final segment rejected");
+      routeFault("M6 soft final rejected");
     }
   }
 
@@ -4250,7 +4262,7 @@ void serviceArmLinearAxes() {
             ? "[M7 CONTACT SOFT] final "
             : "[M7 SOFT ZERO] final ");
     SerialDebug.print(finalDistanceMm, 1);
-    SerialDebug.print(" mm, target/rpm/acc=");
+    SerialDebug.print(" mm,tgt/rpm/acc=");
     SerialDebug.print(finalTargetMm, 2);
     SerialDebug.print("/");
     SerialDebug.print(finalSpeedRpm);
@@ -4270,7 +4282,7 @@ void serviceArmLinearAxes() {
             finalM7ProfilePolicy,
             false) &&
         programState != PROGRAM_FAULT) {
-      routeFault("M7 soft final segment rejected");
+      routeFault("M7 soft final rejected");
     }
   }
 }
@@ -4290,7 +4302,7 @@ bool startLinearAxisMove(
     bool allowEmptyGripperBoost,
     bool allowRawTrackingConcurrentM7) {
   if (axis.fault) {
-    routeFault("EMM axis remains faulted");
+    routeFault("EMM axis fault latched");
     return false;
   }
   const LinearAxisMotion &otherAxis =
@@ -4330,7 +4342,7 @@ bool startLinearAxisMove(
   axis.recoveryReason = ARM_AXIS_RECOVERY_NONE;
   if (targetMm < minimumMm - ARM_AXIS_POSITION_TOLERANCE_MM ||
       targetMm > maximumMm + ARM_AXIS_POSITION_TOLERANCE_MM) {
-    routeFault("Arm target outside calibrated travel");
+    routeFault("Arm target out of travel");
     return false;
   }
 
@@ -4520,7 +4532,7 @@ bool startExtensionToContactMmWithProfile(
       M6_CONTACT_SOFT_LANDING_DISTANCE_MM +
           ARM_AXIS_POSITION_TOLERANCE_MM) {
     SerialDebug.print(
-        "[M6 CONTACT SOFT] direct short final, target/rpm/acc=");
+        "[M6 CONTACT SOFT] final,tgt/rpm/acc=");
     SerialDebug.print(extensionMm, 2);
     SerialDebug.print("/");
     SerialDebug.print(speedRpm);
@@ -4554,13 +4566,13 @@ bool startExtensionToContactMmWithProfile(
   m6ContactSoftLandingAcceleration =
       finalAcceleration;
   SerialDebug.print(
-      "[M6 CONTACT SOFT] fast segment -> ");
+      "[M6 CONTACT SOFT] fast segment > ");
   SerialDebug.print(approachMm, 2);
   SerialDebug.print(" mm; final ");
   SerialDebug.print(
       M6_CONTACT_SOFT_LANDING_DISTANCE_MM,
       1);
-  SerialDebug.println(" mm low acceleration");
+  SerialDebug.println(" mm low acc");
   if (startLinearAxisMove(
           extensionAxis,
           approachMm,
@@ -4629,7 +4641,7 @@ bool startLiftMoveWithZeroSoftLanding(
         finalAcceleration;
     m7SoftLandingProfilePolicy = m7ProfilePolicy;
     SerialDebug.print(
-        "[M7 SOFT ZERO] fast segment -> ");
+        "[M7 SOFT ZERO] fast segment > ");
     SerialDebug.print(softLandingStartMm, 1);
     SerialDebug.println(" mm");
     if (startLinearAxisMove(
@@ -4653,7 +4665,7 @@ bool startLiftMoveWithZeroSoftLanding(
   }
 
   SerialDebug.print(
-      "[M7 SOFT ZERO] short final segment, rpm/acc=");
+      "[M7 SOFT ZERO] short final,rpm/acc=");
   SerialDebug.print(finalSpeedRpm);
   SerialDebug.print("/");
   SerialDebug.println(finalAcceleration);
@@ -4695,7 +4707,7 @@ bool startLiftMoveWithContactSoftLanding(
       M7_CONTACT_SOFT_LANDING_DISTANCE_MM +
           ARM_AXIS_POSITION_TOLERANCE_MM) {
     SerialDebug.print(
-        "[M7 CONTACT SOFT] direct short final, target/rpm/acc=");
+        "[M7 CONTACT SOFT] final,tgt/rpm/acc=");
     SerialDebug.print(heightMm, 2);
     SerialDebug.print("/");
     SerialDebug.print(speedRpm);
@@ -4730,13 +4742,13 @@ bool startLiftMoveWithContactSoftLanding(
   m7SoftLandingProfilePolicy =
       M7_PROFILE_APPLY_EXPERIMENT;
   SerialDebug.print(
-      "[M7 CONTACT SOFT] fast segment -> ");
+      "[M7 CONTACT SOFT] fast segment > ");
   SerialDebug.print(approachHeightMm, 2);
   SerialDebug.print(" mm; final ");
   SerialDebug.print(
       M7_CONTACT_SOFT_LANDING_DISTANCE_MM,
       1);
-  SerialDebug.println(" mm low acceleration");
+  SerialDebug.println(" mm low acc");
   if (startLinearAxisMove(
           liftAxis,
           approachHeightMm,
@@ -4945,7 +4957,7 @@ bool validateLinearAxisStartupAngleDelta(
   SerialDebug.print(" ZERO] ");
   SerialDebug.print(stageLabel);
   SerialDebug.print(
-      " observed/expected signed angle, ratio=");
+      " obs/exp signed ang,ratio=");
   SerialDebug.print(observedSignedAngleDegrees, 3);
   SerialDebug.print("/");
   SerialDebug.print(expectedSignedAngleDegrees, 3);
@@ -4964,8 +4976,7 @@ bool validateLinearAxisStartupAngleDelta(
   SerialDebug.print(" ZERO] ");
   SerialDebug.print(stageLabel);
   SerialDebug.println(
-      " calibration rejected: check physical endpoint, direction, "
-      "microsteps and transmission geometry");
+      " cal reject: check endpt/dir/usteps/geom");
   if (observedAngleRatio > 0.05f &&
       isfinite(observedAngleRatio)) {
     const float inferredDriverMicrosteps =
@@ -4973,13 +4984,12 @@ bool validateLinearAxisStartupAngleDelta(
     SerialDebug.print("[");
     SerialDebug.print(axisLabel);
     SerialDebug.print(
-        " ZERO] firmware/estimated-driver microsteps=");
+        " ZERO] firmware/estimated-driver usteps=");
     SerialDebug.print(configuredMicrosteps, 0);
     SerialDebug.print("/");
     SerialDebug.print(inferredDriverMicrosteps, 1);
     SerialDebug.println(
-        " (change the real EMM setting; a code constant does not "
-        "reprogram the driver)");
+        " (set EMM hardware;code does not change driver)");
   }
   return false;
 }
@@ -4999,10 +5009,9 @@ bool establishLinearAxisSafeWorkingZero(
   SerialDebug.print("[");
   SerialDebug.print(axisLabel);
   SerialDebug.print(
-      " ZERO] read driver angle, move from mechanical "
-      "endpoint by ");
+      " ZERO] read ang;leave mech endpt by ");
   SerialDebug.print(fabsf(startupTargetMm), 2);
-  SerialDebug.println(" mm, then re-zero");
+  SerialDebug.println(" mm,then re-zero");
 
   float angleBeforeDegrees = 0.0f;
   bool angleBeforeValid =
@@ -5012,16 +5021,15 @@ bool establishLinearAxisSafeWorkingZero(
   if (angleBeforeValid) {
     SerialDebug.print("[");
     SerialDebug.print(axisLabel);
-    SerialDebug.print(" ZERO] driver angle before move=");
+    SerialDebug.print(" ZERO] driver ang before move=");
     SerialDebug.print(angleBeforeDegrees, 3);
     SerialDebug.println(
-        " deg (diagnostic only, not mechanical absolute)");
+        " deg (diagnostic only,not mech absolute)");
   } else {
     SerialDebug.print("[");
     SerialDebug.print(axisLabel);
     SerialDebug.println(
-        " ZERO] driver angle read failed before move; "
-        "refuse unverified startup");
+        " ZERO] ang read failed;no startup");
     return false;
   }
 
@@ -5053,7 +5061,7 @@ bool establishLinearAxisSafeWorkingZero(
     SerialDebug.print("[");
     SerialDebug.print(axisLabel);
     SerialDebug.println(
-        " ZERO] stall-reset ACK missing twice; refuse to move");
+        " ZERO] stall-reset ACK x2 missing;no move");
     return false;
   }
   clearArmLinearReceiveBuffer();
@@ -5073,7 +5081,7 @@ bool establishLinearAxisSafeWorkingZero(
   SerialDebug.print("[");
   SerialDebug.print(axisLabel);
   SerialDebug.print(
-      " ZERO] safe microstep probe target=");
+      " ZERO] safe ustep probe tgt=");
   SerialDebug.print(probeTargetMm, 3);
   SerialDebug.println(" mm");
 
@@ -5104,7 +5112,7 @@ bool establishLinearAxisSafeWorkingZero(
     SerialDebug.print("[");
     SerialDebug.print(axisLabel);
     SerialDebug.println(
-        " ZERO] probe angle read failed; refuse full startup move");
+        " ZERO] probe ang read failed;startup blocked");
     return false;
   }
   if (!validateLinearAxisStartupAngleDelta(
@@ -5148,7 +5156,7 @@ bool establishLinearAxisSafeWorkingZero(
       SerialDebug.print("[");
       SerialDebug.print(axisLabel);
       SerialDebug.println(
-          " ZERO] full-offset angle read failed");
+          " ZERO] full-offset ang read failed");
       return false;
     }
     if (!validateLinearAxisStartupAngleDelta(
@@ -5167,7 +5175,7 @@ bool establishLinearAxisSafeWorkingZero(
 
   SerialDebug.print("[");
   SerialDebug.print(axisLabel);
-  SerialDebug.print(" ZERO] driver angle after verified move=");
+  SerialDebug.print(" ZERO] ang after verified move=");
   SerialDebug.print(angleAfterDegrees, 3);
   SerialDebug.println(" deg");
 
@@ -5185,8 +5193,7 @@ bool establishLinearAxisSafeWorkingZero(
     SerialDebug.print("[");
     SerialDebug.print(axisLabel);
     SerialDebug.println(
-        " ZERO] driver-zero ACK missing; "
-        "software working zero remains authoritative");
+        " ZERO] driver-zero ACK missing;use software zero");
   }
   clearArmLinearReceiveBuffer();
 
@@ -5208,13 +5215,13 @@ bool establishLinearAxisSafeWorkingZero(
     SerialDebug.print("[");
     SerialDebug.print(axisLabel);
     SerialDebug.println(
-        " ZERO] angle read missed; accepted driver-zero ACK as 0 deg");
+        " ZERO] read missed;zero ACK accepted=0 deg");
   }
   if (!workingZeroAngleValid) {
     SerialDebug.print("[");
     SerialDebug.print(axisLabel);
     SerialDebug.println(
-        " ZERO] cannot establish recovery angle reference");
+        " ZERO] cannot set recover ang reference");
     return false;
   }
   axis.driverWorkingZeroAngleDegrees =
@@ -5223,7 +5230,7 @@ bool establishLinearAxisSafeWorkingZero(
   SerialDebug.print("[");
   SerialDebug.print(axisLabel);
   SerialDebug.print(
-      " ZERO] recovery angle reference=");
+      " ZERO] recover ang reference=");
   SerialDebug.print(workingZeroAngleDegrees, 3);
   SerialDebug.println(" deg");
   clearArmLinearReceiveBuffer();
@@ -5269,8 +5276,7 @@ bool establishArmLinearSafeWorkingZeros() {
 
   armLinearReferenceValid = true;
   SerialDebug.print(
-      "[M6/M7 ZERO] READY: offsets/usable M6/"
-      "usable M7 descent=");
+      "[M6/M7 ZERO] READY offset/M6 travel/M7 down=");
   SerialDebug.print(
       M6_STARTUP_WORKING_ZERO_OFFSET_MM,
       2);
@@ -5342,14 +5348,14 @@ void commandStorageServoPosition(
     uint8_t positionIndex,
     uint16_t intervalMs = STORAGE_SERVO_INTERVAL_MS) {
   if (positionIndex > 3U) {
-    routeFault("Invalid storage servo position");
+    routeFault("Invalid store servo pos");
     return;
   }
 
   storageServo.setRawAngleMTurn(
       STORAGE_SERVO_POSITIONS_DEGREES[positionIndex],
       intervalMs);
-  SerialDebug.print("Storage servo multi-turn index ");
+  SerialDebug.print("store servo multi-turn index ");
   SerialDebug.print(positionIndex);
   SerialDebug.print(", angle=");
   SerialDebug.println(
@@ -5383,7 +5389,7 @@ void commandStorageServoPositionWithArrivalGateProfile(
     uint16_t commandIntervalMs,
     uint32_t firstQueryDelayMs) {
   if (positionIndex > 2U) {
-    routeFault("Invalid verified storage servo position");
+    routeFault("Invalid verified tray pos");
     return;
   }
 
@@ -5420,7 +5426,7 @@ void commandRawStorageServoPositionWithArrivalGate(
 
 bool serviceStorageServoArrivalGate() {
   if (!storageServoArrivalGate.active) {
-    routeFault("Storage pickup missing real arrival gate");
+    routeFault("Tray pickup lacks arrival gate");
     return false;
   }
   if (storageServoArrivalGate.confirmed) {
@@ -5478,7 +5484,7 @@ bool serviceStorageServoArrivalGate() {
         STORAGE_SERVO_VERIFY_CONFIRMATIONS) {
       storageServoArrivalGate.confirmed = true;
       SerialDebug.print(
-          "[STORAGE SERVO VERIFY] REAL ARRIVAL confirmed slot=");
+          "[STORAGE SERVO VERIFY] arrived slot=");
       SerialDebug.println(storageServoArrivalGate.slot);
       return true;
     }
@@ -5496,18 +5502,18 @@ bool serviceStorageServoArrivalGate() {
       STORAGE_SERVO_VERIFY_MAX_OBSERVE_MS) {
     if (storageServoArrivalGate.retryCount >=
         STORAGE_SERVO_VERIFY_MAX_RETRIES) {
-      routeFault("Storage servo failed real arrival after retry");
+      routeFault("Tray arrival retry failed");
       return false;
     }
 
     ++storageServoArrivalGate.retryCount;
     const uint8_t retrySlot = storageServoArrivalGate.slot;
     SerialDebug.print(
-        "[STORAGE SERVO VERIFY] not arrived; re-drive same slot retry=");
+        "[STORAGE SERVO VERIFY] not arrived;retry same slot=");
     SerialDebug.print(storageServoArrivalGate.retryCount);
     SerialDebug.print("/");
     SerialDebug.print(STORAGE_SERVO_VERIFY_MAX_RETRIES);
-    SerialDebug.println(", reason=800-ms-limit");
+    SerialDebug.println(",reason=800-ms-limit");
     commandStorageServoPosition(
         retrySlot,
         storageServoArrivalGate.commandIntervalMs);
@@ -5533,7 +5539,7 @@ void commandStorageServoParkingPosition(
   storageServo.setRawAngleMTurn(
       STORAGE_SERVO_PARK_ANGLE_DEGREES,
       intervalMs);
-  SerialDebug.print("Storage servo parking angle/interval-ms=");
+  SerialDebug.print("store servo parking ang/interval-ms=");
   SerialDebug.print(
       STORAGE_SERVO_PARK_ANGLE_DEGREES,
       1);
@@ -5546,7 +5552,7 @@ void commandRing1TrayClearancePosition() {
   storageServo.setRawAngleMTurn(
       RING1_TRAY_CLEARANCE_ANGLE_DEGREES,
       STORAGE_SERVO_INTERVAL_MS);
-  SerialDebug.print("[R1 CLEAR] target=");
+  SerialDebug.print("[R1 CLEAR] tgt=");
   SerialDebug.println(
       RING1_TRAY_CLEARANCE_ANGLE_DEGREES,
       1);
@@ -5560,7 +5566,7 @@ bool verifyManipulationServosOnline() {
       gripperOnline && storageOnline;
   SerialDebug.print("[SERVO PING] t=");
   SerialDebug.print(millis());
-  SerialDebug.print(" ms, gripper(ID4)/storage(ID5)=");
+  SerialDebug.print(" ms,grip(ID4)/store(ID5)=");
   SerialDebug.print(gripperOnline ? 1 : 0);
   SerialDebug.print("/");
   SerialDebug.println(storageOnline ? 1 : 0);
@@ -5713,13 +5719,13 @@ bool updateHeadingLock(
 
   if (ENABLE_MOTION_TIMEOUTS &&
       millis() - commandStartMs >= timeoutMs) {
-    routeFault("Heading correction timeout");
+    routeFault("yaw corr timeout");
     return false;
   }
 
   if (turnMotionEnabled &&
       activeTurnCorrectionCount >= MAXIMUM_TURN_CORRECTIONS) {
-    routeFault("Turn correction limit exceeded");
+    routeFault("Turn corr limit exceeded");
     return false;
   }
 
@@ -5797,7 +5803,7 @@ void beginArmStandardization(
       extensionTargetMm >
           M6_MAXIMUM_EXTENSION_MM +
               ARM_AXIS_POSITION_TOLERANCE_MM) {
-    routeFault("Arm standard extension outside M6 travel");
+    routeFault("Arm std M6 out of travel");
     return;
   }
   const bool rawViewPreparation =
@@ -5819,15 +5825,15 @@ void beginArmStandardization(
   SerialDebug.print("[ARM STD] t=");
   SerialDebug.print(millis());
   SerialDebug.print(
-      " ms, start: open gripper; M6 current=");
+      " ms,start: open grip;M6 cur=");
   SerialDebug.print(extensionAxis.currentMm, 2);
-  SerialDebug.print(" mm, M7 current=");
+  SerialDebug.print(" mm,M7 cur=");
   SerialDebug.print(liftAxis.currentMm, 2);
   if (armStandardKeepBaseAngle) {
     SerialDebug.println(
-        " mm, M5 holds current angle (no zero waypoint)");
+        " mm,M5 holds cur ang (no zero waypoint)");
   } else {
-    SerialDebug.print(" mm, M5 direct target=");
+    SerialDebug.print(" mm,M5 direct tgt=");
     SerialDebug.println(
         armStandardBaseTargetDegrees,
         2);
@@ -5836,8 +5842,7 @@ void beginArmStandardization(
     armStandardDeadlineMs = 0UL;
     armStandardPhase = ARM_STANDARD_WAIT_PRE_OPEN_GAP;
     SerialDebug.println(
-        "[WORK INTERLOCK] standardization waits for M7 short handoff "
-        "before gripper open");
+        "[WORK INTERLOCK] standardize: wait M7 gap > open");
   } else {
     commandArmStandardizationGripperOpen();
     armStandardDeadlineMs =
@@ -5913,7 +5918,7 @@ void beginArmEndpointPreparation(
   SerialDebug.print("[ARM ENDPOINT PREP] t=");
   SerialDebug.print(millis());
   SerialDebug.print(
-      " ms, open gripper; parallel targets M7/M5=");
+      " ms,open grip;parallel targets M7/M5=");
   SerialDebug.print(ENDPOINT_VISION_HEIGHT_MM, 2);
   SerialDebug.print("/");
   SerialDebug.println(
@@ -5923,8 +5928,7 @@ void beginArmEndpointPreparation(
     armStandardDeadlineMs = 0UL;
     armStandardPhase = ARM_STANDARD_WAIT_PRE_OPEN_GAP;
     SerialDebug.println(
-        "[WORK INTERLOCK] endpoint preparation waits for M7 short "
-        "handoff before gripper open");
+        "[WORK INTERLOCK] endpt: wait M7 gap > open");
   } else {
     if (!startInitialStorageServoHeadStart()) {
       return;
@@ -5967,8 +5971,7 @@ bool serviceArmStandardization() {
             ENDPOINT_GRIPPER_M7_HANDOFF_US;
         armStandardPhase = ARM_STANDARD_WAIT_OPEN;
         SerialDebug.println(
-            "[ENDPOINT INTERLOCK] M7 handoff 0.1 ms -> gripper open; "
-            "post-open handoff 0.1 ms");
+            "[ENDPOINT INTERLOCK] M7 gap 0.1 ms > open > gap 0.1 ms");
         break;
       }
       if (armStandardDeadlineMs == 0UL) {
@@ -5983,8 +5986,7 @@ bool serviceArmStandardization() {
             WORK_GRIPPER_TO_M7_GAP_MS;
         armStandardPhase = ARM_STANDARD_WAIT_OPEN;
         SerialDebug.println(
-            "[WORK INTERLOCK] M7 handoff -> gripper open; "
-            "M7 remains blocked through open completion + short handoff");
+            "[WORK INTERLOCK] M7 gap > open;M7 held until open+gap");
       }
       break;
 
@@ -6008,7 +6010,7 @@ bool serviceArmStandardization() {
                   requiredExtensionMm) >
                   ARM_AXIS_POSITION_TOLERANCE_MM) {
             routeFault(
-                "Endpoint preparation M6 pose is invalid");
+                "Endpoint prep M6 pose invalid");
             break;
           }
 
@@ -6019,7 +6021,7 @@ bool serviceArmStandardization() {
           startArmBaseStandardFrameDegrees(
               armStandardBaseTargetDegrees);
           SerialDebug.print(
-              "[ARM ENDPOINT PREP] original-time M7/M5 started at t=");
+              "[ARM ENDPOINT PREP] M7/M5 start t=");
           SerialDebug.println(millis());
           armStandardPhase =
               ARM_STANDARD_WAIT_ENDPOINT_PARALLEL;
@@ -6028,7 +6030,7 @@ bool serviceArmStandardization() {
         SerialDebug.print("[ARM STD] t=");
         SerialDebug.print(millis());
         SerialDebug.println(
-            " ms, gripper settled -> M7 safe zero");
+            " ms,grip settled > M7 safe zero");
         startLiftToHeightMm(M7_STANDARD_HEIGHT_MM);
         armStandardPhase = ARM_STANDARD_WAIT_LIFT;
       }
@@ -6053,7 +6055,7 @@ bool serviceArmStandardization() {
         SerialDebug.print("[ARM STD] t=");
         SerialDebug.print(millis());
         SerialDebug.print(
-            " ms, M7 complete -> M6 target ");
+            " ms,M7 done > M6 tgt ");
         SerialDebug.print(
             armStandardExtensionTargetMm,
             2);
@@ -6085,14 +6087,14 @@ bool serviceArmStandardization() {
           SerialDebug.print("[ARM SAFE] t=");
           SerialDebug.print(millis());
           SerialDebug.println(
-              " ms, M6/M7 safe; keep M5 at current angle");
+              " ms,M6/M7 safe;hold M5");
           armStandardPhase = ARM_STANDARD_COMPLETE;
           break;
         }
         SerialDebug.print("[ARM STD] t=");
         SerialDebug.print(millis());
         SerialDebug.print(
-            " ms, M6 complete -> M5 direct target ");
+            " ms,M6 done > M5 direct tgt ");
         SerialDebug.print(
             armStandardBaseTargetDegrees,
             2);
@@ -6108,7 +6110,7 @@ bool serviceArmStandardization() {
         SerialDebug.print("[ARM STD] t=");
         SerialDebug.print(millis());
         SerialDebug.println(
-            " ms, M5 pulse target complete -> settle");
+            " ms,M5 pulse tgt done > settle");
         armStandardDeadlineMs =
             millis() + ARM_BASE_SETTLE_MS;
         armStandardPhase =
@@ -6122,7 +6124,7 @@ bool serviceArmStandardization() {
         SerialDebug.print("[ARM ENDPOINT PREP] t=");
         SerialDebug.print(millis());
         SerialDebug.println(
-            " ms, fixed endpoint height and ring-1 angle ready -> settle");
+            " ms,endpt Z/ring1 ang ready > settle");
         armStandardDeadlineMs =
             millis() + FIRST_ENDPOINT_M7_SETTLE_MS;
         armStandardPhase =
@@ -6273,13 +6275,13 @@ void commandArmTransferGripperOpen() {
   }
   if (armTransferUsesReturnProfile()) {
     SerialDebug.println(
-        "[DOUBLE GRIPPER] tray release -> 20 ms open command");
+        "[DOUBLE GRIPPER] tray release > 20 ms open cmd");
     commandGripperDoubleSpeedOpen();
     return;
   }
   if (armTransferUsesPlaceProfile()) {
     SerialDebug.println(
-        "[TARGET RELEASE] keep 40 ms open command");
+        "[TARGET RELEASE] keep 40 ms open cmd");
     commandGripperTargetPlaceOpen();
     return;
   }
@@ -6511,7 +6513,7 @@ bool armTransferPlanarMoveIsSafe(
       armBaseMotionLockedUntilReset ||
       armMotors.isM5Running()) {
     routeFault(
-        "M5/M6 planar move requested while an axis is busy");
+        "M5/M6 planar req:axis busy");
     return false;
   }
   return true;
@@ -6547,7 +6549,7 @@ bool startArmTransferPlanarMove(
 
   if (ring1LoadedReturnCushion &&
       (!clockwiseRotation || !retractingExtension)) {
-    routeFault("Ring-1 loaded return direction mismatch");
+    routeFault("Ring1 loaded return wrong dir");
     return false;
   }
 
@@ -6577,7 +6579,7 @@ bool startArmTransferPlanarMove(
                 loadedTrayMotion);
   if (!extensionStarted) {
     if (programState != PROGRAM_FAULT) {
-      routeFault("M5/M6 planar parallel start rejected");
+      routeFault("M5/M6 parallel start rejected");
     }
     return false;
   }
@@ -6590,10 +6592,10 @@ bool startArmTransferPlanarMove(
   SerialDebug.print("[TRANSFER PLANAR] ");
   SerialDebug.print(label);
   SerialDebug.println(
-      ": M5 rotation + M6 extension/retraction started together");
+      ": M5/M6 planar start");
   if (ring1LoadedReturnCushion) {
     SerialDebug.print(
-        "[RING1 LOADED RETURN CUSHION] speed/acceleration/ramp-x=");
+        "[RING1 LOADED RETURN CUSHION] v/acc/ramp-x=");
     SerialDebug.print(
         arm_config::M5_LOADED_RETURN_MAXIMUM_STEP_RATE,
         0);
@@ -6794,12 +6796,12 @@ void beginArmTransfer(
       !armPoseIsValid(
           destination,
           destinationMinimumExtensionMm)) {
-    routeFault("Transfer pose outside arm travel");
+    routeFault("Transfer pose out of travel");
     return;
   }
   if (sourceAlreadyPrepared &&
       effectiveConcurrentSourcePreparation) {
-    routeFault("Transfer source preparation mode conflict");
+    routeFault("Transfer src prep conflict");
     return;
   }
   if (nextSourcePreparation != nullptr &&
@@ -6812,12 +6814,12 @@ void beginArmTransfer(
                       : M6_STANDARD_EXTENSION_MM)) ||
        nextStorageSlot < 0 ||
        nextStorageSlot > 2)) {
-    routeFault("Next pickup preparation is invalid");
+    routeFault("Next pickup prep invalid");
     return;
   }
   if (returnToRawViewAtEnd &&
       nextSourcePreparation != nullptr) {
-    routeFault("Transfer final M5 target is ambiguous");
+    routeFault("Transfer M5 target ambiguous");
     return;
   }
   if (sourceAlreadyPrepared &&
@@ -6829,7 +6831,7 @@ void beginArmTransfer(
 #if GONGCHUANG_RING1_LOADED_RETURN_RAMP_TIME_PERCENT > 100U
   if (sourceRingPosition > 3U ||
       (sourceRingPosition != 0U && !mapSource)) {
-    routeFault("Transfer source ring position is invalid");
+    routeFault("Transfer source ring invalid");
     return;
   }
 #endif
@@ -6901,8 +6903,7 @@ void beginArmTransfer(
   if (concurrentSourcePreparation &&
       !effectiveConcurrentSourcePreparation) {
     SerialDebug.println(
-        "[WORK INTERLOCK] concurrent gripper/M7 source preparation "
-        "disabled");
+        "[WORK INTERLOCK] src grip/M7 parallel OFF");
   }
 
   if (armTransferSourceAlreadyPrepared) {
@@ -6924,7 +6925,7 @@ void beginArmTransfer(
             armTransferSourcePose.extensionMm) >
             ARM_AXIS_POSITION_TOLERANCE_MM) {
       routeFault(
-          "Prepared container pickup pose was not retained");
+          "Tray pickup pose lost");
       return;
     }
     if (armTransferStorage2Batch) {
@@ -6933,8 +6934,7 @@ void beginArmTransfer(
       return;
     }
     SerialDebug.println(
-        "[TRANSFER SAFE] retained M5/M6 source pose and open gripper "
-        "at/above M7 clearance; lower directly for next pickup");
+        "[TRANSFER SAFE] M5/M6 held,grip open,M7 clear;next pick down");
     if (!startArmTransferLiftToSourceHeightMm(
             armTransferSourcePose.heightMm)) {
       return;
@@ -6956,8 +6956,7 @@ void beginArmTransfer(
       return;
     }
     SerialDebug.println(
-        "[TRANSFER DIRECT] gripper already open; "
-        "skip source-open settle");
+        "[TRANSFER DIRECT] grip open;skip src-open wait");
     armTransferPhase =
         ARM_TRANSFER_WAIT_PREPARE_LIFT;
     return;
@@ -6971,8 +6970,7 @@ void beginArmTransfer(
     armTransferPhase =
         ARM_TRANSFER_WAIT_PRE_SOURCE_OPEN_GAP;
     SerialDebug.println(
-        "[WORK INTERLOCK] unprepared source waits for M7 short "
-        "handoff before gripper open");
+        "[WORK INTERLOCK] src prep: wait M7 gap > open");
     return;
   }
 
@@ -6984,8 +6982,7 @@ void beginArmTransfer(
       return;
     }
     SerialDebug.println(
-        "[TRANSFER PIPELINE] ring 3 accepted: M7 raises to "
-        "rotation clearance before first tray pickup");
+        "[TRANSFER PIPELINE] r3 OK;M7 rot-clear > tray pick");
     armTransferPhase =
         ARM_TRANSFER_WAIT_PREPARE_CLEARANCE;
   } else {
@@ -7015,7 +7012,7 @@ void startArmTransferDestinationDescent() {
   if (approachHeightMm > M7_STANDARD_HEIGHT_MM) {
     approachHeightMm = M7_STANDARD_HEIGHT_MM;
   }
-  SerialDebug.print("[RING PLACE] normal descent -> ");
+  SerialDebug.print("[RING PLACE] normal descent > ");
   SerialDebug.print(approachHeightMm, 2);
   SerialDebug.print(" mm; final ");
   SerialDebug.print(RING_PLACE_FINAL_DESCENT_MM, 1);
@@ -7043,7 +7040,7 @@ void releaseArmTransferDestination() {
         millis() + STORAGE_SERVO_SETTLE_MS;
     armTransferNextStorageCommanded = true;
     SerialDebug.print(
-        "[TRANSFER PIPELINE] next storage slot moving now: ");
+        "[TRANSFER PIPELINE] next tray moving: ");
     SerialDebug.println(
         static_cast<int>(
             armTransferNextStorageSlot));
@@ -7057,16 +7054,14 @@ void releaseArmTransferDestination() {
         armTransferGripperOpenSettleMs() +
         RAW_NEXT_STORAGE_COMMAND_DELAY_MS;
     SerialDebug.println(
-        "[RAW STORAGE] gripper release completion + 1000 ms "
-        "required before next-slot command");
+        "[RAW STORAGE] release done +1000 ms > next slot");
   } else if (armTransferUsesReturnProfile()) {
     armTransferStorageCommandDueMs =
         gripperOpenCommandMs +
         armTransferGripperOpenSettleMs() +
         RING_RETURN_STORAGE_COMMAND_DELAY_MS;
     SerialDebug.println(
-        "[RING RETURN STORAGE] gripper release completion + 500 ms "
-        "required before turntable command");
+        "[RING RETURN STORAGE] release done +500 ms > tray");
   }
   armTransferDeadlineMs =
       gripperOpenCommandMs +
@@ -7123,13 +7118,11 @@ void serviceArmTransferDeferredStorageCommand() {
   armTransferNextStorageCommanded = true;
   if (rawNextSlotDeferred) {
     SerialDebug.print(
-        "[RAW STORAGE] 1000 ms post-release delay complete; "
-        "next slot commanded, first verification-ms=");
+        "[RAW STORAGE] release+1000 ms;slot cmd;verify-ms=");
     SerialDebug.println(RAW_STORAGE_SERVO_SETTLE_MS);
   } else {
     SerialDebug.print(
-        "[RING RETURN STORAGE] 500 ms post-release delay complete; "
-        "turntable commanded, arrival-gate-ms=");
+        "[RING RETURN STORAGE] release+500 ms;tray cmd;gate-ms=");
     SerialDebug.println(STORAGE_SERVO_SETTLE_MS);
   }
 }
@@ -7270,8 +7263,7 @@ void serviceArmTransfer() {
           armTransferPhase =
               ARM_TRANSFER_WAIT_SOURCE_GRIPPER_GAP;
           SerialDebug.println(
-              "[WORK INTERLOCK] M7 source stop -> short handoff "
-              "before gripper close");
+              "[WORK INTERLOCK] M7 src stop > gap > close");
         } else {
           commandArmTransferGripperClose();
           armTransferDeadlineMs =
@@ -7302,8 +7294,7 @@ void serviceArmTransfer() {
       }
       if (deadlineReached(armTransferDeadlineMs)) {
         SerialDebug.print(
-            "[WORK TIMING] M7 verified source stop -> gripper close "
-            "command ms=");
+            "[WORK TIMING] M7 src stop > close,ms=");
         SerialDebug.print(
             millis() - armTransferM7HandoffStartMs);
         SerialDebug.print(" (limit ");
@@ -7319,8 +7310,7 @@ void serviceArmTransfer() {
         armTransferPhase =
             ARM_TRANSFER_WAIT_GRIP_CLOSE;
         SerialDebug.println(
-            "[WORK INTERLOCK] source gap complete -> gripper close; "
-            "M7 blocked through close completion + short handoff");
+            "[WORK INTERLOCK] src gap > close;M7 held until close+gap");
       }
       break;
 
@@ -7335,8 +7325,7 @@ void serviceArmTransfer() {
         if (startArmTransferLiftToHeightMm(
                 clearanceHeightMm)) {
           SerialDebug.print(
-              "[TRANSFER PIPELINE] loaded M7 -> rotation "
-              "clearance ");
+              "[TRANSFER PIPELINE] loaded M7 > rot clearance ");
           SerialDebug.println(clearanceHeightMm, 1);
           armTransferPhase =
               ARM_TRANSFER_WAIT_LOADED_CLEARANCE;
@@ -7413,8 +7402,7 @@ void serviceArmTransfer() {
           resetStorageServoArrivalGate();
           rawInitialStorageArrivalOverlapPending = false;
           SerialDebug.println(
-              "[RAW STORAGE OVERLAP] initial tray slot confirmed "
-              "before destination M7 descent");
+              "[RAW STORAGE OVERLAP] tray OK > dst M7 down");
         }
         armTransferDeadlineMs =
             millis() + armTransferTransitionSettleMs();
@@ -7466,8 +7454,7 @@ void serviceArmTransfer() {
           armTransferPhase =
               ARM_TRANSFER_WAIT_DESTINATION_GRIPPER_GAP;
           SerialDebug.println(
-              "[WORK INTERLOCK] M7 destination stop -> short handoff "
-              "before gripper open");
+              "[WORK INTERLOCK] M7 dst stop > gap > open");
         } else {
           releaseArmTransferDestination();
         }
@@ -7477,8 +7464,7 @@ void serviceArmTransfer() {
     case ARM_TRANSFER_WAIT_DESTINATION_GRIPPER_GAP:
       if (deadlineReached(armTransferDeadlineMs)) {
         SerialDebug.print(
-            "[WORK TIMING] M7 verified destination stop -> gripper open "
-            "command ms=");
+            "[WORK TIMING] M7 dst stop > open,ms=");
         SerialDebug.print(
             millis() - armTransferM7HandoffStartMs);
         SerialDebug.print(" (limit ");
@@ -7487,8 +7473,7 @@ void serviceArmTransfer() {
         releaseArmTransferDestination();
         armTransferM7HandoffStartMs = 0UL;
         SerialDebug.println(
-            "[WORK INTERLOCK] destination gap complete -> gripper "
-            "open; M7 blocked through open completion + short handoff");
+            "[WORK INTERLOCK] dst gap > open;M7 held until open+gap");
       }
       break;
 
@@ -7503,8 +7488,7 @@ void serviceArmTransfer() {
         if (startArmTransferLiftToHeightMm(
                 clearanceHeightMm)) {
           SerialDebug.print(
-              "[TRANSFER PIPELINE] released M7 -> rotation "
-              "clearance ");
+              "[TRANSFER PIPELINE] released M7 > rot clearance ");
           SerialDebug.println(clearanceHeightMm, 1);
           armTransferPhase =
               ARM_TRANSFER_WAIT_FINAL_CLEARANCE;
@@ -7530,7 +7514,7 @@ void serviceArmTransfer() {
           if (fabsf(liftAxis.currentMm - M7_STANDARD_HEIGHT_MM) >
                   ARM_AXIS_POSITION_TOLERANCE_MM ||
               armMotors.isM5Running() || armBaseMotionWatchdogActive) {
-            routeFault("Final return clearance invalid");
+            routeFault("Invalid final return clearance");
             break;
           }
           if (!startExtensionToMmWithProfile(
@@ -7663,7 +7647,7 @@ bool nominalRingPose(
     float lowerMm,
     ArmPose &pose) {
   if (ringPosition != 1U && ringPosition != 3U) {
-    routeFault("Endpoint seed requires ring 1 or 3");
+    routeFault("Endpoint seed needs ring1/3");
     return false;
   }
 
@@ -7675,7 +7659,7 @@ bool nominalRingPose(
           RING_SCAN_MINIMUM_ANGLE_DEGREES ||
       pose.standardFrameAngleDegrees >
           RING_SCAN_MAXIMUM_ANGLE_DEGREES) {
-    routeFault("Nominal endpoint outside -80..80 scan range");
+    routeFault("Nominal endpoint out of -80..80");
     return false;
   }
   pose.extensionMm = ENDPOINT_SEARCH_SEED_EXTENSION_MM;
@@ -7689,7 +7673,7 @@ bool planarPointToRingPose(
     float lowerMm,
     ArmPose &pose) {
   if (ringPosition < 1U || ringPosition > 3U) {
-    routeFault("Invalid ring position for mapped pose");
+    routeFault("Mapped ring invalid");
     return false;
   }
   const float radialDistanceMm =
@@ -7721,7 +7705,7 @@ bool planarPointToRingPose(
       angleDegrees >
           RING_TARGET_MAXIMUM_ANGLE_DEGREES) {
     SerialDebug.print(
-        "[RING MAP] unreachable xy/r/angle/raw-ext/corrected-ext=");
+        "[RING MAP] unreach xy/r/ang/raw-ext/corr-ext=");
     SerialDebug.print(point.outwardMm, 2);
     SerialDebug.print(",");
     SerialDebug.print(point.leftMm, 2);
@@ -7733,7 +7717,7 @@ bool planarPointToRingPose(
     SerialDebug.print(rawExtensionMm, 2);
     SerialDebug.print("/");
     SerialDebug.println(correctedExtensionMm, 2);
-    routeFault("Measured ring outside safe arm workspace");
+    routeFault("Measured ring out of arm range");
     return false;
   }
 
@@ -7744,8 +7728,7 @@ bool planarPointToRingPose(
   if (ring2 &&
       correctedExtensionMm < M6_STANDARD_EXTENSION_MM) {
     SerialDebug.print(
-        "[RING MAP] ring 2 near-side M6 raw/corrected/command/"
-        "physical-margin=");
+        "[RING MAP] r2 near M6 raw/corr/cmd/margin=");
     SerialDebug.print(rawExtensionMm, 2);
     SerialDebug.print("/");
     SerialDebug.print(correctedExtensionMm, 2);
@@ -7762,7 +7745,7 @@ bool planarPointToRingPose(
   pose.extensionMm = commandedExtensionMm;
   pose.heightMm = -lowerMm;
   SerialDebug.print(
-      "[RING MAP] M6 visual raw/0mm/command=");
+      "[RING MAP] M6 visual raw/0mm/cmd=");
   SerialDebug.print(rawExtensionMm, 2);
   SerialDebug.print("/");
   SerialDebug.print(correctedExtensionMm, 2);
@@ -7804,7 +7787,7 @@ bool planarPointToCameraPose(
       angleDegrees >
           RING_SCAN_MAXIMUM_ANGLE_DEGREES) {
     SerialDebug.print(
-        "[ENDPOINT SERVO] unreachable camera xy/r/angle/ext=");
+        "[ENDPOINT SERVO] unreach camera xy/r/ang/ext=");
     SerialDebug.print(point.outwardMm, 2);
     SerialDebug.print(",");
     SerialDebug.print(point.leftMm, 2);
@@ -7822,7 +7805,7 @@ bool planarPointToCameraPose(
                   ARM_AXIS_POSITION_TOLERANCE_MM &&
           angleDegrees >= RING_SCAN_MINIMUM_ANGLE_DEGREES &&
           angleDegrees <= RING_SCAN_MAXIMUM_ANGLE_DEGREES)) {
-      routeFault("Endpoint outside safe camera workspace");
+      routeFault("Endpoint out of camera range");
     }
     return false;
   }
@@ -7836,7 +7819,7 @@ bool planarPointToCameraPose(
 
 bool predictedRing3SearchPose(ArmPose &pose) {
   if (!measuredRingPointValid[1U]) {
-    routeFault("Ring 1 is unavailable for direct ring-3 handoff");
+    routeFault("Ring3 handoff lacks ring1");
     return false;
   }
 
@@ -7868,8 +7851,7 @@ bool predictedRing3SearchPose(ArmPose &pose) {
   }
 
   SerialDebug.print(
-      "[ENDPOINT HANDOFF] ring1 xy -> predicted ring3 "
-      "xy/raw-M5/search-M5/M6/source=");
+      "[ENDPOINT HANDOFF] r1 xy > r3 xy/raw-M5/scan-M5/M6/src=");
   SerialDebug.print(measuredRingPoints[1U].outwardMm, 2);
   SerialDebug.print(",");
   SerialDebug.print(measuredRingPoints[1U].leftMm, 2);
@@ -7894,11 +7876,11 @@ bool ringPose(
     float lowerMm,
     ArmPose &pose) {
   if (ringPosition < 1U || ringPosition > 3U) {
-    routeFault("Invalid ring position");
+    routeFault("Invalid ring pos");
     return false;
   }
   if (!measuredRingPoseValid[ringPosition]) {
-    routeFault("Ring endpoint map is not ready");
+    routeFault("Ring endpoint map not ready");
     return false;
   }
 
@@ -7949,18 +7931,18 @@ bool applyTargetPlacementExtraLower(
   if (correctedHeightMm <
       M7_MINIMUM_HEIGHT_MM -
           ARM_AXIS_POSITION_TOLERANCE_MM) {
-    routeFault("Target placement extra lower exceeds M7 travel");
+    routeFault("Place extra descent exceeds M7");
     return false;
   }
   SerialDebug.print(
-      "[TARGET PLACE M6] mapped/reduction/corrected-mm=");
+      "[TARGET PLACE M6] mapped/reduce/corr-mm=");
   SerialDebug.print(pose.extensionMm, 2);
   SerialDebug.print("/-");
   SerialDebug.print(extensionReductionMm, 1);
   SerialDebug.print("/");
   SerialDebug.println(correctedExtensionMm, 2);
   SerialDebug.print(
-      "[TARGET PLACE Z] mapped/extra/corrected-mm=");
+      "[TARGET PLACE Z] mapped/extra/corr-mm=");
   SerialDebug.print(pose.heightMm, 2);
   SerialDebug.print("/-");
   SerialDebug.print(
@@ -7990,13 +7972,13 @@ bool applyRing3ExtensionCorrection(
   if (correctedExtensionMm >
       M6_MAXIMUM_EXTENSION_MM +
           ARM_AXIS_POSITION_TOLERANCE_MM) {
-    routeFault("Ring3 correction travel");
+    routeFault("Ring3 corr travel");
     return false;
   }
 
   pose.extensionMm = correctedExtensionMm;
   SerialDebug.print(
-      "[R3 M6] base/add/target=");
+      "[R3 M6] base/add/tgt=");
   SerialDebug.print(baseExtensionMm, 2);
   SerialDebug.print("/");
   SerialDebug.print(RING3_EXTENSION_CORRECTION_MM, 1);
@@ -8029,7 +8011,7 @@ bool endpointVisionToPlanarPoint(
       radiusPixels >
           RING_ENDPOINT_MAXIMUM_RADIUS_PIXELS) {
     SerialDebug.print(
-        "[ENDPOINT MAP] rejected radius=");
+        "[ENDPOINT MAP] reject radius=");
     SerialDebug.println(radiusPixels);
     return false;
   }
@@ -8065,7 +8047,7 @@ bool endpointVisionToPlanarPoint(
       localLeftMm * cosine;
 
   SerialDebug.print(
-      "[ENDPOINT MAP] image-xy/r/scale, scan-M5/M6/M7, arm-xy=");
+      "[ENDPOINT MAP] image-xy/r/k,scan-M5/M6/M7,arm-xy=");
   SerialDebug.print(imageX);
   SerialDebug.print(",");
   SerialDebug.print(imageY);
@@ -8165,7 +8147,7 @@ bool endpointServoTargetPose(
 bool buildMeasuredRingMap() {
   if (!measuredRingPointValid[1U] ||
       !measuredRingPointValid[3U]) {
-    routeFault("Endpoint map missing ring 1 or 3");
+    routeFault("Endpoint map lacks ring1/3");
     return false;
   }
 
@@ -8219,8 +8201,7 @@ bool buildMeasuredRingMap() {
               endpointMapLockedHeadingDegrees));
 
   SerialDebug.print(
-      "[RING MAP] span/error/axisAngle/"
-      "radiusRatio/scanHeading/mapDrift=");
+      "[RING MAP] span/err/axis/rRatio/yaw/drift=");
   SerialDebug.print(endpointSpanMm, 2);
   SerialDebug.print("/");
   SerialDebug.print(spanErrorMm, 2);
@@ -8241,14 +8222,13 @@ bool buildMeasuredRingMap() {
           RING_ENDPOINT_MAXIMUM_SCAN_HEADING_DELTA_DEGREES ||
       mapHeadingDriftDegrees >
           RING_MAP_MAXIMUM_HEADING_DRIFT_DEGREES) {
-    routeFault("Endpoint pair geometry rejected");
+    routeFault("endpt pair geom reject");
     return false;
   }
   if (spanErrorMm >
       RING_ENDPOINT_WARNING_SPAN_ERROR_MM) {
     SerialDebug.println(
-        "[RING MAP] warning: endpoint span needs "
-        "real-board calibration");
+        "[RING MAP] WARN: calibrate ring span on board");
   }
 
   measuredRingPoints[2U].outwardMm =
@@ -8256,8 +8236,7 @@ bool buildMeasuredRingMap() {
   measuredRingPoints[2U].leftMm =
       midpointLeftMm;
   SerialDebug.println(
-      "[LOCAL RING MAP] field XY ignored: observed ring 1/3 "
-      "define arm-local ring 2 midpoint");
+      "[LOCAL RING MAP] arm XY:r2=mid(r1,r3);ignore field XY");
 
   for (uint8_t ring = 1U; ring <= 3U; ++ring) {
     ArmPose pose;
@@ -8272,7 +8251,7 @@ bool buildMeasuredRingMap() {
     measuredRingPoseValid[ring] = true;
 
     SerialDebug.print(
-        "[RING MAP] ring xy -> M5/M6 ");
+        "[RING MAP] ring xy > M5/M6 ");
     SerialDebug.print(ring);
     SerialDebug.print(": ");
     SerialDebug.print(
@@ -8365,8 +8344,7 @@ RawTargetPoseResult rawTargetPoseFromCameraPose(
 
 #if GONGCHUANG_RAW_VERBOSE_VISION_CALIBRATION
   SerialDebug.print(
-      "[RAW VISION CAL] xy/dxy/r/scale/left/out/target-r/M5/"
-      "M6-original/M6-corrected=");
+      "[RAW VISION CAL] xy/dxy/r/k/left/out/tgt-r/M5/M6-orig/M6-corr=");
   SerialDebug.print(pixelX, 1);
   SerialDebug.print(",");
   SerialDebug.print(pixelY, 1);
@@ -8397,7 +8375,7 @@ RawTargetPoseResult rawTargetPoseFromCameraPose(
           ARM_AXIS_POSITION_TOLERANCE_MM) {
 #if GONGCHUANG_RAW_VERBOSE_VISION_CALIBRATION
     SerialDebug.print(
-        "[RAW WAIT REACH] target too near, radius/ext=");
+        "[RAW WAIT REACH] tgt too near,radius/ext=");
     SerialDebug.print(targetRadiusMm, 2);
     SerialDebug.print("/");
     SerialDebug.println(extensionMm, 2);
@@ -8409,7 +8387,7 @@ RawTargetPoseResult rawTargetPoseFromCameraPose(
           ARM_AXIS_POSITION_TOLERANCE_MM) {
 #if GONGCHUANG_RAW_VERBOSE_VISION_CALIBRATION
     SerialDebug.print(
-        "[RAW WAIT REACH] target too far, radius/ext=");
+        "[RAW WAIT REACH] tgt too far,radius/ext=");
     SerialDebug.print(targetRadiusMm, 2);
     SerialDebug.print("/");
     SerialDebug.println(extensionMm, 2);
@@ -8495,6 +8473,7 @@ WorkActionKind activeWorkAction = WORK_ACTION_NONE;
 WorkActionPhase workActionPhase = WORK_PHASE_IDLE;
 TransferPurpose activeTransferPurpose = TRANSFER_PURPOSE_NONE;
 uint8_t activePlacementRingPosition = 0U;
+bool activePlacementRing2AngleCorrectionApplied = false;
 bool endpointDirectContainerPickupPending = false;
 bool endpointInitialStorageCommanded = false;
 bool containerPickupPrepositionedPending = false;
@@ -8663,13 +8642,13 @@ bool processItemIndexForSequence(
     uint8_t sequenceIndex,
     uint8_t &itemIndex) {
   if (sequenceIndex >= 3U) {
-    routeFault("Process transfer sequence index overflow");
+    routeFault("Process transfer index overflow");
     return false;
   }
   const uint8_t destinationRing =
       taskPositions[workRoundIndex][sequenceIndex];
   if (destinationRing < 1U || destinationRing > 3U) {
-    routeFault("Process QR destination ring is invalid");
+    routeFault("Process QR ring invalid");
     return false;
   }
   itemIndex = sequenceIndex;
@@ -8711,8 +8690,7 @@ bool startInitialStorageServoHeadStart() {
           : "[STORAGE1 ENTRY HEAD START] initial storage slot ");
   SerialDebug.print(initialStorageSlot);
   SerialDebug.println(
-      " starts about 60 ms before unchanged-time M7/M5; "
-      "existing arrival gates unchanged");
+      " starts ~60 ms before M7/M5;timing and arrival gates unchanged");
   return true;
 }
 
@@ -8720,7 +8698,7 @@ uint8_t storageRingForItem(
     uint8_t roundIndex,
     uint8_t itemIndex) {
   if (itemIndex >= 3U) {
-    routeFault("Storage item out of range");
+    routeFault("store item out of range");
     return 0U;
   }
   return roundIndex == 0U
@@ -8779,7 +8757,7 @@ void printStorage2VerboseFaultSnapshot(const char *reason) {
   SerialDebug.print('/');
   SerialDebug.println(static_cast<unsigned int>(workActionPhase));
 
-  SerialDebug.print("[S2DBG STATE] scan/ring/expected/samples/window-ms=");
+  SerialDebug.print("[S2DBG STATE] scan/ring/exp/n/window-ms=");
   SerialDebug.print(static_cast<unsigned int>(storage2ScanIndex));
   SerialDebug.print('/');
   SerialDebug.print(static_cast<unsigned int>(storageColorTargetRing));
@@ -8814,8 +8792,8 @@ void printStorage2VerboseFaultSnapshot(const char *reason) {
   SerialDebug.println(liftAxis.fault ? 1 : 0);
 
   SerialDebug.print(
-      "[S2DBG CAM] requested/latestSeq/requestSeq/mode/color/x/y/");
-  SerialDebug.print("metric/confidence/age-ms=");
+      "[S2DBG CAM] req/latestSeq/requestSeq/mode/color/x/y/");
+  SerialDebug.print("metric/conf/age-ms=");
   SerialDebug.print(static_cast<unsigned int>(maixCam.requestedMode()));
   SerialDebug.print('/');
   SerialDebug.print(latest.sequence);
@@ -8845,7 +8823,7 @@ void printStorage2VerboseWindowResult(
   const gongchuang::MaixCamClient::Coordinate &latest = maixCam.latest();
   SerialDebug.print("[S2DBG RESULT] result=");
   SerialDebug.print(result);
-  SerialDebug.print(" elapsed/ring/expected/name/requested/frames/");
+  SerialDebug.print(" t/ring/expect/name/req/frames/");
   SerialDebug.print("accepted/wrong/roi-reject/seq-start/seq-now/last-age-ms=");
   SerialDebug.print(elapsedMs);
   SerialDebug.print('/');
@@ -8876,18 +8854,15 @@ void printStorage2VerboseWindowResult(
 
   if (storage2WindowFreshFrameCount == 0U) {
     SerialDebug.println(
-        "[S2DBG HINT] no valid coordinate reached STM32: check MaixCAM "
-        "target detection output first, then UART TX/RX/GND if MaixCAM says sent");
+        "[S2DBG HINT] no valid coordinate reached STM32: check MaixCAM tgt detection output first,then UART TX/RX/GND if MaixCAM says sent");
   } else if (storage2WindowOutsideRoiCount > 0U &&
              storageColorAccuracySampleCount == 0U) {
     SerialDebug.println(
-        "[S2DBG HINT] target color was returned but remained outside "
-        "the center-100px ROI; inspect scan pose/arm calibration");
+        "[S2DBG HINT] tgt color was returned but remained outside center-100px ROI;inspect scan pose/arm cal");
   } else if (storage2WindowWrongColorCount > 0U &&
              storageColorAccuracySampleCount == 0U) {
     SerialDebug.println(
-        "[S2DBG HINT] received color did not match the fixed ring-color "
-        "map; verify the state-3 physical color arrangement");
+        "[S2DBG HINT] rx color did not match fixed ring-color map;verify state-3 phys color arrangement");
   }
 }
 #endif
@@ -8910,6 +8885,14 @@ bool workstationRingNetCorrectionApplies(uint8_t ringPosition) {
   return processOrStorage1RingNetCorrectionApplies(ringPosition) ||
          (ringPosition >= 1U && ringPosition <= 3U &&
           secondStorageColorWorkflowActive());
+}
+
+bool ring2PlacementAngleCorrectionApplies(
+    const ArmPose &pose,
+    uint8_t ringPosition) {
+  return ringPosition == 2U &&
+         fabsf(pose.standardFrameAngleDegrees) >
+             WORKSTATION_RING2_PLACE_ANGLE_THRESHOLD_DEGREES;
 }
 
 bool applyRingPositionPoseCorrection(
@@ -8935,7 +8918,11 @@ bool applyRingPositionPoseCorrection(
 
 bool applyRingPlacementPoseCorrection(
     ArmPose &pose,
-    uint8_t ringPosition) {
+    uint8_t ringPosition,
+    bool *ring2AngleCorrectionApplied = nullptr) {
+  if (ring2AngleCorrectionApplied != nullptr) {
+    *ring2AngleCorrectionApplied = false;
+  }
   if (!workstationRingNetCorrectionApplies(ringPosition)) {
     return applyRing3ExtensionCorrection(pose, ringPosition);
   }
@@ -8953,7 +8940,8 @@ bool applyRingPlacementPoseCorrection(
       pose.extensionMm *=
           arm_config::STORAGE2_OUTER_RING_FINAL_PLACE_M6_EXTENSION_SCALE;
       pose.standardFrameAngleDegrees +=
-          STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES;
+          STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES[
+              ringPosition - 1U];
     }
   }
   pose.standardFrameAngleDegrees +=
@@ -8974,6 +8962,20 @@ bool applyRingPlacementPoseCorrection(
         arm_config::
             STORAGE2_OUTER_RING_FINAL_PLACE_ADDITIONAL_EXTENSION_MM;
   }
+  // 全局追加顺时针1度、回缩5 mm，不受第二次暂存区外圈0.90倍率影响。
+  pose.standardFrameAngleDegrees -=
+      WORKSTATION_PLACE_EXTRA_M5_CLOCKWISE_DEGREES;
+  pose.extensionMm -= WORKSTATION_PLACE_EXTRA_M6_RETRACTION_MM;
+  // 正式与调试统一在现有修正后伸长15 mm，与回缩5 mm合计净增加10 mm。
+  pose.extensionMm += WORKSTATION_PLACE_EXTRA_M6_EXTENSION_MM;
+  if (ring2PlacementAngleCorrectionApplies(pose, ringPosition)) {
+    pose.extensionMm -= WORKSTATION_RING2_PLACE_EXTRA_M6_RETRACTION_MM;
+    pose.standardFrameAngleDegrees -=
+        WORKSTATION_RING2_PLACE_EXTRA_M5_CLOCKWISE_DEGREES;
+    if (ring2AngleCorrectionApplied != nullptr) {
+      *ring2AngleCorrectionApplied = true;
+    }
+  }
   // 仅第二次暂存区放置：全部修正完成后限幅一次，避免修正后越界停机。
   // 这里使用工作零点坐标 [-9.5, 160] mm，不能误用物理总行程 170 mm。
   if (storage2Placement) {
@@ -8993,10 +8995,22 @@ bool applyRingPlacementPoseCorrection(
 
 void removeRingPositionPoseCorrectionForSavedBase(
     ArmPose &pose,
-    uint8_t ringPosition) {
+    uint8_t ringPosition,
+    bool ring2AngleCorrectionApplied) {
   // Remove the shared placement net once before saving a base pose, preventing
   // a later target from adding it twice.
   if (workstationRingNetCorrectionApplies(ringPosition)) {
+    // 顺时针0.3度可能把目标带回±3度内，必须使用生成目标时记录的触发状态。
+    if (ringPosition == 2U && ring2AngleCorrectionApplied) {
+      pose.extensionMm += WORKSTATION_RING2_PLACE_EXTRA_M6_RETRACTION_MM;
+      pose.standardFrameAngleDegrees +=
+          WORKSTATION_RING2_PLACE_EXTRA_M5_CLOCKWISE_DEGREES;
+    }
+    // 保存基准时反向去掉全局放置追加量，避免重复叠加或带入取回目标。
+    pose.standardFrameAngleDegrees +=
+        WORKSTATION_PLACE_EXTRA_M5_CLOCKWISE_DEGREES;
+    pose.extensionMm += WORKSTATION_PLACE_EXTRA_M6_RETRACTION_MM;
+    pose.extensionMm -= WORKSTATION_PLACE_EXTRA_M6_EXTENSION_MM;
     pose.standardFrameAngleDegrees -=
         PROCESS_STORAGE1_RING_PLACE_M5_NET_CCW_DEGREES[
             ringPosition - 1U];
@@ -9015,7 +9029,8 @@ void removeRingPositionPoseCorrectionForSavedBase(
   if (secondStorageColorWorkflowActive() &&
       (ringPosition == 1U || ringPosition == 3U)) {
     pose.standardFrameAngleDegrees -=
-        STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES;
+        STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES[
+            ringPosition - 1U];
     pose.extensionMm -=
         arm_config::
             STORAGE2_OUTER_RING_FINAL_PLACE_ADDITIONAL_EXTENSION_MM;
@@ -9149,14 +9164,14 @@ void beginStorageColorVision() {
       workItemIndex >= 3U ||
       storageColorExpected < MAIXCAM_RED_REQUEST ||
       storageColorExpected > MAIXCAM_GREEN_REQUEST) {
-    routeFault("Storage targeted color request state is invalid");
+    routeFault("Storage color request invalid");
     return;
   }
 
   workLastMaixSequence = maixCam.latest().sequence;
   const uint8_t requestMode = storageColorExpected;
 #if GONGCHUANG_STORAGE2_VERBOSE_SCAN_DEBUG
-  SerialDebug.print("[S2DBG REQUEST] t/ring/mode/expected/samples/");
+  SerialDebug.print("[S2DBG REQUEST] t/ring/mode/expect/samples/");
   SerialDebug.print("last-seq/window-ms=");
   SerialDebug.print(millis());
   SerialDebug.print('/');
@@ -9216,13 +9231,13 @@ void beginStorageColorSearch(bool travelPoseAlreadyPrepared) {
   const uint8_t existingSlot =
       storage2ItemOrder[storageColorTargetRing - 1U];
   if (existingSlot < 3U && existingSlot != expectedTraySlot) {
-    routeFault("S2 ring/tray map changed during rescan");
+    routeFault("S2 rescan changed ring/tray map");
     return;
   }
   for (uint8_t ring = 1U; ring <= 3U; ++ring) {
     if (ring != storageColorTargetRing &&
         storage2ItemOrder[ring - 1U] == expectedTraySlot) {
-      routeFault("S2 QR map contains duplicate tray slot");
+      routeFault("S2 QR duplicate tray slot");
       return;
     }
   }
@@ -9232,7 +9247,7 @@ void beginStorageColorSearch(bool travelPoseAlreadyPrepared) {
       storageColorSearchExtensionForRing(storageColorTargetRing);
   if (correctedScanExtensionMm < M6_STANDARD_EXTENSION_MM ||
       correctedScanExtensionMm > M6_MAXIMUM_EXTENSION_MM) {
-    routeFault("S2 sweep extension outside travel");
+    routeFault("S2 sweep ext outside travel");
     return;
   }
   // The first-round QR plan already fixes the bottom-layer color on this ring.
@@ -9251,7 +9266,7 @@ void beginStorageColorSearch(bool travelPoseAlreadyPrepared) {
       storageColorSearchAngleForRing(storageColorTargetRing),
       correctedScanExtensionMm, M7_STANDARD_HEIGHT_MM);
 #if GONGCHUANG_STORAGE2_VERBOSE_SCAN_DEBUG
-  SerialDebug.print("[S2DBG VISIT] t/scan/ring/tray-slot/expected/");
+  SerialDebug.print("[S2DBG VISIT] t/scan/ring/tray-slot/expect/");
   SerialDebug.print("M5target/M6base/M6target/M7target=");
   SerialDebug.print(millis());
   SerialDebug.print('/');
@@ -9278,13 +9293,13 @@ void beginStorageColorSearch(bool travelPoseAlreadyPrepared) {
   SerialDebug.print(storage2ColorName(storageColorExpected));
   SerialDebug.print(") tray-slot=");
   SerialDebug.print(static_cast<unsigned int>(expectedTraySlot));
-  SerialDebug.println("; only this color inside center radius 100 px is accepted");
+  SerialDebug.println(";accept only this color within center 100 px");
   printStorage2VerboseMap("visit");
 #endif
   useArmBaseTransferMotionProfile();
   if (!startExtensionToMmWithProfile(storageColorScanPose.extensionMm,
           STORAGE_TRAVEL_M6_SPEED_RPM, STORAGE_TRAVEL_M6_ACCELERATION)) {
-    if (programState != PROGRAM_FAULT) { routeFault("S2 parallel scan rejected"); }
+    if (programState != PROGRAM_FAULT) { routeFault("S2 parallel scan reject"); }
     return;
   }
   // Keep the survey parallel: issue M6 first, then M5 without waiting for M6.
@@ -9323,7 +9338,7 @@ void advanceStorage2Scan() {
   storage2ScanIndex = 3U;
   workItemIndex = 0U;
 #if GONGCHUANG_STORAGE2_VERBOSE_SCAN_DEBUG
-  SerialDebug.print("[S2DBG COMPLETE] map-complete first-tray-slot=");
+  SerialDebug.print("[S2DBG COMPLETE] map-done first-tray-slot=");
   SerialDebug.println(static_cast<unsigned int>(storage2ItemOrder[0]));
 #endif
   commandStorageServoPositionWithArrivalGate(storage2ItemOrder[0]);
@@ -9369,7 +9384,7 @@ bool storageTravelPreparationReady(uint8_t roundNumber) {
 
 void beginStorageTravelPreparation(uint8_t roundNumber) {
   if (roundNumber < 1U || roundNumber > 2U) {
-    routeFault("Storage travel preparation round is invalid");
+    routeFault("Storage travel round invalid");
     return;
   }
   if (!extensionMoveFinished() ||
@@ -9380,7 +9395,7 @@ void beginStorageTravelPreparation(uint8_t roundNumber) {
           extensionAxis.currentMm -
           M6_STANDARD_EXTENSION_MM) >
           ARM_AXIS_POSITION_TOLERANCE_MM) {
-    routeFault("Process departure arm is not ready for travel preparation");
+    routeFault("Process arm not travel-ready");
     return;
   }
 
@@ -9426,7 +9441,7 @@ void serviceStorageTravelPreparation() {
               liftAxis.currentMm -
               M7_STANDARD_HEIGHT_MM) >
           ARM_AXIS_POSITION_TOLERANCE_MM) {
-        routeFault("Storage travel M7 did not reach zero");
+        routeFault("Storage travel M7 not zero");
         return;
       }
       storageTravelM5ZeroHandoffDeadlineUs =
@@ -9476,7 +9491,7 @@ void serviceStorageTravelPreparation() {
               liftAxis.currentMm -
               M7_STANDARD_HEIGHT_MM) >
               ARM_AXIS_POSITION_TOLERANCE_MM) {
-        routeFault("Storage1 travel preparation pose is incomplete");
+        routeFault("Storage1 travel pose incomplete");
         return;
       }
       storageTravelPreparationPhase =
@@ -9507,7 +9522,7 @@ void serviceStorageTravelPreparation() {
               liftAxis.currentMm -
               M7_STANDARD_HEIGHT_MM) >
               ARM_AXIS_POSITION_TOLERANCE_MM) {
-        routeFault("Storage travel M7 did not reach zero before M6");
+        routeFault("Storage travel M7 not zero before M6");
         return;
       }
       if (!startExtensionToMmWithProfile(
@@ -9531,13 +9546,13 @@ void serviceStorageTravelPreparation() {
                 extensionAxis.currentMm -
                 STORAGE_TRAVEL_M6_EXTENSION_MM) >
                 ARM_AXIS_POSITION_TOLERANCE_MM) {
-          routeFault("Storage travel preparation pose is incomplete");
+          routeFault("Storage travel pose incomplete");
           return;
         }
         storageTravelPreparationPhase =
             STORAGE_TRAVEL_PREP_COMPLETE;
         SerialDebug.print(
-            "[STORAGE TRAVEL PREP] round 2 complete M6/M7=");
+            "[STORAGE TRAVEL PREP] round 2 done M6/M7=");
         SerialDebug.print(extensionAxis.currentMm, 2);
         SerialDebug.print("/");
         SerialDebug.println(liftAxis.currentMm, 2);
@@ -9560,14 +9575,14 @@ void serviceStorage1Raw2TravelPreparation() {
           liftAxis.currentMm -
           M7_STANDARD_HEIGHT_MM) >
           ARM_AXIS_POSITION_TOLERANCE_MM) {
-    routeFault("STORAGE1 RAW2 preparation fault");
+    routeFault("STORAGE1 RAW2 prep fault");
     return;
   }
   if (fabsf(
           extensionAxis.currentMm -
           RAW_VIEW_EXTENSION_MM) >
       ARM_AXIS_POSITION_TOLERANCE_MM) {
-    routeFault("STORAGE1 RAW2 preparation fault");
+    routeFault("STORAGE1 RAW2 prep fault");
     return;
   }
 
@@ -9619,7 +9634,7 @@ void printMeasuredRingMapSummary() {
 
 bool completeEndpointMapAndStartTransfers() {
   if (!measuredRingPointValid[1U] || !measuredRingPointValid[3U]) {
-    routeFault("Endpoint scan sequence corrupted");
+    routeFault("endpt scan seq corrupted");
     return false;
   }
   if (!buildMeasuredRingMap()) {
@@ -9630,7 +9645,7 @@ bool completeEndpointMapAndStartTransfers() {
   workItemIndex = 0U;
   printMeasuredRingMapSummary();
   SerialDebug.println(
-      "[ENDPOINT MAP] complete; direct tray pickup");
+      "[ENDPOINT MAP] done;direct tray pickup");
   endpointDirectContainerPickupPending = true;
   workActionPhase = WORK_PHASE_START_UNLOAD;
   return true;
@@ -9660,6 +9675,7 @@ void finishActiveWorkAction() {
   workActionPhase = WORK_PHASE_IDLE;
   activeTransferPurpose = TRANSFER_PURPOSE_NONE;
   activePlacementRingPosition = 0U;
+  activePlacementRing2AngleCorrectionApplied = false;
   armStandardPhase = ARM_STANDARD_IDLE;
   armStandardHandoffDeadlineUs = 0UL;
   armStandardEndpointPreparation = false;
@@ -9719,7 +9735,7 @@ void finishActiveWorkAction() {
     storageTravelM5StartDeadlineMs = 0UL;
   }
   markMissionProgress();
-  SerialDebug.println("Workstation action complete");
+  SerialDebug.println("station action done");
 
   if (ROUGH_PROCESSING_CALIBRATION_MODE &&
       completedAction == WORK_ACTION_PROCESS) {
@@ -9735,9 +9751,7 @@ void finishActiveWorkAction() {
     hmiSetTaskCounts();
     printMeasuredRingMapSummary();
     SerialDebug.println(
-        "Rough-processing calibration complete: "
-        "three placements and three pickups finished; "
-        "power-cycle before another run.");
+        "Rough-processing cal done: three placements and three pickups finished;power-cycle before another run.");
   }
 }
 
@@ -9910,7 +9924,7 @@ void startRawTravelParkingAtSafeLinearZero() {
           ARM_AXIS_POSITION_TOLERANCE_MM;
   if (!linearAxesSafe) {
     routeFault(
-        "RAW travel start requires M6/M7 safe zero");
+        "RAW travel needs safe M6/M7 zero");
     return;
   }
 
@@ -9934,8 +9948,7 @@ void startRawTravelParkingAtSafeLinearZero() {
   }
   rawTravelM5ZeroPending = true;
   SerialDebug.println(
-      "[RAW EXIT PARALLEL] M7 zero; 30%-speed M5 zero and tray park "
-      "started, release chassis now");
+      "[RAW EXIT PARALLEL] M7=0;M5=0@30%+tray park;chassis released");
   // M5 is software-stepped globally and the tray servo is autonomous, so both
   // continue after the work pause is released.  PROCESS entry retains the
   // existing rawTravelM5ZeroPending gate before endpoint work can start.
@@ -9952,7 +9965,7 @@ void beginRawTravelParkingAfterFinalStore() {
           ARM_AXIS_POSITION_TOLERANCE_MM;
   if (!transferClearanceReady) {
     routeFault(
-        "RAW final store did not finish at M6 zero/M7 clearance");
+        "RAW end: M6 not zero or M7 not clear");
     return;
   }
 
@@ -9967,7 +9980,7 @@ void beginRawTravelParkingAfterFinalStore() {
   SerialDebug.print("[RAW TRAVEL] t=");
   SerialDebug.print(millis());
   SerialDebug.println(
-      " ms, final tray release complete; M7 held at 0 mm clearance");
+      " ms,final tray release done;M7 held at 0 mm clearance");
 }
 
 void beginRawExpectedSlotPreparation();
@@ -10006,7 +10019,7 @@ void beginWorkAction(
   SerialDebug.print(scanFlag ? 1 : 0);
   SerialDebug.print(", taskDecoded=");
   SerialDebug.print(taskCodeDecoded ? 1 : 0);
-  SerialDebug.print(", first-round colors=");
+  SerialDebug.print(",first-round colors=");
   SerialDebug.print(taskColors[0][0]);
   SerialDebug.print("/");
   SerialDebug.print(taskColors[0][1]);
@@ -10016,13 +10029,13 @@ void beginWorkAction(
   if (!taskCodeDecoded ||
       roundNumber < 1U ||
       roundNumber > 2U) {
-    routeFault("Work action missing valid task code");
+    routeFault("Work action task code invalid");
     return;
   }
   if (!verifyManipulationServosOnline()) {
     // A single workstation-entry ping is diagnostic only; transient bus
     // errors must not abort the route. Motion/arrival checks remain active.
-    SerialDebug.println("[WARN] Servo ping failed; continuing workstation");
+    SerialDebug.println("[WARN] Servo ping failed;continue station");
   }
 
   const bool useStorage1TravelPreparation =
@@ -10052,6 +10065,7 @@ void beginWorkAction(
   workItemIndex = 0U;
   activeTransferPurpose = TRANSFER_PURPOSE_NONE;
   activePlacementRingPosition = 0U;
+  activePlacementRing2AngleCorrectionApplied = false;
   armTransferPhase = ARM_TRANSFER_IDLE;
   armTransferM7HandoffStartMs = 0UL;
   armTransferRawM7ToGripperDeadlineUs = 0UL;
@@ -10181,8 +10195,7 @@ void beginWorkAction(
       startArmBaseStandardFrameDegrees(0.0f);
       rawTravelM5ZeroPending = true;
       SerialDebug.println(
-          "[PROCESS ENTRY] standard M5 0 deg commanded "
-          "(calibration/direct entry)");
+          "[PROCESS ENTRY] M5 0 deg cmd (cal/direct entry)");
     }
     processM5ZeroSettleDeadlineUs = 0UL;
     workStorageServoDeadlineMs = 0UL;
@@ -10191,7 +10204,7 @@ void beginWorkAction(
     SerialDebug.print("[PROCESS ENTRY] t=");
     SerialDebug.print(millis());
     SerialDebug.println(
-        " ms, waiting for standard M5 0 deg before ring 1");
+        " ms,waiting for std M5 0 deg before ring 1");
     return;
   }
 
@@ -10216,13 +10229,12 @@ void beginWorkAction(
   SerialDebug.print("[WORK PREPARE] t=");
   SerialDebug.print(millis());
   SerialDebug.println(
-      " ms, arm moves to ring-1 pose first; "
-      "storage remains parked");
+      " ms,arm to ring1 first;tray parked");
 }
 
 void beginRawExpectedSlotPreparation() {
   if (rawCollectedCount >= 3U) {
-    routeFault("Raw slot preparation index overflow");
+    routeFault("RAW slot prep index overflow");
     return;
   }
   const uint8_t expectedColor =
@@ -10232,7 +10244,7 @@ void beginRawExpectedSlotPreparation() {
   if (mappedSlot < 0 ||
       static_cast<uint8_t>(mappedSlot) !=
           rawCollectedCount) {
-    routeFault("Raw expected color-to-slot mapping invalid");
+    routeFault("RAW color/slot map invalid");
     return;
   }
 
@@ -10245,14 +10257,14 @@ void beginRawExpectedSlotPreparation() {
 
 void beginRawItemVision() {
   if (rawCollectedCount >= 3U) {
-    routeFault("Raw vision requested after all items stored");
+    routeFault("RAW vision req after storage done");
     return;
   }
   const uint8_t expectedColor =
       taskColors[workRoundIndex][rawCollectedCount];
   if (expectedColor < MAIXCAM_RED_REQUEST ||
       expectedColor > MAIXCAM_GREEN_REQUEST) {
-    routeFault("Raw expected color is invalid");
+    routeFault("RAW expected color invalid");
     return;
   }
   workLastMaixSequence =
@@ -10262,7 +10274,7 @@ void beginRawItemVision() {
   SerialDebug.print(" ms, collected=");
   SerialDebug.print(
       static_cast<unsigned int>(rawCollectedCount));
-  SerialDebug.print(", expected color/request mode=");
+  SerialDebug.print(",exp color/req mode=");
   SerialDebug.print(expectedColor);
   // The camera policy is intentionally independent of the A/B mechanical
   // search policy. The current default restores the historical mode-8 request;
@@ -10296,7 +10308,7 @@ bool startRawSearchZoneMove(
       extensionAxis.active || extensionAxis.recoveryPending ||
       armMotors.isM5Running() || armBaseMotionWatchdogActive ||
       !allMotorsArrived()) {
-    routeFault("RAW search move requested while mechanism busy");
+    routeFault("RAW search req:mechanism busy");
     return false;
   }
 
@@ -10558,15 +10570,14 @@ inline __attribute__((always_inline)) void beginRawPickupTransfer(
     rawPendingSourcePose = source;
   } else {
     SerialDebug.println(
-        "[RAW REUSE] expected material confirmed; retain remembered "
-        "M5/M6 and lower M7 directly");
+        "[RAW REUSE] expect item OK;hold M5/M6,lower M7");
   }
 #endif
   const bool prepareNextRawPickup =
       rawCollectedCount < 2U;
 #if GONGCHUANG_RAW_VERBOSE_VISION_CALIBRATION
   SerialDebug.print(
-      "[RAW DIRECT] latest two-frame color/slot/angle=");
+      "[RAW DIRECT] latest two-frame color/slot/ang=");
   SerialDebug.print(rawPendingColor);
   SerialDebug.print("/");
   SerialDebug.print(rawPendingSlotIndex);
@@ -10655,7 +10666,7 @@ bool startEndpointSearchPlanarMove() {
   if (extensionAxis.active ||
       extensionAxis.recoveryPending ||
       extensionAxis.fault) {
-    routeFault("Endpoint M5-first move requires idle M6");
+    routeFault("Endpoint M5-first needs idle M6");
     return false;
   }
 
@@ -10668,7 +10679,7 @@ bool startEndpointSearchPlanarMove() {
 
 void beginEndpointScan(uint8_t ringPosition) {
   if (ringPosition != 1U && ringPosition != 3U) {
-    routeFault("Endpoint scan requires ring 1 or 3");
+    routeFault("Endpoint scan needs ring1/3");
     return;
   }
   // PROCESS arrives with M6 at the safe 0 mm working zero. STORAGE1 may reuse
@@ -10696,7 +10707,7 @@ void beginEndpointScan(uint8_t ringPosition) {
           ENDPOINT_VISION_HEIGHT_MM) >
           ARM_AXIS_POSITION_TOLERANCE_MM) {
     routeFault(
-      "Initial endpoint scan requires M6 safe zero/search seed and fixed M7 height");
+      "Scan1 needs M6 zero/seed,M7 held");
     return;
   }
 
@@ -10731,7 +10742,7 @@ bool beginDirectRing3EndpointScan() {
           liftAxis.currentMm -
           ENDPOINT_VISION_HEIGHT_MM) >
           ARM_AXIS_POSITION_TOLERANCE_MM) {
-    routeFault("Ring-3 direct handoff requires fixed M7 height");
+    routeFault("Ring3 handoff needs M7 held");
     return false;
   }
 
@@ -10786,7 +10797,7 @@ bool startEndpointSearchFallbackMove() {
       fallbackAngleDegrees >
           RING_SCAN_MAXIMUM_ANGLE_DEGREES) {
     routeFault(
-        "Endpoint fallback outside ring-specific search window");
+        "Endpoint fallback out of ring window");
     return false;
   }
 
@@ -10826,7 +10837,7 @@ void startPreEndpointHeadingCorrection() {
   SerialDebug.print("[ENDPOINT IMU] t=");
   SerialDebug.print(millis());
   SerialDebug.println(
-      " ms, heading lock before endpoint map");
+      " ms,yaw lock before endpt map");
 }
 
 bool ringMapHeadingStillValid() {
@@ -10864,7 +10875,7 @@ bool startAccumulatedWorkstationMove(
           MAXIMUM_ACCUMULATED_VISUAL_CORRECTION_MM ||
       visualCorrectionMoveCount >=
           MAXIMUM_VISUAL_CORRECTION_MOVES) {
-    routeFault("Visual correction safety envelope exceeded");
+    routeFault("Visual correction out of safety range");
     return false;
   }
 
@@ -10936,7 +10947,7 @@ bool beginEndpointM6ReachRecovery(
       armBaseMotionWatchdogActive || !liftMoveFinished() ||
       !imuIsFresh()) {
     if (cameraReachOverflow) {
-      routeFault("M6 scan recovery unavailable");
+      routeFault("M6 scan recover unavailable");
     } else {
       faultLinearAxis(axis, "M6 scan recovery unavailable");
     }
@@ -11035,7 +11046,7 @@ void startPostVisionHeadingCorrection() {
   SerialDebug.print("[VISION IMU] t=");
   SerialDebug.print(millis());
   SerialDebug.println(
-      " ms, start post-vision heading lock");
+      " ms,start post-vision yaw lock");
 }
 
 // Keep this large, infrequent workstation transition out of the main service
@@ -11051,7 +11062,7 @@ void beginUnloadingTransfer() {
     if (!endpointInitialStorageCommanded ||
         workStorageServoDeadlineMs == 0UL) {
       routeFault(
-          "Initial storage slot was not commanded after ring-1 pose");
+          "First tray uncommanded at ring1");
       return;
     }
   }
@@ -11069,7 +11080,7 @@ void beginUnloadingTransfer() {
     }
     workStorageServoDeadlineMs = 0UL;
     SerialDebug.println(
-        "[TRANSFER SAFE] initial storage slot settled; pickup may start");
+        "[TRANSFER SAFE] first slot ready;pickup OK");
   }
 
   ArmPose destination;
@@ -11105,7 +11116,7 @@ void beginUnloadingTransfer() {
             ? STORAGE_ROUND1_PLACE_LOWER_MM
             : STORAGE_ROUND2_PLACE_LOWER_MM;
   } else {
-    routeFault("Unload requested outside ring station");
+    routeFault("Unload outside ring station");
     return;
   }
 
@@ -11138,7 +11149,8 @@ void beginUnloadingTransfer() {
   }
   if (!applyRingPlacementPoseCorrection(
           destination,
-          ringPosition)) {
+          ringPosition,
+          &activePlacementRing2AngleCorrectionApplied)) {
     return;
   }
   activePlacementRingPosition = ringPosition;
@@ -11207,7 +11219,7 @@ void beginUnloadingTransfer() {
   }
   if (workItemIndex == 1U) {
     SerialDebug.print(
-        "[TRAY PICK 2] extra M7 lower/target-mm=");
+        "[TRAY PICK 2] extra M7 lower/tgt-mm=");
     SerialDebug.print(
         arm_config::SECOND_PICK_EXTRA_LOWER_MM,
         1);
@@ -11336,7 +11348,7 @@ void beginReloadingTransfer() {
     }
     nextStorageSlot = nextTransferItemIndex;
     SerialDebug.print(
-        "[RETURN PIPELINE] next ring/slot preposition=");
+        "[RETURN PIPELINE] next ring/slot prepose=");
     SerialDebug.print(nextRingPosition);
     SerialDebug.print("/");
     SerialDebug.println(nextStorageSlot);
@@ -11423,7 +11435,7 @@ void completeTransferAndRotateStorage() {
       } else {
         if (!preparedNextRawPickup) {
           routeFault(
-              "RAW next pickup M5/M6 pose was not retained");
+              "RAW next M5/M6 pose lost");
           return;
         }
 #if GONGCHUANG_RAW_PICKUP_LOGIC_MODE == 1
@@ -11440,8 +11452,7 @@ void completeTransferAndRotateStorage() {
             WORK_PHASE_RAW_WAIT_EXPECTED_SLOT;
 #if GONGCHUANG_RAW_PICKUP_LOGIC_MODE == 0
         SerialDebug.println(
-            "[RAW REUSE] remembered M5/M6 ready; waiting only for "
-            "the already-commanded next tray slot");
+            "[RAW REUSE] M5/M6 ready;wait for next tray slot");
 #endif
       }
       return;
@@ -11450,7 +11461,7 @@ void completeTransferAndRotateStorage() {
     case TRANSFER_PURPOSE_CONTAINER_TO_RING:
       if (activePlacementRingPosition < 1U ||
           activePlacementRingPosition > 3U) {
-        routeFault("Completed placement has no valid ring position");
+        routeFault("Placement done:ring invalid");
         return;
       }
       // Save the vision-derived base pose, then let every real placement/pick
@@ -11459,7 +11470,8 @@ void completeTransferAndRotateStorage() {
           armTransferDestinationPose;
       removeRingPositionPoseCorrectionForSavedBase(
           measuredRingPoses[activePlacementRingPosition],
-          activePlacementRingPosition);
+          activePlacementRingPosition,
+          activePlacementRing2AngleCorrectionApplied);
       measuredRingPoseValid[activePlacementRingPosition] = true;
       SerialDebug.print(
           "[RING PLACE POSE SAVED] ring/M5/M6=");
@@ -11473,6 +11485,7 @@ void completeTransferAndRotateStorage() {
           armTransferDestinationPose.extensionMm,
           2);
       activePlacementRingPosition = 0U;
+      activePlacementRing2AngleCorrectionApplied = false;
       ++correctPlacementCount;
       break;
 
@@ -11481,7 +11494,7 @@ void completeTransferAndRotateStorage() {
       break;
 
     case TRANSFER_PURPOSE_NONE:
-      routeFault("Completed transfer has no purpose");
+      routeFault("Transfer done:no purpose");
       return;
   }
   hmiSetTaskCounts();
@@ -11522,7 +11535,7 @@ void completeTransferAndRotateStorage() {
           "[P2 PIPE] pickup");
     } else if (workItemIndex >= 3U) {
       routeFault(
-          "Unexpected next-pick preparation after final item");
+          "Next-pick prep after final item");
       return;
     } else if (activeTransferPurpose ==
                TRANSFER_PURPOSE_CONTAINER_TO_RING) {
@@ -11715,7 +11728,7 @@ void serviceCompetitionAction() {
       ++workVisionRetryCount;
     }
     SerialDebug.print(
-        "[RAW WAIT] refresh same expected color, count=");
+        "[RAW WAIT] refresh same exp color,count=");
     SerialDebug.println(workVisionRetryCount);
     beginRawItemVision();
     return;
@@ -11782,7 +11795,7 @@ void serviceCompetitionAction() {
       }
       if (!extensionMoveFinished() || !liftMoveFinished() ||
           armMotors.isM5Running() || !allMotorsArrived() || !imuIsFresh()) {
-        routeFault("M6 scan recovery unavailable");
+        routeFault("M6 scan recover unavailable");
         break;
       }
       if (startAccumulatedWorkstationMove(
@@ -11810,7 +11823,7 @@ void serviceCompetitionAction() {
           fabsf(wrapDeltaDegrees(currentRouteCounterClockwiseHeading() -
                                  endpointMapLockedHeadingDegrees)) >
               RING_ENDPOINT_MAXIMUM_SCAN_HEADING_DELTA_DEGREES) {
-        routeFault("M6 scan recovery heading changed");
+        routeFault("M6 scan recover yaw changed");
         break;
       }
       resetMeasuredRingMap();
@@ -11822,7 +11835,7 @@ void serviceCompetitionAction() {
           activeEndpointScanPose.standardFrameAngleDegrees;
       workVisionRetryCount = 0U;
       markMissionProgress();
-      SerialDebug.println("[M6 REACH] arrived; rescan");
+      SerialDebug.println("[M6 REACH] arrived;rescan");
       beginEndpointVision();
       break;
 
@@ -11838,8 +11851,7 @@ void serviceCompetitionAction() {
       SerialDebug.print("[PROCESS ENTRY] t=");
       SerialDebug.print(millis());
       SerialDebug.println(
-          " ms, standard M5 0 deg pulse target reached; "
-          "confirming 0.1 ms PROCESS-entry handoff");
+          " ms,M5 0 deg reached;PROCESS-entry handoff 0.1 ms");
       break;
 
     case WORK_PHASE_PROCESS_WAIT_TRAVEL_M5_ZERO_SETTLE:
@@ -11856,7 +11868,7 @@ void serviceCompetitionAction() {
       SerialDebug.print("[PROCESS ENTRY] t=");
       SerialDebug.print(millis());
       SerialDebug.println(
-          " ms, standard M5 0 deg confirmed -> ring 1");
+          " ms,std M5 0 deg OK > ring 1");
       break;
 
     case WORK_PHASE_PREPARE:
@@ -11867,8 +11879,7 @@ void serviceCompetitionAction() {
         armStandardPhase = ARM_STANDARD_IDLE;
         if (rawInitialStorageArrivalOverlapPending) {
           SerialDebug.println(
-              "[RAW STORAGE OVERLAP] arm ready; start vision/pick "
-              "while initial tray slot moves independently");
+              "[RAW STORAGE OVERLAP] arm ready;vision/pick + first tray move");
 #if GONGCHUANG_RAW_PICKUP_LOGIC_MODE == 1
           beginRawSearchWindow(
               RAW_INITIAL_A_NO_TARGET_MS);
@@ -11899,8 +11910,7 @@ void serviceCompetitionAction() {
         SerialDebug.print("[WORK PREPARE] t=");
         SerialDebug.print(millis());
         SerialDebug.println(
-            " ms, M5/M7 ring-1 pre-pose ready; "
-            "storage arrival remains independently gated");
+            " ms,M5/M7 r1 ready;tray arrival gated");
 
         startPreEndpointHeadingCorrection();
       }
@@ -11948,7 +11958,7 @@ void serviceCompetitionAction() {
           taskColors[workRoundIndex][rawCollectedCount];
       if (detectedColor != expectedColor) {
         SerialDebug.print(
-            "[RAW WAIT] expected/detected color=");
+            "[RAW WAIT] exp/det color=");
         SerialDebug.print(expectedColor);
         SerialDebug.print("/");
         SerialDebug.println(detectedColor);
@@ -11975,14 +11985,14 @@ void serviceCompetitionAction() {
       const uint8_t slotIndex =
           static_cast<uint8_t>(slot);
       if (slotIndex != rawCollectedCount) {
-        routeFault("Raw color-to-slot order mismatch");
+        routeFault("RAW color/slot order mismatch");
         break;
       }
       const uint8_t slotBit =
           static_cast<uint8_t>(1U << slotIndex);
       if ((rawFilledSlotMask & slotBit) != 0U) {
         SerialDebug.print(
-            "[RAW IGNORE] slot already filled, color/slot=");
+            "[RAW IGNORE] slot already filled,color/slot=");
         SerialDebug.print(detectedColor);
         SerialDebug.print("/");
         SerialDebug.println(slotIndex);
@@ -12020,8 +12030,7 @@ void serviceCompetitionAction() {
         }
       } else {
         SerialDebug.println(
-            "[RAW REUSE] next material arrived at the remembered "
-            "pickup position");
+            "[RAW REUSE] next item at saved pickup pos");
       }
 #endif
 
@@ -12057,7 +12066,7 @@ void serviceCompetitionAction() {
       if (rawSearchMoveTargetZone == RAW_SEARCH_ZONE_A &&
           (!motorPulsesAreZero(visualCorrectionAccumulator) ||
            fabsf(visualCorrectionLeftMm) > 0.01f)) {
-        routeFault("RAW 40 mm chassis return did not cancel");
+        routeFault("RAW return did not cancel 40 mm");
         break;
       }
       rawSearchZone = rawSearchMoveTargetZone;
@@ -12072,7 +12081,7 @@ void serviceCompetitionAction() {
             RAW_NORMAL_NO_TARGET_MS);
       }
 #else
-      routeFault("RAW search state unavailable in legacy mode");
+      routeFault("RAW legacy mode has no search state");
 #endif
       break;
 
@@ -12091,7 +12100,7 @@ void serviceCompetitionAction() {
         endpointMapLockedHeadingDegrees =
             currentRouteCounterClockwiseHeading();
         SerialDebug.print(
-            "[ENDPOINT IMU] locked heading/error=");
+            "[ENDPOINT IMU] locked yaw/err=");
         SerialDebug.print(
             endpointMapLockedHeadingDegrees,
             2);
@@ -12158,8 +12167,7 @@ void serviceCompetitionAction() {
         workActionPhase =
             WORK_PHASE_ENDPOINT_WAIT_LOCAL_SETTLE;
         SerialDebug.print(
-            "[ENDPOINT SCAN] full coarse pose reached; "
-            "re-recognition settle-ms=");
+            "[ENDPOINT SCAN] coarse ready;vision wait-ms=");
         SerialDebug.println(ENDPOINT_LOCAL_MOVE_SETTLE_MS);
       }
       break;
@@ -12179,7 +12187,7 @@ void serviceCompetitionAction() {
 
       if (activeEndpointScanRing != 1U &&
           activeEndpointScanRing != 3U) {
-        routeFault("Endpoint response has no active ring");
+        routeFault("Endpoint reply:no active ring");
         break;
       }
 
@@ -12190,7 +12198,7 @@ void serviceCompetitionAction() {
       if (confidence <
           RING_ENDPOINT_MINIMUM_CONFIDENCE) {
         SerialDebug.print(
-            "[ENDPOINT MAP] rejected confidence=");
+            "[ENDPOINT MAP] reject conf=");
         SerialDebug.println(confidence);
         break;
       }
@@ -12215,7 +12223,7 @@ void serviceCompetitionAction() {
       if (headingDriftDegrees >
           RING_MAP_MAXIMUM_HEADING_DRIFT_DEGREES) {
         routeFault(
-            "Chassis drifted during endpoint scan");
+            "Chassis drift during endpoint scan");
         break;
       }
 
@@ -12252,7 +12260,7 @@ void serviceCompetitionAction() {
           SerialDebug.print("/");
           SerialDebug.println(centerErrorPixels, 2);
           routeFault(
-              "Endpoint servo did not converge");
+              "Endpoint servo not converged");
           break;
         }
 
@@ -12271,7 +12279,7 @@ void serviceCompetitionAction() {
                   M6_MAXIMUM_EXTENSION_MM +
                       ARM_AXIS_POSITION_TOLERANCE_MM &&
               !beginEndpointM6ReachRecovery(extensionAxis, true)) {
-            routeFault("Endpoint outside safe camera workspace");
+            routeFault("Endpoint out of camera range");
           }
           break;
         }
@@ -12292,8 +12300,7 @@ void serviceCompetitionAction() {
         ++activeEndpointServoMoveCount;
 
         SerialDebug.print(
-            "[ENDPOINT SERVO] move ring/stage/step/total/"
-            "px/mm/cmd/M5/M6=");
+            "[ENDPOINT SERVO] move r/stg/n/sum/px/mm/cmd/M5/M6=");
         SerialDebug.print(ring);
         SerialDebug.print("/");
         SerialDebug.print(
@@ -12335,7 +12342,7 @@ void serviceCompetitionAction() {
         activeEndpointStageServoMoveCount = 0U;
         resetEndpointCenteredConfirmationWindow();
         SerialDebug.print(
-            "[ENDPOINT SERVO] coarse ok ring/px; start fine=");
+            "[ENDPOINT SERVO] coarse ok ring/px;start fine=");
         SerialDebug.print(ring);
         SerialDebug.print("/");
         SerialDebug.print(centerErrorPixels, 2);
@@ -12351,8 +12358,7 @@ void serviceCompetitionAction() {
         endpointCenteredConfirmationCount =
             ENDPOINT_FINAL_CENTER_CONFIRMATIONS;
         SerialDebug.print(
-            "[ENDPOINT SERVO] stable camera result accepted "
-            "ring/error-px/conf=");
+            "[ENDPOINT SERVO] stable ring/err-px/conf=");
         SerialDebug.print(ring);
         SerialDebug.print("/");
         SerialDebug.print(centerErrorPixels, 2);
@@ -12364,8 +12370,7 @@ void serviceCompetitionAction() {
       if (endpointCenteredConfirmationCount <
           ENDPOINT_FINAL_CENTER_CONFIRMATIONS) {
         SerialDebug.print(
-            "[ENDPOINT SERVO] final center confirmation "
-            "ring/count/error px=");
+            "[ENDPOINT SERVO] center r/count/err-px=");
         SerialDebug.print(ring);
         SerialDebug.print("/");
         SerialDebug.print(
@@ -12392,8 +12397,7 @@ void serviceCompetitionAction() {
       stopMaixRequest();
 
       SerialDebug.print(
-          "[ENDPOINT SCAN] overhead center accepted "
-          "ring/xy/error-px/r/conf/heading/elapsed=");
+          "[ENDPOINT SCAN] center OK ring/xy/err-px/r/conf/yaw/t=");
       SerialDebug.print(ring);
       SerialDebug.print("/");
       SerialDebug.print(x);
@@ -12413,8 +12417,7 @@ void serviceCompetitionAction() {
       if (ring == 1U) {
         if (!measuredRingPointValid[3U]) {
           SerialDebug.println(
-              "[ENDPOINT HANDOFF] ring 1 accepted; hold fixed M7 and "
-              "move M5/M6 to predicted ring-3 pose");
+              "[ENDPOINT HANDOFF] r1 OK;hold M7,M5/M6 > predicted r3");
           (void)beginDirectRing3EndpointScan();
           break;
         }
@@ -12466,7 +12469,7 @@ void serviceCompetitionAction() {
         workActionPhase =
             WORK_PHASE_ENDPOINT_WAIT_LOCAL_SETTLE;
         SerialDebug.print(
-            "[ENDPOINT SERVO] correction reached; next vision in ms=");
+            "[ENDPOINT SERVO] corr done;vision wait-ms=");
         SerialDebug.println(ENDPOINT_LOCAL_MOVE_SETTLE_MS);
       }
       break;
@@ -12492,11 +12495,10 @@ void serviceCompetitionAction() {
           SerialDebug.print("[WORK SAFE] t=");
           SerialDebug.print(millis());
           SerialDebug.print(
-              " ms, ring-1 full pose settled -> "
-              "initial storage slot ");
+              " ms,ring-1 full pose settled > first store slot ");
           SerialDebug.print(initialStorageSlot);
           SerialDebug.println(
-              " starts with endpoint vision");
+              " starts with endpt vision");
         }
         beginEndpointVision();
       }
@@ -12577,8 +12579,8 @@ void serviceCompetitionAction() {
 #if GONGCHUANG_STORAGE2_VERBOSE_SCAN_DEBUG
         const gongchuang::MaixCamClient::Coordinate &latest =
             maixCam.latest();
-        SerialDebug.print("[S2DBG FRAME] t/window/ring/req/expected-before/");
-        SerialDebug.print("detected/x/y/metric/confidence/samples/decision=");
+        SerialDebug.print("[S2DBG FRAME] t/window/ring/req/expect-before/");
+        SerialDebug.print("det/x/y/metric/conf/n/decision=");
         SerialDebug.print(nowMs);
         SerialDebug.print('/');
         SerialDebug.print(nowMs - storageColorAccuracyWindowStartMs);
@@ -12627,8 +12629,8 @@ void serviceCompetitionAction() {
         printStorage2VerboseWindowResult(
             missReason,
             nowMs - storageColorAccuracyWindowStartMs);
-        SerialDebug.print("[S2DBG WINDOW] result=miss-rescan elapsed/ring/");
-        SerialDebug.print("expected/mapped-slot/samples=");
+        SerialDebug.print("[S2DBG WINDOW] result=miss-rescan t/ring/");
+        SerialDebug.print("exp/mapped-slot/n=");
         SerialDebug.print(nowMs - storageColorAccuracyWindowStartMs);
         SerialDebug.print('/');
         SerialDebug.print(static_cast<unsigned int>(storageColorTargetRing));
@@ -12654,8 +12656,8 @@ void serviceCompetitionAction() {
       printStorage2VerboseWindowResult(
           "ACCEPTED_TARGET_COORDINATE",
           nowMs - storageColorAccuracyWindowStartMs);
-      SerialDebug.print("[S2DBG WINDOW] result=coordinate elapsed/ring/");
-      SerialDebug.print("expected/samples/avg-x/avg-y=");
+      SerialDebug.print("[S2DBG WINDOW] result=coordinate t/ring/");
+      SerialDebug.print("exp/n/avg-x/avg-y=");
       SerialDebug.print(nowMs - storageColorAccuracyWindowStartMs);
       SerialDebug.print('/');
       SerialDebug.print(static_cast<unsigned int>(storageColorTargetRing));
@@ -12672,7 +12674,7 @@ void serviceCompetitionAction() {
       ArmPose targetPose;
       if (!storageColorTargetPose(storageColorScanPose,
               storageColorTargetRing, x, y, targetPose)) {
-        routeFault("S2 sweep target invalid");
+        routeFault("S2 sweep tgt invalid");
         break;
       }
       measuredRingPoses[storageColorTargetRing] = targetPose;
@@ -12681,7 +12683,7 @@ void serviceCompetitionAction() {
       measuredRingHeadingsDegrees[storageColorTargetRing] =
           currentRouteCounterClockwiseHeading();
 #if GONGCHUANG_STORAGE2_VERBOSE_SCAN_DEBUG
-      SerialDebug.print("[S2DBG TARGET] ring/M5/M6/M7/confidence=");
+      SerialDebug.print("[S2DBG TARGET] ring/M5/M6/M7/conf=");
       SerialDebug.print(static_cast<unsigned int>(storageColorTargetRing));
       SerialDebug.print('/');
       SerialDebug.print(targetPose.standardFrameAngleDegrees, 2);
@@ -12707,8 +12709,7 @@ void serviceCompetitionAction() {
       SerialDebug.print("[HOUGH ARM] t=");
       SerialDebug.print(millis());
       SerialDebug.println(
-          " ms, M7 logical -80 mm (physical -90 mm); "
-          "start circle positioning");
+          " ms,M7 logical/phys=-80/-90 mm;start circle positioning");
       beginCircleVision();
       break;
 
@@ -12768,7 +12769,7 @@ void serviceCompetitionAction() {
         SerialDebug.print("[HOUGH ARM] t=");
         SerialDebug.print(millis());
         SerialDebug.println(
-            " ms, positioning complete; retract M6/M7 and keep M5");
+            " ms,positioning done;retract M6/M7,hold M5");
         beginArmStandardization(0.0f, true);
         workActionPhase =
             WORK_PHASE_CIRCLE_WAIT_ARM_STANDARD;
@@ -12791,7 +12792,7 @@ void serviceCompetitionAction() {
         SerialDebug.print("[HOUGH ARM] t=");
         SerialDebug.print(millis());
         SerialDebug.println(
-            " ms, M6/M7 safe and M5 retained; correct heading");
+            " ms,M6/M7 safe and M5 retained;correct yaw");
         startPostVisionHeadingCorrection();
       }
       break;
@@ -12803,7 +12804,7 @@ void serviceCompetitionAction() {
               VISION_HEADING_STABLE_TIME_MS)) {
         SerialDebug.print("[VISION IMU] t=");
         SerialDebug.print(millis());
-        SerialDebug.print(" ms, complete; target/actual/error=");
+        SerialDebug.print(" ms,done;tgt/act/err=");
         SerialDebug.print(
             targetCounterClockwiseHeadingDegrees, 2);
         SerialDebug.print("/");
@@ -12884,7 +12885,7 @@ void serviceCompetitionAction() {
         workActionPhase =
             WORK_PHASE_WAIT_STORAGE1_RAW2_HANDOFF;
         SerialDebug.println(
-            "[S1 EXIT] M7=0; handoff-us=100");
+            "[S1 EXIT] M7=0;handoff-us=100");
         break;
       }
 
@@ -12907,7 +12908,7 @@ void serviceCompetitionAction() {
               liftAxis.currentMm -
               M7_STANDARD_HEIGHT_MM) >
           ARM_AXIS_POSITION_TOLERANCE_MM) {
-        routeFault("STORAGE1 RAW2 preparation fault");
+        routeFault("STORAGE1 RAW2 prep fault");
         break;
       }
       if (static_cast<int32_t>(
@@ -12917,7 +12918,7 @@ void serviceCompetitionAction() {
       }
       if (storage1Raw2TravelPhase !=
           STORAGE1_RAW2_TRAVEL_IDLE) {
-        routeFault("STORAGE1 RAW2 preparation fault");
+        routeFault("STORAGE1 RAW2 prep fault");
         break;
       }
       if (!startExtensionToMmWithProfile(
@@ -13031,6 +13032,7 @@ void cancelCompetitionAction() {
   workActionPhase = WORK_PHASE_IDLE;
   activeTransferPurpose = TRANSFER_PURPOSE_NONE;
   activePlacementRingPosition = 0U;
+  activePlacementRing2AngleCorrectionApplied = false;
   armStandardPhase = ARM_STANDARD_IDLE;
   armStandardHandoffDeadlineUs = 0UL;
   armStandardEndpointPreparation = false;
@@ -13245,7 +13247,7 @@ void onStartButtonDoubleClick() {
                    ? "S1READY"
                    : "S2READY")));
     SerialDebug.println(
-        "Local workstation simulation ignores start-zone selection");
+        "Local station sim ignores start-zone selection");
     return;
   }
 
@@ -13275,7 +13277,7 @@ bool configureRoughProcessingCalibrationTask() {
           CALIBRATION_TASK_CODE,
           calibrationPlan) !=
       competition::TASK_CODE_OK) {
-    routeFault("Rough-processing calibration task is invalid");
+    routeFault("Rough-processing cal task is invalid");
     return false;
   }
 
@@ -13305,7 +13307,7 @@ bool configureRawWorkstationSimulationTask() {
   if (competition::parseTaskCode(
           RAW_SIMULATION_TASK_CODE,
           plan) != competition::TASK_CODE_OK) {
-    routeFault("RAW workstation simulation task is invalid");
+    routeFault("RAW station sim task is invalid");
     return false;
   }
 
@@ -13332,7 +13334,7 @@ bool configureStorageRound1SimulationTask() {
   competition::TaskPlan plan;
   if (competition::parseTaskCode(TASK_CODE, plan) !=
       competition::TASK_CODE_OK) {
-    routeFault("Storage round-1 simulation task is invalid");
+    routeFault("store round-1 sim task is invalid");
     return false;
   }
   taskPlan = plan;
@@ -13359,7 +13361,7 @@ bool configureStorageRound2SimulationTask() {
           STORAGE2_SIMULATION_TASK_CODE,
           simulationPlan) !=
       competition::TASK_CODE_OK) {
-    routeFault("Storage round-2 simulation task is invalid");
+    routeFault("store round-2 sim task is invalid");
     return false;
   }
 
@@ -13375,8 +13377,7 @@ bool configureStorageRound2SimulationTask() {
   SerialDebug.print("[STORAGE2 SIM] fixed task=");
   SerialDebug.println(STORAGE2_SIMULATION_TASK_CODE);
   SerialDebug.println(
-      "[STORAGE2 SIM] setup: bottom colors 1/3/4 at rings 1/2/3; "
-      "tray slots 0/1/2 contain colors 3/1/4");
+      "[STORAGE2 SIM] setup: bottom colors 1/3/4 at rings 1/2/3;tray slots 0/1/2 contain colors 3/1/4");
   return true;
 }
 
@@ -13410,7 +13411,7 @@ void beginRoute() {
   if (!imuIsFresh()) {
     if (!imuWaitStatusDisplayed) {
       hmiSetRunStatus("IMUWAIT");
-      SerialDebug.println("Waiting for a valid JY901 angle frame");
+      SerialDebug.println("Waiting for valid JY901 ang frame");
       imuWaitStatusDisplayed = true;
     }
     return;
@@ -13420,9 +13421,7 @@ void beginRoute() {
     startRequested = false;
     hmiSetRunStatus("ARMZERO");
     SerialDebug.println(
-        "Start refused: M6/M7 safe working zero is invalid; "
-        "power-cycle with M6 at retract stop and M7 at "
-        "physical highest point");
+        "Start refused: M6/M7 zero invalid;power-cycle:M6 retract stop,M7 top");
     return;
   }
 
@@ -13430,7 +13429,7 @@ void beginRoute() {
     startRequested = false;
     hmiSetRunStatus("SERVOERR");
     SerialDebug.println(
-        "Start refused: gripper or storage servo offline");
+        "Start refused: grip or store servo offline");
     return;
   }
 
@@ -13553,12 +13552,10 @@ void beginRoute() {
               : "RAW2");
 #if GONGCHUANG_RAW_PICKUP_LOGIC_MODE == 1
       SerialDebug.println(
-          "[RAW SIM] local RAW action started; route disabled; "
-          "only production A/B search may move the chassis");
+          "[RAW SIM] local RAW action started;route disabled;only production A/B search may move chassis");
 #else
       SerialDebug.println(
-          "[RAW SIM] local legacy fixed-A pickup started; "
-          "route disabled; chassis motion blocked");
+          "[RAW SIM] local legacy fixed-pickup started;route disabled;chassis motion blocked");
 #endif
       beginWorkAction(
           WORK_ACTION_RAW,
@@ -13572,9 +13569,7 @@ void beginRoute() {
       storageRound2SimulationPhase =
           STORAGE2_SIMULATION_WAIT_GRIPPER_OPEN;
       SerialDebug.println(
-          "Storage round-2 local simulation started: wheels locked; "
-          "open gripper, prepare QR-selected first color pose, then run "
-          "three targeted-color stack placements");
+          "store round-2 local sim started: wheels locked;open grip,prepare QR-selected first color pose,then run three targeted-color stack placements");
       return;
     }
     if (STORAGE_ROUND1_SIMULATION_MODE) {
@@ -13588,13 +13583,11 @@ void beginRoute() {
       storageRound1SimulationPhase =
           STORAGE1_SIMULATION_WAIT_PREPARATION;
       SerialDebug.println(
-          "[STORAGE1 SIM] wheels locked; preparation started");
+          "[STORAGE1 SIM] wheels locked;prep started");
       return;
     }
     SerialDebug.println(
-        "Rough-processing calibration started: "
-        "wheels locked; scan rings 1/3, derive ring 2, "
-        "QR place/pick ring order 1/3/2");
+        "Rough-processing cal started: wheels locked;scan rings 1/3,derive ring 2,QR place/pick ring order 1/3/2");
     beginWorkAction(WORK_ACTION_PROCESS, 1U);
     return;
   }
@@ -13628,7 +13621,7 @@ void beginRoute() {
       CHASSIS_STARTUP_HOLD_MS;
   if (chassisStartupHoldActive) {
     hmiSetRunStatus("STARTWAIT");
-    SerialDebug.println("[START HOLD] complete minimum 500ms; QR reception active");
+    SerialDebug.println("[START HOLD] done min 500ms;QR reception active");
   }
 
   SerialDebug.println(
@@ -13668,7 +13661,7 @@ void serviceStorageRound2Simulation() {
               M7_STANDARD_HEIGHT_MM) >
               ARM_AXIS_POSITION_TOLERANCE_MM) {
         routeFault(
-            "Storage round-2 simulation requires M5 stopped and M6/M7 zero");
+            "store round-2 sim requires M5 stopped and M6/M7 zero");
         return;
       }
       beginStorageTravelPreparation(2U);
@@ -13678,7 +13671,7 @@ void serviceStorageRound2Simulation() {
       storageRound2SimulationPhase =
           STORAGE2_SIMULATION_WAIT_TRAVEL_PREPARATION;
       SerialDebug.println(
-          "[STORAGE2 SIM] M5 hold; M7/M6 preparation started");
+          "[STORAGE2 SIM] M5 hold;M7/M6 prep started");
       return;
 
     case STORAGE2_SIMULATION_WAIT_TRAVEL_PREPARATION:
@@ -13692,7 +13685,7 @@ void serviceStorageRound2Simulation() {
       storageRound2SimulationPhase =
           STORAGE2_SIMULATION_RUN_ACTION;
       SerialDebug.println(
-          "[STORAGE2 SIM] exact arrival pose ready; start local stack action");
+          "[STORAGE2 SIM] exact arrival pose ready;start local stack action");
       beginWorkAction(WORK_ACTION_STORAGE, 2U);
       return;
 
@@ -13706,7 +13699,7 @@ void serviceStorageRound2Simulation() {
           activeWorkAction != WORK_ACTION_NONE ||
           workActionPhase != WORK_PHASE_IDLE) {
         routeFault(
-            "Storage round-2 simulation completion state is invalid");
+            "store round-2 sim done state is invalid");
         return;
       }
       stopMaixRequest();
@@ -13721,7 +13714,7 @@ void serviceStorageRound2Simulation() {
       hmiSetRunStatus("S2DONE");
       hmiSetTaskCounts();
       SerialDebug.println(
-          "Storage round-2 local simulation complete: three targeted-color stack placements finished; chassis never released");
+          "store round-2 local sim done: three targeted-color stack placements finished;chassis never released");
       return;
   }
 }
@@ -13742,7 +13735,7 @@ void serviceStorageRound1Simulation() {
     storageRound1SimulationPhase = STORAGE1_SIMULATION_RUN_ACTION;
     hmiSetRunStatus("STACK1");
     SerialDebug.println(
-        "[STORAGE1 SIM] arrival pose ready; start three placements");
+        "[STORAGE1 SIM] arrival pose ready;start three placements");
     beginWorkAction(WORK_ACTION_STORAGE, 1U);
     return;
   }
@@ -13756,7 +13749,7 @@ void serviceStorageRound1Simulation() {
       workItemIndex != 3U ||
       activeWorkAction != WORK_ACTION_NONE ||
       workActionPhase != WORK_PHASE_IDLE) {
-    routeFault("Storage round-1 simulation completion state is invalid");
+    routeFault("store round-1 sim done state is invalid");
     return;
   }
   stopMaixRequest();
@@ -13770,7 +13763,7 @@ void serviceStorageRound1Simulation() {
   hmiSetRunStatus("S1DONE");
   hmiSetTaskCounts();
   SerialDebug.println(
-      "[STORAGE1 SIM] complete: three placements; chassis never released");
+      "[STORAGE1 SIM] done: three placements;chassis never released");
 }
 
 void serviceRawWorkstationSimulation() {
@@ -13806,7 +13799,7 @@ void serviceRawWorkstationSimulation() {
       activeWorkAction != WORK_ACTION_NONE ||
       workActionPhase != WORK_PHASE_IDLE ||
       !searchOffsetReturned) {
-    routeFault("RAW workstation simulation completion state is invalid");
+    routeFault("RAW station sim done state is invalid");
     return;
   }
 
@@ -13823,12 +13816,10 @@ void serviceRawWorkstationSimulation() {
   hmiSetTaskCounts();
 #if GONGCHUANG_RAW_PICKUP_LOGIC_MODE == 1
   SerialDebug.println(
-      "[RAW SIM] complete: three materials stored; A/B 40 mm "
-      "search offset returned; route never started");
+      "[RAW SIM] done: three materials stored;A/B 40 mm search offset returned;route never started");
 #else
   SerialDebug.println(
-      "[RAW SIM] complete: three materials stored by legacy fixed-A "
-      "pickup; chassis never moved; route never started");
+      "[RAW SIM] done: three materials stored by legacy fixed-pickup;chassis never moved;route never started");
 #endif
 }
 
@@ -13878,7 +13869,7 @@ void synchronizeTaskCodeToRouteChassis() {
       sizeof(route_chassis::qrData) - 1U] = '\0';
   route_chassis::scanFlag = true;
   SerialDebug.println(
-      "[CHASSIS BRIDGE] decoded task code shared with chassis QR state");
+      "[CHASSIS BRIDGE] QR synced");
 }
 
 IntegratedWorkPause workPauseAfterRouteStep(
@@ -13962,7 +13953,7 @@ void beginIntegratedWorkPause(IntegratedWorkPause pause) {
   activeCompetitionRound = roundNumber;
   markMissionProgress();
   SerialDebug.print(
-      "[CHASSIS BRIDGE] pause route for arm/vision kind/round=");
+      "[CHASSIS BRIDGE] pause kind/round=");
   SerialDebug.print(static_cast<unsigned int>(kind));
   SerialDebug.print("/");
   SerialDebug.println(roundNumber);
@@ -14015,7 +14006,7 @@ void finishIntegratedWorkPause() {
                  ? 2U
                  : 0U);
   SerialDebug.print(
-      "[CHASSIS BRIDGE] arm/vision complete, resume route after ms=");
+      "[CHASSIS BRIDGE] resume;work-ms=");
   SerialDebug.println(millis() - integratedWorkPauseStartMs);
   integratedWorkPause = INTEGRATED_WORK_NONE;
   integratedWorkPauseStartMs = 0UL;
@@ -14042,7 +14033,7 @@ bool serviceChassisStartupHold() {
   chassisStartupHoldActive = false;
   hmiSetRunStatus("RUN");
   markMissionProgress();
-  SerialDebug.println("[START RELEASE] minimum 500ms reached; start first route command");
+  SerialDebug.println("[START RELEASE] >=500ms;first cmd");
   return false;
 }
 
@@ -14274,18 +14265,18 @@ void initializeManipulationHardware() {
   storageServo.init();
   manipulationServosOnline =
       gripperServo.isOnline && storageServo.isOnline;
-  SerialDebug.print("Servo online gripper/storage: ");
+  SerialDebug.print("Servo online grip/store: ");
   SerialDebug.print(gripperServo.isOnline ? 1 : 0);
   SerialDebug.print("/");
   SerialDebug.println(storageServo.isOnline ? 1 : 0);
   commandGripperClose();
   commandStorageServoParkingPosition();
 
-  SerialDebug.print("M6 microsteps/pulses-per-mm=");
+  SerialDebug.print("M6 usteps/pulses-per-mm=");
   SerialDebug.print(M6_MICROSTEPS, 0);
   SerialDebug.print("/");
   SerialDebug.println(M6_PULSES_PER_MM, 4);
-  SerialDebug.print("M7 microsteps/pulses-per-mm=");
+  SerialDebug.print("M7 usteps/pulses-per-mm=");
   SerialDebug.print(M7_MICROSTEPS, 0);
   SerialDebug.print("/");
   SerialDebug.println(M7_PULSES_PER_MM, 4);
@@ -14314,16 +14305,13 @@ void setup() {
   }
 #if GONGCHUANG_STORAGE2_VERBOSE_SCAN_DEBUG
   SerialDebug.println(
-      "[S2DBG ENABLED] detailed STORAGE2 scan telemetry; baud=115200");
+      "[S2DBG ENABLED] detailed STORAGE2 scan telemetry;baud=115200");
   SerialDebug.println(
-      "[S2DBG PROTOCOL] STM32 PE8(TX)->Maix A17(RX), "
-      "Maix A16(TX)->STM32 PE7(RX), common GND, UART 115200 8N1, V2 CRC8");
+      "[S2DBG PROTOCOL] STM32 PE8(TX)->Maix A17(RX),Maix A16(TX)->STM32 PE7(RX),common GND,UART 115200 8N1,V2 CRC8");
   SerialDebug.println(
-      "[S2DBG FIXTURE] scan order r3=4(GREEN), r2=3(BLUE), r1=1(RED); "
-      "bottom rings must be r1/r2/r3=RED/BLUE/GREEN for fixed task "
-      "134+123+314+231");
+      "[S2DBG FIXTURE] scan order r3=4(GREEN),r2=3(BLUE),r1=1(RED);bottom rings must be r1/r2/r3=RED/BLUE/GREEN for fixed task 134+123+314+231");
   SerialDebug.print(
-      "[S2DBG CONFIG] dwell-ms/M5-r1/M5-r3/M6-outer-mm/roi-px/px-mm-scale=");
+      "[S2DBG CONFIG] dwell-ms/M5-r1/M5-r3/M6-outer-mm/roi-px/px-mm-k=");
   SerialDebug.print(arm_config::STORAGE2_SCAN_DWELL_MS);
   SerialDebug.print('/');
   SerialDebug.print(STORAGE2_SCAN_RING1_M5_CORRECTION_DEGREES, 2);
@@ -14348,9 +14336,7 @@ void setup() {
   initializeMotorOutputs();
 
   SerialDebug.println(
-      "[ZERO SAFETY] Before this power-up M6 must be fully "
-      "retracted and M7 at its physical highest point. A previous "
-      "FAULT does not retract either axis.");
+      "[ZERO SAFETY] Boot:M6 retracted,M7 top;FAULT:no retract");
   initializeHmi();
   const bool armWorkingZerosReady =
       armLinearBootReady &&
@@ -14373,56 +14359,43 @@ void setup() {
 
   if (!armWorkingZerosReady) {
     SerialDebug.println(
-        "Controller NOT READY: M6/M7 failed to establish "
-        "their 10 mm safe working zeros");
+        "NOT READY: M6/M7 safe 10 mm zeros failed");
     SerialDebug.println(
-        "SAFETY: power off and manually restore both mechanical "
-        "start endpoints before another startup");
+        "SAFETY: power off;reset both mech endpoints;restart");
   } else if (RAW_WORKSTATION_SIMULATION_MODE) {
 #if GONGCHUANG_RAW_PICKUP_LOGIC_MODE == 1
     SerialDebug.println(
-        "[RAW SIM] ready: place the chassis at the RAW station in the "
-        "normal A pose with 40 mm clear travel on both sides");
+        "[RAW SIM] ready: place chassis at RAW station in normal pose with 40 mm clear travel on both sides");
 #else
     SerialDebug.println(
-        "[RAW SIM] ready: legacy fixed-A pickup is selected; "
-        "place the chassis at the original RAW station pose");
+        "[RAW SIM] ready: legacy fixed-pickup is selected;place chassis at orig RAW station pose");
 #endif
-    SerialDebug.print("[RAW SIM] tray empty; task/selected round=");
+    SerialDebug.print("[RAW SIM] tray empty;task/selected round=");
     SerialDebug.print(GONGCHUANG_DEBUG_RAW_TASK_CODE);
     SerialDebug.print('/');
     SerialDebug.println(GONGCHUANG_DEBUG_RAW_ROUND);
     SerialDebug.println(
-        "[RAW SIM] PB9 starts only the production RAW action; the route "
-        "stays disabled; long-press stops");
+        "[RAW SIM] PB9 starts only production RAW action;route stays disabled;long-press stops");
   } else if (ROUGH_PROCESSING_CALIBRATION_MODE) {
     SerialDebug.println(
-        "Rough-processing calibration ready: place the chassis "
-        "at D, face the three rings, and load tray slots 0/1/2");
+        "Rough-processing cal ready: place chassis at D,face three rings,and load tray slots 0/1/2");
     SerialDebug.println(
-        "Press PB9 once to detect rings 1/3, derive ring 2, "
-        "place three items and pick all three back; "
-        "long-press to stop");
+        "Press PB9 once to detect rings 1/3,derive ring 2,place three items and pick all three back;long-press to stop");
   } else if (STORAGE_ROUND1_SIMULATION_MODE) {
     SerialDebug.println(
-        "[STORAGE1 SIM] place chassis at first storage station; "
-        "tray slots 0/1/2 must contain colors 1/2/3");
+        "[STORAGE1 SIM] place chassis at first store station;tray slots 0/1/2 must contain colors 1/2/3");
     SerialDebug.println(
-        "[STORAGE1 SIM] PB9 starts ring 1/3/2 placements; "
-        "wheels stay locked; long-press to stop");
+        "[STORAGE1 SIM] PB9 starts ring 1/3/2 placements;wheels stay locked;long-press to stop");
   } else if (STORAGE_ROUND2_SIMULATION_MODE) {
     SerialDebug.println(
-        "Storage round-2 local simulation ready: place chassis at the "
-        "second storage station with wheels aligned and stationary");
+        "store round-2 local sim ready: place chassis at second store station with wheels aligned and stationary");
     SerialDebug.println(
-        "Physical setup for 134+123+314+231: bottom colors 1/3/4 on "
-        "rings 1/2/3; tray slots 0/1/2 hold colors 3/1/4; press PB9 once");
+        "phys setup for 134+123+314+231: bottom colors 1/3/4 on rings 1/2/3;tray slots 0/1/2 hold colors 3/1/4;press PB9 once");
   } else {
     SerialDebug.println(
         "GongChuang_route chassis + GC arm/vision ready");
     SerialDebug.println(
-        "HMI 1/2 selects Zone1/Zone2. PB9 click starts the current zone; "
-        "during running, hold 2 s to stop");
+      "HMI1/2=zone1/2;PB9 click=start selected zone;hold 2s=stop");
   }
 }
 

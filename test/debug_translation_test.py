@@ -39,7 +39,7 @@ assert (
     in debug
 )
 assert (
-    "#define GONGCHUANG_DEBUG_TRANSLATION_LONG_LATERAL_FORWARD_CORRECTION_MM 70.0f"
+    "#define GONGCHUANG_DEBUG_TRANSLATION_LONG_LATERAL_FORWARD_CORRECTION_MM 80.0f"
     in debug
 )
 assert (
@@ -64,7 +64,7 @@ assert "#define GONGCHUANG_STEP06_FORWARD_CORRECTION_ENABLED 1" in main_source
 assert "#define GONGCHUANG_STEP06_FORWARD_CORRECTION_MM 10.0f" in main_source
 assert "STEP06_REAR_CORRECTION" not in main_source
 assert "#define GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_ENABLED 1" in main_source
-assert "#define GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_MM 70.0f" in main_source
+assert "#define GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_MM 80.0f" in main_source
 assert (
     "#define GONGCHUANG_STEP07_SECOND_HALF_FORWARD_CORRECTION_ENABLED 1"
     in main_source
@@ -331,7 +331,9 @@ void stopAllMotorsImmediately(){}
  void startZone1Step04Remainder(){}
  void requestZone1FreshQrSweep(){}
  void startZone1QrReturnRight(){}
- void startZone1ReturnFinalLongitudinal(){}
+ void startZone1ReturnFinalLongitudinal(){
+  zone1ReorderedRoutePhase=ZONE1_REORDERED_RETURN_FINAL_LONGITUDINAL;
+ }
 '''
 harness += types + "\n" + command + "\n" + "\n".join(constant_lines) + "\n" + table
 harness += r'''
@@ -342,6 +344,7 @@ for name in ("activeTranslationCommandIsStep01", "activeTranslationCommandIsLong
              "activeTranslationInMotionHeadingCorrectionEnabled"):
     harness += function(route, f"bool {name}()", name)
 harness += function(route, "float activeTranslationBaseRateLimitScale()", "activeTranslationBaseRateLimitScale")
+harness += function(route, "bool zone1ReorderedReturnEnabled()", "zone1ReorderedReturnEnabled")
 harness += function(route, "void finishProgram(bool stoppedByConfiguredStep, uint8_t completedStep)", "finishProgram")
 harness += function(route, "void advanceRoute()", "advanceRoute")
 for name in ("onStartButtonClick", "onStartButtonLongPress"):
@@ -395,6 +398,7 @@ void reset(uint8_t step){
  rc::commandStarted=false;rc::fresh=false;rc::enabled=false;rc::completeNext=false;
  rc::routeIndex=0;rc::starts=0;rc::stops=0;rc::qrServices=0;rc::scanFlag=false;
  rc::startedSteps.clear();rc::completedSteps.clear();
+ rc::zone1ReorderedRoutePhase=rc::ZONE1_REORDERED_INACTIVE;
  rc::step7RawAreaHeadingReferenceValid=false;rc::step15HeadingMatchAppliedAtSecondRawArea=false;
  setup();
 }
@@ -426,6 +430,13 @@ int main(){
   if(command.specificationStep==4){rc::scanFlag=true;}
   rc::completeNext=true;nowMs=700;loop();
   assert(rc::qrServices==1);
+  if(command.specificationStep==20){
+   // Step20 includes the production final150 mm; do not report it complete early.
+   assert(rc::programState==rc::PROGRAM_RUNNING&&rc::enabled);
+   assert(rc::completedSteps.empty());
+   assert(rc::zone1ReorderedRoutePhase==rc::ZONE1_REORDERED_RETURN_FINAL_LONGITUDINAL);
+   rc::completeNext=true;nowMs=800;loop();
+  }
   assert(rc::programState==rc::PROGRAM_FINISHED&&!rc::enabled);
   assert(rc::completedSteps.size()==1&&rc::completedSteps[0]==command.specificationStep);
   rc::onStartButtonClick();
@@ -456,4 +467,4 @@ with tempfile.TemporaryDirectory(prefix="gc6_translation_") as temp:
     source.write_text(harness, encoding="utf-8")
     subprocess.run([compiler, "-std=c++17", "-O0", str(source), "-o", str(executable)], check=True)
     subprocess.run([str(executable)], check=True)
-print("PASS: step4 QR, step6 forward10 with no rear correction, step7/15 +70mm, continuous second-half step7 +15mm/step15 +40mm, one-command routing and startup guards")
+print("PASS: step4 QR, step6 forward10 with no rear correction, step7/15 +80mm, continuous second-half step7 +15mm/step15 +40mm, one-command routing and startup guards")

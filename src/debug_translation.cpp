@@ -7,8 +7,10 @@
 // 选择第4段时复用正式扫码停车：未扫码则在原终点前190 mm停稳等待，扫码
 // 后继续到原终点；提前扫到则不停车。扫码串口和任务码校验也复用正式实现。
 // 第4段叠加车头+20 mm；第6段只叠加车头+10 mm；
-// 选择第7/15段时叠加向车头+70 mm（含本轮新增10 mm）。
+// 选择第7/15段时叠加向车头+80 mm（原70 mm再加10 mm朝扫码区）。
 // 越过50%后只对剩余运动追加车头修正：第7段+15 mm，第15段+40 mm。
+// 启停区1返程：第21段纵移908.4 mm；第20段横移1944.38 mm并合成车头+170 mm，
+// 再补回纵向150 mm才算该段完成，复用正式返程的完成条件。
 // 这些都是实测修正量，不参加横移理论量的motionScale换算。第7段仍是
 // 一次连续运动，不停车、不重启；第4段扫码停车点沿完整二维向量计算。
 #ifndef GONGCHUANG_DEBUG_TRANSLATION_STEP
@@ -19,7 +21,7 @@
 #define GONGCHUANG_DEBUG_TRANSLATION_STEP06_FORWARD_CORRECTION_ENABLED 1
 #define GONGCHUANG_DEBUG_TRANSLATION_STEP06_FORWARD_CORRECTION_MM 10.0f
 #define GONGCHUANG_DEBUG_TRANSLATION_LONG_LATERAL_FORWARD_CORRECTION_ENABLED 1
-#define GONGCHUANG_DEBUG_TRANSLATION_LONG_LATERAL_FORWARD_CORRECTION_MM 70.0f
+#define GONGCHUANG_DEBUG_TRANSLATION_LONG_LATERAL_FORWARD_CORRECTION_MM 80.0f
 #define GONGCHUANG_DEBUG_TRANSLATION_STEP07_SECOND_HALF_FORWARD_CORRECTION_ENABLED 1
 #define GONGCHUANG_DEBUG_TRANSLATION_STEP07_SECOND_HALF_FORWARD_CORRECTION_MM 15.0f
 #define GONGCHUANG_DEBUG_TRANSLATION_STEP15_SECOND_HALF_FORWARD_CORRECTION_ENABLED 1
@@ -27,6 +29,7 @@
 
 #include <AccelStepper.h>
 #include <Arduino.h>
+#include <Stm32SerialCompat.h>
 #include <MecanumKinematics.h>
 #include <OneButton.h>
 #include <math.h>
@@ -45,8 +48,8 @@ static_assert(
     GONGCHUANG_DEBUG_TRANSLATION_STEP06_FORWARD_CORRECTION_MM == 10.0f,
     "Step-6 measured correction must remain +10 mm user-forward");
 static_assert(
-    GONGCHUANG_DEBUG_TRANSLATION_LONG_LATERAL_FORWARD_CORRECTION_MM == 70.0f,
-    "Long-lateral measured correction must remain +70 mm user-forward");
+    GONGCHUANG_DEBUG_TRANSLATION_LONG_LATERAL_FORWARD_CORRECTION_MM == 80.0f,
+    "Long-lateral measured correction must remain +80 mm user-forward");
 static_assert(
     GONGCHUANG_DEBUG_TRANSLATION_STEP07_SECOND_HALF_FORWARD_CORRECTION_MM == 15.0f,
     "Step-7 second-half measured correction must remain +15 mm user-forward");

@@ -5,6 +5,17 @@
 namespace gongchuang {
 namespace arm_transfer {
 
+namespace {
+
+ArmPose containerPoseAtHeight(float heightMm) {
+  return ArmPose(
+      config::arm_transfer::CONTAINER_ANGLE_DEGREES,
+      config::arm_transfer::CONTAINER_EXTENSION_MM,
+      heightMm);
+}
+
+}
+
 MotionProfile selectMotionProfile(
     bool rawFastProfile,
     bool mapSource,
@@ -29,16 +40,11 @@ ArmPose containerPickPose(uint8_t placementSequenceIndex) {
       (placementSequenceIndex == 1U
            ? config::arm_transfer::SECOND_PICK_EXTRA_LOWER_MM
            : 0.0f);
-  return ArmPose(
-      config::arm_transfer::CONTAINER_PICK_ANGLE_DEGREES,
-      config::arm_transfer::CONTAINER_PICK_EXTENSION_MM,
-      -lowerMm);
+  return containerPoseAtHeight(-lowerMm);
 }
 
 ArmPose containerPlacePose() {
-  return ArmPose(
-      config::arm_transfer::CONTAINER_PLACE_ANGLE_DEGREES,
-      0.0f,
+  return containerPoseAtHeight(
       -(
           config::arm_transfer::CONTAINER_PLACE_PHYSICAL_LOWER_MM -
           config::arm_hardware::M7_STARTUP_WORKING_ZERO_OFFSET_MM));
@@ -46,8 +52,6 @@ ArmPose containerPlacePose() {
 
 ArmPose containerReturnPlacePose() {
   ArmPose pose = containerPlacePose();
-  pose.standardFrameAngleDegrees =
-      config::arm_transfer::CONTAINER_RETURN_PLACE_ANGLE_DEGREES;
   pose.heightMm -=
       config::arm_transfer::CONTAINER_RETURN_PLACE_EXTRA_LOWER_MM;
   return pose;

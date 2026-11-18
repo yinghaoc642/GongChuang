@@ -13,7 +13,7 @@ MAIN_PATH = ROOT / "src" / "main.cpp"
 ROUTE_PATH = ROOT / "src" / "route_chassis_main.inc"
 PLATFORMIO_PATH = ROOT / "platformio.ini"
 EXPECTED_ROUTE_SHA256 = (
-    "6f15cfc5556d600af8bc95a13fda72eebf4dddbd8e796a58807174eee7f58299"
+    "a2f1b90956cca82b5f778c33d5764cf75a66abea3f2cd01d7fb3674997790316"
 )
 
 
@@ -273,7 +273,7 @@ def verify_route_copy(route_source: str) -> None:
         "stabilityElapsedMs<TURN_POST_STOP_STABILITY_TIME_MS||"
         "integratedTurnStabilityFrameCount<"
         "TURN_POST_STOP_MINIMUM_NEW_FRAMES",
-        "GONGCHUANG_ZONE1_ROUTE_MODE1",
+        "GONGCHUANG_ZONE1_ROUTE_MODE0",
         "DEFAULT_START_ZONE_SELECTION=1U;",
         "ZONE1_INITIAL_FORWARD_BEFORE_STEP04_MM=150.0f;",
         "ZONE1_STEP04_BEFORE_TURN_RIGHT_MM=200.0f;",
