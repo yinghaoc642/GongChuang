@@ -1,0 +1,5 @@
+path: "/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/vision/training/ring2/dataset_yolo_unique"
+train: images/train
+val: images/val
+names:
+  0: 2r

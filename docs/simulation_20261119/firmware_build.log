@@ -1,0 +1,2459 @@
+Processing genericSTM32H750VB (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Checking size .pio/build/genericSTM32H750VB/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.6% (used 13444 bytes from 524288 bytes)
+Flash: [==========]  96.2% (used 126028 bytes from 131072 bytes)
+========================= [SUCCESS] Took 2.84 seconds =========================
+
+Processing debug_qr_continuous (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- CompetitionCore @ 1.0.0
+|-- RobotConfig @ 1.0.0
+Building in release mode
+Compiling .pio/build/debug_qr_continuous/FrameworkArduinoVariant/PeripheralPins.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduinoVariant/PeripheralPins_DevEBoxH7xx.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduinoVariant/PeripheralPins_WeActMiniH7xx.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduinoVariant/generic_clock.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduinoVariant/variant_DevEBoxH7xx.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduinoVariant/variant_WeActMiniH7xx.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduinoVariant/variant_generic.cpp.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_dlyb_core.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_adc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_adc_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_aes.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_can.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_ccb.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_cec.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_comp.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_comp_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_cordic.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_cortex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_crc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_crc_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_crs.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_cryp.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_cryp_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dac.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dac_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dbgmcu.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dcache.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dcmi.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dcmi_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dfsdm.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dfsdm_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dma.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dma2d.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dma_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dsi.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_dts.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_eth.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_eth_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_exti.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_fdcan.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_firewall.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_flash.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_flash_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_flash_itf.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_flash_ramfunc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_fmac.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_fmpi2c.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_fmpi2c_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_fmpsmbus.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_fmpsmbus_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_gfxmmu.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_gfxtim.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_gpio.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_gpio_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_gpu2d.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_gtzc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_hash.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_hash_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_hcd.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_hrtim.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_hsem.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_hsp.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_i2c.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_i2c_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_i2s.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_i2s_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_i3c.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_icache.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_ipcc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_irda.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_iwdg.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_jpeg.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_lcd.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_lpawur.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_lptim.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_ltdc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_ltdc_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_mdf.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_mdios.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_mdma.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_mmc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_mmc_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_mrsubg.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_mrsubg_timer.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_nand.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_nor.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_opamp.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_opamp_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_ospi.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_otfdec.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_pccard.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_pcd.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_pcd_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_pka.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_play.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_pssi.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_pwr.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_pwr_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_q.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_qspi.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_radio.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_radio_timer.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_ramcfg.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_ramecc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_rcc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_rcc_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_rng.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_rng_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_rtc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_rtc_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_sai.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_sai_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_sbs.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_sd.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_sd_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_sdadc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_sdio.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_sdram.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_smartcard.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_smartcard_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_smbus.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_smbus_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_spdifrx.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_spi.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_spi_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_sram.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_subghz.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_swpmi.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_tamp.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_tim.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_tim_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_tsc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_uart.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_uart_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_usart.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_usart_ex.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_wwdg.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_hal_xspi.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_usb_drd_core.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_util_i3c.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_utils_fdcan.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_utils_i2c.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HAL/stm32yyxx_utils_i3c.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/HardwareTimer.cpp.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_adc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_bdma.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_comp.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_cordic.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_crc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_crs.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_dac.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_delayblock.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_dlyb.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_dma.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_dma2d.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_exti.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_fmac.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_fmc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_fmpi2c.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_fsmc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_gpio.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_hrtim.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_i2c.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_i3c.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_icache.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_lcsc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_lpgpio.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_lptim.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_lpuart.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_mdma.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_opamp.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_pka.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_play.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_pwr.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_rcc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_rng.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_rtc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_sdmmc.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_spi.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_swpmi.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_system.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_tim.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_ucpd.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_usart.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_usb.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/LL/stm32yyxx_ll_utils.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/new.cpp.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/PortNames.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/analog.cpp.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/bootloader.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/clock.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/core_callback.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/dwt.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/hw_config.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/interrupt.cpp.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/otp.c.o
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/libraries/SrcWrapper/src/stm32/hw_config.c:30:9: note: '#pragma message: 
+Configure the system power supply according to the
+definition to be used at compilation preprocessing level.
+The application shall set one of the following configuration option:
+                            - USE_PWR_LDO_SUPPLY
+                            - USE_PWR_DIRECT_SMPS_SUPPLY
+                            - USE_PWR_EXTERNAL_SOURCE_SUPPLY
+                            - USE_PWR_SMPS_1V8_SUPPLIES_LDO
+                            - USE_PWR_SMPS_2V5_SUPPLIES_LDO
+                            - USE_PWR_SMPS_1V8_SUPPLIES_EXT_AND_LDO
+                            - USE_PWR_SMPS_2V5_SUPPLIES_EXT_AND_LDO
+                            - USE_PWR_SMPS_1V8_SUPPLIES_EXT
+                            - USE_PWR_SMPS_2V5_SUPPLIES_EXT
+   '
+   30 | #pragma message "\n\
+      |         ^~~~~~~
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/pinmap.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/stm32_def.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/system_stm32yyxx.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/timer.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/stm32/uart.c.o
+Compiling .pio/build/debug_qr_continuous/SrcWrapper/src/syscalls.c.o
+Compiling .pio/build/debug_qr_continuous/src/debug_qr_continuous.cpp.o
+Compiling .pio/build/debug_qr_continuous/lib098/AccelStepper/AccelStepper.cpp.o
+Compiling .pio/build/debug_qr_continuous/lib098/AccelStepper/MultiStepper.cpp.o
+Compiling .pio/build/debug_qr_continuous/lib371/OneButton/OneButton.cpp.o
+Compiling .pio/build/debug_qr_continuous/lib371/OneButton/OneButtonTiny.cpp.o
+Compiling .pio/build/debug_qr_continuous/lib246/CompetitionCore/CompetitionCore.cpp.o
+Archiving .pio/build/debug_qr_continuous/lib246/libCompetitionCore.a
+Indexing .pio/build/debug_qr_continuous/lib246/libCompetitionCore.a
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/Serial.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/Tone.cpp.o
+In file included from .pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.cpp:6:
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.h:275:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.cpp:41:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   41 | boolean AccelStepper::runSpeed()
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.cpp:185:27: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  185 | boolean AccelStepper::run()
+      |                           ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.cpp:646:42: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  646 | boolean AccelStepper::runSpeedToPosition()
+      |                                          ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+In file included from .pio/libdeps/debug_qr_continuous/AccelStepper/src/MultiStepper.cpp:6:
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/MultiStepper.h:43:45: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   43 |     boolean addStepper(AccelStepper& stepper);
+      |                                             ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_qr_continuous/AccelStepper/src/MultiStepper.h:8:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/MultiStepper.h:57:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   57 |     boolean run();
+      |                 ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+In file included from .pio/libdeps/debug_qr_continuous/AccelStepper/src/MultiStepper.cpp:7:
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/MultiStepper.cpp:14:55: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   14 | boolean MultiStepper::addStepper(AccelStepper& stepper)
+      |                                                       ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/MultiStepper.cpp:52:27: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   52 | boolean MultiStepper::run()
+      |                           ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/MultiStepper.cpp: In member function 'boolean MultiStepper::run()':
+.pio/libdeps/debug_qr_continuous/AccelStepper/src/MultiStepper.cpp:55:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   55 |     boolean ret = false;
+      |             ^~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/WInterrupts.cpp.o
+Archiving .pio/build/debug_qr_continuous/lib098/libAccelStepper.a
+Indexing .pio/build/debug_qr_continuous/lib098/libAccelStepper.a
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/WMath.cpp.o
+Archiving .pio/build/debug_qr_continuous/lib371/libOneButton.a
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/WSerial.cpp.o
+Indexing .pio/build/debug_qr_continuous/lib371/libOneButton.a
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/abi.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/api/CanMsg.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/api/CanMsgRingbuffer.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/api/Common.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/api/IPAddress.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/api/PluggableUSB.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/api/Print.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/api/Stream.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/api/String.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/avr/dtostrf.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/board.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/core_debug.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/hooks.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/itoa.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/main.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/pins_arduino.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/stm32/startup_stm32yyxx.S.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/stm32/startup_stm32yyxx.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/wiring_analog.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/wiring_digital.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/wiring_pulse.cpp.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/wiring_shift.c.o
+Compiling .pio/build/debug_qr_continuous/FrameworkArduino/wiring_time.c.o
+Archiving .pio/build/debug_qr_continuous/libFrameworkArduino.a
+Indexing .pio/build/debug_qr_continuous/libFrameworkArduino.a
+Linking .pio/build/debug_qr_continuous/firmware.elf
+Checking size .pio/build/debug_qr_continuous/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   0.7% (used 3752 bytes from 524288 bytes)
+Flash: [==        ]  18.3% (used 23940 bytes from 131072 bytes)
+Building .pio/build/debug_qr_continuous/firmware.bin
+========================= [SUCCESS] Took 15.96 seconds =========================
+
+Processing debug_workstation (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Checking size .pio/build/debug_workstation/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.3% (used 11800 bytes from 524288 bytes)
+Flash: [========= ]  85.6% (used 112248 bytes from 131072 bytes)
+========================= [SUCCESS] Took 2.38 seconds =========================
+
+Processing debug_raw_workstation (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Compiling .pio/build/debug_raw_workstation/FrameworkArduinoVariant/PeripheralPins.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduinoVariant/PeripheralPins_DevEBoxH7xx.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduinoVariant/PeripheralPins_WeActMiniH7xx.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduinoVariant/generic_clock.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduinoVariant/variant_DevEBoxH7xx.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduinoVariant/variant_WeActMiniH7xx.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduinoVariant/variant_generic.cpp.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_dlyb_core.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_adc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_adc_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_aes.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_can.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_ccb.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_cec.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_comp.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_comp_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_cordic.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_cortex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_crc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_crc_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_crs.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_cryp.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_cryp_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dac.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dac_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dbgmcu.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dcache.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dcmi.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dcmi_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dfsdm.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dfsdm_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dma.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dma2d.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dma_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dsi.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_dts.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_eth.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_eth_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_exti.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_fdcan.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_firewall.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_flash.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_flash_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_flash_itf.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_flash_ramfunc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_fmac.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_fmpi2c.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_fmpi2c_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_fmpsmbus.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_fmpsmbus_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_gfxmmu.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_gfxtim.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_gpio.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_gpio_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_gpu2d.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_gtzc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_hash.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_hash_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_hcd.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_hrtim.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_hsem.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_hsp.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_i2c.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_i2c_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_i2s.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_i2s_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_i3c.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_icache.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_ipcc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_irda.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_iwdg.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_jpeg.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_lcd.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_lpawur.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_lptim.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_ltdc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_ltdc_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_mdf.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_mdios.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_mdma.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_mmc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_mmc_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_mrsubg.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_mrsubg_timer.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_nand.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_nor.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_opamp.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_opamp_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_ospi.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_otfdec.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_pccard.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_pcd.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_pcd_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_pka.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_play.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_pssi.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_pwr.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_pwr_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_q.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_qspi.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_radio.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_radio_timer.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_ramcfg.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_ramecc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_rcc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_rcc_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_rng.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_rng_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_rtc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_rtc_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_sai.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_sai_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_sbs.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_sd.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_sd_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_sdadc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_sdio.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_sdram.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_smartcard.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_smartcard_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_smbus.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_smbus_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_spdifrx.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_spi.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_spi_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_sram.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_subghz.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_swpmi.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_tamp.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_tim.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_tim_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_tsc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_uart.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_uart_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_usart.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_usart_ex.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_wwdg.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_hal_xspi.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_usb_drd_core.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_util_i3c.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_utils_fdcan.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_utils_i2c.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HAL/stm32yyxx_utils_i3c.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/HardwareTimer.cpp.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_adc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_bdma.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_comp.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_cordic.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_crc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_crs.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_dac.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_delayblock.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_dlyb.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_dma.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_dma2d.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_exti.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_fmac.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_fmc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_fmpi2c.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_fsmc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_gpio.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_hrtim.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_i2c.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_i3c.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_icache.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_lcsc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_lpgpio.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_lptim.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_lpuart.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_mdma.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_opamp.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_pka.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_play.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_pwr.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_rcc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_rng.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_rtc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_sdmmc.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_spi.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_swpmi.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_system.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_tim.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_ucpd.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_usart.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_usb.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/LL/stm32yyxx_ll_utils.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/new.cpp.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/PortNames.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/analog.cpp.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/bootloader.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/clock.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/core_callback.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/dwt.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/hw_config.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/interrupt.cpp.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/otp.c.o
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/libraries/SrcWrapper/src/stm32/hw_config.c:30:9: note: '#pragma message: 
+Configure the system power supply according to the
+definition to be used at compilation preprocessing level.
+The application shall set one of the following configuration option:
+                            - USE_PWR_LDO_SUPPLY
+                            - USE_PWR_DIRECT_SMPS_SUPPLY
+                            - USE_PWR_EXTERNAL_SOURCE_SUPPLY
+                            - USE_PWR_SMPS_1V8_SUPPLIES_LDO
+                            - USE_PWR_SMPS_2V5_SUPPLIES_LDO
+                            - USE_PWR_SMPS_1V8_SUPPLIES_EXT_AND_LDO
+                            - USE_PWR_SMPS_2V5_SUPPLIES_EXT_AND_LDO
+                            - USE_PWR_SMPS_1V8_SUPPLIES_EXT
+                            - USE_PWR_SMPS_2V5_SUPPLIES_EXT
+   '
+   30 | #pragma message "\n\
+      |         ^~~~~~~
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/pinmap.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/stm32_def.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/system_stm32yyxx.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/timer.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/stm32/uart.c.o
+Compiling .pio/build/debug_raw_workstation/SrcWrapper/src/syscalls.c.o
+Compiling .pio/build/debug_raw_workstation/src/debug_raw_workstation.cpp.o
+Compiling .pio/build/debug_raw_workstation/libf4d/AccelStepper/AccelStepper.cpp.o
+Compiling .pio/build/debug_raw_workstation/libf4d/AccelStepper/MultiStepper.cpp.o
+Compiling .pio/build/debug_raw_workstation/lib2af/OneButton/OneButton.cpp.o
+Compiling .pio/build/debug_raw_workstation/lib2af/OneButton/OneButtonTiny.cpp.o
+Compiling .pio/build/debug_raw_workstation/lib985/TTL_STEPPER/TTL_STEPPER.cpp.o
+In file included from src/main.cpp:6,
+                 from src/debug_raw_workstation.cpp:20:
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from lib/RobotConfig/src/Stm32SerialCompat.h:3,
+                 from src/main.cpp:3:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+In file included from .pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.cpp:6:
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:275:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.cpp:41:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   41 | boolean AccelStepper::runSpeed()
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.cpp:185:27: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  185 | boolean AccelStepper::run()
+      |                           ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.cpp:646:42: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  646 | boolean AccelStepper::runSpeedToPosition()
+      |                                          ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+In file included from .pio/libdeps/debug_raw_workstation/AccelStepper/src/MultiStepper.cpp:6:
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/MultiStepper.h:43:45: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   43 |     boolean addStepper(AccelStepper& stepper);
+      |                                             ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_raw_workstation/AccelStepper/src/MultiStepper.h:8:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/MultiStepper.h:57:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   57 |     boolean run();
+      |                 ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+In file included from .pio/libdeps/debug_raw_workstation/AccelStepper/src/MultiStepper.cpp:7:
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/MultiStepper.cpp:14:55: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   14 | boolean MultiStepper::addStepper(AccelStepper& stepper)
+      |                                                       ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/MultiStepper.cpp:52:27: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   52 | boolean MultiStepper::run()
+      |                           ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/MultiStepper.cpp: In member function 'boolean MultiStepper::run()':
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/MultiStepper.cpp:55:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   55 |     boolean ret = false;
+      |             ^~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Compiling .pio/build/debug_raw_workstation/lib7a1/ArmMotorController/ArmMotorController.cpp.o
+Archiving .pio/build/debug_raw_workstation/libf4d/libAccelStepper.a
+Archiving .pio/build/debug_raw_workstation/lib985/libTTL_STEPPER.a
+Compiling .pio/build/debug_raw_workstation/lib340/ArmTransferPlanner/ArmTransferPlanner.cpp.o
+Indexing .pio/build/debug_raw_workstation/libf4d/libAccelStepper.a
+Indexing .pio/build/debug_raw_workstation/lib985/libTTL_STEPPER.a
+Compiling .pio/build/debug_raw_workstation/lib246/CompetitionCore/CompetitionCore.cpp.o
+Compiling .pio/build/debug_raw_workstation/libfc7/fashionstar-uart-servo-arduino-sdk-V2/FashionStar_UartServo.cpp.o
+Archiving .pio/build/debug_raw_workstation/lib2af/libOneButton.a
+Archiving .pio/build/debug_raw_workstation/lib340/libArmTransferPlanner.a
+Indexing .pio/build/debug_raw_workstation/lib2af/libOneButton.a
+Indexing .pio/build/debug_raw_workstation/lib340/libArmTransferPlanner.a
+Archiving .pio/build/debug_raw_workstation/lib246/libCompetitionCore.a
+Compiling .pio/build/debug_raw_workstation/libfc7/fashionstar-uart-servo-arduino-sdk-V2/FashionStar_UartServoProtocol.cpp.o
+Indexing .pio/build/debug_raw_workstation/lib246/libCompetitionCore.a
+Compiling .pio/build/debug_raw_workstation/lib4fe/Wire/Wire.cpp.o
+Compiling .pio/build/debug_raw_workstation/lib4fe/Wire/utility/twi.c.o
+Compiling .pio/build/debug_raw_workstation/lib561/JY901/JY901.cpp.o
+Compiling .pio/build/debug_raw_workstation/lib2b4/ImuHeadingTracker/ImuHeadingTracker.cpp.o
+In file included from lib/ArmMotorController/ArmMotorController.h:4,
+                 from lib/ArmMotorController/ArmMotorController.cpp:1:
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:275:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Archiving .pio/build/debug_raw_workstation/lib7a1/libArmMotorController.a
+Indexing .pio/build/debug_raw_workstation/lib7a1/libArmMotorController.a
+Compiling .pio/build/debug_raw_workstation/libcc7/VisionProtocol/VisionProtocol.cpp.o
+Compiling .pio/build/debug_raw_workstation/lib24a/MaixCamClient/MaixCamClient.cpp.o
+Archiving .pio/build/debug_raw_workstation/libcc7/libVisionProtocol.a
+Archiving .pio/build/debug_raw_workstation/libfc7/libfashionstar-uart-servo-arduino-sdk-V2.a
+Indexing .pio/build/debug_raw_workstation/libcc7/libVisionProtocol.a
+Indexing .pio/build/debug_raw_workstation/libfc7/libfashionstar-uart-servo-arduino-sdk-V2.a
+Compiling .pio/build/debug_raw_workstation/libc20/MecanumKinematics/MecanumKinematics.cpp.o
+Archiving .pio/build/debug_raw_workstation/lib4fe/libWire.a
+Compiling .pio/build/debug_raw_workstation/lib5f4/QimingGrid/GridNavigator.cpp.o
+Indexing .pio/build/debug_raw_workstation/lib4fe/libWire.a
+Archiving .pio/build/debug_raw_workstation/lib561/libJY901.a
+Archiving .pio/build/debug_raw_workstation/lib2b4/libImuHeadingTracker.a
+Indexing .pio/build/debug_raw_workstation/lib561/libJY901.a
+Compiling .pio/build/debug_raw_workstation/lib5f4/QimingGrid/LinkProtocol.cpp.o
+Indexing .pio/build/debug_raw_workstation/lib2b4/libImuHeadingTracker.a
+Compiling .pio/build/debug_raw_workstation/lib5f4/QimingGrid/QimingGridClient.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/Serial.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/Tone.cpp.o
+Archiving .pio/build/debug_raw_workstation/libc20/libMecanumKinematics.a
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/WInterrupts.cpp.o
+Indexing .pio/build/debug_raw_workstation/libc20/libMecanumKinematics.a
+Archiving .pio/build/debug_raw_workstation/lib5f4/libQimingGrid.a
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/WMath.cpp.o
+Indexing .pio/build/debug_raw_workstation/lib5f4/libQimingGrid.a
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/WSerial.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/abi.cpp.o
+Archiving .pio/build/debug_raw_workstation/lib24a/libMaixCamClient.a
+Indexing .pio/build/debug_raw_workstation/lib24a/libMaixCamClient.a
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/api/CanMsg.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/api/CanMsgRingbuffer.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/api/Common.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/api/IPAddress.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/api/PluggableUSB.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/api/Print.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/api/Stream.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/api/String.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/avr/dtostrf.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/board.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/core_debug.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/hooks.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/itoa.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/main.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/pins_arduino.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/stm32/startup_stm32yyxx.S.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/stm32/startup_stm32yyxx.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/wiring_analog.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/wiring_digital.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/wiring_pulse.cpp.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/wiring_shift.c.o
+Compiling .pio/build/debug_raw_workstation/FrameworkArduino/wiring_time.c.o
+Archiving .pio/build/debug_raw_workstation/libFrameworkArduino.a
+Indexing .pio/build/debug_raw_workstation/libFrameworkArduino.a
+Linking .pio/build/debug_raw_workstation/firmware.elf
+lto-wrapper: warning: using serial compilation of 4 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+Checking size .pio/build/debug_raw_workstation/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.3% (used 11812 bytes from 524288 bytes)
+Flash: [========= ]  85.9% (used 112580 bytes from 131072 bytes)
+Building .pio/build/debug_raw_workstation/firmware.bin
+========================= [SUCCESS] Took 13.16 seconds =========================
+
+Processing debug_raw_workstation_341 (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduinoVariant/PeripheralPins.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduinoVariant/PeripheralPins_DevEBoxH7xx.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduinoVariant/PeripheralPins_WeActMiniH7xx.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduinoVariant/generic_clock.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduinoVariant/variant_DevEBoxH7xx.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduinoVariant/variant_WeActMiniH7xx.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduinoVariant/variant_generic.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_dlyb_core.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_adc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_adc_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_aes.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_can.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_ccb.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_cec.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_comp.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_comp_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_cordic.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_cortex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_crc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_crc_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_crs.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_cryp.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_cryp_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dac.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dac_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dbgmcu.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dcache.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dcmi.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dcmi_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dfsdm.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dfsdm_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dma.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dma2d.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dma_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dsi.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_dts.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_eth.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_eth_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_exti.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_fdcan.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_firewall.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_flash.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_flash_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_flash_itf.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_flash_ramfunc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_fmac.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_fmpi2c.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_fmpi2c_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_fmpsmbus.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_fmpsmbus_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_gfxmmu.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_gfxtim.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_gpio.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_gpio_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_gpu2d.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_gtzc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_hash.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_hash_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_hcd.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_hrtim.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_hsem.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_hsp.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_i2c.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_i2c_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_i2s.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_i2s_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_i3c.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_icache.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_ipcc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_irda.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_iwdg.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_jpeg.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_lcd.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_lpawur.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_lptim.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_ltdc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_ltdc_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_mdf.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_mdios.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_mdma.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_mmc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_mmc_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_mrsubg.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_mrsubg_timer.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_nand.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_nor.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_opamp.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_opamp_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_ospi.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_otfdec.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_pccard.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_pcd.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_pcd_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_pka.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_play.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_pssi.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_pwr.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_pwr_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_q.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_qspi.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_radio.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_radio_timer.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_ramcfg.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_ramecc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_rcc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_rcc_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_rng.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_rng_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_rtc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_rtc_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_sai.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_sai_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_sbs.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_sd.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_sd_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_sdadc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_sdio.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_sdram.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_smartcard.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_smartcard_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_smbus.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_smbus_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_spdifrx.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_spi.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_spi_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_sram.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_subghz.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_swpmi.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_tamp.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_tim.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_tim_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_tsc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_uart.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_uart_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_usart.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_usart_ex.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_wwdg.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_hal_xspi.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_usb_drd_core.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_util_i3c.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_utils_fdcan.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_utils_i2c.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HAL/stm32yyxx_utils_i3c.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/HardwareTimer.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_adc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_bdma.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_comp.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_cordic.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_crc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_crs.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_dac.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_delayblock.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_dlyb.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_dma.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_dma2d.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_exti.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_fmac.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_fmc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_fmpi2c.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_fsmc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_gpio.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_hrtim.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_i2c.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_i3c.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_icache.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_lcsc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_lpgpio.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_lptim.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_lpuart.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_mdma.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_opamp.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_pka.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_play.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_pwr.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_rcc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_rng.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_rtc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_sdmmc.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_spi.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_swpmi.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_system.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_tim.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_ucpd.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_usart.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_usb.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/LL/stm32yyxx_ll_utils.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/new.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/PortNames.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/analog.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/bootloader.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/clock.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/core_callback.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/dwt.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/hw_config.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/interrupt.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/otp.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/pinmap.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/stm32_def.c.o
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/libraries/SrcWrapper/src/stm32/hw_config.c:30:9: note: '#pragma message: 
+Configure the system power supply according to the
+definition to be used at compilation preprocessing level.
+The application shall set one of the following configuration option:
+                            - USE_PWR_LDO_SUPPLY
+                            - USE_PWR_DIRECT_SMPS_SUPPLY
+                            - USE_PWR_EXTERNAL_SOURCE_SUPPLY
+                            - USE_PWR_SMPS_1V8_SUPPLIES_LDO
+                            - USE_PWR_SMPS_2V5_SUPPLIES_LDO
+                            - USE_PWR_SMPS_1V8_SUPPLIES_EXT_AND_LDO
+                            - USE_PWR_SMPS_2V5_SUPPLIES_EXT_AND_LDO
+                            - USE_PWR_SMPS_1V8_SUPPLIES_EXT
+                            - USE_PWR_SMPS_2V5_SUPPLIES_EXT
+   '
+   30 | #pragma message "\n\
+      |         ^~~~~~~
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/system_stm32yyxx.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/timer.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/stm32/uart.c.o
+Compiling .pio/build/debug_raw_workstation_341/SrcWrapper/src/syscalls.c.o
+Compiling .pio/build/debug_raw_workstation_341/src/debug_raw_workstation_341.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/lib200/AccelStepper/AccelStepper.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/lib200/AccelStepper/MultiStepper.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/lib9bb/OneButton/OneButton.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/lib9bb/OneButton/OneButtonTiny.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/lib985/TTL_STEPPER/TTL_STEPPER.cpp.o
+In file included from .pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.cpp:6:
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:275:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.cpp:41:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   41 | boolean AccelStepper::runSpeed()
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.cpp:185:27: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  185 | boolean AccelStepper::run()
+      |                           ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.cpp:646:42: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  646 | boolean AccelStepper::runSpeedToPosition()
+      |                                          ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+In file included from src/main.cpp:6,
+                 from src/debug_raw_workstation_341.cpp:12:
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from lib/RobotConfig/src/Stm32SerialCompat.h:3,
+                 from src/main.cpp:3:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+In file included from .pio/libdeps/debug_raw_workstation_341/AccelStepper/src/MultiStepper.cpp:6:
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/MultiStepper.h:43:45: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   43 |     boolean addStepper(AccelStepper& stepper);
+      |                                             ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_raw_workstation_341/AccelStepper/src/MultiStepper.h:8:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/MultiStepper.h:57:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   57 |     boolean run();
+      |                 ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+In file included from .pio/libdeps/debug_raw_workstation_341/AccelStepper/src/MultiStepper.cpp:7:
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/MultiStepper.cpp:14:55: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   14 | boolean MultiStepper::addStepper(AccelStepper& stepper)
+      |                                                       ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/MultiStepper.cpp:52:27: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   52 | boolean MultiStepper::run()
+      |                           ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/MultiStepper.cpp: In member function 'boolean MultiStepper::run()':
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/MultiStepper.cpp:55:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   55 |     boolean ret = false;
+      |             ^~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Compiling .pio/build/debug_raw_workstation_341/lib7a1/ArmMotorController/ArmMotorController.cpp.o
+Archiving .pio/build/debug_raw_workstation_341/lib200/libAccelStepper.a
+Compiling .pio/build/debug_raw_workstation_341/lib340/ArmTransferPlanner/ArmTransferPlanner.cpp.o
+Indexing .pio/build/debug_raw_workstation_341/lib200/libAccelStepper.a
+Archiving .pio/build/debug_raw_workstation_341/lib9bb/libOneButton.a
+Indexing .pio/build/debug_raw_workstation_341/lib9bb/libOneButton.a
+Compiling .pio/build/debug_raw_workstation_341/lib246/CompetitionCore/CompetitionCore.cpp.o
+Archiving .pio/build/debug_raw_workstation_341/lib340/libArmTransferPlanner.a
+Indexing .pio/build/debug_raw_workstation_341/lib340/libArmTransferPlanner.a
+Compiling .pio/build/debug_raw_workstation_341/libfc7/fashionstar-uart-servo-arduino-sdk-V2/FashionStar_UartServo.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/libfc7/fashionstar-uart-servo-arduino-sdk-V2/FashionStar_UartServoProtocol.cpp.o
+Archiving .pio/build/debug_raw_workstation_341/lib246/libCompetitionCore.a
+Indexing .pio/build/debug_raw_workstation_341/lib246/libCompetitionCore.a
+Compiling .pio/build/debug_raw_workstation_341/lib4fe/Wire/Wire.cpp.o
+Archiving .pio/build/debug_raw_workstation_341/lib985/libTTL_STEPPER.a
+Indexing .pio/build/debug_raw_workstation_341/lib985/libTTL_STEPPER.a
+Compiling .pio/build/debug_raw_workstation_341/lib4fe/Wire/utility/twi.c.o
+In file included from lib/ArmMotorController/ArmMotorController.h:4,
+                 from lib/ArmMotorController/ArmMotorController.cpp:1:
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:275:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Compiling .pio/build/debug_raw_workstation_341/lib561/JY901/JY901.cpp.o
+Archiving .pio/build/debug_raw_workstation_341/lib7a1/libArmMotorController.a
+Indexing .pio/build/debug_raw_workstation_341/lib7a1/libArmMotorController.a
+Compiling .pio/build/debug_raw_workstation_341/lib2b4/ImuHeadingTracker/ImuHeadingTracker.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/libcc7/VisionProtocol/VisionProtocol.cpp.o
+Archiving .pio/build/debug_raw_workstation_341/libcc7/libVisionProtocol.a
+Compiling .pio/build/debug_raw_workstation_341/lib24a/MaixCamClient/MaixCamClient.cpp.o
+Indexing .pio/build/debug_raw_workstation_341/libcc7/libVisionProtocol.a
+Compiling .pio/build/debug_raw_workstation_341/libc20/MecanumKinematics/MecanumKinematics.cpp.o
+Archiving .pio/build/debug_raw_workstation_341/libfc7/libfashionstar-uart-servo-arduino-sdk-V2.a
+Indexing .pio/build/debug_raw_workstation_341/libfc7/libfashionstar-uart-servo-arduino-sdk-V2.a
+Compiling .pio/build/debug_raw_workstation_341/lib5f4/QimingGrid/GridNavigator.cpp.o
+Archiving .pio/build/debug_raw_workstation_341/lib4fe/libWire.a
+Indexing .pio/build/debug_raw_workstation_341/lib4fe/libWire.a
+Archiving .pio/build/debug_raw_workstation_341/libc20/libMecanumKinematics.a
+Compiling .pio/build/debug_raw_workstation_341/lib5f4/QimingGrid/LinkProtocol.cpp.o
+Indexing .pio/build/debug_raw_workstation_341/libc20/libMecanumKinematics.a
+Compiling .pio/build/debug_raw_workstation_341/lib5f4/QimingGrid/QimingGridClient.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/Serial.cpp.o
+Archiving .pio/build/debug_raw_workstation_341/lib561/libJY901.a
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/Tone.cpp.o
+Indexing .pio/build/debug_raw_workstation_341/lib561/libJY901.a
+Archiving .pio/build/debug_raw_workstation_341/lib2b4/libImuHeadingTracker.a
+Archiving .pio/build/debug_raw_workstation_341/lib5f4/libQimingGrid.a
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/WInterrupts.cpp.o
+Indexing .pio/build/debug_raw_workstation_341/lib2b4/libImuHeadingTracker.a
+Indexing .pio/build/debug_raw_workstation_341/lib5f4/libQimingGrid.a
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/WMath.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/WSerial.cpp.o
+Archiving .pio/build/debug_raw_workstation_341/lib24a/libMaixCamClient.a
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/abi.cpp.o
+Indexing .pio/build/debug_raw_workstation_341/lib24a/libMaixCamClient.a
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/api/CanMsg.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/api/CanMsgRingbuffer.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/api/Common.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/api/IPAddress.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/api/PluggableUSB.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/api/Print.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/api/Stream.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/api/String.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/avr/dtostrf.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/board.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/core_debug.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/hooks.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/itoa.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/main.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/pins_arduino.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/stm32/startup_stm32yyxx.S.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/stm32/startup_stm32yyxx.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/wiring_analog.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/wiring_digital.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/wiring_pulse.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/wiring_shift.c.o
+Compiling .pio/build/debug_raw_workstation_341/FrameworkArduino/wiring_time.c.o
+Archiving .pio/build/debug_raw_workstation_341/libFrameworkArduino.a
+Indexing .pio/build/debug_raw_workstation_341/libFrameworkArduino.a
+Linking .pio/build/debug_raw_workstation_341/firmware.elf
+lto-wrapper: warning: using serial compilation of 4 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+Checking size .pio/build/debug_raw_workstation_341/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.3% (used 11812 bytes from 524288 bytes)
+Flash: [========= ]  85.9% (used 112580 bytes from 131072 bytes)
+Building .pio/build/debug_raw_workstation_341/firmware.bin
+========================= [SUCCESS] Took 15.66 seconds =========================
+
+Processing debug_storage2_workstation (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Checking size .pio/build/debug_storage2_workstation/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.3% (used 11808 bytes from 524288 bytes)
+Flash: [========= ]  90.0% (used 117968 bytes from 131072 bytes)
+========================= [SUCCESS] Took 2.05 seconds =========================
+
+Processing debug_translation (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- MecanumKinematics @ 1.0.0
+|-- RobotConfig @ 1.0.0
+Building in release mode
+Checking size .pio/build/debug_translation/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   1.2% (used 6092 bytes from 524288 bytes)
+Flash: [====      ]  42.5% (used 55660 bytes from 131072 bytes)
+========================= [SUCCESS] Took 1.62 seconds =========================
+
+Processing debug_chassis_route (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- MecanumKinematics @ 1.0.0
+|-- RobotConfig @ 1.0.0
+Building in release mode
+Checking size .pio/build/debug_chassis_route/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   1.2% (used 6080 bytes from 524288 bytes)
+Flash: [====      ]  42.2% (used 55316 bytes from 131072 bytes)
+========================= [SUCCESS] Took 1.56 seconds =========================
+
+Processing debug_grid_navigation (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- MecanumKinematics @ 1.0.0
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Checking size .pio/build/debug_grid_navigation/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   1.4% (used 7468 bytes from 524288 bytes)
+Flash: [=====     ]  46.9% (used 61448 bytes from 131072 bytes)
+========================= [SUCCESS] Took 1.49 seconds =========================
+
+Processing legacy_route (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Checking size .pio/build/legacy_route/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.3% (used 12032 bytes from 524288 bytes)
+Flash: [==========]  98.3% (used 128872 bytes from 131072 bytes)
+========================= [SUCCESS] Took 1.79 seconds =========================
+
+Processing debug_maix_mode8 (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- RobotConfig @ 1.0.0
+|-- VisionProtocol @ 2.0.0
+Building in release mode
+Compiling .pio/build/debug_maix_mode8/FrameworkArduinoVariant/PeripheralPins.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduinoVariant/PeripheralPins_DevEBoxH7xx.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduinoVariant/PeripheralPins_WeActMiniH7xx.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduinoVariant/generic_clock.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduinoVariant/variant_DevEBoxH7xx.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduinoVariant/variant_WeActMiniH7xx.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduinoVariant/variant_generic.cpp.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_dlyb_core.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_adc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_adc_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_aes.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_can.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_ccb.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_cec.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_comp.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_comp_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_cordic.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_cortex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_crc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_crc_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_crs.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_cryp.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_cryp_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dac.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dac_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dbgmcu.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dcache.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dcmi.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dcmi_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dfsdm.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dfsdm_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dma.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dma2d.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dma_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dsi.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_dts.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_eth.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_eth_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_exti.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_fdcan.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_firewall.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_flash.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_flash_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_flash_itf.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_flash_ramfunc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_fmac.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_fmpi2c.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_fmpi2c_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_fmpsmbus.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_fmpsmbus_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_gfxmmu.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_gfxtim.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_gpio.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_gpio_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_gpu2d.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_gtzc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_hash.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_hash_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_hcd.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_hrtim.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_hsem.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_hsp.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_i2c.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_i2c_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_i2s.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_i2s_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_i3c.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_icache.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_ipcc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_irda.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_iwdg.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_jpeg.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_lcd.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_lpawur.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_lptim.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_ltdc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_ltdc_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_mdf.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_mdios.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_mdma.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_mmc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_mmc_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_mrsubg.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_mrsubg_timer.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_nand.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_nor.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_opamp.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_opamp_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_ospi.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_otfdec.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_pccard.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_pcd.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_pcd_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_pka.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_play.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_pssi.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_pwr.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_pwr_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_q.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_qspi.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_radio.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_radio_timer.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_ramcfg.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_ramecc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_rcc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_rcc_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_rng.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_rng_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_rtc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_rtc_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_sai.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_sai_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_sbs.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_sd.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_sd_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_sdadc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_sdio.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_sdram.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_smartcard.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_smartcard_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_smbus.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_smbus_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_spdifrx.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_spi.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_spi_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_sram.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_subghz.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_swpmi.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_tamp.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_tim.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_tim_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_tsc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_uart.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_uart_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_usart.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_usart_ex.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_wwdg.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_hal_xspi.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_usb_drd_core.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_util_i3c.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_utils_fdcan.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_utils_i2c.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HAL/stm32yyxx_utils_i3c.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/HardwareTimer.cpp.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_adc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_bdma.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_comp.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_cordic.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_crc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_crs.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_dac.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_delayblock.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_dlyb.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_dma.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_dma2d.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_exti.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_fmac.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_fmc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_fmpi2c.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_fsmc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_gpio.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_hrtim.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_i2c.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_i3c.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_icache.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_lcsc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_lpgpio.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_lptim.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_lpuart.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_mdma.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_opamp.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_pka.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_play.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_pwr.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_rcc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_rng.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_rtc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_sdmmc.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_spi.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_swpmi.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_system.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_tim.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_ucpd.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_usart.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_usb.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/LL/stm32yyxx_ll_utils.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/new.cpp.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/PortNames.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/analog.cpp.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/bootloader.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/clock.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/core_callback.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/dwt.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/hw_config.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/interrupt.cpp.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/otp.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/pinmap.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/stm32_def.c.o
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/libraries/SrcWrapper/src/stm32/hw_config.c:30:9: note: '#pragma message: 
+Configure the system power supply according to the
+definition to be used at compilation preprocessing level.
+The application shall set one of the following configuration option:
+                            - USE_PWR_LDO_SUPPLY
+                            - USE_PWR_DIRECT_SMPS_SUPPLY
+                            - USE_PWR_EXTERNAL_SOURCE_SUPPLY
+                            - USE_PWR_SMPS_1V8_SUPPLIES_LDO
+                            - USE_PWR_SMPS_2V5_SUPPLIES_LDO
+                            - USE_PWR_SMPS_1V8_SUPPLIES_EXT_AND_LDO
+                            - USE_PWR_SMPS_2V5_SUPPLIES_EXT_AND_LDO
+                            - USE_PWR_SMPS_1V8_SUPPLIES_EXT
+                            - USE_PWR_SMPS_2V5_SUPPLIES_EXT
+   '
+   30 | #pragma message "\n\
+      |         ^~~~~~~
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/system_stm32yyxx.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/timer.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/stm32/uart.c.o
+Compiling .pio/build/debug_maix_mode8/SrcWrapper/src/syscalls.c.o
+Compiling .pio/build/debug_maix_mode8/src/debug_maix_mode8.cpp.o
+Compiling .pio/build/debug_maix_mode8/libb7e/AccelStepper/AccelStepper.cpp.o
+Compiling .pio/build/debug_maix_mode8/libb7e/AccelStepper/MultiStepper.cpp.o
+Compiling .pio/build/debug_maix_mode8/lib751/OneButton/OneButton.cpp.o
+Compiling .pio/build/debug_maix_mode8/lib751/OneButton/OneButtonTiny.cpp.o
+Compiling .pio/build/debug_maix_mode8/libcc7/VisionProtocol/VisionProtocol.cpp.o
+Archiving .pio/build/debug_maix_mode8/libcc7/libVisionProtocol.a
+Indexing .pio/build/debug_maix_mode8/libcc7/libVisionProtocol.a
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/Serial.cpp.o
+In file included from .pio/libdeps/debug_maix_mode8/AccelStepper/src/MultiStepper.cpp:6:
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/MultiStepper.h:43:45: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   43 |     boolean addStepper(AccelStepper& stepper);
+      |                                             ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_maix_mode8/AccelStepper/src/MultiStepper.h:8:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/MultiStepper.h:57:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   57 |     boolean run();
+      |                 ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+In file included from .pio/libdeps/debug_maix_mode8/AccelStepper/src/MultiStepper.cpp:7:
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/MultiStepper.cpp:14:55: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   14 | boolean MultiStepper::addStepper(AccelStepper& stepper)
+      |                                                       ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/MultiStepper.cpp:52:27: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   52 | boolean MultiStepper::run()
+      |                           ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/MultiStepper.cpp: In member function 'boolean MultiStepper::run()':
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/MultiStepper.cpp:55:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   55 |     boolean ret = false;
+      |             ^~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/Tone.cpp.o
+In file included from .pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.cpp:6:
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.h:275:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.cpp:41:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   41 | boolean AccelStepper::runSpeed()
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.cpp:185:27: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  185 | boolean AccelStepper::run()
+      |                           ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_mode8/AccelStepper/src/AccelStepper.cpp:646:42: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  646 | boolean AccelStepper::runSpeedToPosition()
+      |                                          ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/WInterrupts.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/WMath.cpp.o
+Archiving .pio/build/debug_maix_mode8/libb7e/libAccelStepper.a
+Archiving .pio/build/debug_maix_mode8/lib751/libOneButton.a
+Indexing .pio/build/debug_maix_mode8/libb7e/libAccelStepper.a
+Indexing .pio/build/debug_maix_mode8/lib751/libOneButton.a
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/WSerial.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/abi.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/api/CanMsg.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/api/CanMsgRingbuffer.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/api/Common.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/api/IPAddress.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/api/PluggableUSB.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/api/Print.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/api/Stream.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/api/String.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/avr/dtostrf.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/board.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/core_debug.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/hooks.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/itoa.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/main.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/pins_arduino.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/stm32/startup_stm32yyxx.S.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/stm32/startup_stm32yyxx.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/wiring_analog.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/wiring_digital.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/wiring_pulse.cpp.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/wiring_shift.c.o
+Compiling .pio/build/debug_maix_mode8/FrameworkArduino/wiring_time.c.o
+Archiving .pio/build/debug_maix_mode8/libFrameworkArduino.a
+Indexing .pio/build/debug_maix_mode8/libFrameworkArduino.a
+Linking .pio/build/debug_maix_mode8/firmware.elf
+Checking size .pio/build/debug_maix_mode8/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   0.7% (used 3684 bytes from 524288 bytes)
+Flash: [==        ]  16.0% (used 20916 bytes from 131072 bytes)
+Building .pio/build/debug_maix_mode8/firmware.bin
+========================= [SUCCESS] Took 13.51 seconds =========================
+
+Processing debug_maix_protocol_cycle (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- MaixCamClient @ 1.0.0
+|-- RobotConfig @ 1.0.0
+Building in release mode
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduinoVariant/PeripheralPins.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduinoVariant/PeripheralPins_DevEBoxH7xx.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduinoVariant/PeripheralPins_WeActMiniH7xx.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduinoVariant/generic_clock.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduinoVariant/variant_DevEBoxH7xx.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduinoVariant/variant_WeActMiniH7xx.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduinoVariant/variant_generic.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_dlyb_core.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_adc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_adc_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_aes.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_can.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_ccb.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_cec.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_comp.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_comp_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_cordic.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_cortex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_crc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_crc_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_crs.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_cryp.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_cryp_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dac.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dac_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dbgmcu.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dcache.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dcmi.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dcmi_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dfsdm.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dfsdm_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dma.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dma2d.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dma_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dsi.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_dts.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_eth.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_eth_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_exti.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_fdcan.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_firewall.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_flash.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_flash_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_flash_itf.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_flash_ramfunc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_fmac.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_fmpi2c.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_fmpi2c_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_fmpsmbus.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_fmpsmbus_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_gfxmmu.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_gfxtim.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_gpio.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_gpio_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_gpu2d.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_gtzc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_hash.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_hash_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_hcd.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_hrtim.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_hsem.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_hsp.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_i2c.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_i2c_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_i2s.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_i2s_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_i3c.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_icache.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_ipcc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_irda.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_iwdg.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_jpeg.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_lcd.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_lpawur.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_lptim.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_ltdc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_ltdc_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_mdf.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_mdios.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_mdma.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_mmc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_mmc_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_mrsubg.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_mrsubg_timer.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_nand.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_nor.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_opamp.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_opamp_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_ospi.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_otfdec.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_pccard.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_pcd.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_pcd_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_pka.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_play.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_pssi.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_pwr.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_pwr_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_q.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_qspi.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_radio.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_radio_timer.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_ramcfg.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_ramecc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_rcc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_rcc_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_rng.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_rng_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_rtc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_rtc_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_sai.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_sai_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_sbs.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_sd.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_sd_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_sdadc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_sdio.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_sdram.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_smartcard.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_smartcard_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_smbus.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_smbus_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_spdifrx.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_spi.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_spi_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_sram.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_subghz.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_swpmi.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_tamp.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_tim.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_tim_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_tsc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_uart.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_uart_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_usart.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_usart_ex.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_wwdg.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_hal_xspi.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_usb_drd_core.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_util_i3c.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_utils_fdcan.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_utils_i2c.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HAL/stm32yyxx_utils_i3c.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/HardwareTimer.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_adc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_bdma.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_comp.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_cordic.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_crc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_crs.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_dac.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_delayblock.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_dlyb.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_dma.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_dma2d.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_exti.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_fmac.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_fmc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_fmpi2c.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_fsmc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_gpio.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_hrtim.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_i2c.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_i3c.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_icache.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_lcsc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_lpgpio.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_lptim.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_lpuart.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_mdma.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_opamp.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_pka.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_play.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_pwr.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_rcc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_rng.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_rtc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_sdmmc.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_spi.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_swpmi.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_system.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_tim.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_ucpd.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_usart.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_usb.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/LL/stm32yyxx_ll_utils.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/new.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/PortNames.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/analog.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/bootloader.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/clock.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/core_callback.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/dwt.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/hw_config.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/interrupt.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/otp.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/pinmap.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/stm32_def.c.o
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/libraries/SrcWrapper/src/stm32/hw_config.c:30:9: note: '#pragma message: 
+Configure the system power supply according to the
+definition to be used at compilation preprocessing level.
+The application shall set one of the following configuration option:
+                            - USE_PWR_LDO_SUPPLY
+                            - USE_PWR_DIRECT_SMPS_SUPPLY
+                            - USE_PWR_EXTERNAL_SOURCE_SUPPLY
+                            - USE_PWR_SMPS_1V8_SUPPLIES_LDO
+                            - USE_PWR_SMPS_2V5_SUPPLIES_LDO
+                            - USE_PWR_SMPS_1V8_SUPPLIES_EXT_AND_LDO
+                            - USE_PWR_SMPS_2V5_SUPPLIES_EXT_AND_LDO
+                            - USE_PWR_SMPS_1V8_SUPPLIES_EXT
+                            - USE_PWR_SMPS_2V5_SUPPLIES_EXT
+   '
+   30 | #pragma message "\n\
+      |         ^~~~~~~
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/system_stm32yyxx.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/timer.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/stm32/uart.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/SrcWrapper/src/syscalls.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/src/debug_maix_protocol_cycle.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/lib917/AccelStepper/AccelStepper.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/lib917/AccelStepper/MultiStepper.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/lib707/OneButton/OneButton.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/lib707/OneButton/OneButtonTiny.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/libcc7/VisionProtocol/VisionProtocol.cpp.o
+Archiving .pio/build/debug_maix_protocol_cycle/libcc7/libVisionProtocol.a
+Indexing .pio/build/debug_maix_protocol_cycle/libcc7/libVisionProtocol.a
+Compiling .pio/build/debug_maix_protocol_cycle/lib24a/MaixCamClient/MaixCamClient.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/Serial.cpp.o
+In file included from .pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/MultiStepper.cpp:6:
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/MultiStepper.h:43:45: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   43 |     boolean addStepper(AccelStepper& stepper);
+      |                                             ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/MultiStepper.h:8:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/MultiStepper.h:57:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   57 |     boolean run();
+      |                 ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+In file included from .pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/MultiStepper.cpp:7:
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/MultiStepper.cpp:14:55: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   14 | boolean MultiStepper::addStepper(AccelStepper& stepper)
+      |                                                       ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/MultiStepper.cpp:52:27: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   52 | boolean MultiStepper::run()
+      |                           ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/MultiStepper.cpp: In member function 'boolean MultiStepper::run()':
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/MultiStepper.cpp:55:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   55 |     boolean ret = false;
+      |             ^~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+In file included from .pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.cpp:6:
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from .pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.h:275:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.cpp:41:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+   41 | boolean AccelStepper::runSpeed()
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.cpp:185:27: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  185 | boolean AccelStepper::run()
+      |                           ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_maix_protocol_cycle/AccelStepper/src/AccelStepper.cpp:646:42: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  646 | boolean AccelStepper::runSpeedToPosition()
+      |                                          ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/Tone.cpp.o
+Archiving .pio/build/debug_maix_protocol_cycle/lib917/libAccelStepper.a
+Indexing .pio/build/debug_maix_protocol_cycle/lib917/libAccelStepper.a
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/WInterrupts.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/WMath.cpp.o
+Archiving .pio/build/debug_maix_protocol_cycle/lib707/libOneButton.a
+Indexing .pio/build/debug_maix_protocol_cycle/lib707/libOneButton.a
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/WSerial.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/abi.cpp.o
+Archiving .pio/build/debug_maix_protocol_cycle/lib24a/libMaixCamClient.a
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/api/CanMsg.cpp.o
+Indexing .pio/build/debug_maix_protocol_cycle/lib24a/libMaixCamClient.a
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/api/CanMsgRingbuffer.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/api/Common.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/api/IPAddress.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/api/PluggableUSB.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/api/Print.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/api/Stream.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/api/String.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/avr/dtostrf.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/board.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/core_debug.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/hooks.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/itoa.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/main.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/pins_arduino.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/stm32/startup_stm32yyxx.S.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/stm32/startup_stm32yyxx.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/wiring_analog.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/wiring_digital.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/wiring_pulse.cpp.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/wiring_shift.c.o
+Compiling .pio/build/debug_maix_protocol_cycle/FrameworkArduino/wiring_time.c.o
+Archiving .pio/build/debug_maix_protocol_cycle/libFrameworkArduino.a
+Indexing .pio/build/debug_maix_protocol_cycle/libFrameworkArduino.a
+Linking .pio/build/debug_maix_protocol_cycle/firmware.elf
+Checking size .pio/build/debug_maix_protocol_cycle/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   0.7% (used 3660 bytes from 524288 bytes)
+Flash: [==        ]  17.1% (used 22380 bytes from 131072 bytes)
+Building .pio/build/debug_maix_protocol_cycle/firmware.bin
+========================= [SUCCESS] Took 22.35 seconds =========================
+
+Environment                 Status    Duration
+--------------------------  --------  ------------
+genericSTM32H750VB          SUCCESS   00:00:02.837
+debug_qr_continuous         SUCCESS   00:00:15.965
+debug_workstation           SUCCESS   00:00:02.375
+debug_raw_workstation       SUCCESS   00:00:13.160
+debug_raw_workstation_341   SUCCESS   00:00:15.665
+debug_storage2_workstation  SUCCESS   00:00:02.053
+debug_translation           SUCCESS   00:00:01.621
+debug_chassis_route         SUCCESS   00:00:01.556
+debug_grid_navigation       SUCCESS   00:00:01.487
+legacy_route                SUCCESS   00:00:01.785
+debug_maix_mode8            SUCCESS   00:00:13.508
+debug_maix_protocol_cycle   SUCCESS   00:00:22.353
+========================= 12 succeeded in 00:01:34.364 =========================
+Failed to check for PlatformIO upgrades. Please check your Internet connection.

@@ -1,0 +1,54 @@
+{
+  "app_id": "gc_try_r2_331476_20261119",
+  "version": "5.6.0",
+  "model": 331476,
+  "deployment_only_change": "ring2_coarse.MODEL_PATH points to the model bundled inside this app; production source unchanged.",
+  "files": {
+    "app.yaml": {
+      "bytes": 253,
+      "sha256": "3e3c9f571743b77e4e85ca9a36cfe31231bbefb15f328143f369738d1d70fbc7"
+    },
+    "main.py": {
+      "bytes": 42668,
+      "sha256": "f696cef65dfb4a079150ce66302830fc3a09fbd73e2a78d3f71e7871f23f8cd9"
+    },
+    "models/ring2/model.mud": {
+      "bytes": 286,
+      "sha256": "e652404804f17d2f156d251f3144a51014dab3c4a21369af5bd7f94a136f6f1b"
+    },
+    "models/ring2/model_331476.cvimodel": {
+      "bytes": 7270728,
+      "sha256": "03695d0dc9c36a0cd2945343e128f8d914284175bd87e088058eea1515a2f813"
+    },
+    "ring2_coarse.py": {
+      "bytes": 4486,
+      "sha256": "c159df5370dffe1767d1b31e8fd5e488f2ae3c1dc534cf4ba398e6e498972106"
+    }
+  },
+  "device_execution": "Not performed; user authorized installation only.",
+  "installation": {
+    "tool": "MaixVision",
+    "result": "Completed",
+    "progress_percent": 100,
+    "app_id": "gc_try_r2_331476_20261119",
+    "package": "maixvision_try_ring2_331476_20261119/dist/maix-gc_try_r2_331476_20261119-v5.6.0.zip",
+    "bytes": 6156697,
+    "sha256": "d894ff73e5706c23b62c3108dbe53548524434108385c2818dd1799b01598c70",
+    "verification": "Local ZIP script/model contents byte-for-byte matched; device install UI Completed at 100%; device files not read back."
+  },
+  "additional_installations": [
+    {
+      "device_ip": "10.62.9.1",
+      "connection_log_time": "21:08:42.338",
+      "tool": "MaixVision",
+      "result": "Completed",
+      "progress_percent": 100,
+      "app_id": "gc_try_r2_331476_20261119",
+      "sha256": "13935de8b1963855a09c8a708a3117778cc59b658dcbb18b61c784c1fac7a5f3",
+      "bytes": 6156697,
+      "device_execution": "Not performed",
+      "autostart": "Unchanged",
+      "verification": "Install UI Completed; two scripts and two model files inside local ZIP match deployment files byte-for-byte; device files not read back"
+    }
+  ]
+}

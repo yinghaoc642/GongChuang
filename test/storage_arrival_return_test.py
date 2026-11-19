@@ -104,6 +104,7 @@ bool deadlineReached(uint32_t t){return int32_t(tick-t)>=0;}
 bool liftMoveFinished(){return liftDone;} bool extensionMoveFinished(){return extDone;}
 void routeFault(const char*){programState=PROGRAM_FAULT;}
 bool secondStorageColorWorkflowActive(){return second;}
+bool radarDepartureEnabled(){return false;}
 void markMissionProgress(){}
 bool startLiftToHeightMm(float h){liftAxis.currentMm=h;return true;}
 bool startLiftToHeightMmWithProfile(float h,int,int){return startLiftToHeightMm(h);}
@@ -111,6 +112,7 @@ bool startExtensionToMmWithProfile(float e,int,int){++m6Moves;targetM6=e;extensi
 void commandStorageServoPosition(int slot,int){++trayMoves;lastSlot=slot;}
 void commandStorageServoPositionWithArrivalGate(uint8_t slot){++trayMoves;lastSlot=slot;if(gateFails)routeFault("");}
 void commandStorageServoParkingPosition(){++trayMoves;lastSlot=-1;}
+void prepareDepartureTrayParking(){commandStorageServoParkingPosition();}
 struct Frame {uint32_t sequence=9;} frame;
 struct Camera {Frame& latest(){return frame;}} maixCam;
 void beginMaixRequest(uint8_t m){mode=m;}

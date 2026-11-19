@@ -714,8 +714,8 @@ def verify_process_ring_transfer_order_contract(
             "VISION_POST_MOTION_SETTLE_TIME_MS,"
             "VISION_HEADING_STABLE_TIME_MS)"
         )
-        == 2,
-        "circle correction and post-vision heading locks do not both use "
+        == 4,
+        "coarse, circle correction and post-vision heading locks do not both use "
         "the 10 ms vision gate",
     )
     initial_storage_parallel = compact_cpp(
@@ -1208,7 +1208,7 @@ def verify_raw_pick_and_process_entry_contract(
         "safe parallel/fallback arm path",
     )
     require(
-        "commandStorageServoParkingPosition();"
+        "prepareDepartureTrayParking();"
         not in begin_work[raw_branch_index:raw_branch_return_index],
         "RAW entry still performs the redundant 165-degree parking move",
     )
@@ -1570,7 +1570,7 @@ def verify_raw_pick_and_process_entry_contract(
         arm_transfer,
         (
             "if (armTransferSourceAlreadyPrepared)",
-            "retained M5/M6 source pose and open gripper",
+            "M5/M6 held,grip open,M7 clear",
             "startArmTransferLiftToSourceHeightMm("
             "armTransferSourcePose.heightMm)",
             "if (sourceGripperAlreadyOpen)",
@@ -1833,7 +1833,7 @@ def verify_raw_pick_and_process_entry_contract(
             "rawTravelM5ZeroPending = true",
             "RAW_EXIT_M5_MAXIMUM_STEP_RATE",
             "RAW_EXIT_M5_STEP_ACCELERATION",
-            "commandStorageServoParkingPosition("
+            "prepareDepartureTrayParking("
             "DEPARTURE_STORAGE_SERVO_INTERVAL_MS)",
             "finishActiveWorkAction()",
         ),
@@ -2224,8 +2224,8 @@ def verify_run_mode_contract(
         flags=re.MULTILINE,
     )
     require(
-        environments == ["genericSTM32H750VB", "debug_qr_continuous", "debug_workstation", "debug_raw_workstation", "debug_raw_workstation_341", "debug_storage2_workstation", "debug_translation", "debug_chassis_route", "debug_maix_mode8", "debug_maix_protocol_cycle"],
-        "platformio.ini must expose production plus the nine isolated debug environments; "
+        environments == ["genericSTM32H750VB", "debug_qr_continuous", "debug_workstation", "debug_raw_workstation", "debug_raw_workstation_341", "debug_storage2_workstation", "debug_translation", "debug_chassis_route", "debug_grid_navigation", "legacy_route", "debug_maix_mode8", "debug_maix_protocol_cycle"],
+        "platformio.ini must expose production plus the eleven optional environments; "
         f"found {environments}",
     )
     require(
@@ -2333,7 +2333,7 @@ def verify_run_mode_contract(
             "armTransferDestinationPose;",
             "removeRingPositionPoseCorrectionForSavedBase("
             "measuredRingPoses[activePlacementRingPosition],"
-            "activePlacementRingPosition);",
+            "activePlacementRingPosition,activePlacementRing2AngleCorrectionApplied);",
         ),
         "normalized ring base pose prevents correction accumulation",
     )
@@ -2422,13 +2422,13 @@ def verify_run_mode_contract(
         < process_storage1_place_adjustment.find(
             "STORAGE2_OUTER_RING_FINAL_PLACE_ADDITIONAL_EXTENSION_MM"
         ),
-        "STORAGE2 outer +5 mm must be the final direct placement offset",
+        "STORAGE2 outer offset must follow the scale and shared net",
     )
     require_fragments(
         compact_cpp(source_without_comments),
         (
             "PROCESS_STORAGE1_RING_PLACE_M5_NET_CCW_DEGREES[3]={1.92f,2.75f,1.62f};",
-            "STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES=-0.50f;",
+            "STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES[3]={-1.0f,0.0f,0.0f};",
             "WORKSTATION_RING_PLACE_M6_NET_EXTENSION_MM[3]={-17.5f,-13.5f,-17.0f};",
             "STORAGE1_RING1_PLACE_EXTRA_M5_CLOCKWISE_DEGREES=0.20f;",
             "STORAGE1_RING1_PLACE_EXTRA_M6_EXTENSION_MM=1.0f;",
@@ -2514,7 +2514,7 @@ def verify_run_mode_contract(
             "pose.standardFrameAngleDegrees-="
             "PROCESS_STORAGE1_RING_PLACE_M5_NET_CCW_DEGREES[ringPosition-1U];",
             "pose.standardFrameAngleDegrees-="
-            "STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES;",
+            "STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES[ringPosition-1U];",
             "pose.extensionMm-="
             "WORKSTATION_RING_PLACE_M6_NET_EXTENSION_MM[ringPosition-1U];",
             "pose.standardFrameAngleDegrees+="
@@ -2752,7 +2752,7 @@ def verify_run_mode_contract(
             "branches",
         )
         require(
-            source_without_comments.count("resetQrReceiver();") == 2
+            source_without_comments.count("resetQrReceiver();") == (4 if split_route_chassis else 2)
             and source_without_comments.count("receiveQrData();") == 1
             and source_without_comments.count(
                 "route_chassis::setup();"
@@ -2764,7 +2764,7 @@ def verify_run_mode_contract(
         )
     else:
         require(
-            source_without_comments.count("resetQrReceiver();") == 2
+            source_without_comments.count("resetQrReceiver();") == (4 if split_route_chassis else 2)
             and source_without_comments.count("receiveQrData();") == 1
             and source_without_comments.count(
                 "SerialQr.begin(QR_BAUDRATE);"
@@ -2913,7 +2913,7 @@ def verify_calibration_mode_contract(
             "if (finishedFinalContainerSequence)",
             "if (!processRound1TravelOwnsTrayCommand && "
             "!storageRound1RawTravelOwnsTrayCommand)",
-            "commandStorageServoParkingPosition("
+            "prepareDepartureTrayParking("
             "activeWorkAction == WORK_ACTION_PROCESS ? "
             "DEPARTURE_STORAGE_SERVO_INTERVAL_MS : "
             "STORAGE_SERVO_INTERVAL_MS)",
@@ -2931,7 +2931,7 @@ def verify_calibration_mode_contract(
         final_sequence_index,
     )
     process2_parking_command_index = transfer_completion.find(
-        "commandStorageServoParkingPosition("
+        "prepareDepartureTrayParking("
         "activeWorkAction==WORK_ACTION_PROCESS?"
         "DEPARTURE_STORAGE_SERVO_INTERVAL_MS:"
         "STORAGE_SERVO_INTERVAL_MS);",
@@ -3242,7 +3242,7 @@ def verify_calibration_mode_contract(
             "programState = PROGRAM_FINISHED",
             "startRequested = false",
             'hmiSetRunStatus("CALDONE")',
-            '"three placements and three pickups finished; "',
+            'three placements and three pickups finished;',
         ),
         "safe calibration stop",
     )

@@ -1,0 +1,85 @@
+Processing genericSTM32H750VB (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Compiling .pio/build/genericSTM32H750VB/lib5f4/QimingGrid/GridNavigator.cpp.o
+Archiving .pio/build/genericSTM32H750VB/lib5f4/libQimingGrid.a
+Indexing .pio/build/genericSTM32H750VB/lib5f4/libQimingGrid.a
+Linking .pio/build/genericSTM32H750VB/firmware.elf
+lto-wrapper: warning: using serial compilation of 4 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+Checking size .pio/build/genericSTM32H750VB/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.6% (used 13448 bytes from 524288 bytes)
+Flash: [==========]  96.4% (used 126360 bytes from 131072 bytes)
+Building .pio/build/genericSTM32H750VB/firmware.bin
+========================= [SUCCESS] Took 15.27 seconds =========================
+
+Processing debug_grid_navigation (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- MecanumKinematics @ 1.0.0
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Compiling .pio/build/debug_grid_navigation/lib5f4/QimingGrid/GridNavigator.cpp.o
+Archiving .pio/build/debug_grid_navigation/lib5f4/libQimingGrid.a
+Indexing .pio/build/debug_grid_navigation/lib5f4/libQimingGrid.a
+Linking .pio/build/debug_grid_navigation/firmware.elf
+lto-wrapper: warning: using serial compilation of 2 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+Checking size .pio/build/debug_grid_navigation/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   1.4% (used 7472 bytes from 524288 bytes)
+Flash: [=====     ]  47.1% (used 61788 bytes from 131072 bytes)
+Building .pio/build/debug_grid_navigation/firmware.bin
+========================= [SUCCESS] Took 5.70 seconds =========================
+
+Environment            Status    Duration
+---------------------  --------  ------------
+genericSTM32H750VB     SUCCESS   00:00:15.267
+debug_grid_navigation  SUCCESS   00:00:05.696
+========================= 2 succeeded in 00:00:20.962 =========================
+Failed to check for PlatformIO upgrades. Please check your Internet connection.

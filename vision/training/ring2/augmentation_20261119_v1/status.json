@@ -1,0 +1,57 @@
+{
+  "status": "round_complete_further_training_paused",
+  "dataset_id": 157083,
+  "dataset_url": "https://maixhub.com/model/training/dataset/157083/overview",
+  "dataset_name": "try-ring2-aug-v1-20261119",
+  "server_observed": {
+    "total": 278,
+    "annotated": 278,
+    "unannotated": 0,
+    "train": 266,
+    "val": 12
+  },
+  "augmentation_generated": 224,
+  "original_dataset_modified": false,
+  "validation_modified": false,
+  "new_training_submitted": true,
+  "new_model_generated": true,
+  "runtime_model_changed": false,
+  "next_step": "Wait for user to resume. Recommended next evidence: compare both candidates on MaixCAM using independent high-pose images and hard negatives; retain current0.70 gate.",
+  "browser_state": "Both model archives downloaded through MaixHub UI; CUA task closed.",
+  "ui_notes": [
+    "Native Chrome CUA available. Browser host unavailable in earlier attempt.",
+    "Screenshot coordinates use full emitted image coordinates, not half resolution.",
+    "Some AX clicks focus text only; screenshot coordinate clicks worked.",
+    "Actions may complete after the returned AX snapshot; read fresh state before retry.",
+    "Native setValue worked for file path. typeText dropped underscores; paste sometimes ineffective.",
+    "Separate images+xml ZIPs uploaded with explicit train/val selection."
+  ],
+  "connection_errors": [
+    "Computer Use server error -10005: noWindowsAvailable",
+    "The browser access host is unavailable"
+  ],
+  "project_id": 147837,
+  "project_url": "https://maixhub.com/model/training/project/147837/dashboard",
+  "project_dataset_link_verified": true,
+  "baseline_report_evaluation": "baseline_331402_report_evaluation.json",
+  "training_ids": [
+    331476,
+    331477
+  ],
+  "pause_after_current_round": true,
+  "stop_scope": "Current round completed and archived; no further training submitted.",
+  "paused_at_utc": "2026-11-19T06:04:56.697929+00:00",
+  "pause_immediately": false,
+  "new_model_completion_verified": true,
+  "models_downloaded": true,
+  "cloud_tasks_cancelled": false,
+  "resumed_at_utc": "2026-11-19T05:59:50.204584+00:00",
+  "completed_training_ids_verified": [
+    331476,
+    331477
+  ],
+  "round_completed_at_utc": "2026-11-19T06:17:48.132784+00:00",
+  "further_training_paused": true,
+  "preferred_first_hardware_test": 331476,
+  "hardware_uploaded": false
+}

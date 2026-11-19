@@ -679,7 +679,7 @@ def main() -> None:
     assert calibration["schema_version"] == 1
     assert (
         calibration["vision_version"]
-        == "5.5.1-aggressive-latency"
+        == "5.6.0-try-coarse-ring2"
     )
     assert calibration["vision_version"] == runtime_constants[
         "VISION_VERSION"

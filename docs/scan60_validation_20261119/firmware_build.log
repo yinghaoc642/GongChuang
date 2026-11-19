@@ -1,0 +1,673 @@
+Processing genericSTM32H750VB (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Compiling .pio/build/genericSTM32H750VB/src/main.cpp.o
+Compiling .pio/build/genericSTM32H750VB/lib5f4/QimingGrid/GridNavigator.cpp.o
+Compiling .pio/build/genericSTM32H750VB/lib5f4/QimingGrid/QimingGridClient.cpp.o
+Archiving .pio/build/genericSTM32H750VB/lib5f4/libQimingGrid.a
+Indexing .pio/build/genericSTM32H750VB/lib5f4/libQimingGrid.a
+In file included from src/main.cpp:6:
+.pio/libdeps/genericSTM32H750VB/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from lib/RobotConfig/src/Stm32SerialCompat.h:3,
+                 from src/main.cpp:3:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/genericSTM32H750VB/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/genericSTM32H750VB/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/genericSTM32H750VB/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Linking .pio/build/genericSTM32H750VB/firmware.elf
+lto-wrapper: warning: using serial compilation of 4 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+Checking size .pio/build/genericSTM32H750VB/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.6% (used 13448 bytes from 524288 bytes)
+Flash: [==========]  96.4% (used 126336 bytes from 131072 bytes)
+Building .pio/build/genericSTM32H750VB/firmware.bin
+========================= [SUCCESS] Took 8.54 seconds =========================
+
+Processing debug_qr_continuous (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- CompetitionCore @ 1.0.0
+|-- RobotConfig @ 1.0.0
+Building in release mode
+Checking size .pio/build/debug_qr_continuous/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   0.7% (used 3752 bytes from 524288 bytes)
+Flash: [==        ]  18.3% (used 23940 bytes from 131072 bytes)
+========================= [SUCCESS] Took 8.85 seconds =========================
+
+Processing debug_workstation (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Compiling .pio/build/debug_workstation/src/debug_workstation.cpp.o
+Compiling .pio/build/debug_workstation/lib5f4/QimingGrid/GridNavigator.cpp.o
+Compiling .pio/build/debug_workstation/lib5f4/QimingGrid/QimingGridClient.cpp.o
+Archiving .pio/build/debug_workstation/lib5f4/libQimingGrid.a
+Indexing .pio/build/debug_workstation/lib5f4/libQimingGrid.a
+In file included from src/main.cpp:6,
+                 from src/debug_workstation.cpp:33:
+.pio/libdeps/debug_workstation/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from lib/RobotConfig/src/Stm32SerialCompat.h:3,
+                 from src/main.cpp:3:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_workstation/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_workstation/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_workstation/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Linking .pio/build/debug_workstation/firmware.elf
+lto-wrapper: warning: using serial compilation of 4 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+Checking size .pio/build/debug_workstation/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.3% (used 11800 bytes from 524288 bytes)
+Flash: [========= ]  85.6% (used 112248 bytes from 131072 bytes)
+========================= [SUCCESS] Took 10.14 seconds =========================
+
+Processing debug_raw_workstation (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Compiling .pio/build/debug_raw_workstation/src/debug_raw_workstation.cpp.o
+Compiling .pio/build/debug_raw_workstation/lib5f4/QimingGrid/GridNavigator.cpp.o
+Compiling .pio/build/debug_raw_workstation/lib5f4/QimingGrid/QimingGridClient.cpp.o
+Archiving .pio/build/debug_raw_workstation/lib5f4/libQimingGrid.a
+Indexing .pio/build/debug_raw_workstation/lib5f4/libQimingGrid.a
+In file included from src/main.cpp:6,
+                 from src/debug_raw_workstation.cpp:20:
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from lib/RobotConfig/src/Stm32SerialCompat.h:3,
+                 from src/main.cpp:3:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Linking .pio/build/debug_raw_workstation/firmware.elf
+lto-wrapper: warning: using serial compilation of 4 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+Checking size .pio/build/debug_raw_workstation/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.3% (used 11812 bytes from 524288 bytes)
+Flash: [========= ]  85.9% (used 112580 bytes from 131072 bytes)
+========================= [SUCCESS] Took 8.54 seconds =========================
+
+Processing debug_raw_workstation_341 (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Compiling .pio/build/debug_raw_workstation_341/src/debug_raw_workstation_341.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/lib5f4/QimingGrid/GridNavigator.cpp.o
+Compiling .pio/build/debug_raw_workstation_341/lib5f4/QimingGrid/QimingGridClient.cpp.o
+Archiving .pio/build/debug_raw_workstation_341/lib5f4/libQimingGrid.a
+Indexing .pio/build/debug_raw_workstation_341/lib5f4/libQimingGrid.a
+In file included from src/main.cpp:6,
+                 from src/debug_raw_workstation_341.cpp:12:
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from lib/RobotConfig/src/Stm32SerialCompat.h:3,
+                 from src/main.cpp:3:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_raw_workstation_341/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Linking .pio/build/debug_raw_workstation_341/firmware.elf
+lto-wrapper: warning: using serial compilation of 4 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+Checking size .pio/build/debug_raw_workstation_341/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.3% (used 11812 bytes from 524288 bytes)
+Flash: [========= ]  85.9% (used 112580 bytes from 131072 bytes)
+========================= [SUCCESS] Took 10.07 seconds =========================
+
+Processing debug_storage2_workstation (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Compiling .pio/build/debug_storage2_workstation/src/debug_storage2_workstation.cpp.o
+Compiling .pio/build/debug_storage2_workstation/lib5f4/QimingGrid/GridNavigator.cpp.o
+Compiling .pio/build/debug_storage2_workstation/lib5f4/QimingGrid/QimingGridClient.cpp.o
+Archiving .pio/build/debug_storage2_workstation/lib5f4/libQimingGrid.a
+Indexing .pio/build/debug_storage2_workstation/lib5f4/libQimingGrid.a
+In file included from src/main.cpp:6,
+                 from src/debug_workstation.cpp:33,
+                 from src/debug_storage2_workstation.cpp:7:
+.pio/libdeps/debug_storage2_workstation/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from lib/RobotConfig/src/Stm32SerialCompat.h:3,
+                 from src/main.cpp:3:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_storage2_workstation/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_storage2_workstation/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_storage2_workstation/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Linking .pio/build/debug_storage2_workstation/firmware.elf
+lto-wrapper: warning: using serial compilation of 4 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+Checking size .pio/build/debug_storage2_workstation/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.3% (used 11808 bytes from 524288 bytes)
+Flash: [========= ]  90.0% (used 117968 bytes from 131072 bytes)
+========================= [SUCCESS] Took 21.59 seconds =========================
+
+Processing debug_translation (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- MecanumKinematics @ 1.0.0
+|-- RobotConfig @ 1.0.0
+Building in release mode
+Checking size .pio/build/debug_translation/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   1.2% (used 6092 bytes from 524288 bytes)
+Flash: [====      ]  42.5% (used 55660 bytes from 131072 bytes)
+========================= [SUCCESS] Took 2.52 seconds =========================
+
+Processing debug_chassis_route (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- MecanumKinematics @ 1.0.0
+|-- RobotConfig @ 1.0.0
+Building in release mode
+Checking size .pio/build/debug_chassis_route/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   1.2% (used 6080 bytes from 524288 bytes)
+Flash: [====      ]  42.2% (used 55316 bytes from 131072 bytes)
+========================= [SUCCESS] Took 1.76 seconds =========================
+
+Processing debug_grid_navigation (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- MecanumKinematics @ 1.0.0
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Compiling .pio/build/debug_grid_navigation/src/debug_grid_navigation.cpp.o
+Compiling .pio/build/debug_grid_navigation/lib5f4/QimingGrid/GridNavigator.cpp.o
+Compiling .pio/build/debug_grid_navigation/lib5f4/QimingGrid/QimingGridClient.cpp.o
+Archiving .pio/build/debug_grid_navigation/lib5f4/libQimingGrid.a
+Indexing .pio/build/debug_grid_navigation/lib5f4/libQimingGrid.a
+In file included from src/debug_grid_navigation.cpp:3:
+.pio/libdeps/debug_grid_navigation/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from src/debug_grid_navigation.cpp:2:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_grid_navigation/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_grid_navigation/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/debug_grid_navigation/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Linking .pio/build/debug_grid_navigation/firmware.elf
+lto-wrapper: warning: using serial compilation of 2 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+Checking size .pio/build/debug_grid_navigation/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   1.4% (used 7472 bytes from 524288 bytes)
+Flash: [=====     ]  47.1% (used 61768 bytes from 131072 bytes)
+Building .pio/build/debug_grid_navigation/firmware.bin
+========================= [SUCCESS] Took 4.62 seconds =========================
+
+Processing legacy_route (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- ArmMotorController @ 1.0.0
+|-- ArmTransferPlanner @ 1.0.0
+|-- CompetitionCore @ 1.0.0
+|-- fashionstar-uart-servo-arduino-sdk-V2
+|-- ImuHeadingTracker @ 1.0.0
+|-- MaixCamClient @ 1.0.0
+|-- MecanumKinematics @ 1.0.0
+|-- MobileRobotConfig
+|-- RobotConfig @ 1.0.0
+|-- QimingGrid
+Building in release mode
+Compiling .pio/build/legacy_route/src/main.cpp.o
+Compiling .pio/build/legacy_route/lib5f4/QimingGrid/GridNavigator.cpp.o
+Compiling .pio/build/legacy_route/lib5f4/QimingGrid/QimingGridClient.cpp.o
+Archiving .pio/build/legacy_route/lib5f4/libQimingGrid.a
+Indexing .pio/build/legacy_route/lib5f4/libQimingGrid.a
+In file included from src/main.cpp:6:
+.pio/libdeps/legacy_route/AccelStepper/src/AccelStepper.h:417:17: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  417 |     boolean run();
+      |                 ^
+In file included from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Interrupts.h:27,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/ArduinoAPI.h:29,
+                 from /private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/Arduino.h:36,
+                 from lib/RobotConfig/src/Stm32SerialCompat.h:3,
+                 from src/main.cpp:3:
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/legacy_route/AccelStepper/src/AccelStepper.h:423:22: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  423 |     boolean runSpeed();
+      |                      ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/legacy_route/AccelStepper/src/AccelStepper.h:498:32: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  498 |     boolean runSpeedToPosition();
+      |                                ^
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+.pio/libdeps/legacy_route/AccelStepper/src/AccelStepper.h:653:13: warning: 'boolean' is deprecated [-Wdeprecated-declarations]
+  653 |     boolean _direction; // 1 == CW
+      |             ^~~~~~~~~~
+/private/tmp/gc_publish_pio_2xu9xo4w/packages/framework-arduinoststm32/cores/arduino/api/Common.h:99:19: note: declared here
+   99 | typedef bool      boolean __attribute__((deprecated));
+      |                   ^~~~~~~
+Linking .pio/build/legacy_route/firmware.elf
+lto-wrapper: warning: using serial compilation of 4 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+Checking size .pio/build/legacy_route/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   2.3% (used 12032 bytes from 524288 bytes)
+Flash: [==========]  98.3% (used 128872 bytes from 131072 bytes)
+========================= [SUCCESS] Took 6.10 seconds =========================
+
+Processing debug_maix_mode8 (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- RobotConfig @ 1.0.0
+|-- VisionProtocol @ 2.0.0
+Building in release mode
+Checking size .pio/build/debug_maix_mode8/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   0.7% (used 3684 bytes from 524288 bytes)
+Flash: [==        ]  16.0% (used 20916 bytes from 131072 bytes)
+========================= [SUCCESS] Took 2.01 seconds =========================
+
+Processing debug_maix_protocol_cycle (platform: ststm32; board: genericSTM32H750VB_cmsis_dap; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/ststm32/genericSTM32H750VB_cmsis_dap.html
+PLATFORM: ST STM32 (20.0.0) > STM32H750VBT6 with CMSIS-DAP
+HARDWARE: STM32H750VBT6 480MHz, 512KB RAM, 128KB Flash
+DEBUG: Current (cmsis-dap) External (blackmagic, cmsis-dap, jlink, stlink)
+PACKAGES: 
+ - framework-arduinoststm32 @ 4.30000.0 (3.0.0) 
+ - framework-cmsis @ 2.60300.0 (6.3.0) 
+ - framework-cmsis-dsp @ 1.16.2 
+ - toolchain-gccarmnoneeabi @ 1.120301.0 (12.3.1)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- AccelStepper @ 1.64.0
+|-- OneButton @ 2.6.2
+|-- MaixCamClient @ 1.0.0
+|-- RobotConfig @ 1.0.0
+Building in release mode
+Checking size .pio/build/debug_maix_protocol_cycle/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   0.7% (used 3660 bytes from 524288 bytes)
+Flash: [==        ]  17.1% (used 22380 bytes from 131072 bytes)
+========================= [SUCCESS] Took 2.08 seconds =========================
+
+Environment                 Status    Duration
+--------------------------  --------  ------------
+genericSTM32H750VB          SUCCESS   00:00:08.544
+debug_qr_continuous         SUCCESS   00:00:08.849
+debug_workstation           SUCCESS   00:00:10.137
+debug_raw_workstation       SUCCESS   00:00:08.541
+debug_raw_workstation_341   SUCCESS   00:00:10.068
+debug_storage2_workstation  SUCCESS   00:00:21.585
+debug_translation           SUCCESS   00:00:02.522
+debug_chassis_route         SUCCESS   00:00:01.763
+debug_grid_navigation       SUCCESS   00:00:04.616
+legacy_route                SUCCESS   00:00:06.100
+debug_maix_mode8            SUCCESS   00:00:02.005
+debug_maix_protocol_cycle   SUCCESS   00:00:02.083
+========================= 12 succeeded in 00:01:26.811 =========================
+Failed to check for PlatformIO upgrades. Please check your Internet connection.

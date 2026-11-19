@@ -161,10 +161,16 @@ constexpr uint8_t M7_CONTACT_SOFT_LANDING_ACCELERATION = 171U;
 
 namespace arm_transfer {
 
-constexpr float CONTAINER_PICK_ANGLE_DEGREES = -103.0f;
-constexpr float CONTAINER_PLACE_ANGLE_DEGREES = -102.0f;
-constexpr float CONTAINER_RETURN_PLACE_ANGLE_DEGREES = -102.0f;
-constexpr float CONTAINER_PICK_EXTENSION_MM = 1.0f;
+// One planar tray target for RAW placement, all pickups and PROCESS returns.
+// Positive M5 angles are counterclockwise; positive M6 values extend the arm.
+constexpr float CONTAINER_BASE_ANGLE_DEGREES = -103.0f;
+constexpr float CONTAINER_BASE_EXTENSION_MM = 0.0f;
+constexpr float CONTAINER_EXTRA_CLOCKWISE_DEGREES = 1.0f;
+constexpr float CONTAINER_EXTRA_EXTENSION_MM = 4.0f;
+constexpr float CONTAINER_ANGLE_DEGREES =
+    CONTAINER_BASE_ANGLE_DEGREES - CONTAINER_EXTRA_CLOCKWISE_DEGREES;
+constexpr float CONTAINER_EXTENSION_MM =
+    CONTAINER_BASE_EXTENSION_MM + CONTAINER_EXTRA_EXTENSION_MM;
 // Every tray pickup descends another 2 mm from the previous 41 mm setting.
 // The second slot keeps its independent extra 3 mm compensation below.
 constexpr float CONTAINER_PICK_PHYSICAL_LOWER_MM = 43.0f;
@@ -205,8 +211,9 @@ constexpr float STORAGE2_PIXEL_TO_MM_CORRECTION_SCALE = 1.30f;
 constexpr float STORAGE2_OUTER_RING_FINAL_PLACE_M6_EXTENSION_SCALE = 0.90f;
 // Second STORAGE placement only: after its existing per-ring correction,
 // outer-position 0.90 scale and shared workstation net have all been applied,
-// extend physical positions 1 and 3 by this exact manual correction amount.
-constexpr float STORAGE2_OUTER_RING_FINAL_PLACE_ADDITIONAL_EXTENSION_MM = 5.0f;
+// apply this direct offset to physical positions 1 and 3. The previous +5 mm
+// is reduced by 5 mm, leaving a net 0 mm outer-position offset.
+constexpr float STORAGE2_OUTER_RING_FINAL_PLACE_ADDITIONAL_EXTENSION_MM = 0.0f;
 // A STORAGE2 scan already knows the bottom-layer color assigned to its ring
 // from the first-round QR plan. Accept that targeted color only when its
 // coordinate stays inside this center ROI, so an adjacent ring cannot supply

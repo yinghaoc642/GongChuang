@@ -1,12 +1,13 @@
 // Independent QR bench firmware. Build ONLY with the debug_qr_continuous env.
 // PB9 starts PE0/PE1 reception; no motor, servo, camera, HMI or IMU is set up.
 #include <Arduino.h>
+#include <Stm32SerialCompat.h>
 #include <CompetitionCore.h>
 #include <OneButton.h>
 
 namespace {
-HardwareSerial debugPort(PB12, PB13);  // RX, TX, 115200 baud
-HardwareSerial qrPort(PE0, PE1);       // RX, TX, 9600 baud
+gongchuang::Stm32HardwareSerial debugPort(PB12, PB13);  // RX, TX, 115200 baud
+gongchuang::Stm32HardwareSerial qrPort(PE0, PE1);       // RX, TX, 9600 baud
 OneButton startButton(PB9, true, true); // Active low, internal pull-up
 constexpr size_t kFrameCapacity = 32U;
 char frame[kFrameCapacity] = {};

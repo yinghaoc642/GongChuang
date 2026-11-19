@@ -3,6 +3,7 @@
 
 #include <AccelStepper.h>
 #include <Arduino.h>
+#include <Stm32SerialCompat.h>
 #include <TTL_STEPPER.h>
 
 class ArmMotorController {
@@ -68,7 +69,7 @@ private:
       uint32_t pulses);
 
   AccelStepper motorM5_;
-  HardwareSerial serialM6M7_;
+  gongchuang::Stm32HardwareSerial serialM6M7_;
   TTL_Protocol serialProtocol_;
   uint16_t serialSpeedRpm_;
   uint8_t serialAcceleration_;

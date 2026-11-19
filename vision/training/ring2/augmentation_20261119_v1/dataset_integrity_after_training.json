@@ -1,0 +1,56 @@
+{
+  "source_files_checked": 110,
+  "source_files_changed": [],
+  "validation_images_and_annotations_byte_identical": true,
+  "validation_list_byte_identical": true,
+  "validation": [
+    {
+      "name": "17_43.jpg",
+      "sha256": "3db8c23dcc3ba3322139c9814ad75ec0e3f91796acf08de042355e2df0f84f72"
+    },
+    {
+      "name": "16_44.jpg",
+      "sha256": "2a1dcbbff4469e54588b369b074f392b87ee56cfc2a091f5df0f53b5aa3b5d9b"
+    },
+    {
+      "name": "15_45.jpg",
+      "sha256": "19b37d6f5e0067921c1e07a9abed29f54a8efbb1bddbbdad668252af52941fcb"
+    },
+    {
+      "name": "18_46.jpg",
+      "sha256": "7e37faaba76cf17192783905b63649645c3475a3935ef23d07234763087e4fe1"
+    },
+    {
+      "name": "28_47.jpg",
+      "sha256": "43bab10e574b588b0ea77cef09a85eaf129c37dec89ba6a5b907d0a1ea0bcf30"
+    },
+    {
+      "name": "27_48.jpg",
+      "sha256": "3726b6e138cba9a854ae2ad132347831936f7628c14a6e90cf975c79a31514ef"
+    },
+    {
+      "name": "15_49.jpg",
+      "sha256": "19b37d6f5e0067921c1e07a9abed29f54a8efbb1bddbbdad668252af52941fcb"
+    },
+    {
+      "name": "18_50.jpg",
+      "sha256": "7e37faaba76cf17192783905b63649645c3475a3935ef23d07234763087e4fe1"
+    },
+    {
+      "name": "17_51.jpg",
+      "sha256": "3db8c23dcc3ba3322139c9814ad75ec0e3f91796acf08de042355e2df0f84f72"
+    },
+    {
+      "name": "16_52.jpg",
+      "sha256": "2a1dcbbff4469e54588b369b074f392b87ee56cfc2a091f5df0f53b5aa3b5d9b"
+    },
+    {
+      "name": "28_53.jpg",
+      "sha256": "43bab10e574b588b0ea77cef09a85eaf129c37dec89ba6a5b907d0a1ea0bcf30"
+    },
+    {
+      "name": "27_54.jpg",
+      "sha256": "3726b6e138cba9a854ae2ad132347831936f7628c14a6e90cf975c79a31514ef"
+    }
+  ]
+}

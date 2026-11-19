@@ -1,0 +1,122 @@
+[
+  {
+    "source": "1_1.jpg",
+    "sha256": "25a65d846627916c828ec24c48d88adf8fd8495efba534cb727999b0b8fba01d",
+    "split": "train",
+    "output": "25a65d846627916c828e"
+  },
+  {
+    "source": "6 - 副本_2.jpg",
+    "sha256": "b54be9d5f28bce368612266a0f1ae6408033da1bc617300d234b63e9b7ddc46a",
+    "split": "train",
+    "output": "b54be9d5f28bce368612"
+  },
+  {
+    "source": "4 - 副本 (2)_5.jpg",
+    "sha256": "3952e0221423e65489d43e6d102cb6397b4128c4db310f7c4a3ee9211db9eff8",
+    "split": "train",
+    "output": "3952e0221423e65489d4"
+  },
+  {
+    "source": "2 - 副本 (2)_8.jpg",
+    "sha256": "4939742b599c29c3c89b52ba66145fd0105633228b6bca837f26072725dc003a",
+    "split": "train",
+    "output": "4939742b599c29c3c89b"
+  },
+  {
+    "source": "5 - 副本 (2)_11.jpg",
+    "sha256": "edace7c4e6b75a8c89248ab426d7a3c77c4318fdf8721f1582a51285d98d5eea",
+    "split": "train",
+    "output": "edace7c4e6b75a8c8924"
+  },
+  {
+    "source": "8_13.jpg",
+    "sha256": "d5f011d7561efb565ac5b40c8db25e25373b6cd46c829659c6f839709b6e9884",
+    "split": "train",
+    "output": "d5f011d7561efb565ac5"
+  },
+  {
+    "source": "3_14.jpg",
+    "sha256": "3a559e95f4daa646899b641429a5e1b4d1ff366154ba0dc7cc03472ba02d00ea",
+    "split": "train",
+    "output": "3a559e95f4daa646899b"
+  },
+  {
+    "source": "7 - 副本 (2)_16.jpg",
+    "sha256": "d020d499fcb37c28474c4219aa2100c6c842f70acb33f9ccffd98417f77ac5cb",
+    "split": "train",
+    "output": "d020d499fcb37c28474c"
+  },
+  {
+    "source": "14_19.jpg",
+    "sha256": "2a364975392fd99117d6ce34874fe87d79bf0f50c5af880c7a0b4bd409c4e4fb",
+    "split": "train",
+    "output": "2a364975392fd99117d6"
+  },
+  {
+    "source": "10 - 副本 (2)_21.jpg",
+    "sha256": "24ecb9eb939a9cacd64b8130772d341b4eb260b226d96a92b3560fae2d13328f",
+    "split": "train",
+    "output": "24ecb9eb939a9cacd64b"
+  },
+  {
+    "source": "9 - 副本_22.jpg",
+    "sha256": "f8530bdd6239c80bfb030541fd978c0c2c95c61e126815125cbb3e56b4d6b776",
+    "split": "train",
+    "output": "f8530bdd6239c80bfb03"
+  },
+  {
+    "source": "13 - 副本_24.jpg",
+    "sha256": "adba0b80344c184812dba1ffea2a775f6f75b7e3324b293bb08dc1da2a625d49",
+    "split": "train",
+    "output": "adba0b80344c184812db"
+  },
+  {
+    "source": "11 - 副本 (2)_27.jpg",
+    "sha256": "4a4545e3645235828379c19b071de5411f3d867e82371f360ee2258137ccc84b",
+    "split": "train",
+    "output": "4a4545e3645235828379"
+  },
+  {
+    "source": "12 - 副本_28.jpg",
+    "sha256": "63d9c745bc371795587229cd603a612f70a86b52475d6fd415f54dec2799ef03",
+    "split": "train",
+    "output": "63d9c745bc3717955872"
+  },
+  {
+    "source": "17_43.jpg",
+    "sha256": "3db8c23dcc3ba3322139c9814ad75ec0e3f91796acf08de042355e2df0f84f72",
+    "split": "val",
+    "output": "3db8c23dcc3ba3322139"
+  },
+  {
+    "source": "16_44.jpg",
+    "sha256": "2a1dcbbff4469e54588b369b074f392b87ee56cfc2a091f5df0f53b5aa3b5d9b",
+    "split": "val",
+    "output": "2a1dcbbff4469e54588b"
+  },
+  {
+    "source": "15_45.jpg",
+    "sha256": "19b37d6f5e0067921c1e07a9abed29f54a8efbb1bddbbdad668252af52941fcb",
+    "split": "val",
+    "output": "19b37d6f5e0067921c1e"
+  },
+  {
+    "source": "18_46.jpg",
+    "sha256": "7e37faaba76cf17192783905b63649645c3475a3935ef23d07234763087e4fe1",
+    "split": "val",
+    "output": "7e37faaba76cf1719278"
+  },
+  {
+    "source": "28_47.jpg",
+    "sha256": "43bab10e574b588b0ea77cef09a85eaf129c37dec89ba6a5b907d0a1ea0bcf30",
+    "split": "val",
+    "output": "43bab10e574b588b0ea7"
+  },
+  {
+    "source": "27_48.jpg",
+    "sha256": "3726b6e138cba9a854ae2ad132347831936f7628c14a6e90cf975c79a31514ef",
+    "split": "val",
+    "output": "3726b6e138cba9a854ae"
+  }
+]

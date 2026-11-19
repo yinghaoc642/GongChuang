@@ -1,0 +1,22 @@
+{
+  "genericSTM32H750VB": {
+    "ram_bytes": 13472,
+    "flash_bytes": 127712
+  },
+  "debug_workstation": {
+    "ram_bytes": 11828,
+    "flash_bytes": 113572
+  },
+  "debug_storage2_workstation": {
+    "ram_bytes": 11824,
+    "flash_bytes": 119320
+  },
+  "debug_grid_navigation": {
+    "ram_bytes": 7472,
+    "flash_bytes": 61788
+  },
+  "legacy_route": {
+    "ram_bytes": 12048,
+    "flash_bytes": 130180
+  }
+}

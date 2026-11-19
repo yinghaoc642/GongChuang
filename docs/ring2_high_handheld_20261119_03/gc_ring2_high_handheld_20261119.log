@@ -1,0 +1,581 @@
+-- [I] [Maix Comm Protocol] auto set pinmap A16 to UART0_TX for uart0
+-- [I] [Maix Comm Protocol] auto set pinmap A17 to UART0_RX for uart0
+-- [I] [Maix Comm Protocol] listening on uart port: uart0(/dev/ttyS0)
+-- [I] load cvimodel from: /maixapp/apps/gc_try_r2_331476_20261119/models/ring2/model_331476.cvimodel
+version: 1.4.0
+model Build at 2026-11-19 13:17:25 For platform cv181x
+Max SharedMem size:602112
+-- [I] model info:
+	type: yolov5
+	input type: rgb
+	mean:0.000000 0.000000 0.000000 
+	scale:0.003922 0.003922 0.003922 
+	labels num: 1
+	anchors:10.00 13.00 16.00 30.00 33.00 23.00 30.00 61.00 62.00 45.00 59.00 119.00 116.00 90.00 156.00 198.00 373.00 326.00 
+	input size: 224x224
+
+[COARSE2] loaded /maixapp/apps/gc_try_r2_331476_20261119/models/ring2/model.mud
+[SAMPLE_COMM_SNS_ParseIni]-2203: Parse /mnt/data/sensor_cfg.ini
+[parse_source_devnum]-1796: devNum =  1
+[parse_sensor_name]-1877: sensor =  GCORE_GC4653_MIPI_4M_30FPS_10BIT
+[parse_sensor_busid]-1906: bus_id =  4
+[parse_sensor_i2caddr]-1917: sns_i2c_addr =  29
+[parse_sensor_mipidev]-1928: mipi_dev =  0
+[parse_sensor_laneid]-1939: Lane_id =  4, 3, 2, -1, -1
+[parse_sensor_pnswap]-1950: pn_swap =  0, 0, 0, 0, 0
+[parse_sensor_mclken]-1972: mclk_en =  1
+[parse_sensor_mclk]-1983: mclk =  1
+[SAMPLE_COMM_SNS_ParseIni]-2203: Parse /mnt/data/sensor_cfg.ini
+[parse_source_devnum]-1796: devNum =  1
+[parse_sensor_name]-1877: sensor =  GCORE_GC4653_MIPI_4M_30FPS_10BIT
+[parse_sensor_busid]-1906: bus_id =  4
+[parse_sensor_i2caddr]-1917: sns_i2c_addr =  29
+[parse_sensor_mipidev]-1928: mipi_dev =  0
+[parse_sensor_laneid]-1939: Lane_id =  4, 3, 2, -1, -1
+[parse_sensor_pnswap]-1950: pn_swap =  0, 0, 0, 0, 0
+[parse_sensor_mclken]-1972: mclk_en =  1
+[parse_sensor_mclk]-1983: mclk =  1
+try release sys ok
+[_mmf_init]-1144: maix multi-media version:67a90e2-musl_riscv64
+maix multi-media init ok
+try release vio ok
+try release venc ok
+ISP Vipipe(0) Allocate pa(0x8acdc000) va(0x0x3fc440b000) size(291424)
+stSnsrMode.u16Width 1280 stSnsrMode.u16Height 720 60.000000 wdrMode 0 pstSnsObj 0x3fc7a84060
+[SAMPLE_COMM_VI_StartMIPI]-494: sensor 0 stDevAttr.devno 0
+awbInit ver 6.9@2021500
+0 R:1400 B:3100 CT:2850
+1 R:1500 B:2500 CT:3900
+2 R:2300 B:1600 CT:6500
+Golden 1024 1024 1024
+WB Quadratic:0
+isWdr:0
+ViPipe:0,===GC4653 720P 60fps 10bit LINEAR Init OK!===
+********************************************************************************
+cvi_bin_isp message
+gerritId:      97347          commitId:      fc6ce647       
+md5:           [redacted identifier]
+sensorNum      1              
+sensorName0    4653           
+
+PQBIN message
+gerritId:      
+              commitId:      fc6ce647       
+md5:           [redacted identifier]
+sensorNum      1              
+sensorName0    4653           
+
+author:        lxowalle       desc:          gc4653 30fps   
+createTime:    2024-03-26 13:41:34version:                      
+tool Version:       v3.0.5.48           mode:      
+********************************************************************************
+[SAMPLE_COMM_ISP_Thread]-95: ISP Dev 0 running!
+0 R:1298 B:3773 CT:2688
+1 R:1629 B:2599 CT:3890
+2 R:2430 B:1675 CT:7300
+Golden 1629 1024 2599
+wdrLEOnly:1
+[SAMPLE_COMM_VO_StartChn]-351: u32Width:480, u32Height:640, u32Square:1
+FRAME {"frame": 0, "production_ms": 19.93, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 200, "y": 77, "w": 85, "h": 100}, {"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 84, "w": 94, "h": 91}]}
+FRAME {"frame": 1, "production_ms": 14.64, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 2, "production_ms": 17.12, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 3, "production_ms": 17.12, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 4, "production_ms": 15.23, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 5, "production_ms": 17.11, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 200, "y": 80, "w": 85, "h": 92}, {"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 75, "w": 94, "h": 105}, {"label": "2r", "score": 0.[redacted identifier], "x": 211, "y": 102, "w": 65, "h": 48}]}
+FRAME {"frame": 6, "production_ms": 16.98, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 7, "production_ms": 15.65, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 8, "production_ms": 15.24, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 9, "production_ms": 17.18, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 10, "production_ms": 15.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 198, "y": 77, "w": 91, "h": 100}, {"label": "2r", "score": 0.[redacted identifier], "x": 98, "y": 84, "w": 94, "h": 91}]}
+FRAME {"frame": 11, "production_ms": 16.19, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 12, "production_ms": 15.71, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 13, "production_ms": 14.87, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 14, "production_ms": 16.73, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 15, "production_ms": 15.41, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 202, "y": 77, "w": 78, "h": 100}]}
+FRAME {"frame": 16, "production_ms": 14.19, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 17, "production_ms": 18.57, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 18, "production_ms": 15.63, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 19, "production_ms": 14.33, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 20, "production_ms": 17.16, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 202, "y": 80, "w": 78, "h": 97}]}
+FRAME {"frame": 21, "production_ms": 14.79, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 22, "production_ms": 18.43, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 23, "production_ms": 15.38, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 24, "production_ms": 14.45, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 25, "production_ms": 17.05, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 195, "y": 78, "w": 91, "h": 97}]}
+FRAME {"frame": 26, "production_ms": 15.74, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 27, "production_ms": 15.25, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 28, "production_ms": 16.98, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 29, "production_ms": 16.15, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 30, "production_ms": 14.22, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 195, "y": 78, "w": 91, "h": 97}]}
+FRAME {"frame": 31, "production_ms": 15.72, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 32, "production_ms": 15.71, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 33, "production_ms": 17.28, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 34, "production_ms": 16.79, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 35, "production_ms": 15.59, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 200, "y": 82, "w": 85, "h": 90}]}
+FRAME {"frame": 36, "production_ms": 15.53, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 37, "production_ms": 17.37, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 38, "production_ms": 15.55, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 39, "production_ms": 15.56, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 40, "production_ms": 14.96, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 201, "y": 97, "w": 75, "h": 62}, {"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 84, "w": 94, "h": 91}]}
+FRAME {"frame": 41, "production_ms": 20.71, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 42, "production_ms": 15.73, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 43, "production_ms": 15.4, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 44, "production_ms": 17.1, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 45, "production_ms": 16.04, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 202, "y": 97, "w": 75, "h": 62}, {"label": "2r", "score": 0.[redacted identifier], "x": 97, "y": 84, "w": 94, "h": 91}]}
+FRAME {"frame": 46, "production_ms": 15.01, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 47, "production_ms": 18.83, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 48, "production_ms": 15.53, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 49, "production_ms": 14.29, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 50, "production_ms": 17.11, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 51, "production_ms": 15.11, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 52, "production_ms": 18.48, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 53, "production_ms": 15.4, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 54, "production_ms": 15.72, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 55, "production_ms": 14.81, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 98, "y": 82, "w": 94, "h": 91}]}
+FRAME {"frame": 56, "production_ms": 18.7, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 57, "production_ms": 15.43, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 58, "production_ms": 14.26, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 59, "production_ms": 17.13, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 60, "production_ms": 18.18, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 61, "production_ms": 15.78, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 62, "production_ms": 15.66, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 63, "production_ms": 17.06, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 64, "production_ms": 17.06, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 65, "production_ms": 15.13, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 66, "production_ms": 15.36, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 67, "production_ms": 17.08, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 68, "production_ms": 17.11, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 69, "production_ms": 15.13, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 70, "production_ms": 16.97, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 194, "y": 84, "w": 94, "h": 105}, {"label": "2r", "score": 0.[redacted identifier], "x": 205, "y": 95, "w": 65, "h": 62}]}
+FRAME {"frame": 71, "production_ms": 15.64, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 72, "production_ms": 15.34, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 73, "production_ms": 17.11, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 74, "production_ms": 16.02, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 75, "production_ms": 16.0, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 194, "y": 85, "w": 94, "h": 105}, {"label": "2r", "score": 0.[redacted identifier], "x": 207, "y": 97, "w": 65, "h": 62}]}
+FRAME {"frame": 76, "production_ms": 18.44, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 77, "production_ms": 15.49, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 78, "production_ms": 14.14, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 79, "production_ms": 17.06, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 80, "production_ms": 17.99, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 81, "production_ms": 15.81, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 82, "production_ms": 24.73, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 83, "production_ms": 16.46, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 84, "production_ms": 18.76, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 85, "production_ms": 16.0, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 194, "y": 75, "w": 94, "h": 121}]}
+FRAME {"frame": 86, "production_ms": 14.51, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 87, "production_ms": 17.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 88, "production_ms": 15.88, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 89, "production_ms": 14.05, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 90, "production_ms": 17.85, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 195, "y": 84, "w": 94, "h": 105}]}
+FRAME {"frame": 91, "production_ms": 16.05, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 92, "production_ms": 15.63, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 93, "production_ms": 16.96, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 94, "production_ms": 15.55, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 95, "production_ms": 14.57, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 96, "production_ms": 16.03, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 97, "production_ms": 17.06, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 98, "production_ms": 15.9, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 99, "production_ms": 14.1, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 100, "production_ms": 14.74, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 101, "production_ms": 15.0, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 102, "production_ms": 14.52, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 103, "production_ms": 16.97, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 104, "production_ms": 15.78, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 105, "production_ms": 14.17, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 184, "y": 95, "w": 104, "h": 81}]}
+FRAME {"frame": 106, "production_ms": 14.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 107, "production_ms": 17.04, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 108, "production_ms": 17.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 109, "production_ms": 14.73, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 110, "production_ms": 16.63, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 111, "production_ms": 15.67, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 112, "production_ms": 15.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 113, "production_ms": 18.62, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 114, "production_ms": 17.1, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 115, "production_ms": 14.17, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 116, "production_ms": 15.02, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 117, "production_ms": 19.15, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 118, "production_ms": 15.55, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 119, "production_ms": 14.1, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 120, "production_ms": 17.38, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 121, "production_ms": 15.36, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 122, "production_ms": 15.8, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 123, "production_ms": 14.56, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 124, "production_ms": 17.22, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 125, "production_ms": 16.82, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 126, "production_ms": 15.62, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 127, "production_ms": 14.57, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 128, "production_ms": 17.55, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 129, "production_ms": 16.8, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 130, "production_ms": 17.31, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 195, "y": 75, "w": 94, "h": 121}]}
+FRAME {"frame": 131, "production_ms": 15.55, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 132, "production_ms": 15.89, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 133, "production_ms": 14.9, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 134, "production_ms": 18.02, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 135, "production_ms": 15.77, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 194, "y": 67, "w": 94, "h": 138}]}
+FRAME {"frame": 136, "production_ms": 15.98, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 137, "production_ms": 28.07, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 138, "production_ms": 20.68, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 139, "production_ms": 15.58, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 140, "production_ms": 14.96, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 204, "y": 100, "w": 65, "h": 62}]}
+FRAME {"frame": 141, "production_ms": 17.19, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 142, "production_ms": 16.65, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 143, "production_ms": 22.83, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 144, "production_ms": 24.23, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 145, "production_ms": 15.81, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 204, "y": 94, "w": 65, "h": 70}]}
+FRAME {"frame": 146, "production_ms": 14.4, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 147, "production_ms": 14.81, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 148, "production_ms": 18.45, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 149, "production_ms": 15.59, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 150, "production_ms": 14.13, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 151, "production_ms": 19.87, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 152, "production_ms": 15.73, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 153, "production_ms": 14.11, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 154, "production_ms": 17.07, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 155, "production_ms": 16.68, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 156, "production_ms": 15.72, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 157, "production_ms": 15.21, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 158, "production_ms": 17.09, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 159, "production_ms": 15.96, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 160, "production_ms": 15.66, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 161, "production_ms": 13.96, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 162, "production_ms": 17.11, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 163, "production_ms": 16.75, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 164, "production_ms": 15.63, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 165, "production_ms": 14.8, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 208, "y": 101, "w": 71, "h": 55}, {"label": "2r", "score": 0.[redacted identifier], "x": 198, "y": 84, "w": 94, "h": 105}]}
+FRAME {"frame": 166, "production_ms": 16.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 167, "production_ms": 15.45, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 168, "production_ms": 15.67, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 169, "production_ms": 14.6, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 170, "production_ms": 18.29, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 210, "y": 95, "w": 65, "h": 62}, {"label": "2r", "score": 0.[redacted identifier], "x": 101, "y": 78, "w": 94, "h": 105}, {"label": "2r", "score": 0.[redacted identifier], "x": 201, "y": 74, "w": 84, "h": 121}]}
+FRAME {"frame": 171, "production_ms": 13.78, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 172, "production_ms": 17.01, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 173, "production_ms": 17.94, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 174, "production_ms": 15.15, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 175, "production_ms": 16.77, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 176, "production_ms": 16.78, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 177, "production_ms": 15.47, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 178, "production_ms": 15.06, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 179, "production_ms": 16.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 180, "production_ms": 15.82, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 181, "production_ms": 15.5, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 182, "production_ms": 15.07, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 183, "production_ms": 17.29, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 184, "production_ms": 16.04, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 185, "production_ms": 15.65, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 205, "y": 81, "w": 78, "h": 92}]}
+FRAME {"frame": 186, "production_ms": 14.99, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 187, "production_ms": 17.21, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 188, "production_ms": 15.85, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 189, "production_ms": 14.15, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 190, "production_ms": 15.0, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 191, "production_ms": 17.35, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 192, "production_ms": 16.7, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 193, "production_ms": 15.69, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 194, "production_ms": 15.32, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 195, "production_ms": 16.88, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 208, "y": 92, "w": 71, "h": 70}]}
+FRAME {"frame": 196, "production_ms": 15.49, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 197, "production_ms": 14.16, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 198, "production_ms": 18.49, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 199, "production_ms": 15.99, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 200, "production_ms": 14.1, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 201, "production_ms": 16.58, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 202, "production_ms": 15.64, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 203, "production_ms": 15.38, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 204, "production_ms": 16.96, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 205, "production_ms": 15.73, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 206, "production_ms": 15.47, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 207, "production_ms": 15.26, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 208, "production_ms": 17.01, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 209, "production_ms": 16.0, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 210, "production_ms": 15.72, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 211, "production_ms": 14.18, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 212, "production_ms": 17.03, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 213, "production_ms": 16.84, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 214, "production_ms": 15.74, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 215, "production_ms": 15.39, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 216, "production_ms": 17.26, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 217, "production_ms": 16.79, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 218, "production_ms": 15.69, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 219, "production_ms": 15.36, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 220, "production_ms": 18.27, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 221, "production_ms": 15.69, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 222, "production_ms": 14.05, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 223, "production_ms": 14.84, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 224, "production_ms": 18.29, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 225, "production_ms": 15.68, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 226, "production_ms": 39.03, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 227, "production_ms": 15.95, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 228, "production_ms": 15.42, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 229, "production_ms": 15.3, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 230, "production_ms": 17.08, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.208177387714386, "x": 210, "y": 75, "w": 78, "h": 102}]}
+FRAME {"frame": 231, "production_ms": 15.39, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 232, "production_ms": 13.77, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 233, "production_ms": 17.1, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 234, "production_ms": 16.05, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 235, "production_ms": 15.84, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 207, "y": 75, "w": 78, "h": 105}]}
+FRAME {"frame": 236, "production_ms": 15.57, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 237, "production_ms": 16.93, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 238, "production_ms": 15.88, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 239, "production_ms": 15.64, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 240, "production_ms": 15.07, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 210, "y": 77, "w": 78, "h": 102}]}
+FRAME {"frame": 241, "production_ms": 16.99, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 242, "production_ms": 15.93, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 243, "production_ms": 15.76, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 244, "production_ms": 15.08, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 245, "production_ms": 17.08, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 246, "production_ms": 15.81, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 247, "production_ms": 15.68, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 248, "production_ms": 14.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 249, "production_ms": 17.0, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 250, "production_ms": 15.99, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 251, "production_ms": 16.79, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 252, "production_ms": 17.24, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 253, "production_ms": 15.18, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 254, "production_ms": 17.09, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 255, "production_ms": 16.2, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 256, "production_ms": 15.45, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 257, "production_ms": 15.23, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 258, "production_ms": 17.13, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 259, "production_ms": 16.1, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 260, "production_ms": 15.62, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 261, "production_ms": 14.08, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 262, "production_ms": 17.12, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 263, "production_ms": 16.68, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 264, "production_ms": 15.41, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 265, "production_ms": 15.52, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 266, "production_ms": 14.89, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 267, "production_ms": 16.86, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 268, "production_ms": 15.83, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 269, "production_ms": 15.48, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 270, "production_ms": 15.03, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 271, "production_ms": 17.2, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 272, "production_ms": 16.66, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 273, "production_ms": 15.68, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 274, "production_ms": 15.15, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 275, "production_ms": 16.93, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 212, "y": 78, "w": 71, "h": 97}]}
+FRAME {"frame": 276, "production_ms": 15.44, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 277, "production_ms": 13.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 278, "production_ms": 14.98, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 279, "production_ms": 16.93, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 280, "production_ms": 15.58, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 212, "y": 74, "w": 71, "h": 102}]}
+FRAME {"frame": 281, "production_ms": 21.36, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 282, "production_ms": 15.9, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 283, "production_ms": 15.65, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 284, "production_ms": 15.17, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 285, "production_ms": 17.04, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 210, "y": 72, "w": 78, "h": 105}]}
+FRAME {"frame": 286, "production_ms": 15.37, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 287, "production_ms": 15.09, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 288, "production_ms": 16.91, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 289, "production_ms": 18.23, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 290, "production_ms": 13.96, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 212, "y": 75, "w": 71, "h": 100}]}
+FRAME {"frame": 291, "production_ms": 14.53, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 292, "production_ms": 16.97, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 293, "production_ms": 17.07, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 294, "production_ms": 13.78, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 295, "production_ms": 16.96, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 296, "production_ms": 16.75, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 297, "production_ms": 15.75, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 298, "production_ms": 15.03, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 299, "production_ms": 17.06, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 300, "production_ms": 15.93, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 301, "production_ms": 16.76, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 302, "production_ms": 17.2, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 303, "production_ms": 15.11, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 304, "production_ms": 16.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 305, "production_ms": 16.65, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 306, "production_ms": 15.46, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 307, "production_ms": 15.01, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 308, "production_ms": 16.87, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 309, "production_ms": 16.28, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 310, "production_ms": 15.64, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 211, "y": 77, "w": 78, "h": 100}]}
+FRAME {"frame": 311, "production_ms": 14.96, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 312, "production_ms": 16.95, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 313, "production_ms": 15.8, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 314, "production_ms": 15.63, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 315, "production_ms": 15.1, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 316, "production_ms": 17.0, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 317, "production_ms": 16.67, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 318, "production_ms": 15.66, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 319, "production_ms": 15.28, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 320, "production_ms": 17.26, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 321, "production_ms": 15.38, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 322, "production_ms": 14.04, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 323, "production_ms": 14.97, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 324, "production_ms": 16.87, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 325, "production_ms": 15.82, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 326, "production_ms": 15.41, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 327, "production_ms": 15.2, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 328, "production_ms": 16.71, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 329, "production_ms": 15.84, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 330, "production_ms": 15.85, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 331, "production_ms": 13.98, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 332, "production_ms": 16.93, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 333, "production_ms": 16.77, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 334, "production_ms": 15.65, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 335, "production_ms": 20.13, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 336, "production_ms": 15.56, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 337, "production_ms": 15.29, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 338, "production_ms": 17.37, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 339, "production_ms": 16.76, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 340, "production_ms": 15.64, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 341, "production_ms": 17.5, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 342, "production_ms": 16.89, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 343, "production_ms": 15.99, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 344, "production_ms": 17.41, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 345, "production_ms": 16.29, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 346, "production_ms": 15.84, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 347, "production_ms": 15.22, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 348, "production_ms": 16.91, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 349, "production_ms": 15.2, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 350, "production_ms": 15.65, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 217, "y": 71, "w": 78, "h": 100}]}
+FRAME {"frame": 351, "production_ms": 16.73, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 352, "production_ms": 15.33, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 353, "production_ms": 16.07, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 354, "production_ms": 17.06, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 355, "production_ms": 15.88, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 215, "y": 70, "w": 85, "h": 105}]}
+FRAME {"frame": 356, "production_ms": 16.22, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 357, "production_ms": 17.49, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 358, "production_ms": 15.7, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 359, "production_ms": 14.01, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 360, "production_ms": 19.22, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 214, "y": 72, "w": 85, "h": 102}]}
+FRAME {"frame": 361, "production_ms": 16.28, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 362, "production_ms": 17.13, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 363, "production_ms": 18.23, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 364, "production_ms": 15.15, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 365, "production_ms": 16.83, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 366, "production_ms": 15.46, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 367, "production_ms": 15.53, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 368, "production_ms": 16.86, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 369, "production_ms": 15.89, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 370, "production_ms": 15.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 217, "y": 70, "w": 78, "h": 105}]}
+FRAME {"frame": 371, "production_ms": 19.15, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 372, "production_ms": 15.53, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 373, "production_ms": 14.03, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 374, "production_ms": 14.66, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 375, "production_ms": 17.2, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 212, "y": 74, "w": 85, "h": 100}]}
+FRAME {"frame": 376, "production_ms": 15.25, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 377, "production_ms": 15.3, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 378, "production_ms": 17.06, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 379, "production_ms": 17.08, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 380, "production_ms": 15.35, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 211, "y": 74, "w": 85, "h": 97}]}
+FRAME {"frame": 381, "production_ms": 17.52, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 382, "production_ms": 16.56, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 383, "production_ms": 15.43, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 384, "production_ms": 15.02, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 385, "production_ms": 16.91, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 217, "y": 74, "w": 78, "h": 97}]}
+FRAME {"frame": 386, "production_ms": 15.7, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 387, "production_ms": 15.63, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 388, "production_ms": 16.86, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 389, "production_ms": 15.48, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 390, "production_ms": 14.13, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 217, "y": 71, "w": 78, "h": 102}]}
+FRAME {"frame": 391, "production_ms": 15.05, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 392, "production_ms": 16.94, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 393, "production_ms": 16.26, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 394, "production_ms": 14.15, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 395, "production_ms": 17.05, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 217, "y": 70, "w": 78, "h": 102}]}
+FRAME {"frame": 396, "production_ms": 17.3, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 397, "production_ms": 16.69, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 398, "production_ms": 15.9, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 399, "production_ms": 14.96, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 400, "production_ms": 17.03, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 214, "y": 70, "w": 78, "h": 102}]}
+FRAME {"frame": 401, "production_ms": 16.7, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 402, "production_ms": 16.65, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 403, "production_ms": 15.93, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 404, "production_ms": 14.95, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 405, "production_ms": 17.0, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 212, "y": 74, "w": 85, "h": 100}]}
+FRAME {"frame": 406, "production_ms": 15.64, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 407, "production_ms": 14.22, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 408, "production_ms": 14.65, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 409, "production_ms": 16.99, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 410, "production_ms": 15.82, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 214, "y": 74, "w": 85, "h": 97}]}
+FRAME {"frame": 411, "production_ms": 14.23, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 412, "production_ms": 14.99, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 413, "production_ms": 16.95, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 414, "production_ms": 15.85, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 415, "production_ms": 15.77, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 215, "y": 72, "w": 78, "h": 100}]}
+FRAME {"frame": 416, "production_ms": 15.35, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 417, "production_ms": 17.15, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 418, "production_ms": 15.83, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 419, "production_ms": 15.67, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 420, "production_ms": 14.96, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.325085312128067, "x": 212, "y": 72, "w": 85, "h": 100}]}
+FRAME {"frame": 421, "production_ms": 16.95, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 422, "production_ms": 15.86, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 423, "production_ms": 15.69, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 424, "production_ms": 14.92, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 425, "production_ms": 18.25, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 212, "y": 72, "w": 78, "h": 100}]}
+FRAME {"frame": 426, "production_ms": 15.36, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 427, "production_ms": 15.06, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 428, "production_ms": 17.5, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 429, "production_ms": 15.16, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 430, "production_ms": 15.63, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 215, "y": 75, "w": 78, "h": 92}]}
+FRAME {"frame": 431, "production_ms": 15.09, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 432, "production_ms": 17.36, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 433, "production_ms": 15.13, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 434, "production_ms": 15.66, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 435, "production_ms": 14.8, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 212, "y": 75, "w": 78, "h": 97}]}
+FRAME {"frame": 436, "production_ms": 17.29, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 437, "production_ms": 15.17, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 438, "production_ms": 14.07, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 439, "production_ms": 14.68, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 440, "production_ms": 17.14, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 211, "y": 75, "w": 85, "h": 97}]}
+FRAME {"frame": 441, "production_ms": 15.41, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 442, "production_ms": 15.14, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 443, "production_ms": 16.82, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 444, "production_ms": 16.27, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 445, "production_ms": 15.37, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 214, "y": 77, "w": 78, "h": 92}]}
+FRAME {"frame": 446, "production_ms": 15.09, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 447, "production_ms": 17.04, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 448, "production_ms": 16.16, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 449, "production_ms": 15.62, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 450, "production_ms": 14.87, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 214, "y": 74, "w": 78, "h": 97}]}
+FRAME {"frame": 451, "production_ms": 15.01, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 452, "production_ms": 14.02, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 453, "production_ms": 14.81, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 454, "production_ms": 17.02, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 455, "production_ms": 15.18, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.325085312128067, "x": 214, "y": 74, "w": 78, "h": 97}]}
+FRAME {"frame": 456, "production_ms": 14.08, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 457, "production_ms": 17.07, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 458, "production_ms": 18.11, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 459, "production_ms": 13.79, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 460, "production_ms": 16.97, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 212, "y": 77, "w": 85, "h": 92}]}
+FRAME {"frame": 461, "production_ms": 15.83, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 462, "production_ms": 13.88, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 463, "production_ms": 14.78, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 464, "production_ms": 16.99, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 465, "production_ms": 15.75, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 212, "y": 72, "w": 85, "h": 100}]}
+FRAME {"frame": 466, "production_ms": 13.83, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 467, "production_ms": 23.75, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 468, "production_ms": 15.76, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 469, "production_ms": 14.08, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 470, "production_ms": 17.05, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 211, "y": 77, "w": 85, "h": 92}]}
+FRAME {"frame": 471, "production_ms": 15.38, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 472, "production_ms": 14.06, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 473, "production_ms": 14.55, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 474, "production_ms": 17.07, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 475, "production_ms": 15.4, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": []}
+FRAME {"frame": 476, "production_ms": 15.94, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 477, "production_ms": 15.28, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 478, "production_ms": 17.06, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 479, "production_ms": 15.12, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 480, "production_ms": 15.58, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 211, "y": 80, "w": 94, "h": 91}]}
+FRAME {"frame": 481, "production_ms": 15.01, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 482, "production_ms": 17.14, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 483, "production_ms": 15.48, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 484, "production_ms": 13.99, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 485, "production_ms": 16.71, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.325085312128067, "x": 215, "y": 71, "w": 78, "h": 102}]}
+FRAME {"frame": 486, "production_ms": 17.7, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 487, "production_ms": 14.08, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 488, "production_ms": 14.48, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 489, "production_ms": 16.89, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 490, "production_ms": 15.82, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 214, "y": 70, "w": 78, "h": 105}]}
+FRAME {"frame": 491, "production_ms": 15.04, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 492, "production_ms": 17.23, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 493, "production_ms": 16.1, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 494, "production_ms": 15.73, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 495, "production_ms": 14.89, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 220, "y": 71, "w": 71, "h": 102}]}
+FRAME {"frame": 496, "production_ms": 17.21, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 497, "production_ms": 16.04, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 498, "production_ms": 15.69, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+FRAME {"frame": 499, "production_ms": 15.14, "objects": [], "geometric_box": null, "stable_result": null, "candidate_before_stability": null, "previous_candidate": null, "diagnostic_objects": null}
+SUMMARY {"frames": 500, "seconds": 13.577, "frames_with_score_070": 0, "frames_with_geometric_box": 0, "frames_with_stable_output": 0, "low_threshold_frames": 100, "low_threshold_hits": 60, "scope": "One stationary scene; diagnostic 0.20 results never used as accepted outputs. No robot request or response sent."}
+maix multi-media driver released.
+ISP Vipipe(0) Free pa(0x8acdc000) va(0x0x3fc440b000)

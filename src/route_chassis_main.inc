@@ -8,6 +8,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifndef GONGCHUANG_VERBOSE_TRACE
+#define GONGCHUANG_VERBOSE_TRACE 1
+#endif
+
 using namespace mecanum;
 
 /*
@@ -230,7 +234,7 @@ namespace {
 /*
  * 启停区运行时选择：
  *   1：从启停区1出发；具体顺序由GONGCHUANG_ZONE1_ROUTE_MODE决定，
- *      默认新路线先执行第4规范段，再执行第1规范段并在中心左移扫码；
+ *      默认普通路线先执行第1规范段，再执行第4规范段并保留扫码条件停车；
  *   2：从启停区2出发；始终使用旧路线顺序，第1段距离不变，只把
  *      步骤1、21的前进/后退互换。
  *
@@ -240,17 +244,17 @@ constexpr uint8_t DEFAULT_START_ZONE_SELECTION = 1U;
 uint8_t selectedStartZoneNumber = DEFAULT_START_ZONE_SELECTION;
 
 /*
- * 启停区1路线选择：
- *   0：保留旧顺序 1 -> 4 -> 5...20 -> 21，并保留第4段二维码条件停车；
+ * 启停区1出发路线选择（不再控制返程）：
+ *   0：普通出发顺序 1 -> 4 -> 5...19，并保留第4段二维码条件停车；
  *   1：新状态机顺序 4(200 mm/逆时针360°/余程) -> 1 ->
- *      中心点左移扫码并原路归位 -> 5...19 -> 21(少150 mm) ->
- *      20(横移合成车头+170 mm修正) -> 补回纵向150 mm。
+ *      中心点左移扫码并原路归位 -> 5...19。
+ * 两种模式均按21(少150 mm) -> 20(横移合成车头+170 mm) -> 补回150 mm返程。
  *
  * 这里只改变启停区1。启停区2无论本宏取何值都继续执行旧路线。
  * route[]保持唯一且不重排，防止工位规范段号和调试参数被复制成第二份。
  */
 #ifndef GONGCHUANG_ZONE1_ROUTE_MODE
-#define GONGCHUANG_ZONE1_ROUTE_MODE 1
+#define GONGCHUANG_ZONE1_ROUTE_MODE 0
 #endif
 
 constexpr uint8_t ZONE1_ROUTE_MODE_LEGACY = 0U;
@@ -325,6 +329,30 @@ constexpr float STEP_19_MOTION_SCALE = 0.98f; // 重复11：E前进到F
 constexpr float STEP_20_MOTION_SCALE = 1.018f; // F向右横移到A
 constexpr float STEP_21_MOTION_SCALE = 1.12f; // A返回所选启停区
 constexpr float STEP_21_5_MOTION_SCALE = 1.11f; // 启停区2：A反向返回启停区
+
+// 第1段发车实际行程减少10 mm；不改变速度、加速度或返程第21段。
+constexpr float STEP_01_DISTANCE_REDUCTION_MM = 10.0f;
+
+// 启停区1从中心点到第一次原料区的第6段：仅横移距离在当前标定基础上加2.5%。
+constexpr float ZONE1_STEP_06_DISTANCE_SCALE = 1.025f;
+
+// 第7段原料区到粗加工区：仅横移距离在当前标定基础上增加3%。
+constexpr float STEP_07_DISTANCE_SCALE = 1.03f;
+// 原先减30 mm，现增加15 mm，合并为在上述增加3%后的实际横移行程中减15 mm。
+constexpr float STEP_07_DISTANCE_REDUCTION_MM = 15.0f;
+
+// 第一次粗加工区到第一次暂存区的第9/11段：前进速度上限减10%。
+constexpr float STEP_09_11_MAXIMUM_SPEED_PROFILE_SCALE = 0.90f;
+
+// 第一次经过暂存区F：E->F（第11段）原减20 mm后增加15 mm，净减5 mm；F->G加20 mm。
+// 在标定后的行程上修正，不改变运动档位，也不影响第二次E->F（第19段）。
+constexpr float STEP_11_DISTANCE_REDUCTION_MM = 5.0f;
+constexpr float STEP_12_DISTANCE_EXTENSION_MM = 20.0f;
+
+// 第一次暂存区离开后，旋转90°再前进的第14段：距离在当前标定基础上减5%。
+// 第二次粗加工区离开后的第17段：速度上限减10%。两者不改变加速度。
+constexpr float STEP_14_DISTANCE_SCALE = 0.95f;
+constexpr float STEP_17_MAXIMUM_SPEED_PROFILE_SCALE = 0.90f;
 
 // E到F（第11/19段）额外实车修正：相对当前车体向右20 mm。
 // 与标定后的前进量合成为一次二维运动；本修正不乘motionScale。
@@ -529,10 +557,10 @@ constexpr uint32_t QR_BAUDRATE = 9600UL;
  */
 constexpr uint32_t MOTION_TELEMETRY_INTERVAL_MS = 500UL;
 
-HardwareSerial SerialDebug(DEBUG_RX_PIN, DEBUG_TX_PIN);
-HardwareSerial SerialHmi(HMI_RX_PIN, HMI_TX_PIN);
-HardwareSerial SerialImu(IMU_RX_PIN, IMU_TX_PIN);
-HardwareSerial SerialQr(QR_RX_PIN, QR_TX_PIN);
+gongchuang::Stm32HardwareSerial SerialDebug(DEBUG_RX_PIN, DEBUG_TX_PIN);
+gongchuang::Stm32HardwareSerial SerialHmi(HMI_RX_PIN, HMI_TX_PIN);
+gongchuang::Stm32HardwareSerial SerialImu(IMU_RX_PIN, IMU_TX_PIN);
+gongchuang::Stm32HardwareSerial SerialQr(QR_RX_PIN, QR_TX_PIN);
 
 OneButton startButton(START_BUTTON_PIN, true, true);
 
@@ -599,7 +627,7 @@ constexpr float ZONE1_QR_RETURN_PROFILE_SCALE = 0.50f;
 // 主循环离散更新余量。减速度会按本段最大步频反算，并且不得低于普通段
 // 原减速度。这里约束的是继续输出的轮脉冲；无编码器时不能测量轮胎打滑。
 constexpr float ZONE1_QR_SWEEP_BRAKING_TARGET_MM = 80.0f;
-// 仅启停区1新路线返程：将第21段的实际150 mm延后至第20段横移完成后。
+// 启停区1返程（独立于出发模式）：将第21段的实际150 mm延后至第20段横移完成后。
 // +170 mm是第20段向车头的实车修正量，与横移合成，不乘该段标定比例。
 constexpr float ZONE1_RETURN_DEFERRED_LONGITUDINAL_MM = 150.0f;
 constexpr float ZONE1_RETURN_LATERAL_FORWARD_CORRECTION_MM = 170.0f;
@@ -1361,12 +1389,14 @@ void finishQrFrame() {
     SerialDebug.println(qrData);
   } else {
     hmiSetText("t1", "QRERR");
-    SerialDebug.print("[QR] rejected, overflow/length/data=");
+#if GONGCHUANG_VERBOSE_TRACE
+    SerialDebug.print("[QR] reject,overflow/length/data=");
     SerialDebug.print(qrOverflow ? 1 : 0);
     SerialDebug.print("/");
     SerialDebug.print(static_cast<unsigned int>(qrDataIndex));
     SerialDebug.print("/");
     SerialDebug.println(qrData);
+#endif
   }
 
   qrDataIndex = 0U;
@@ -2069,6 +2099,7 @@ void setDriveMotionProfile(
   appliedDriveAcceleration =
       activeDriveAcceleration;
 
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.print(
       profileShape ==
               DRIVE_PROFILE_ASYMMETRIC_S_CURVE
@@ -2079,6 +2110,7 @@ void setDriveMotionProfile(
   SerialDebug.print(activeDriveAcceleration, 1);
   SerialDebug.print("/");
   SerialDebug.print(activeDriveDeceleration, 1);
+#endif
   if (profileShape ==
       DRIVE_PROFILE_ASYMMETRIC_S_CURVE) {
     SerialDebug.print("/");
@@ -2099,6 +2131,13 @@ void setDriveMotionProfile(
 }
 
 void startRelativeMotorMove(const MotorPulses &pulses) {
+#if GONGCHUANG_GRID_NAVIGATION
+  if (navigation::departureTrayPending &&
+      (pulses.motor1 || pulses.motor2 || pulses.motor3 || pulses.motor4)) {
+    navigation::departureTrayPending = false;
+    if (navigation::onDeparture) navigation::onDeparture();
+  }
+#endif
   SerialDebug.print("[PULSES] M1/M2/M3/M4=");
   SerialDebug.print(pulses.motor1);
   SerialDebug.print("/");
@@ -3016,6 +3055,11 @@ bool zone1ReorderedRouteEnabled() {
              ZONE1_ROUTE_MODE_REORDERED_QR_SWEEP;
 }
 
+// 启停区1始终先短纵移再长横移；普通出发模式也复用原扫描模式的返程修正。
+bool zone1ReorderedReturnEnabled() {
+  return selectedStartZoneNumber == 1U;
+}
+
 bool zone1QrAuxiliaryMotionActive() {
   return zone1ReorderedRouteEnabled() &&
          (zone1ReorderedRoutePhase ==
@@ -3353,7 +3397,7 @@ void routeFault(const char *reason) {
   SerialDebug.println(reason);
 #if GONGCHUANG_ROUTE_DETAILED_FAULT_SNAPSHOT
   SerialDebug.print(
-      "[FAULT SNAP] elapsed/imu-age/max-speed/speed-cap/decel=");
+      "[FAULT SNAP] t/imu-age/max-speed/speed-cap/decel=");
   SerialDebug.print(elapsedMs);
   SerialDebug.print("/");
   SerialDebug.print(imuAgeMs);
@@ -3364,7 +3408,7 @@ void routeFault(const char *reason) {
   SerialDebug.print("/");
   SerialDebug.println(decelerationWasActive ? 1 : 0);
   SerialDebug.print(
-      "[FAULT SNAP] heading target/actual/error/cmd-correction/executed/lead=");
+      "[FAULT SNAP] yaw tgt/actual/err/cmd-corr/executed/lead=");
   SerialDebug.print(targetHeading, 2);
   SerialDebug.print("/");
   SerialDebug.print(actualHeading, 2);
@@ -3377,11 +3421,11 @@ void routeFault(const char *reason) {
   SerialDebug.print("/");
   SerialDebug.println(correctionLead, 2);
   SerialDebug.print(
-      "[FAULT SNAP] translation forward/right mm=");
+      "[FAULT SNAP] move forward/right mm=");
   SerialDebug.print(commandedForwardMm, 1);
   SerialDebug.print("/");
   SerialDebug.println(commandedRightMm, 1);
-  SerialDebug.print("[FAULT SNAP] motor position=");
+  SerialDebug.print("[FAULT SNAP] motor pos=");
   SerialDebug.print(positions.motor1);
   SerialDebug.print("/");
   SerialDebug.print(positions.motor2);
@@ -3389,7 +3433,7 @@ void routeFault(const char *reason) {
   SerialDebug.print(positions.motor3);
   SerialDebug.print("/");
   SerialDebug.println(positions.motor4);
-  SerialDebug.print("[FAULT SNAP] motor target=");
+  SerialDebug.print("[FAULT SNAP] motor tgt=");
   SerialDebug.print(targets.motor1);
   SerialDebug.print("/");
   SerialDebug.print(targets.motor2);
@@ -3397,7 +3441,7 @@ void routeFault(const char *reason) {
   SerialDebug.print(targets.motor3);
   SerialDebug.print("/");
   SerialDebug.println(targets.motor4);
-  SerialDebug.print("[FAULT SNAP] motor remaining=");
+  SerialDebug.print("[FAULT SNAP] motor remain=");
   SerialDebug.print(remaining.motor1);
   SerialDebug.print("/");
   SerialDebug.print(remaining.motor2);
@@ -3437,11 +3481,11 @@ bool serviceTranslationHeadingControl() {
   return true;
 #else
   if (!translationHeadingControlActive) {
-    routeFault("translation heading control state missing");
+    routeFault("move yaw control state missing");
     return false;
   }
   if (!imuIsFresh()) {
-    routeFault("IMU data timeout during translation");
+    routeFault("IMU data timeout during move");
     return false;
   }
 
@@ -3462,15 +3506,19 @@ bool serviceTranslationHeadingControl() {
       const uint8_t activeStep =
           route[routeIndex].specificationStep;
       if (activeStep == 1U) {
+#if GONGCHUANG_VERBOSE_TRACE
         SerialDebug.print(
             "[STEP1->4 IMU CHECK] start, window ms=");
         SerialDebug.println(
             STEP_01_PRE_LATERAL_IMU_CHECK_MS);
+#endif
       } else if (activeStep == 4U) {
+#if GONGCHUANG_VERBOSE_TRACE
         SerialDebug.print(
-            "[STEP4->5 IMU WINDOW] start, minimum ms=");
+            "[STEP4->5 IMU WINDOW] start,min ms=");
         SerialDebug.println(
             STEP_04_TERMINAL_IMU_MINIMUM_DURATION_MS);
+#endif
       }
     }
   }
@@ -3582,7 +3630,7 @@ bool serviceTranslationHeadingControl() {
    */
   if (fabsf(actualTranslationCorrectionDegrees()) >
       TRANSLATION_MAXIMUM_ACCUMULATED_CORRECTION_DEGREES) {
-    routeFault("translation actual IMU correction exceeded safety limit");
+    routeFault("move actual IMU corr exceeded safety limit");
     return false;
   }
   return true;
@@ -3614,6 +3662,7 @@ void startTurnResidualCorrection(float errorDegrees) {
     correction = -MINIMUM_TURN_RESIDUAL_DEGREES;
   }
 
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.print(
       "[TURN RESIDUAL] tgt/act/err/corr=");
   SerialDebug.print(
@@ -3624,6 +3673,7 @@ void startTurnResidualCorrection(float errorDegrees) {
   SerialDebug.print(errorDegrees, 2);
   SerialDebug.print("/");
   SerialDebug.println(correction, 2);
+#endif
 
   setDriveMotionProfile(
       TURN_RESIDUAL_MAXIMUM_STEP_RATE,
@@ -3667,6 +3717,7 @@ void finishProgram(
   hmiSetRunStatus(
       stoppedByConfiguredStep ? "STEPSTOP" : "FINISH");
 
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.print(
       stoppedByConfiguredStep
           ? "[RUN STEP STOP] completed step="
@@ -3674,17 +3725,19 @@ void finishProgram(
   SerialDebug.print(completedStep);
   SerialDebug.print("/21, total=");
   SerialDebug.print(millis() - routeRunStartMs);
-  SerialDebug.print(" ms, start zone=");
+  SerialDebug.print(" ms,start zone=");
   SerialDebug.print(selectedStartZoneNumber);
   SerialDebug.print(", scan b=");
   SerialDebug.print(scanDistanceBmm, 1);
   SerialDebug.println(" mm");
+#endif
 }
 
 void advanceRoute() {
   const uint8_t completedStep =
       route[routeIndex].specificationStep;
   const bool reorderedZone1 = zone1ReorderedRouteEnabled();
+  const bool reorderedReturnZone1 = zone1ReorderedReturnEnabled();
 
   /*
    * 启停区1新第4段入口包含四个子状态：先前进150 mm，再横移200 mm、
@@ -3736,7 +3789,7 @@ void advanceRoute() {
 
   // 第20段横移到位后补回第21段延后的实际150 mm；补完才报告完成并收车。
   // routeIndex保持在第20段，避免重复进入第21段或提前通知主程序FINISHED。
-  if (reorderedZone1 && completedStep == 20U &&
+  if (reorderedReturnZone1 && completedStep == 20U &&
       zone1ReorderedRoutePhase !=
           ZONE1_REORDERED_RETURN_FINAL_LONGITUDINAL) {
     stopAllMotorsImmediately();
@@ -3763,23 +3816,19 @@ void advanceRoute() {
     return;
   }
 
-  if (reorderedZone1) {
-    if (completedStep == 4U && routeIndex == 1U) {
-      zone1ReorderedRoutePhase = ZONE1_REORDERED_INACTIVE;
-      routeIndex = 0U;  // 新顺序：第4段完成后再执行现有1045 mm第1段。
-    } else if (completedStep == 1U && routeIndex == 0U) {
-      requestZone1FreshQrSweep();
-      return;
-    } else if (completedStep == 19U && routeIndex == 16U) {
-      routeIndex = 18U; // 新返程：先第21段纵向，再第20段横向。
-    } else if (completedStep == 21U && routeIndex == 18U) {
-      routeIndex = 17U;
-    } else if (completedStep == 20U && routeIndex == 17U) {
-      finishProgram(false, completedStep);
-      return;
-    } else {
-      ++routeIndex;
-    }
+  if (reorderedZone1 && completedStep == 4U && routeIndex == 1U) {
+    zone1ReorderedRoutePhase = ZONE1_REORDERED_INACTIVE;
+    routeIndex = 0U;  // 扫描模式：第4段完成后再执行第1段。
+  } else if (reorderedZone1 && completedStep == 1U && routeIndex == 0U) {
+    requestZone1FreshQrSweep();
+    return;
+  } else if (reorderedReturnZone1 && completedStep == 19U && routeIndex == 16U) {
+    routeIndex = 18U; // 两种出发模式均先第21段纵向，再第20段横向。
+  } else if (reorderedReturnZone1 && completedStep == 21U && routeIndex == 18U) {
+    routeIndex = 17U;
+  } else if (reorderedReturnZone1 && completedStep == 20U && routeIndex == 17U) {
+    finishProgram(false, completedStep);
+    return;
   } else {
     ++routeIndex;
   }
@@ -3813,8 +3862,9 @@ void beginPostTranslationHeadingCorrection(
   postTranslationCompletionAction =
       completionAction;
   hmiSetRunStatus("POSTIMU");
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.print(
-      "[POST IMU START] target/actual/error/action=");
+      "[POST IMU START] tgt/actual/err/action=");
   SerialDebug.print(
       targetCounterClockwiseHeadingDegrees, 2);
   SerialDebug.print("/");
@@ -3827,6 +3877,7 @@ void beginPostTranslationHeadingCorrection(
               POST_TRANSLATION_ADVANCE_ROUTE
           ? "ADVANCE"
           : "WAIT_SCAN");
+#endif
 #else
   (void)completionAction;
 #endif
@@ -3835,15 +3886,15 @@ void beginPostTranslationHeadingCorrection(
 void servicePostTranslationHeadingCorrection() {
 #if GONGCHUANG_TRANSLATION_CONTROL_MODE == 0
   if (!postTranslationHeadingCorrectionActive) {
-    routeFault("post-translation IMU state missing");
+    routeFault("post-move IMU state missing");
     return;
   }
   if (!imuIsFresh()) {
-    routeFault("IMU timeout during post-translation correction");
+    routeFault("IMU timeout during post-move corr");
     return;
   }
   if (millis() - commandStartMs > MOTION_TIMEOUT_MS) {
-    routeFault("post-translation IMU correction timeout");
+    routeFault("post-move IMU corr timeout");
     return;
   }
 
@@ -3855,22 +3906,26 @@ void servicePostTranslationHeadingCorrection() {
   const float errorDegrees = headingErrorDegrees();
   if (fabsf(errorDegrees) <=
       activeTranslationHeadingToleranceDegrees()) {
+#if GONGCHUANG_VERBOSE_TRACE
     SerialDebug.print(
-        "[POST IMU DONE] target/actual/error=");
+        "[POST IMU DONE] tgt/actual/err=");
     SerialDebug.print(
         targetCounterClockwiseHeadingDegrees, 2);
     SerialDebug.print("/");
     SerialDebug.print(currentRouteHeadingDegrees(), 2);
     SerialDebug.print("/");
     SerialDebug.println(errorDegrees, 2);
+#endif
 
     postTranslationHeadingCorrectionActive = false;
     if (postTranslationCompletionAction ==
         POST_TRANSLATION_WAIT_FOR_SCAN_CODE) {
       routePhase = ROUTE_PHASE_WAIT_SCAN_CODE;
       hmiSetRunStatus("SCANMAX");
+#if GONGCHUANG_VERBOSE_TRACE
       SerialDebug.println(
-          "[SCAN] heading corrected, waiting in place");
+          "[SCAN] yaw corr,waiting in place");
+#endif
     } else {
       advanceRoute();
     }
@@ -3981,7 +4036,7 @@ void startFastLateralTranslation(
   SerialDebug.print("/");
   SerialDebug.print(motionScale, 2);
   SerialDebug.print(
-      ", v/a-request/a-limit scale=");
+      ",v/a-req/a-limit scale=");
   SerialDebug.print(maximumSpeedProfileScale, 2);
   SerialDebug.print("/");
   SerialDebug.print(accelerationProfileScale, 2);
@@ -4168,16 +4223,20 @@ bool serviceStep04QrGate() {
 #endif
     routePhase = ROUTE_PHASE_MOTION;
     hmiSetRunStatus("RUN");
+#if GONGCHUANG_VERBOSE_TRACE
     SerialDebug.println(wasWaiting
         ? "[QR RESUME] step=4 original endpoint retained"
         : "[QR PASS] step=4 checkpoint released in motion");
+#endif
     return false;
   }
   const bool held = stopStep04AtQrCheckpoint();
   if (step04QrWaitNoticePending) {
     step04QrWaitNoticePending = false;
     hmiSetRunStatus("QRWAIT");
-    SerialDebug.println("[QR WAIT] step=4 endpoint-gap=190mm; braking complete, wheels held");
+#if GONGCHUANG_VERBOSE_TRACE
+    SerialDebug.println("[QR WAIT] step=4 endpt-gap=190mm;brake done,wheels held");
+#endif
   }
   return held; // Indefinite QR wait; loop still serves QR/IMU/button/arm.
 }
@@ -4399,8 +4458,10 @@ void startSlowScan(float motionScale) {
    * 核验硬航向；模式0按其规则执行段后原地航向修正。
    */
   if (scanFlag) {
+#if GONGCHUANG_VERBOSE_TRACE
     SerialDebug.println(
-        "[SCAN] valid code already present, b=0 mm");
+        "[SCAN] valid code already present,b=0 mm");
+#endif
     /*
      * 即使b=0也建立一个零位移平移段：main可在同一步内核验硬航向，
      * 模式0则会立即进入段后原地纠偏。这样状态机不会绕过第2段航向条件。
@@ -4435,7 +4496,7 @@ void startSlowScan(float motionScale) {
       STEP_02_ACCELERATION_PROFILE_SCALE;
 
   SerialDebug.print(
-      "[SCAN] maximum/scale/requested-vmax/acc=");
+      "[SCAN] max/scale/req-vmax/acc=");
   SerialDebug.print(scanCommandedMaximumDistanceMm, 1);
   SerialDebug.print("/");
   SerialDebug.print(motionScale, 2);
@@ -4487,7 +4548,7 @@ void captureScanDistanceB() {
 
 void startAdjustToPointA(float motionScale) {
   if (!scanFlag || !scanOriginValid) {
-    routeFault("step 3 requires a valid QR code and scan origin");
+    routeFault("step 3 requires valid QR code and scan origin");
     return;
   }
 
@@ -4510,6 +4571,7 @@ void startAdjustToPointA(float motionScale) {
       selectedStartZoneDirection() *
       deltaAlongScanDirectionMm;
 
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.print("[SCAN->A] b/delta/vehicle-forward=");
   SerialDebug.print(scanDistanceBmm, 1);
   SerialDebug.print("/");
@@ -4517,16 +4579,23 @@ void startAdjustToPointA(float motionScale) {
   SerialDebug.print("/");
   SerialDebug.print(vehicleForwardMm, 1);
   SerialDebug.println(" mm");
+#endif
 
   if (deltaAlongScanDirectionMm > 0.05f) {
+#if GONGCHUANG_VERBOSE_TRACE
     SerialDebug.println(
         "[SCAN->A] b<92: continue along scan direction");
+#endif
   } else if (deltaAlongScanDirectionMm < -0.05f) {
+#if GONGCHUANG_VERBOSE_TRACE
     SerialDebug.println(
         "[SCAN->A] b>92: reverse excess distance");
+#endif
   } else {
+#if GONGCHUANG_VERBOSE_TRACE
     SerialDebug.println(
         "[SCAN->A] b=92: already at point A");
+#endif
   }
 
   startFastLongitudinalTranslation(
@@ -4550,6 +4619,7 @@ void startCurrentCommand() {
   const float motionScale =
       selectedStartZoneMotionScale(command);
   const bool reorderedZone1 = zone1ReorderedRouteEnabled();
+  const bool reorderedReturnZone1 = zone1ReorderedReturnEnabled();
   commandStartMs = millis();
   printCurrentCommand();
 
@@ -4585,6 +4655,7 @@ void startCurrentCommand() {
     step7RawAreaHeadingReferenceDegrees =
         targetCounterClockwiseHeadingDegrees;
     step7RawAreaHeadingReferenceValid = true;
+#if GONGCHUANG_VERBOSE_TRACE
     SerialDebug.print(
         "[STEP7 HEADING REF] raw/norm-deg=");
     SerialDebug.print(
@@ -4594,6 +4665,7 @@ void startCurrentCommand() {
         wrapDeltaDegrees(
             step7RawAreaHeadingReferenceDegrees),
         2);
+#endif
   }
 
   /*
@@ -4603,7 +4675,7 @@ void startCurrentCommand() {
   if (command.specificationStep == 15U) {
     if (!step7RawAreaHeadingReferenceValid ||
         !step15HeadingMatchAppliedAtSecondRawArea) {
-      routeFault("step 15 heading match was not completed");
+      routeFault("step 15 yaw match was not done");
       return;
     }
     const float targetMismatchDegrees =
@@ -4611,7 +4683,7 @@ void startCurrentCommand() {
             targetCounterClockwiseHeadingDegrees -
             step7RawAreaHeadingReferenceDegrees);
     if (fabsf(targetMismatchDegrees) > 0.001f) {
-      routeFault("step 15 target differs from step 7");
+      routeFault("step 15 tgt differs from step 7");
       return;
     }
   }
@@ -4621,16 +4693,19 @@ void startCurrentCommand() {
       /*
        * 步骤1和21共用“随启停区反转纵向”的命令类型。启停区1新路线
        * 已在第4段横移前实际前进150 mm，因此这里从第1段的实际命令量
-       * 精确扣回150 mm；启停区2和模式0仍使用原理论量与原比例。
+       * 精确扣回150 mm；第21段的返程拆分独立于出发模式，仅启停区1应用。
        */
       float nominalLongitudinalMm =
           static_cast<float>(command.value);
+      if (command.specificationStep == 1U) {
+        nominalLongitudinalMm -= STEP_01_DISTANCE_REDUCTION_MM / motionScale;
+      }
       if (reorderedZone1 &&
           command.specificationStep == 1U) {
         nominalLongitudinalMm -=
             ZONE1_INITIAL_FORWARD_BEFORE_STEP04_MM /
             motionScale;
-      } else if (reorderedZone1 &&
+      } else if (reorderedReturnZone1 &&
                  command.specificationStep == 21U) {
         // 从标定后的实际行程扣150 mm，横移完再沿原方向补回同样的150 mm。
         nominalLongitudinalMm -=
@@ -4651,17 +4726,30 @@ void startCurrentCommand() {
       startAdjustToPointA(motionScale);
       break;
 
-    case COMMAND_FORWARD_FAST:
+    case COMMAND_FORWARD_FAST: {
+      float nominalForwardMm =
+          static_cast<float>(command.value) *
+              (command.specificationStep == 14U ? STEP_14_DISTANCE_SCALE : 1.0f);
+      if (command.specificationStep == 11U) {
+        nominalForwardMm -= STEP_11_DISTANCE_REDUCTION_MM / motionScale;
+      } else if (command.specificationStep == 12U) {
+        nominalForwardMm += STEP_12_DISTANCE_EXTENSION_MM / motionScale;
+      }
       startFastLongitudinalTranslation(
-          static_cast<float>(command.value),
+          nominalForwardMm,
           motionScale,
-          1.0f,
+          (command.specificationStep == 9U || command.specificationStep == 11U)
+              ? STEP_09_11_MAXIMUM_SPEED_PROFILE_SCALE
+              : (command.specificationStep == 17U
+                     ? STEP_17_MAXIMUM_SPEED_PROFILE_SCALE
+                     : 1.0f),
           1.0f,
           (command.specificationStep == 11U ||
            command.specificationStep == 19U)
               ? E_TO_F_RIGHT_CORRECTION_MM
               : 0.0f);
       break;
+    }
 
     case COMMAND_BACKWARD_FAST:
       startFastLongitudinalTranslation(
@@ -4684,7 +4772,7 @@ void startCurrentCommand() {
       DriveProfileShape profileShape =
           DRIVE_PROFILE_ASYMMETRIC_TRAPEZOID;
       float forwardCorrectionMm = 0.0f;
-      if (reorderedZone1 &&
+      if (reorderedReturnZone1 &&
           command.specificationStep == 20U) {
         forwardCorrectionMm =
             ZONE1_RETURN_LATERAL_FORWARD_CORRECTION_MM;
@@ -4712,9 +4800,11 @@ void startCurrentCommand() {
          * route[]横移理论量，也不乘本段motionScale。
          */
         forwardCorrectionMm = configuredStep04ForwardCorrectionMm();
+#if GONGCHUANG_VERBOSE_TRACE
         SerialDebug.print(
             "[STEP4 LATERAL CORRECTION] fwd-mm=");
         SerialDebug.println(forwardCorrectionMm, 1);
+#endif
       }
 #endif
 
@@ -4736,21 +4826,32 @@ void startCurrentCommand() {
       if (command.specificationStep == 7U ||
           command.specificationStep == 15U) {
         /*
-         * 正式与独立平移固件共用。+70 mm指向物理车头（3、4号轮侧），
+         * 正式与独立平移固件共用。+80 mm指向物理车头（3、4号轮侧），
          * 是实车修正量，不改变route[]中的1835 mm理论横移量，也不乘该段
          * motionScale。两个分量在startTranslationDisplacement()内一次合成。
          */
         forwardCorrectionMm =
             GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_MM;
+#if GONGCHUANG_VERBOSE_TRACE
         SerialDebug.print(
             "[LONG LATERAL CORRECTION] fwd-mm=");
         SerialDebug.println(forwardCorrectionMm, 1);
+#endif
       }
 #endif
 
+      const float distanceScale =
+          selectedStartZoneNumber == 1U && command.specificationStep == 6U
+              ? ZONE1_STEP_06_DISTANCE_SCALE
+              : (command.specificationStep == 7U ? STEP_07_DISTANCE_SCALE : 1.0f);
+      const float nominalLateralMm =
+          static_cast<float>(command.value) * distanceScale -
+          (command.specificationStep == 7U
+               ? STEP_07_DISTANCE_REDUCTION_MM / motionScale
+               : 0.0f);
       startFastLateralTranslation(
           (command.type == COMMAND_LEFT_FAST ? -1.0f : 1.0f) *
-              static_cast<float>(command.value),
+              nominalLateralMm,
           motionScale,
           maximumSpeedProfileScale,
           accelerationProfileScale,
@@ -4806,8 +4907,10 @@ void serviceScanCommand() {
           if (!scanDistanceCaptured) {
             captureScanDistanceB();
           }
+#if GONGCHUANG_VERBOSE_TRACE
           SerialDebug.println(
-              "[SCAN] QR acquired: translation stopped, finishing in-segment heading");
+              "[SCAN] QR acquired: move stopped,finishing in-segment yaw");
+#endif
         }
       }
 
@@ -4816,7 +4919,7 @@ void serviceScanCommand() {
       }
       if (millis() - commandStartMs >
           MOTION_TIMEOUT_MS) {
-        routeFault("slow scan motion/heading timeout");
+        routeFault("slow scan motion/yaw timeout");
         return;
       }
 
@@ -4841,10 +4944,12 @@ void serviceScanCommand() {
         stopAllMotorsImmediately();
         routePhase = ROUTE_PHASE_WAIT_SCAN_CODE;
         hmiSetRunStatus("SCANMAX");
+#if GONGCHUANG_VERBOSE_TRACE
         SerialDebug.print(
-            "[SCAN] configured limit and heading reached at ");
+            "[SCAN] configured limit and yaw reached at ");
         SerialDebug.print(scanCommandedMaximumDistanceMm, 1);
-        SerialDebug.println(" mm, waiting in place");
+        SerialDebug.println(" mm,waiting in place");
+#endif
       }
       return;
 #else
@@ -4892,8 +4997,10 @@ void serviceScanCommand() {
 
     case ROUTE_PHASE_WAIT_SCAN_CODE:
       if (scanFlag) {
+#if GONGCHUANG_VERBOSE_TRACE
         SerialDebug.println(
             "[SCAN] code acquired at 200 mm limit");
+#endif
         // 航向已经在进入等待相位前合格，因此这里不再重复校准。
         advanceRoute();
       }
@@ -5139,7 +5246,13 @@ void serviceIntegratedTurnCommand() {
     integratedTurnControlActive = false;
     integratedTurnBrakeCommandIssued = false;
     integratedTurnDirectionSign = 0;
+#if GONGCHUANG_GRID_NAVIGATION
+    // GridDrive owns the next action; never advance the legacy route table.
+    if (navigation::gridMotionOwned) routePhase = ROUTE_PHASE_IDLE;
+    else advanceRoute();
+#else
     advanceRoute();
+#endif
     return;
   }
 
@@ -5275,7 +5388,7 @@ void serviceOrdinaryCommand() {
   }
   if (!allMotorsArrived()) {
     if (millis() - commandStartMs > MOTION_TIMEOUT_MS) {
-      routeFault("chassis translation timeout");
+      routeFault("chassis move timeout");
     }
     return;
   }
@@ -5307,7 +5420,7 @@ void serviceOrdinaryCommand() {
       allMotorsArrived()) {
 #endif
     if (!step7RawAreaHeadingReferenceValid) {
-      routeFault("step 7 heading reference missing");
+      routeFault("step 7 yaw reference missing");
       return;
     }
 
@@ -5321,6 +5434,7 @@ void serviceOrdinaryCommand() {
         matchedTargetDegrees;
     step15HeadingMatchAppliedAtSecondRawArea = true;
 
+#if GONGCHUANG_VERBOSE_TRACE
     SerialDebug.print(
         "[STEP15 PRE-ALIGN] ref/prev/tgt/act/delta-deg=");
     SerialDebug.print(
@@ -5336,6 +5450,7 @@ void serviceOrdinaryCommand() {
         matchedTargetDegrees -
             currentRouteHeadingDegrees(),
         2);
+#endif
   }
 
 #if GONGCHUANG_TRANSLATION_CONTROL_MODE == 0
@@ -5375,6 +5490,7 @@ void serviceOrdinaryCommand() {
   }
 
   if (activeCommandIsStep01) {
+#if GONGCHUANG_VERBOSE_TRACE
     SerialDebug.print(
         "[STEP1->4 IMU CHECK] done, elapsed/target/actual/error=");
     SerialDebug.print(
@@ -5386,11 +5502,13 @@ void serviceOrdinaryCommand() {
     SerialDebug.print(currentRouteHeadingDegrees(), 2);
     SerialDebug.print("/");
     SerialDebug.println(headingErrorDegrees(), 2);
+#endif
   }
 
   if (activeCommandIsStep04) {
+#if GONGCHUANG_VERBOSE_TRACE
     SerialDebug.print(
-        "[STEP4->5 IMU WINDOW] done, elapsed/target/actual/error=");
+        "[STEP4->5 IMU WINDOW] done,t/tgt/actual/err=");
     SerialDebug.print(
         millis() - translationTerminalCorrectionStartMs);
     SerialDebug.print(" ms/");
@@ -5400,6 +5518,7 @@ void serviceOrdinaryCommand() {
     SerialDebug.print(currentRouteHeadingDegrees(), 2);
     SerialDebug.print("/");
     SerialDebug.println(headingErrorDegrees(), 2);
+#endif
   }
 
   /*
@@ -5408,14 +5527,16 @@ void serviceOrdinaryCommand() {
    */
   if (route[routeIndex].specificationStep == 14U &&
       step15HeadingMatchAppliedAtSecondRawArea) {
+#if GONGCHUANG_VERBOSE_TRACE
     SerialDebug.print(
-        "[STEP15 PRE-ALIGN DONE] target/actual/error deg=");
+        "[STEP15 PRE-ALIGN DONE] tgt/actual/err deg=");
     SerialDebug.print(
         targetCounterClockwiseHeadingDegrees, 2);
     SerialDebug.print("/");
     SerialDebug.print(currentRouteHeadingDegrees(), 2);
     SerialDebug.print("/");
     SerialDebug.println(headingErrorDegrees(), 2);
+#endif
   }
   advanceRoute();
 #endif
@@ -5501,6 +5622,15 @@ void receiveHmiStartCommand() {
   while (SerialHmi.available()) {
     const uint8_t command =
         static_cast<uint8_t>(SerialHmi.read());
+#if GONGCHUANG_GRID_NAVIGATION
+    if (programState == PROGRAM_WAITING && !startRequested &&
+        (command == 0x03U || command == 0x04U)) {
+      navigation::mode.select(command == 0x03U ? qiming::NavigationMode::RADAR : qiming::NavigationMode::LEGACY);
+      hmiSetRunStatus(command == 0x03U ? "RADAR" : "LEGACY");
+      SerialDebug.println(command == 0x03U ? "[MODE] RADAR" : "[MODE] LEGACY");
+      continue;
+    }
+#endif
     if ((command != 0x01U && command != 0x02U) ||
         programState != PROGRAM_WAITING || startRequested) {
       continue;
@@ -5511,6 +5641,16 @@ void receiveHmiStartCommand() {
     hmiSetRunStatus(command == 0x01U ? "READY1" : "READY2");
   }
 }
+
+#if GONGCHUANG_GRID_NAVIGATION
+void onNavigationModeDoubleClick() {
+  if (programState != PROGRAM_WAITING || startRequested) return;
+  const bool radar = navigation::mode.selected() != qiming::NavigationMode::RADAR;
+  navigation::mode.select(radar ? qiming::NavigationMode::RADAR : qiming::NavigationMode::LEGACY);
+  hmiSetRunStatus(radar ? "RADAR" : "LEGACY");
+  SerialDebug.println(radar ? "[MODE] RADAR" : "[MODE] LEGACY");
+}
+#endif
 
 void beginRoute() {
   if (programState != PROGRAM_WAITING) {
@@ -5586,17 +5726,19 @@ void beginRoute() {
   hmiSetText("t8", "000+000");
   hmiSetRunStatus("RUN");
 
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.print("[RUN START] start zone=");
   SerialDebug.print(selectedStartZoneNumber);
-  SerialDebug.print(", longitudinal sign=");
+  SerialDebug.print(",long sign=");
   SerialDebug.print(selectedStartZoneDirection(), 0);
-  SerialDebug.print(", step1 direct/pre-step4-offset mm=");
+  SerialDebug.print(",step1 direct/pre-step4-offset mm=");
   SerialDebug.print(START_TO_STEP_04_PRE_ENTRY_MM);
   SerialDebug.print("/");
   SerialDebug.print(STEP_04_PRE_ENTRY_OFFSET_MM);
-  SerialDebug.print(", IMU reference=");
+  SerialDebug.print(",IMU reference=");
   SerialDebug.print(routeImuReferenceDegrees, 2);
   SerialDebug.println(" deg");
+#endif
 }
 
 void abortRoute() {
@@ -5622,7 +5764,7 @@ void abortRoute() {
   SerialDebug.print("[RUN ABORT] step=");
   SerialDebug.print(stoppedStep);
   SerialDebug.print(
-      "/21, reason=PB9 long press, elapsed/heading/error=");
+      "/21,reason=PB9 long press,t/yaw/err=");
   SerialDebug.print(elapsedMs);
   SerialDebug.print("/");
   SerialDebug.print(actualHeading, 2);
@@ -5685,21 +5827,28 @@ void initializeHmi() {
 
 void printStartupConfiguration() {
 #if GONGCHUANG_ROUTE_VERBOSE_BOOT_DIAGNOSTICS
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.println(
       "=== GongChuang chassis-only route ===");
   SerialDebug.println(
-      "[BOOT] arm M5/M6/M7, gripper, tray and MaixCAM are not initialized");
-#if GONGCHUANG_TRANSLATION_CONTROL_MODE == 1
-  SerialDebug.println(
-      "[BOOT] firmware=main, translation=hard-distance + hard-heading, signed wheel-rate priority");
-  SerialDebug.println(
-      "[BOOT] terminal stability delay=0 ms; translation progress never commands reverse");
-#else
-  SerialDebug.println(
-      "[BOOT] firmware=main_v0, translation=no in-motion IMU + post-segment IMU correction");
-  SerialDebug.println(
-      "[BOOT] terminal stability delay=0 ms; explicit turns keep integrated IMU braking");
+      "[BOOT] M5/M6/M7/grip/tray/MaixCAM not initialized");
 #endif
+#if GONGCHUANG_TRANSLATION_CONTROL_MODE == 1
+#if GONGCHUANG_VERBOSE_TRACE
+  SerialDebug.println(
+      "[BOOT] fw=main,hard-distance/yaw,signed wheel priority");
+  SerialDebug.println(
+      "[BOOT] end wait=0 ms;move never reverses");
+#endif
+#else
+#if GONGCHUANG_VERBOSE_TRACE
+  SerialDebug.println(
+      "[BOOT] fw=main_v0,move IMU=OFF;end IMU corr=ON");
+  SerialDebug.println(
+      "[BOOT] end wait=0 ms;turns keep IMU brake");
+#endif
+#endif
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.print("[BOOT] selected start zone=");
   SerialDebug.println(selectedStartZoneNumber);
   SerialDebug.print(
@@ -5722,7 +5871,7 @@ void printStartupConfiguration() {
   SerialDebug.print("/");
   SerialDebug.println(POINT_A_TO_START_ZONE_MM);
   SerialDebug.print(
-      "[BOOT] step1 direct/pre-step4-offset/step4 right mm=");
+      "[BOOT] s1/pre-s4/s4-right mm=");
   SerialDebug.print(START_TO_STEP_04_PRE_ENTRY_MM);
   SerialDebug.print("/");
   SerialDebug.print(STEP_04_PRE_ENTRY_OFFSET_MM);
@@ -5734,21 +5883,23 @@ void printStartupConfiguration() {
       STOP_AFTER_STEP == 0U
           ? " (full route)"
           : " (configured step stop)");
-  SerialDebug.println("[BOOT] independent step motion scales:");
+  SerialDebug.println("[BOOT] separate step motion scales:");
+#endif
   for (size_t i = 0U; i < ROUTE_COMMAND_COUNT; ++i) {
     SerialDebug.print("[BOOT]   step ");
     SerialDebug.print(route[i].specificationStep);
     SerialDebug.print(" = ");
     SerialDebug.println(route[i].motionScale, 3);
   }
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.print(
-      "[BOOT] step 7 lateral anti-slip speed/acc scale=");
+      "[BOOT] s7 anti-slip v/a gain=");
   SerialDebug.print(STEP_07_LATERAL_MAX_SPEED_SCALE, 2);
   SerialDebug.print("/");
   SerialDebug.println(
       STEP_07_LATERAL_ACCELERATION_SCALE, 2);
   SerialDebug.print(
-      "[BOOT] step 15 lateral anti-slip speed/acc scale=");
+      "[BOOT] s15 anti-slip v/a gain=");
   SerialDebug.print(STEP_15_LATERAL_MAX_SPEED_SCALE, 2);
   SerialDebug.print("/");
   SerialDebug.println(
@@ -5773,7 +5924,7 @@ void printStartupConfiguration() {
   SerialDebug.print("/");
   SerialDebug.println(FINAL_ALL_ACCELERATION_SCALE, 2);
   SerialDebug.print(
-      "[BOOT] latest maximum-speed-only increase scale=");
+      "[BOOT] vmax-only gain=");
   SerialDebug.println(
       LATEST_MAXIMUM_SPEED_INCREASE_SCALE, 2);
   SerialDebug.print(
@@ -5784,52 +5935,52 @@ void printStartupConfiguration() {
   SerialDebug.println(
       LATEST_GLOBAL_ACCELERATION_SCALE, 2);
   SerialDebug.print(
-      "[BOOT] chassis additional speed/acc scale=");
+      "[BOOT] chassis extra v/a=");
   SerialDebug.print(CHASSIS_GLOBAL_SPEED_INCREASE_SCALE, 2);
   SerialDebug.print("/");
   SerialDebug.println(
       CHASSIS_GLOBAL_ACCELERATION_INCREASE_SCALE, 2);
   SerialDebug.print(
-      "[BOOT] latest angular-only speed/acc scale=");
+      "[BOOT] turn-only v/a=");
   SerialDebug.print(
       LATEST_ANGULAR_MAXIMUM_SPEED_SCALE, 2);
   SerialDebug.print("/");
   SerialDebug.println(
       LATEST_ANGULAR_ACCELERATION_SCALE, 2);
   SerialDebug.print(
-      "[BOOT] latest linear-only speed/acc scale=");
+      "[BOOT] move-only v/a=");
   SerialDebug.print(
       LATEST_LINEAR_MAXIMUM_SPEED_SCALE, 2);
   SerialDebug.print("/");
   SerialDebug.println(
       LATEST_LINEAR_ACCELERATION_SCALE, 2);
   SerialDebug.print(
-      "[BOOT] additional linear-only speed/acc scale=");
+      "[BOOT] move extra v/a=");
   SerialDebug.print(
       LATEST_ADDITIONAL_LINEAR_MAXIMUM_SPEED_SCALE, 3);
   SerialDebug.print("/");
   SerialDebug.println(
       LATEST_ADDITIONAL_LINEAR_ACCELERATION_SCALE, 3);
   SerialDebug.print(
-      "[BOOT] trapezoid-only final speed/acc scale=");
+      "[BOOT] trapezoid final v/a=");
   SerialDebug.print(
       TRAPEZOID_MAXIMUM_SPEED_REDUCTION_SCALE, 2);
   SerialDebug.print("/");
   SerialDebug.println(
       TRAPEZOID_FINAL_ACCELERATION_SCALE, 2);
   SerialDebug.print(
-      "[BOOT] latest trapezoid acceleration multiplier=");
+      "[BOOT] trapezoid acc mul=");
   SerialDebug.println(
       LATEST_TRAPEZOID_ACCELERATION_SCALE, 2);
   SerialDebug.print(
-      "[BOOT] trapezoid/S-curve peak deceleration scale=");
+      "[BOOT] trap/S peak decel gain=");
   SerialDebug.print(
       TRAPEZOID_DECELERATION_ACCELERATION_SCALE, 3);
   SerialDebug.print("/");
   SerialDebug.println(
       S_CURVE_DECELERATION_ACCELERATION_SCALE, 3);
   SerialDebug.print(
-      "[BOOT] S-curve decel-gentleness/min-speed/min-acc=");
+      "[BOOT] S decel-soft/vmin/amin=");
   SerialDebug.print(
       S_CURVE_DECELERATION_GENTLENESS, 2);
   SerialDebug.print("/");
@@ -5838,7 +5989,7 @@ void printStartupConfiguration() {
   SerialDebug.println(
       S_CURVE_MINIMUM_ACCELERATION_SCALE, 2);
   SerialDebug.print(
-      "[BOOT] translation heading deadband/Kp/max-rate/rate-slew/max-total=");
+      "[BOOT] yaw deadband/Kp/wmax/slew/maxsum=");
   SerialDebug.print(
       TRANSLATION_HEADING_DEADBAND_DEGREES, 2);
   SerialDebug.print("/");
@@ -5856,7 +6007,7 @@ void printStartupConfiguration() {
       1);
   SerialDebug.println();
   SerialDebug.print(
-      "[BOOT] terminal heading Kp/min-rate/base-min-scale=");
+      "[BOOT] end yaw Kp/wmin/min-gain=");
   SerialDebug.print(
       TRANSLATION_HEADING_KP_PER_SECOND *
           TRANSLATION_TERMINAL_KP_SCALE,
@@ -5874,60 +6025,65 @@ void printStartupConfiguration() {
       TRANSLATION_TERMINAL_MINIMUM_CORRECTION_RATE_SCALE,
       2);
   SerialDebug.println(
-      "[BOOT] route fixed inter-segment pure wait ms=0");
+      "[BOOT] segment fixed wait-ms=0");
   SerialDebug.print(
-      "[BOOT] step1->4 pre-lateral IMU check ms=");
+      "[BOOT] step1->4 pre-lat IMU check ms=");
   SerialDebug.println(
       STEP_01_PRE_LATERAL_IMU_CHECK_MS);
   SerialDebug.print(
-      "[BOOT] step4->5 terminal IMU minimum window ms=");
+      "[BOOT] step4->5 end IMU min window ms=");
   SerialDebug.println(
       STEP_04_TERMINAL_IMU_MINIMUM_DURATION_MS);
   SerialDebug.print(
-      "[BOOT] all-translation in-motion/end IMU correction=");
+      "[BOOT] all-move in-motion/end IMU corr=");
   SerialDebug.print(
       ENABLE_IN_MOTION_IMU_CORRECTION
           ? "enabled/terminal"
           : "disabled/terminal");
-  SerialDebug.print(", step1 independent correction=");
+  SerialDebug.print(",step1 separate corr=");
   SerialDebug.println(
       STEP_01_ENABLE_IN_MOTION_IMU_CORRECTION
           ? "enabled"
           : "disabled");
   SerialDebug.print(
-      "[BOOT] step1 base-rate/reserved-correction scale=");
+      "[BOOT] s1 base/reserve corr=");
   SerialDebug.print(STEP_01_BASE_RATE_LIMIT_SCALE, 2);
   SerialDebug.print("/");
   SerialDebug.println(
       STEP_01_HEADING_CORRECTION_RATE_RESERVE, 2);
   SerialDebug.print(
-      "[BOOT] step7/15 base-rate/reserved-correction scale=");
+      "[BOOT] s7/15 base/reserve corr=");
   SerialDebug.print(LONG_LATERAL_BASE_RATE_LIMIT_SCALE, 2);
   SerialDebug.print("/");
   SerialDebug.println(
       LONG_LATERAL_HEADING_CORRECTION_RATE_RESERVE, 2);
   SerialDebug.println(
-      "[BOOT] step7/15 continuous lateral: no midpoint stop");
+      "[BOOT] s7/15 lat:no midpoint stop");
+#endif
 #if GONGCHUANG_TRANSLATION_CONTROL_MODE == 1
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.print(
-      "[BOOT] translation-priority/position-tolerance/min-terminal-rate=BASE/");
+      "[BOOT] priority/pos-tol/end-min=BASE/");
   SerialDebug.print(
       TRANSLATION_POSITION_TOLERANCE_STEPS, 2);
   SerialDebug.print("/");
   SerialDebug.println(
       TRANSLATION_TERMINAL_MINIMUM_STEP_RATE, 1);
 #endif
+#endif
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.print(
-      "[BOOT] step15 pre-alignment heading tolerance deg=");
+      "[BOOT] step15 pre-alignment yaw tol deg=");
   SerialDebug.println(
       STEP_15_PRE_ALIGNMENT_TOLERANCE_DEGREES, 2);
   SerialDebug.print(
-      "[BOOT] lateral/longitudinal acceleration limit=");
+      "[BOOT] lat/long acc limit=");
   SerialDebug.println(
       LATERAL_ACCELERATION_LIMIT_RELATIVE_TO_LONGITUDINAL,
       2);
   SerialDebug.print(
-      "[BOOT] ordinary lateral trapezoid acc/decel before step scale=");
+      "[BOOT] lat trap acc/decel pre-scale=");
+#endif
   const float ordinaryLateralAcceleration =
       FAST_STEP_ACCELERATION *
       NON_07_15_LINEAR_PROFILE_INCREASE_SCALE *
@@ -5938,10 +6094,11 @@ void printStartupConfiguration() {
   const float ordinaryLateralBaseDeceleration =
       ordinaryLateralAcceleration *
       TRAPEZOID_DECELERATION_ACCELERATION_SCALE;
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.println(
       ordinaryLateralBaseDeceleration, 1);
   SerialDebug.print(
-      "[BOOT] integrated-turn latency/brake-margin=");
+      "[BOOT] turn latency/brake-margin=");
   SerialDebug.print(
       TURN_IMU_CONTROL_LATENCY_SECONDS, 3);
   SerialDebug.print(" s/");
@@ -5949,7 +6106,7 @@ void printStartupConfiguration() {
       TURN_PREDICTIVE_BRAKE_MARGIN_DEGREES, 2);
   SerialDebug.println(" deg");
   SerialDebug.print(
-      "[BOOT] step 7 lateral actual vmax/acc=");
+      "[BOOT] step 7 lat actual vmax/acc=");
   SerialDebug.print(
       FAST_MAXIMUM_STEP_RATE *
           STEP_07_MOTION_SCALE *
@@ -5962,7 +6119,7 @@ void printStartupConfiguration() {
           STEP_07_LATERAL_ACCELERATION_SCALE,
       1);
   SerialDebug.print(
-      "[BOOT] step 15 lateral actual vmax/acc=");
+      "[BOOT] step 15 lat actual vmax/acc=");
   SerialDebug.print(
       FAST_MAXIMUM_STEP_RATE *
           STEP_15_MOTION_SCALE *
@@ -5975,7 +6132,7 @@ void printStartupConfiguration() {
           STEP_15_LATERAL_ACCELERATION_SCALE,
       1);
   SerialDebug.print(
-      "[BOOT] non-7/15 fast vmax/acc before step scale=");
+      "[BOOT] non7/15 vmax/acc pre-scale=");
   SerialDebug.print(
       FAST_MAXIMUM_STEP_RATE *
           NON_07_15_LINEAR_PROFILE_INCREASE_SCALE *
@@ -5988,7 +6145,7 @@ void printStartupConfiguration() {
           TRAPEZOID_FINAL_ACCELERATION_SCALE,
       1);
   SerialDebug.print(
-      "[BOOT] scan-before-QR vmax/acc before step scale=");
+      "[BOOT] preQR vmax/acc pre-scale=");
   SerialDebug.print(
       SCAN_MAXIMUM_STEP_RATE *
           NON_07_15_LINEAR_PROFILE_INCREASE_SCALE *
@@ -6001,7 +6158,7 @@ void printStartupConfiguration() {
           TRAPEZOID_FINAL_ACCELERATION_SCALE,
       1);
   SerialDebug.print(
-      "[BOOT] coarse-turn vmax/acc before step scale=");
+      "[BOOT] turn vmax/acc pre-scale=");
   SerialDebug.print(
       TURN_MAXIMUM_STEP_RATE *
           TRAPEZOID_MAXIMUM_SPEED_REDUCTION_SCALE,
@@ -6021,19 +6178,25 @@ void printStartupConfiguration() {
       TURN_RESIDUAL_STEP_ACCELERATION *
           TRAPEZOID_FINAL_ACCELERATION_SCALE,
       1);
-#if GONGCHUANG_TRANSLATION_CONTROL_MODE == 1
-  SerialDebug.println(
-      "[BOOT] post-translation independent IMU lock=disabled");
-#else
-  SerialDebug.println(
-      "[BOOT] translation in-motion IMU=disabled; post-translation IMU lock=enabled");
 #endif
+#if GONGCHUANG_TRANSLATION_CONTROL_MODE == 1
+#if GONGCHUANG_VERBOSE_TRACE
+  SerialDebug.println(
+      "[BOOT] post-move separate IMU lock=disabled");
+#endif
+#else
+#if GONGCHUANG_VERBOSE_TRACE
+  SerialDebug.println(
+      "[BOOT] move IMU=OFF;end IMU lock=ON");
+#endif
+#endif
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.print(
       "[BOOT] motion telemetry interval ms=");
   SerialDebug.println(MOTION_TELEMETRY_INTERVAL_MS);
   SerialDebug.println(
-      "[BOOT] telemetry @step,elapsed,maxRemain,maxSpeed,speedCap,"
-      "heading*100,error*100,cmdCorr*100,doneCorr*100,decel,imuAge");
+      "[BOOT] telemetry @step,t,maxRemain,maxSpeed,speedCap,yaw*100,err*100,cmdCorr*100,doneCorr*100,decel,imuAge");
+#endif
 #else
   SerialDebug.println("[BOOT] chassis route ready");
 #endif
@@ -6044,21 +6207,27 @@ void printStartupConfiguration() {
 void setup() {
   SerialDebug.begin(DEBUG_BAUDRATE);
   // 常规启动日志始终输出此标记；详细BOOT配置默认关闭，不能用它判断版本。
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.println(
       "[CHASSIS REV] GC6-20261007 no-midpoint-7-15 v-a-x1.32");
   SerialDebug.println("[QR REV] GC6-20261002 step4-brake100-wait190 startup-min-500ms");
+#endif
 #if GONGCHUANG_STEP04_FORWARD_CORRECTION_ENABLED || \
     GONGCHUANG_STEP06_FORWARD_CORRECTION_ENABLED || \
     GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_ENABLED
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.println(
       "[LATERAL REV] GC6-1003 s4+20 s6+10 s7/15+60 h7+15 h15+40");
 #endif
+#endif
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.println(
       ENABLE_IN_MOTION_IMU_CORRECTION ||
               STEP_01_ENABLE_IN_MOTION_IMU_CORRECTION ||
               LONG_LATERAL_ENABLE_IN_MOTION_IMU_CORRECTION
           ? "[IMU REV] GC6-20261003 translation-in-motion-some-on terminal-on turns-on"
           : "[IMU REV] GC6-20261003 translation-in-motion-all-off terminal-on turns-on");
+#endif
   SerialHmi.begin(HMI_BAUDRATE);
   SerialImu.begin(IMU_BAUDRATE);
   SerialQr.begin(QR_BAUDRATE);
@@ -6072,13 +6241,18 @@ void setup() {
   startButton.reset();
   startButton.setPressMs(START_BUTTON_LONG_PRESS_MS);
   startButton.attachClick(onStartButtonClick);
+#if GONGCHUANG_GRID_NAVIGATION
+  startButton.attachDoubleClick(onNavigationModeDoubleClick);
+#endif
   startButton.attachLongPressStart(onStartButtonLongPress);
 
   initializeHmi();
   resetQrReceiver();
 
+#if GONGCHUANG_VERBOSE_TRACE
   SerialDebug.println(
-      "[READY] HMI 1/2 selects zone 1/2; PB9 click starts; running hold stops");
+      "[READY] HMI1/2=zone1/2;PB9 click=start,hold=stop");
+#endif
 }
 
 void loop() {

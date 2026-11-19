@@ -1,0 +1,21 @@
+{
+  "preferred_first_hardware_test": 331476,
+  "comparison_candidate": 331477,
+  "candidate_folders": [
+    "try/vision/deploy/ring2_aug_331476",
+    "try/vision/deploy/ring2_aug_331477"
+  ],
+  "active_local_default": 311465,
+  "runtime_model_changed": false,
+  "hardware_uploaded": false,
+  "fully_qualified": false,
+  "runtime_threshold": 0.7,
+  "reason": "331476 exposed samples have larger minimum confidence margin and higher mean IoU.331477 has smaller center errors.Only one shared sample between new reports; preference is provisional, not a general ranking.",
+  "limits": [
+    "3 report samples per model, different samples",
+    "12 validation entries contain6 byte-unique images",
+    "14 unique original training images;224 synthetic variants do not add independent real scenes",
+    "No full quantized inference, real high camera pose, hard negatives, timing or robot verification"
+  ],
+  "further_training_paused": true
+}

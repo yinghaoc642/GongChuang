@@ -16,12 +16,13 @@
  */
 
 #include <Arduino.h>
+#include <Stm32SerialCompat.h>
 #include <VisionProtocol.h>
 
 namespace {
 
-HardwareSerial debugPort(PB12, PB13);  // RX, TX
-HardwareSerial maixPort(PE7, PE8);      // RX, TX
+gongchuang::Stm32HardwareSerial debugPort(PB12, PB13);  // RX, TX
+gongchuang::Stm32HardwareSerial maixPort(PE7, PE8);      // RX, TX
 
 constexpr uint32_t kBaudrate = 115200UL;
 constexpr uint8_t kMode = 0x08U;

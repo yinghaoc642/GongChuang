@@ -49,7 +49,7 @@ assert (
     in config
 )
 assert (
-    "STORAGE2_OUTER_RING_FINAL_PLACE_ADDITIONAL_EXTENSION_MM=5.0f;"
+    "STORAGE2_OUTER_RING_FINAL_PLACE_ADDITIONAL_EXTENSION_MM=0.0f;"
     in config
 )
 assert "STORAGE2_FINAL_PLACE_M6_EXTENSION_SCALE" not in config
@@ -73,7 +73,8 @@ assert (
     "secondStorageColorWorkflowActive())" in unloading
 )
 placement_correction_index = unloading.index(
-    "applyRingPlacementPoseCorrection(destination,ringPosition)"
+    "applyRingPlacementPoseCorrection(destination,ringPosition,"
+    "&activePlacementRing2AngleCorrectionApplied)"
 )
 transfer_index = unloading.index("beginArmTransfer(")
 assert (
@@ -83,6 +84,10 @@ assert (
 )
 final_correction = function_body(
     source, "boolapplyRingPlacementPoseCorrection("
+)
+assert "LOCAL_WORKSTATION_SIMULATION_MODE" not in final_correction
+assert "LOCAL_WORKSTATION_SIMULATION_MODE" not in function_body(
+    source, "voidremoveRingPositionPoseCorrectionForSavedBase("
 )
 assert (
     "pose.extensionMm*=arm_config::"
@@ -112,7 +117,7 @@ def declaration(code: str, name: str) -> str:
 
 
 def cpp_function(name: str) -> str:
-    match = re.search(rf"\bbool\s+{name}\s*\([^;{{]*\)\s*{{", raw_source)
+    match = re.search(rf"\b(?:bool|void)\s+{name}\s*\([^;{{]*\)\s*{{", raw_source)
     assert match, f"missing function {name}"
     body = function_body(raw_source, match.group())
     return match.group() + body + "}"
@@ -137,8 +142,16 @@ main_names = (
     "PROCESS_STORAGE1_RING_PLACE_M5_NET_CCW_DEGREES",
     "STORAGE2_OUTER_RING_PLACE_M5_DIFFERENCE_CCW_DEGREES",
     "WORKSTATION_RING_PLACE_M6_NET_EXTENSION_MM",
+    "WORKSTATION_PLACE_EXTRA_M5_CLOCKWISE_DEGREES",
+    "WORKSTATION_PLACE_EXTRA_M6_RETRACTION_MM",
     "STORAGE1_RING1_PLACE_EXTRA_M5_CLOCKWISE_DEGREES",
     "STORAGE1_RING1_PLACE_EXTRA_M6_EXTENSION_MM",
+    "WORKSTATION_PLACE_EXTRA_M6_EXTENSION_MM",
+    "WORKSTATION_RING2_PLACE_ANGLE_THRESHOLD_DEGREES",
+    "WORKSTATION_RING2_PLACE_EXTRA_M6_RETRACTION_MM",
+    "WORKSTATION_RING2_PLACE_EXTRA_M5_CLOCKWISE_DEGREES",
+    "WORKSTATION_RING_RETURN_M5_NET_CCW_DEGREES",
+    "WORKSTATION_RING_RETURN_M6_NET_EXTENSION_MM",
 )
 default_ring3 = re.search(
     r"^#define GONGCHUANG_RING3_EXTENSION_CORRECTION_MM (\d+(?:\.\d+)?f)$",
@@ -160,6 +173,7 @@ enum { WORK_ACTION_PROCESS, WORK_ACTION_STORAGE };
 int activeWorkAction = WORK_ACTION_STORAGE;
 uint8_t workRoundIndex = 1;
 bool fault = false;
+bool LOCAL_WORKSTATION_SIMULATION_MODE = false;
 void routeFault(const char*) { fault = true; }
 '''
 harness += (
@@ -175,7 +189,8 @@ harness += (
         "secondStorageColorWorkflowActive", "processOrStorage1RingNetCorrectionApplies",
         "storage1Ring1PlacementExtraCorrectionApplies", "workstationRingNetCorrectionApplies",
         "applyTargetPlacementExtraLower", "applyRing3ExtensionCorrection",
-        "applyRingPlacementPoseCorrection", "armPoseIsValid",
+        "ring2PlacementAngleCorrectionApplies", "applyRingPlacementPoseCorrection", "armPoseIsValid",
+        "applyRingPositionPoseCorrection", "removeRingPositionPoseCorrectionForSavedBase",
     ))
 )
 harness += r'''
@@ -198,14 +213,14 @@ void expect(uint8_t ring, float mapped, float target) {
   assert(std::fabs(place(ring, mapped).extensionMm - target) < 0.001f);
 }
 int main() {
-  // Logged input with current net: 4.45 - 10 - 13.5 = -19.05 mm clamps to -9.5.
+  // Final angle 31.75 deg triggers another 2 mm retraction, then the final clamp.
   expect(2, 4.45f, -9.5f);
-  // Regression: all valid, unclipped targets retain the current correction chain.
-  expect(1, 102.01f, 79.309f);
-  expect(2, 44.69f, 21.19f);
-  expect(3, 104.91f, 85.119f);
+  // STORAGE2 outer placements retract 5 mm from their previous targets.
+  expect(1, 102.01f, 84.309f);
+  expect(2, 44.69f, 29.19f);
+  expect(3, 104.91f, 90.119f);
   // Ring3 intermediate +5 exceeds 160, but final corrected target is in range.
-  expect(3, 158.0f, 132.9f);
+  expect(3, 158.0f, 137.9f);
   // Values below the minimum in intermediate steps must reach the final clamp.
   for (uint8_t ring = 1; ring <= 3; ++ring) {
     expect(ring, -20.0f, -9.5f);
@@ -214,11 +229,14 @@ int main() {
     for (float boundary : {-9.5f, 160.0f}) {
       for (float offset : {-0.1f, 0.0f, 0.1f}) {
         const float desired = boundary + offset;
-        float mapped = desired - WORKSTATION_RING_PLACE_M6_NET_EXTENSION_MM[ring-1];
+        float mapped = desired + WORKSTATION_PLACE_EXTRA_M6_RETRACTION_MM
+            - WORKSTATION_PLACE_EXTRA_M6_EXTENSION_MM
+            - WORKSTATION_RING_PLACE_M6_NET_EXTENSION_MM[ring-1];
         if (ring != 2)
           mapped = (mapped - arm_config::STORAGE2_OUTER_RING_FINAL_PLACE_ADDITIONAL_EXTENSION_MM)
               / arm_config::STORAGE2_OUTER_RING_FINAL_PLACE_M6_EXTENSION_SCALE;
         if (ring == 3) mapped -= RING3_EXTENSION_CORRECTION_MM;
+        if (ring == 2) mapped += WORKSTATION_RING2_PLACE_EXTRA_M6_RETRACTION_MM;
         mapped += reduction(ring);
         expect(ring, mapped, desired < -9.5f ? -9.5f : desired > 160.0f ? 160.0f : desired);
       }
@@ -243,13 +261,159 @@ int main() {
       fault = false;
       ArmPose tooLong{30.0f, 158.0f, -85.0f};
       assert(!applyRing3ExtensionCorrection(tooLong, 3) && fault);
-      ArmPose finalTooShort{30.0f, 0.0f, -85.0f};
+      ArmPose finalTooShort{30.0f, -5.0f, -85.0f};
       assert(applyRingPlacementPoseCorrection(finalTooShort, 1));
       assert(!armPoseIsValid(finalTooShort, M6_RING2_MINIMUM_EXTENSION_MM));
     }
   }
-  std::cout << "PASS actual C++: STORAGE2 final M6 limits, correction order, "
-               "boundary cases, unchanged other stations and M7 guards\n";
+  // Debug and production share the +15 mm correction after the outer-ring
+  // scale, before final limits; mode selection must not change target poses.
+  activeWorkAction = WORK_ACTION_STORAGE;
+  workRoundIndex = 1;
+  LOCAL_WORKSTATION_SIMULATION_MODE = true;
+  expect(1, 102.01f, 84.309f);
+  expect(2, 44.69f, 29.19f);
+  expect(3, 104.91f, 90.119f);
+  expect(2, 4.45f, -9.5f);
+  for (uint8_t ring = 1; ring <= 3; ++ring) {
+    expect(ring, -100.0f, -9.5f);
+    expect(ring, 250.0f, 160.0f);
+    for (float boundary : {-9.5f, 160.0f}) {
+      for (float offset : {-0.1f, 0.0f, 0.1f}) {
+        const float desired = boundary + offset;
+        float mapped = desired - WORKSTATION_PLACE_EXTRA_M6_EXTENSION_MM
+            + WORKSTATION_PLACE_EXTRA_M6_RETRACTION_MM
+            - WORKSTATION_RING_PLACE_M6_NET_EXTENSION_MM[ring-1];
+        if (ring != 2)
+          mapped = (mapped - arm_config::STORAGE2_OUTER_RING_FINAL_PLACE_ADDITIONAL_EXTENSION_MM)
+              / arm_config::STORAGE2_OUTER_RING_FINAL_PLACE_M6_EXTENSION_SCALE;
+        if (ring == 3) mapped -= RING3_EXTENSION_CORRECTION_MM;
+        if (ring == 2) mapped += WORKSTATION_RING2_PLACE_EXTRA_M6_RETRACTION_MM;
+        mapped += reduction(ring);
+        expect(ring, mapped, desired < -9.5f ? -9.5f : desired > 160.0f ? 160.0f : desired);
+      }
+    }
+  }
+  // All stations/rings: preserve vision bases and prevent accumulated offsets
+  // when a completed placement is saved and another target is generated.
+  for (int action : {WORK_ACTION_PROCESS, WORK_ACTION_STORAGE}) {
+    for (uint8_t round = 0; round <= 1; ++round) {
+      activeWorkAction = action;
+      workRoundIndex = round;
+      for (uint8_t ring = 1; ring <= 3; ++ring) {
+        ArmPose production{30.0f, 100.0f, -85.0f};
+        ArmPose debug = production;
+        bool productionExtraApplied = false;
+        bool debugExtraApplied = false;
+        for (int repeat = 0; repeat < 3; ++repeat) {
+          LOCAL_WORKSTATION_SIMULATION_MODE = false;
+          assert(applyRingPlacementPoseCorrection(production, ring, &productionExtraApplied));
+          if (repeat == 0) {
+            // Fixed outputs for a 30 deg / 100 mm base: global CW 1 deg and
+            // retraction 5 mm plus extension 15 mm reach every station visit.
+            const float processAngles[] = {30.92f, 31.45f, 30.62f};
+            const float processExtensions[] = {92.5f, 94.5f, 93.0f};
+            const float storage1Angles[] = {30.72f, 31.45f, 30.62f};
+            const float storage1Extensions[] = {93.5f, 94.5f, 93.0f};
+            // STORAGE2 only: ring1 CW 0.5 deg, ring3 CCW 0.5 deg; both -5 mm.
+            const float storage2Angles[] = {29.92f, 31.45f, 30.62f};
+            const float storage2Extensions[] = {82.5f, 94.5f, 87.5f};
+            const float* angles = action == WORK_ACTION_PROCESS ? processAngles
+                : round == 0 ? storage1Angles : storage2Angles;
+            const float* extensions = action == WORK_ACTION_PROCESS ? processExtensions
+                : round == 0 ? storage1Extensions : storage2Extensions;
+            assert(std::fabs(production.standardFrameAngleDegrees - angles[ring-1]) < 0.001f);
+            assert(std::fabs(production.extensionMm - extensions[ring-1]) < 0.001f);
+          }
+          LOCAL_WORKSTATION_SIMULATION_MODE = true;
+          assert(applyRingPlacementPoseCorrection(debug, ring, &debugExtraApplied));
+          assert(productionExtraApplied == (ring == 2));
+          assert(debugExtraApplied == productionExtraApplied);
+          assert(std::fabs(debug.extensionMm - production.extensionMm) < 0.001f);
+          assert(debug.standardFrameAngleDegrees == production.standardFrameAngleDegrees);
+          assert(debug.heightMm == production.heightMm);
+          assert(armPoseIsValid(debug, M6_RING2_MINIMUM_EXTENSION_MM));
+          LOCAL_WORKSTATION_SIMULATION_MODE = false;
+          removeRingPositionPoseCorrectionForSavedBase(production, ring, productionExtraApplied);
+          LOCAL_WORKSTATION_SIMULATION_MODE = true;
+          removeRingPositionPoseCorrectionForSavedBase(debug, ring, debugExtraApplied);
+          assert(std::fabs(debug.extensionMm - production.extensionMm) < 0.001f);
+          assert(debug.standardFrameAngleDegrees == production.standardFrameAngleDegrees);
+          assert(std::fabs(production.standardFrameAngleDegrees - 30.0f) < 0.001f);
+          if (action == WORK_ACTION_STORAGE && round == 1 && repeat == 0) {
+            const float savedExtensions[] = {90.0f, 100.0f, 89.5f};
+            assert(std::fabs(production.extensionMm - savedExtensions[ring-1]) < 0.001f);
+          }
+          if (action == WORK_ACTION_PROCESS || round == 0)
+            assert(std::fabs(production.extensionMm - 100.0f) < 0.001f);
+        }
+        ArmPose productionReturn = production;
+        ArmPose debugReturn = debug;
+        LOCAL_WORKSTATION_SIMULATION_MODE = false;
+        assert(applyRingPositionPoseCorrection(productionReturn, ring));
+        LOCAL_WORKSTATION_SIMULATION_MODE = true;
+        assert(applyRingPositionPoseCorrection(debugReturn, ring));
+        assert(std::fabs(debugReturn.extensionMm - productionReturn.extensionMm) < 0.001f);
+        assert(debugReturn.standardFrameAngleDegrees == productionReturn.standardFrameAngleDegrees);
+        // Placement-only changes must not alter pickups from a fixed vision base.
+        ArmPose fixedReturn{30.0f, 100.0f, -85.0f};
+        assert(applyRingPositionPoseCorrection(fixedReturn, ring));
+        const float returnAngles[] = {32.0f, 32.5f, 32.0f};
+        const float returnExtensions[] = {83.0f, 87.5f, 84.0f};
+        const float ring3Extra = action == WORK_ACTION_STORAGE && round == 1 && ring == 3
+            ? 5.0f : 0.0f;
+        assert(std::fabs(fixedReturn.standardFrameAngleDegrees - returnAngles[ring-1]) < 0.001f);
+        assert(std::fabs(fixedReturn.extensionMm - returnExtensions[ring-1] - ring3Extra) < 0.001f);
+      }
+    }
+  }
+  // Judge after existing +1.75 deg net, before the new CW0.3/-2 mm pair.
+  // Preserve the application flag when 3.01 -> 2.71 deg crosses the threshold.
+  struct AngleCase {float finalAngle; bool retract;};
+  const AngleCase angleCases[] = {
+      {-4.0f,true}, {-3.01f,true}, {-3.0f,false}, {-2.99f,false},
+      {0.0f,false}, {2.99f,false}, {3.0f,false}, {3.01f,true}, {4.0f,true}};
+  for (int action : {WORK_ACTION_PROCESS, WORK_ACTION_STORAGE}) {
+    for (uint8_t round = 0; round <= 1; ++round) {
+      activeWorkAction = action; workRoundIndex = round;
+      for (bool debug : {false, true}) {
+        LOCAL_WORKSTATION_SIMULATION_MODE = debug;
+        for (const AngleCase& value : angleCases) {
+          const float baseAngle = value.finalAngle - 1.75f;
+          ArmPose pose{baseAngle, 100.0f, -85.0f};
+          for (int repeat = 0; repeat < 3; ++repeat) {
+            bool extraApplied = !value.retract; // verify stale flags are overwritten
+            assert(applyRingPlacementPoseCorrection(pose, 2, &extraApplied));
+            assert(extraApplied == value.retract);
+            const float expectedAngle = value.finalAngle - (value.retract ? 0.3f : 0.0f);
+            assert(std::fabs(pose.standardFrameAngleDegrees-expectedAngle)<0.001f);
+            assert(std::fabs(pose.extensionMm-(value.retract ? 94.5f : 96.5f))<0.001f);
+            assert(pose.heightMm == -85.0f);
+            removeRingPositionPoseCorrectionForSavedBase(pose, 2, extraApplied);
+            assert(std::fabs(pose.standardFrameAngleDegrees-baseAngle)<0.001f);
+            assert(std::fabs(pose.extensionMm-100.0f)<0.001f);
+          }
+          assert(applyRingPositionPoseCorrection(pose, 2));
+          assert(std::fabs(pose.extensionMm-87.5f)<0.001f);
+          assert(std::fabs(pose.standardFrameAngleDegrees-(baseAngle+2.5f))<0.001f);
+        }
+        // Existing travel handling remains in force after the new retraction.
+        ArmPose nearLimit{2.25f, -5.0f, -85.0f}; // final 4 deg: -5-3.5-2=-10.5
+        assert(applyRingPlacementPoseCorrection(nearLimit, 2));
+        if (action == WORK_ACTION_STORAGE && round == 1) {
+          assert(nearLimit.extensionMm == -9.5f);
+          assert(armPoseIsValid(nearLimit, M6_RING2_MINIMUM_EXTENSION_MM));
+        } else {
+          assert(nearLimit.extensionMm == -10.5f);
+          assert(!armPoseIsValid(nearLimit, M6_RING2_MINIMUM_EXTENSION_MM));
+        }
+      }
+    }
+  }
+  std::cout << "PASS actual C++ ring2: corrected angle outside [-3,+3] adds -2 mm / CW0.3 deg; "
+               "inclusive endpoints, both rounds/stations/modes, saved bases and pickups preserved\n";
+  std::cout << "PASS actual C++: shared CW 1 deg / net extension 10 mm in all four visits, identical production/debug, final limits, "
+               "STORAGE2 ring1 CW0.5/ring3 CCW0.5 and both -5 mm, saved-base normalization, unchanged return poses and M7 guards\n";
 }
 '''
 compiler = shutil.which("g++")
@@ -259,7 +423,7 @@ with tempfile.TemporaryDirectory(prefix="gongchuang_storage2_limits_") as tempor
     executable = Path(temporary) / "placement_limits.exe"
     test_cpp.write_text(harness, encoding="utf-8")
     subprocess.run(
-        [compiler, "-std=c++17", "-O0", "-static", str(test_cpp), "-o", str(executable)],
+        [compiler, "-std=c++17", "-O0", str(test_cpp), "-o", str(executable)],
         check=True,
     )
     subprocess.run([str(executable)], check=True)

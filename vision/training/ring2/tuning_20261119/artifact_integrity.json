@@ -1,0 +1,92 @@
+[
+  {
+    "id": 331402,
+    "zip_crc_ok": true,
+    "model_reference_exists": true,
+    "input_shape": [
+      224,
+      224,
+      3
+    ],
+    "labels": [
+      "2r"
+    ],
+    "archive_sha256": "9d4ab5837189a91322e493904f81aee533e53f11daf39987979961d0998cd7b2",
+    "model_sha256": "40c24f5fc45f817fed53bf86aac0310c55feaf366261928455b790f8899ad3eb"
+  },
+  {
+    "id": 331403,
+    "zip_crc_ok": true,
+    "model_reference_exists": true,
+    "input_shape": [
+      224,
+      224,
+      3
+    ],
+    "labels": [
+      "2r"
+    ],
+    "archive_sha256": "129bae8760d082d845fae22eee6b814d4bd5a7019cb6d5ea03f254c32bfab829",
+    "model_sha256": "8bf9263e41c6b2480db73b7d96cd8906054aedd916d90b91b473ee4b8a7d894e"
+  },
+  {
+    "id": 331404,
+    "zip_crc_ok": true,
+    "model_reference_exists": true,
+    "input_shape": [
+      320,
+      320,
+      3
+    ],
+    "labels": [
+      "2r"
+    ],
+    "archive_sha256": "08abd3fba3574c227fabf5385e527dfdad9c7623db367510d7f79a7b4da2c918",
+    "model_sha256": "18bf45c4acf64d6f015bcd0fe087b5d9a65b45044e7f8500ef1de33f7de00972"
+  },
+  {
+    "id": 331405,
+    "zip_crc_ok": true,
+    "model_reference_exists": true,
+    "input_shape": [
+      224,
+      224,
+      3
+    ],
+    "labels": [
+      "2r"
+    ],
+    "archive_sha256": "ece3c75fcd226f05e061f54c5c4ca2955019058c6a321dbfa43a22ebe343fc42",
+    "model_sha256": "74245f601ca6baa77d8009204a2088f2a46a053f01637b3707a6c743a704dfc0"
+  },
+  {
+    "id": 331406,
+    "zip_crc_ok": true,
+    "model_reference_exists": true,
+    "input_shape": [
+      224,
+      224,
+      3
+    ],
+    "labels": [
+      "2r"
+    ],
+    "archive_sha256": "e12ebc36fc4c2c742d5a91f4f6b9f1334f291b6a1a1cb065f0f5effb9363d014",
+    "model_sha256": "1a4d943c921b3df7acfd72be0b5b02adba787fa90edd063b49a817d622513764"
+  },
+  {
+    "id": 331407,
+    "zip_crc_ok": true,
+    "model_reference_exists": true,
+    "input_shape": [
+      320,
+      320,
+      3
+    ],
+    "labels": [
+      "2r"
+    ],
+    "archive_sha256": "89f3ca9d07e4b3146a7c475b3858b83470c6dc8b6eba1e973e5e682c8bd1da63",
+    "model_sha256": "7573e2257a647894d62386495be27e890b3420b6a784c886ef220ca9618b3b2f"
+  }
+]

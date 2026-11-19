@@ -1,0 +1,457 @@
+{
+  "status": "paused_by_user",
+  "counts": {
+    "gc_ring1_capture_20261119_01": 20,
+    "gc_ring1_capture_20261119_02": 20,
+    "gc_ring3_capture_20261119_01": 20
+  },
+  "files": [
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/capture.json",
+      "bytes": 2816,
+      "sha256": "735b894827826ecb500d4e0be9b208d854fbd37667829e95fd9c00e809cdc309",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_019.png",
+      "bytes": 93825,
+      "sha256": "09be150679e9029b62b801f19766e4a26ae15892d17d0dbaed8728fd8a259417",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_018.png",
+      "bytes": 92774,
+      "sha256": "135edbf2f4d0b85b722c84d51839897d255c4b7253fc5077623dbd85001043eb",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_017.png",
+      "bytes": 95682,
+      "sha256": "9e11187d70e7e63364e7e97a663755a575e7050b08ee69bedb3d6b62d5d8223d",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_016.png",
+      "bytes": 96722,
+      "sha256": "84cadaa9d19b28361c1916a3ad87a3fcb3ecee48a695ea03fe58a455c1c82ff6",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_015.png",
+      "bytes": 91661,
+      "sha256": "85f89840f2836c5951718d6ab78df45dad952397d2a8fdce65ef996cf0626113",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_014.png",
+      "bytes": 92025,
+      "sha256": "440e16830fbb57b2c3228eca259d6fee357760ebef6a6723aa2dfcd3049c9208",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_013.png",
+      "bytes": 93054,
+      "sha256": "08ca80c061bcbc22982a62ccb679a620d2dcb7b05c7e0b837573d85a0c40836e",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_012.png",
+      "bytes": 94975,
+      "sha256": "666b1f24d526b779b3686be231652b11dc4143b7e59945dc426c534e6f65c196",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_011.png",
+      "bytes": 89968,
+      "sha256": "35bb885c3b1b2c51e813e60b8a535ea11178670f1db0d2907f122152f458fbd1",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_010.png",
+      "bytes": 94222,
+      "sha256": "63bcce83e59a91057e4b7347ddd92972655156cd6364a4ab8287a4e70e7b87c6",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_009.png",
+      "bytes": 91752,
+      "sha256": "073e482748fa405a352bfd675af8a81c66cab4c8864dda8c81ff039c69f91bad",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_008.png",
+      "bytes": 90153,
+      "sha256": "ff379ed4554f469f9d0bda77bba0d1f4d43bbf3d84ef8e269e6c8962e9da9f1d",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_007.png",
+      "bytes": 91638,
+      "sha256": "b64be0cba0025cef3292396a8d7912299937a543587a09a80c6d286003d05941",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_006.png",
+      "bytes": 93747,
+      "sha256": "5fa5bb3e1371f36d18a54a0f76eae86ae4bc76dac6fe850361009e2fb9598932",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_005.png",
+      "bytes": 94575,
+      "sha256": "336f0110f469cffdc95d530fa9b44d6ddad007bc6f71579741f05d7f93424a9d",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_004.png",
+      "bytes": 91953,
+      "sha256": "25c8fa165a67bb2f79531be6fb83ec09b04d8e1cd9ddb75bd1ba5f7cac728419",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_003.png",
+      "bytes": 92283,
+      "sha256": "1c9966cb9bb203c76daea6b0a8d040f2b28cb2a249da9da9cf7efdf8995c96d1",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_002.png",
+      "bytes": 94110,
+      "sha256": "c2bbab1e596b08e495c196be47a3fae33be47428113a4ec48090c4eace0a93da",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_001.png",
+      "bytes": 92277,
+      "sha256": "d54fcff09592399b403c06152a5cc879be37ce4ef5dd6d8bd0d7cb48c181952c",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_01/ring1_000.png",
+      "bytes": 94274,
+      "sha256": "98d3c476a7ee57bb9721630fcc4426195496394cbfa7c3bdf4b6026a1c6fa2a3",
+      "capture_group": "gc_ring1_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/capture.json",
+      "bytes": 2807,
+      "sha256": "cca2bb7046a5919d8d42c01986a441cad73ca22dd65eb0f1ba7928a5bc08f5a8",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_019.png",
+      "bytes": 101250,
+      "sha256": "cda98a1a2b7855a06cd0340eee5943cd3fc552ec289a51a31e963d82ba2c0190",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_018.png",
+      "bytes": 99353,
+      "sha256": "c670e969f777589a200bdde4a31b31b45f44ad939e9562f959bba1bffd2d3113",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_017.png",
+      "bytes": 98070,
+      "sha256": "3bb488176aa5835eea5d3b93ac5226561ce9cebce283f59642a7e82343ba7348",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_016.png",
+      "bytes": 99780,
+      "sha256": "5bbb0c9d71885bef93496cf2ec8a7dd95ee07b069e8109d3088ea81f769eb291",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_015.png",
+      "bytes": 96940,
+      "sha256": "05b00bfe66361c313967de321a5ce4f8412171000db3d31373746f29e8a497f6",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_014.png",
+      "bytes": 98480,
+      "sha256": "0f793fd28218c3441c1d8d70039e1a1a1ecdbfe45bfa3b366fe699830a943cf3",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_013.png",
+      "bytes": 97194,
+      "sha256": "ec84ba5941f05bdea1ccc307649bd6c8cfeb35e12ac64033a9a82190dd508c96",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_012.png",
+      "bytes": 98026,
+      "sha256": "9ab927a00b28d4c46afae7ff560ef62efaef707172eda33a84dff9d711b681e5",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_011.png",
+      "bytes": 96187,
+      "sha256": "2162396c0b67650f8fb391cba2995217ffe41a04b2d96e284a992608e850f584",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_010.png",
+      "bytes": 98962,
+      "sha256": "74dfd5410eb809838d3284eb0365d86a8d45eb915257d20ef0f0a676da745671",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_009.png",
+      "bytes": 98028,
+      "sha256": "c6018b9f257e904973c76d8c28f22aae9f3daecbbe227c57ad5065a25c5d6d83",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_008.png",
+      "bytes": 97149,
+      "sha256": "90599fe78b512b62b7cd9dfa5a0255dae9e4ded106ca4d61e5b276384327a4cd",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_007.png",
+      "bytes": 96969,
+      "sha256": "8beac28ed7a4b6d2f804e454eebac44373cdd6760400c2e2bc9da86c065c0b08",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_006.png",
+      "bytes": 95088,
+      "sha256": "79df9a3b55b4fe15bccd3adb1c82c447ce1eb6666a418972de9ecb63ed750a1f",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_005.png",
+      "bytes": 100502,
+      "sha256": "f0ab22743815a669f99ef719446be50c92527115e2579b06e6258ae0951d4c61",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_004.png",
+      "bytes": 99242,
+      "sha256": "e3c34b995ce70b2df74d6a771d44e301c0a8c5692b389a981a445bbbb9c8b4e0",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_003.png",
+      "bytes": 97687,
+      "sha256": "848b1f198bf8e9398181998be46b38b2915b1041b5b776c467654c46687f694a",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_002.png",
+      "bytes": 96714,
+      "sha256": "1fe4726f08bee422bee3439ee128203a024e579e22a1ec8883190e2f16bad41a",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_001.png",
+      "bytes": 97554,
+      "sha256": "0bf26d30a73c2bf6c2e7a08e08b5564da838e06774c0cd163fe8f4e2397fa5f9",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring1_capture_20261119_02/ring1_000.png",
+      "bytes": 97664,
+      "sha256": "455fb348c7d945520f2301b8eee33651dca4d14cdcd982303b1f6848fe6773e1",
+      "capture_group": "gc_ring1_capture_20261119_02",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/capture.json",
+      "bytes": 2801,
+      "sha256": "74a6299c6407777c4fd2b3aaed7f10189f61cbdc00f9bd57e6cf29dcd10b85f5",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_019.png",
+      "bytes": 94662,
+      "sha256": "1da6c06b6ffce5c853cdc9546432e6131614e6d61c499444b9306734191c893c",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_018.png",
+      "bytes": 96755,
+      "sha256": "b0d51ffa888c0bb42453fdedd52e58603b873bc7e0dbeb1bdcebc6730aa427d1",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_017.png",
+      "bytes": 94987,
+      "sha256": "331832ba273dd2dad2db55bf3641bd0af425853a6496d8d4028325beff38988b",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_016.png",
+      "bytes": 96446,
+      "sha256": "245fa563b426e5c7e14cbf1425b522a51aa8040ae75bf81afd05c8a2ff120103",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_015.png",
+      "bytes": 98163,
+      "sha256": "65dcb04671dfd5a01c558e7e062090a4dcf107fda49b8c90c125b9960d802a40",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_014.png",
+      "bytes": 95364,
+      "sha256": "50fcb82e32abb3f74c047bd76f5214db812a449e4a1df21eb65520db977ed9f8",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_013.png",
+      "bytes": 100629,
+      "sha256": "688b42171a5638952626071a8fd8c8ddc86148c913e6364aff75992114d731a5",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_012.png",
+      "bytes": 93454,
+      "sha256": "b5cd17a841c925188cedff5fc65e56352e564e8fed422fe4f1da40d6149087f1",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_011.png",
+      "bytes": 96009,
+      "sha256": "13c157de34f7e9f90d84f6d80df5b8766b92ebc6dcada9d95605bc7afe15b25a",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_010.png",
+      "bytes": 98464,
+      "sha256": "b31d6fa77f8bfd71a95bbc2fde26a51c60a5da09fa46fac797d8acaf92000e04",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_009.png",
+      "bytes": 96854,
+      "sha256": "217e1ac697a15cc11dc158610d167c9aa78cd486fadc3ba866a1bb1d1114d87b",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_008.png",
+      "bytes": 96712,
+      "sha256": "0464a05db6a1fc4bfd0669067a55202d66e84973858709d157c5683e9737c3ae",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_007.png",
+      "bytes": 94863,
+      "sha256": "55445aee606d1a39bc266d1b320690aea1a366893c33ed96687922e45e122035",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_006.png",
+      "bytes": 94072,
+      "sha256": "336b340e687055c4e140fe8c7411a418786e4cee86e31c7074556e55d5473793",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_005.png",
+      "bytes": 95448,
+      "sha256": "37c1e988835ce64f063fbdcb6b63454458f4d27207b786eaaf55436166963f31",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_004.png",
+      "bytes": 94990,
+      "sha256": "f030599e1e3438f7659b2346998a696c62c0a73254398c008225036c6447871e",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_003.png",
+      "bytes": 93515,
+      "sha256": "83448b1b0ba94c56308c28962f07a6968f6e102965b8b187738e4d1c7dbc79b9",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_002.png",
+      "bytes": 99518,
+      "sha256": "5517609e2fd0309402b7e153849cbc3753bd064818606d995162d1a212743e9c",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_001.png",
+      "bytes": 96322,
+      "sha256": "d6e1ef1272f7dd6983f0bb3c84747928cfd32842cfec1778418cc92d35383b97",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    },
+    {
+      "file": "raw/gc_ring3_capture_20261119_01/ring3_000.png",
+      "bytes": 92967,
+      "sha256": "0892bd0ce943a58b07cb8981ff80313bfb6a95e354e379c83a97954c1d250904",
+      "capture_group": "gc_ring3_capture_20261119_01",
+      "review": "pending"
+    }
+  ],
+  "annotation": "not started",
+  "augmentation": "not started",
+  "upload": "not started",
+  "training": "not started",
+  "browser": "MaixHub native Chrome access and logged-in existing dataset page verified; no dataset changes",
+  "camera_preview": "stopped"
+}

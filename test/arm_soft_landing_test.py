@@ -257,9 +257,11 @@ def main() -> int:
         "prepared second pickup can still reject its already-open gripper state",
     )
     require(
-        "CONTAINER_PLACE_ANGLE_DEGREES=-102.0f;" in tuning
-        and "CONTAINER_RETURN_PLACE_ANGLE_DEGREES=-102.0f;"
-        in tuning
+        "CONTAINER_BASE_ANGLE_DEGREES=-103.0f;" in tuning
+        and "CONTAINER_EXTRA_CLOCKWISE_DEGREES=1.0f;" in tuning
+        and "CONTAINER_ANGLE_DEGREES=CONTAINER_BASE_ANGLE_DEGREES-"
+        "CONTAINER_EXTRA_CLOCKWISE_DEGREES;" in tuning
+        and "ArmPosepose=containerPlacePose();" in planner
         and "CONTAINER_RETURN_PLACE_EXTRA_LOWER_MM=2.0f;"
         in tuning
         and "containerReturnPlacePose()" in planner
@@ -435,8 +437,12 @@ def main() -> int:
         "existing second-slot calibration",
     )
     require(
-        "CONTAINER_PICK_EXTENSION_MM=1.0f;" in tuning,
-        "tray pickup M6 extension is not reduced from 3 mm to 1 mm",
+        "CONTAINER_BASE_EXTENSION_MM=0.0f;" in tuning
+        and "CONTAINER_EXTRA_EXTENSION_MM=4.0f;" in tuning
+        and "CONTAINER_EXTENSION_MM=CONTAINER_BASE_EXTENSION_MM+"
+        "CONTAINER_EXTRA_EXTENSION_MM;" in tuning
+        and "returncontainerPoseAtHeight(-lowerMm);" in planner,
+        "tray pickup must use the shared 0 mm base plus 4 mm extension",
     )
     require(
         "RING_RETURN_PICK_EXTRA_LOWER_MM=3.0f;" in tuning

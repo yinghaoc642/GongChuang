@@ -5,15 +5,15 @@
  * 和全部底盘参数，
  * 不包含正式 main.cpp，因此不会初始化或运行M5/M6/M7、夹爪、物料台、
  * MaixCAM及六个工位动作。每条底盘命令正常完成后立即进入下一条命令；
- * 默认执行启停区1新路线：先前进150 mm，再执行第4段；第4段横移200 mm
- * 后以普通粗旋转一半的最大速度逆时针360°，再走余程和扣除150 mm后的
- * 第1段。到中心后左移扫码、等距右移归位；返程执行21->20。把正式路线模式改为
- * 旧模式时，第4段原扫码条件停车仍然保留。所有平移的
+ * 默认启停区1普通出发：1->4->5...19，第4段保留扫码条件停车。
+ * 正式路线模式设为1时，才启用前进150 mm、第4段横移200 mm后逆时针360°、
+ * 中心左移扫码和等距归位。两种出发模式均使用21->20的分段返程，
+ * 最后补回150 mm后结束。所有平移的
  * 行程中IMU纠偏均关闭，IMU新鲜度保护和到位后的静态航向闭环继续执行。
  *
  * 下列修正量必须与正式main一致，都是实车修正量，不是理论路线量：
  *   - 第4段：车头+20 mm；第6段：只保留车头+10 mm；
- *   - 第7/15段：全段车头+70 mm（含本轮新增10 mm）；
+ *   - 第7/15段：全段车头+80 mm（原70 mm再加10 mm朝扫码区）；
  *   - 第7段超过50%：只对剩余运动再加车头+15 mm。
  *   - 第15段超过50%：只对剩余运动再加车头+40 mm。
  */
@@ -33,7 +33,7 @@
 #define GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_ENABLED 1
 #endif
 #ifndef GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_MM
-#define GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_MM 70.0f
+#define GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_MM 80.0f
 #endif
 #ifndef GONGCHUANG_STEP07_SECOND_HALF_FORWARD_CORRECTION_ENABLED
 #define GONGCHUANG_STEP07_SECOND_HALF_FORWARD_CORRECTION_ENABLED 1
@@ -50,6 +50,7 @@
 
 #include <AccelStepper.h>
 #include <Arduino.h>
+#include <Stm32SerialCompat.h>
 #include <MecanumKinematics.h>
 #include <OneButton.h>
 
@@ -63,7 +64,7 @@ static_assert(
         GONGCHUANG_STEP06_FORWARD_CORRECTION_MM == 10.0f,
     "Chassis-only step-4/6 corrections must match production");
 static_assert(
-    GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_MM == 70.0f &&
+    GONGCHUANG_LONG_LATERAL_FORWARD_CORRECTION_MM == 80.0f &&
         GONGCHUANG_STEP07_SECOND_HALF_FORWARD_CORRECTION_MM == 15.0f &&
         GONGCHUANG_STEP15_SECOND_HALF_FORWARD_CORRECTION_MM == 40.0f,
     "Chassis-only step-7/15 corrections must match production");

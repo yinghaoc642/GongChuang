@@ -1,0 +1,8 @@
+{
+  "train_images": 42,
+  "val_images": 12,
+  "train_unique": 14,
+  "val_unique": 6,
+  "shared_byte_hashes": 0,
+  "all_unique": 20
+}

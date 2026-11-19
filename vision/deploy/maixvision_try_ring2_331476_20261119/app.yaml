@@ -1,0 +1,18 @@
+id: gc_try_r2_331476_20261119
+name: GongChuang TRY Ring2 331476
+name[zh]: 工创TRY粗定位331476
+version: 5.6.0
+author: GongChuang
+desc: TRY coarse ring2 vision with bundled model 331476
+icon: ''
+exclude:
+  - __pycache__
+  - build
+  - dist
+  - .DS_Store
+files:
+  - models/ring2/model_331476.cvimodel
+  - models/ring2/model.mud
+  - app.yaml
+  - main.py
+  - ring2_coarse.py

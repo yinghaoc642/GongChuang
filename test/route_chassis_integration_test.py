@@ -13,7 +13,7 @@ MAIN_PATH = ROOT / "src" / "main.cpp"
 ROUTE_PATH = ROOT / "src" / "route_chassis_main.inc"
 PLATFORMIO_PATH = ROOT / "platformio.ini"
 EXPECTED_ROUTE_SHA256 = (
-    "6f15cfc5556d600af8bc95a13fda72eebf4dddbd8e796a58807174eee7f58299"
+    "bc1f4badaf392ba7df9037ffa604e61b71b2d121611c0135d91c3543d28288f6"
 )
 
 
@@ -99,8 +99,8 @@ def verify_platformio(platformio_source: str) -> None:
         flags=re.MULTILINE,
     )
     require(
-        environments == ["genericSTM32H750VB", "debug_qr_continuous", "debug_workstation", "debug_raw_workstation", "debug_raw_workstation_341", "debug_storage2_workstation", "debug_translation", "debug_chassis_route", "debug_maix_mode8", "debug_maix_protocol_cycle"],
-        f"expected production and nine isolated debug environments, found {environments}",
+        environments == ["genericSTM32H750VB", "debug_qr_continuous", "debug_workstation", "debug_raw_workstation", "debug_raw_workstation_341", "debug_storage2_workstation", "debug_translation", "debug_chassis_route", "debug_grid_navigation", "legacy_route", "debug_maix_mode8", "debug_maix_protocol_cycle"],
+        f"expected production and eleven optional environments, found {environments}",
     )
     require(
         re.search(
@@ -273,7 +273,7 @@ def verify_route_copy(route_source: str) -> None:
         "stabilityElapsedMs<TURN_POST_STOP_STABILITY_TIME_MS||"
         "integratedTurnStabilityFrameCount<"
         "TURN_POST_STOP_MINIMUM_NEW_FRAMES",
-        "GONGCHUANG_ZONE1_ROUTE_MODE1",
+        "GONGCHUANG_ZONE1_ROUTE_MODE0",
         "DEFAULT_START_ZONE_SELECTION=1U;",
         "ZONE1_INITIAL_FORWARD_BEFORE_STEP04_MM=150.0f;",
         "ZONE1_STEP04_BEFORE_TURN_RIGHT_MM=200.0f;",

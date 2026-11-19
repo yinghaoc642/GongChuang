@@ -1,0 +1,3 @@
+# Complete device recovery archives remain local; application/model artifacts are tracked.
+maixcam_recovery_*/
+.DS_Store

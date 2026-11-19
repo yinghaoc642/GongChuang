@@ -1,0 +1,86 @@
+{
+  "genericSTM32H750VB": {
+    "ram": 13448,
+    "ram_limit": 524288,
+    "flash": 126336,
+    "flash_limit": 131072,
+    "flash_free": 4736
+  },
+  "debug_qr_continuous": {
+    "ram": 3752,
+    "ram_limit": 524288,
+    "flash": 23940,
+    "flash_limit": 131072,
+    "flash_free": 107132
+  },
+  "debug_workstation": {
+    "ram": 11800,
+    "ram_limit": 524288,
+    "flash": 112248,
+    "flash_limit": 131072,
+    "flash_free": 18824
+  },
+  "debug_raw_workstation": {
+    "ram": 11812,
+    "ram_limit": 524288,
+    "flash": 112580,
+    "flash_limit": 131072,
+    "flash_free": 18492
+  },
+  "debug_raw_workstation_341": {
+    "ram": 11812,
+    "ram_limit": 524288,
+    "flash": 112580,
+    "flash_limit": 131072,
+    "flash_free": 18492
+  },
+  "debug_storage2_workstation": {
+    "ram": 11808,
+    "ram_limit": 524288,
+    "flash": 117968,
+    "flash_limit": 131072,
+    "flash_free": 13104
+  },
+  "debug_translation": {
+    "ram": 6092,
+    "ram_limit": 524288,
+    "flash": 55660,
+    "flash_limit": 131072,
+    "flash_free": 75412
+  },
+  "debug_chassis_route": {
+    "ram": 6080,
+    "ram_limit": 524288,
+    "flash": 55316,
+    "flash_limit": 131072,
+    "flash_free": 75756
+  },
+  "debug_grid_navigation": {
+    "ram": 7472,
+    "ram_limit": 524288,
+    "flash": 61768,
+    "flash_limit": 131072,
+    "flash_free": 69304
+  },
+  "legacy_route": {
+    "ram": 12032,
+    "ram_limit": 524288,
+    "flash": 128872,
+    "flash_limit": 131072,
+    "flash_free": 2200
+  },
+  "debug_maix_mode8": {
+    "ram": 3684,
+    "ram_limit": 524288,
+    "flash": 20916,
+    "flash_limit": 131072,
+    "flash_free": 110156
+  },
+  "debug_maix_protocol_cycle": {
+    "ram": 3660,
+    "ram_limit": 524288,
+    "flash": 22380,
+    "flash_limit": 131072,
+    "flash_free": 108692
+  }
+}

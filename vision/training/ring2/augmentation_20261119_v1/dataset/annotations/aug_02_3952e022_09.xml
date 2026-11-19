@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<annotation>
+  <filename>aug_02_3952e022_09.jpg</filename>
+  <size>
+    <width>416</width>
+    <height>234</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+  <object>
+    <name>2r</name>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <occluded>0</occluded>
+    <bndbox>
+      <xmin>86</xmin>
+      <ymin>47</ymin>
+      <xmax>242</xmax>
+      <ymax>204</ymax>
+    </bndbox>
+  </object>
+</annotation>

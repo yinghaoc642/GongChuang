@@ -1,0 +1,121 @@
+-- [I] [Maix Comm Protocol] auto set pinmap A16 to UART0_TX for uart0
+-- [I] [Maix Comm Protocol] auto set pinmap A17 to UART0_RX for uart0
+-- [I] [Maix Comm Protocol] listening on uart port: uart0(/dev/ttyS0)
+-- [I] load cvimodel from: /maixapp/apps/gc_try_r2_331476_20261119/models/ring2/model_331476.cvimodel
+version: 1.4.0
+model Build at 2026-11-19 13:17:25 For platform cv181x
+Max SharedMem size:602112
+-- [I] model info:
+	type: yolov5
+	input type: rgb
+	mean:0.000000 0.000000 0.000000 
+	scale:0.003922 0.003922 0.003922 
+	labels num: 1
+	anchors:10.00 13.00 16.00 30.00 33.00 23.00 30.00 61.00 62.00 45.00 59.00 119.00 116.00 90.00 156.00 198.00 373.00 326.00 
+	input size: 224x224
+
+[COARSE2] loaded /maixapp/apps/gc_try_r2_331476_20261119/models/ring2/model.mud
+[SAMPLE_COMM_SNS_ParseIni]-2203: Parse /mnt/data/sensor_cfg.ini
+[parse_source_devnum]-1796: devNum =  1
+[parse_sensor_name]-1877: sensor =  GCORE_GC4653_MIPI_4M_30FPS_10BIT
+[parse_sensor_busid]-1906: bus_id =  4
+[parse_sensor_i2caddr]-1917: sns_i2c_addr =  29
+[parse_sensor_mipidev]-1928: mipi_dev =  0
+[parse_sensor_laneid]-1939: Lane_id =  4, 3, 2, -1, -1
+[parse_sensor_pnswap]-1950: pn_swap =  0, 0, 0, 0, 0
+[parse_sensor_mclken]-1972: mclk_en =  1
+[parse_sensor_mclk]-1983: mclk =  1
+[SAMPLE_COMM_SNS_ParseIni]-2203: Parse /mnt/data/sensor_cfg.ini
+[parse_source_devnum]-1796: devNum =  1
+[parse_sensor_name]-1877: sensor =  GCORE_GC4653_MIPI_4M_30FPS_10BIT
+[parse_sensor_busid]-1906: bus_id =  4
+[parse_sensor_i2caddr]-1917: sns_i2c_addr =  29
+[parse_sensor_mipidev]-1928: mipi_dev =  0
+[parse_sensor_laneid]-1939: Lane_id =  4, 3, 2, -1, -1
+[parse_sensor_pnswap]-1950: pn_swap =  0, 0, 0, 0, 0
+[parse_sensor_mclken]-1972: mclk_en =  1
+[parse_sensor_mclk]-1983: mclk =  1
+try release sys ok
+[_mmf_init]-1144: maix multi-media version:67a90e2-musl_riscv64
+maix multi-media init ok
+try release vio ok
+try release venc ok
+ISP Vipipe(0) Allocate pa(0x8acdc000) va(0x0x3fbae00000) size(291424)
+stSnsrMode.u16Width 1280 stSnsrMode.u16Height 720 60.000000 wdrMode 0 pstSnsObj 0x3fbe479060
+[SAMPLE_COMM_VI_StartMIPI]-494: sensor 0 stDevAttr.devno 0
+awbInit ver 6.9@2021500
+0 R:1400 B:3100 CT:2850
+1 R:1500 B:2500 CT:3900
+2 R:2300 B:1600 CT:6500
+Golden 1024 1024 1024
+WB Quadratic:0
+isWdr:0
+ViPipe:0,===GC4653 720P 60fps 10bit LINEAR Init OK!===
+********************************************************************************
+cvi_bin_isp message
+gerritId:      97347          commitId:      fc6ce647       
+md5:           [redacted identifier]
+sensorNum      1              
+sensorName0    4653           
+
+PQBIN message
+gerritId:      
+              commitId:      fc6ce647       
+md5:           [redacted identifier]
+sensorNum      1              
+sensorName0    4653           
+
+author:        lxowalle       desc:          gc4653 30fps   
+createTime:    2024-03-26 13:41:34version:                      
+tool Version:       v3.0.5.48           mode:      
+********************************************************************************
+[SAMPLE_COMM_ISP_Thread]-95: ISP Dev 0 running!
+0 R:1298 B:3773 CT:2688
+1 R:1629 B:2599 CT:3890
+2 R:2430 B:1675 CT:7300
+Golden 1629 1024 2599
+wdrLEOnly:1
+[SAMPLE_COMM_VO_StartChn]-351: u32Width:480, u32Height:640, u32Square:1
+FRAME {"frame": 0, "production_ms": 62.72, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 120, "y": 135, "w": 85, "h": 100}, {"label": "2r", "score": 0.[redacted identifier], "x": 2, "y": 150, "w": 71, "h": 70}, {"label": "2r", "score": 0.[redacted identifier], "x": 0, "y": 104, "w": 81, "h": 136}]}
+FRAME {"frame": 1, "production_ms": 16.98, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 2, "production_ms": 15.86, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 3, "production_ms": 15.47, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 4, "production_ms": 15.23, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 5, "production_ms": 18.31, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 121, "y": 138, "w": 81, "h": 87}, {"label": "2r", "score": 0.[redacted identifier], "x": 4, "y": 147, "w": 65, "h": 77}, {"label": "2r", "score": 0.[redacted identifier], "x": 0, "y": 105, "w": 74, "h": 135}]}
+FRAME {"frame": 6, "production_ms": 16.86, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 7, "production_ms": 15.77, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 8, "production_ms": 15.47, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 9, "production_ms": 15.51, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 10, "production_ms": 18.26, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.530347466468811, "x": 114, "y": 134, "w": 91, "h": 102}, {"label": "2r", "score": 0.[redacted identifier], "x": 0, "y": 142, "w": 75, "h": 87}]}
+FRAME {"frame": 11, "production_ms": 16.72, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 12, "production_ms": 16.87, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 13, "production_ms": 15.59, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 14, "production_ms": 15.38, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 15, "production_ms": 18.33, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 1, "y": 141, "w": 75, "h": 87}, {"label": "2r", "score": 0.[redacted identifier], "x": 121, "y": 138, "w": 81, "h": 87}]}
+FRAME {"frame": 16, "production_ms": 14.21, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 17, "production_ms": 17.18, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 18, "production_ms": 18.19, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 19, "production_ms": 27.34, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 20, "production_ms": 16.18, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 4, "y": 145, "w": 71, "h": 77}, {"label": "2r", "score": 0.[redacted identifier], "x": 118, "y": 134, "w": 85, "h": 100}, {"label": "2r", "score": 0.[redacted identifier], "x": 0, "y": 124, "w": 94, "h": 116}]}
+FRAME {"frame": 21, "production_ms": 15.22, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 22, "production_ms": 16.14, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 23, "production_ms": 18.66, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 24, "production_ms": 15.32, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 25, "production_ms": 15.34, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 120, "y": 132, "w": 85, "h": 100}, {"label": "2r", "score": 0.[redacted identifier], "x": 1, "y": 140, "w": 75, "h": 87}]}
+FRAME {"frame": 26, "production_ms": 21.93, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 27, "production_ms": 14.0, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 28, "production_ms": 17.3, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 29, "production_ms": 16.86, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 30, "production_ms": 15.83, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 1, "y": 140, "w": 75, "h": 87}, {"label": "2r", "score": 0.[redacted identifier], "x": 118, "y": 132, "w": 85, "h": 102}]}
+FRAME {"frame": 31, "production_ms": 18.02, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 32, "production_ms": 14.2, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 33, "production_ms": 16.91, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 34, "production_ms": 16.04, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 35, "production_ms": 15.75, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 120, "y": 134, "w": 85, "h": 102}, {"label": "2r", "score": 0.[redacted identifier], "x": 7, "y": 147, "w": 65, "h": 77}, {"label": "2r", "score": 0.[redacted identifier], "x": 0, "y": 112, "w": 80, "h": 128}]}
+FRAME {"frame": 36, "production_ms": 15.83, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 37, "production_ms": 15.46, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 38, "production_ms": 15.62, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 39, "production_ms": 22.66, "objects": [], "geometric_box": null, "stable_result": null, "diagnostic_objects": null}
+SUMMARY {"frames": 40, "seconds": 1.572, "frames_with_score_070": 0, "frames_with_geometric_box": 0, "frames_with_stable_output": 0, "low_threshold_frames": 8, "low_threshold_hits": 8, "scope": "One stationary scene; diagnostic 0.20 results never used as accepted outputs. No robot request or response sent."}
+maix multi-media driver released.
+ISP Vipipe(0) Free pa(0x8acdc000) va(0x0x3fbae00000)

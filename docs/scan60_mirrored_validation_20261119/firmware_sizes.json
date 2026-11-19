@@ -1,0 +1,16 @@
+{
+  "genericSTM32H750VB": {
+    "ram": 13448,
+    "ram_limit": 524288,
+    "flash": 126360,
+    "flash_limit": 131072,
+    "flash_free": 4712
+  },
+  "debug_grid_navigation": {
+    "ram": 7472,
+    "ram_limit": 524288,
+    "flash": 61788,
+    "flash_limit": 131072,
+    "flash_free": 69284
+  }
+}

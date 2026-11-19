@@ -1,0 +1,22 @@
+{
+  "seed": 20261119,
+  "original_train": 42,
+  "unique_train_sources": 14,
+  "generated": 224,
+  "train": 266,
+  "val": 12,
+  "source_files_unchanged": 110,
+  "validation_preserved_byte_for_byte": true,
+  "cross_split_exact_duplicates": 0,
+  "all_boxes_valid_and_unclipped": true,
+  "box_method": "Affine of four original box corners; conservative axis-aligned bounds.",
+  "limitations": [
+    "Synthetic variants do not add independent scenes.",
+    "No real high-view camera images or negative scenes added.",
+    "Exact hash split audit does not rule out visually similar scenes."
+  ],
+  "versions": {
+    "opencv": "5.0.0",
+    "numpy": "2.5.1"
+  }
+}

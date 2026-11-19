@@ -1,0 +1,55 @@
+{
+  "status": "six_runs_completed_candidate_prepared_hardware_unverified",
+  "new_training_id": null,
+  "new_model_created": true,
+  "runtime_model_changed": false,
+  "dataset_changed": false,
+  "blocker": null,
+  "recovery_attempted": [
+    "reconnect native Chrome repeatedly",
+    "inventory apps/browsers",
+    "reset cua_repl session and reinitialize",
+    "wait and retry inventory"
+  ],
+  "last_observed_url": "https://maixhub.com/model/training/project/137925/deployment?id=331407",
+  "connection_repair_attempt": {
+    "checked_at_utc": "2026-11-19T02:26:15.346613+00:00",
+    "result": "not_recovered",
+    "diagnostic_file": "connection_diagnosis_20261119.md",
+    "service_files_compared": 173,
+    "targeted_restart": "denied: operation not permitted",
+    "launch_services": "failed: -10827 kLSNoExecutableErr",
+    "root_cause": "unconfirmed",
+    "local_dataset_integrity": {
+      "checked_at_utc": "2026-11-19T02:26:15.346613+00:00",
+      "files_checked": 152,
+      "changed": [],
+      "missing": [],
+      "all_unchanged": true
+    }
+  },
+  "new_training_ids": [
+    331402,
+    331403,
+    331404,
+    331405,
+    331406,
+    331407
+  ],
+  "connection_recovered": {
+    "at_utc": "2026-11-19T02:38:20.807055+00:00",
+    "native_chrome_ui": "working",
+    "browser_access_host": "still_unavailable",
+    "verified": "MaixHub task pages show submitted tasks and server parameters"
+  },
+  "recommended_candidate": 331402,
+  "candidate_folder": "try/vision/deploy/ring2_tuned_331402",
+  "dataset_integrity": {
+    "checked_at_utc": "2026-11-19T03:07:30.051132+00:00",
+    "files_checked": 152,
+    "changed": [],
+    "missing": [],
+    "all_unchanged": true
+  },
+  "remaining_validation": "Full fixed-validation inference at runtime thresholds and actual MaixCAM/vehicle testing are not available in this session."
+}

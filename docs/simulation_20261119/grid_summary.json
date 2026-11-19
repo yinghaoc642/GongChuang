@@ -1,0 +1,162 @@
+{
+  "total": 7418,
+  "groups": {
+    "static_0_to_3": {
+      "total": 3124,
+      "clear_handoff": 2,
+      "six_stations_and_home": 848,
+      "fault_stop": 2274,
+      "failure_codes": {
+        "3": 422,
+        "6": 1126,
+        "4": 726
+      }
+    },
+    "first_only_0_to_3": {
+      "total": 3122,
+      "clear_handoff": 0,
+      "six_stations_and_home": 848,
+      "fault_stop": 2274,
+      "failure_codes": {
+        "3": 422,
+        "7": 1126,
+        "4": 726
+      }
+    },
+    "split_random_4_to_10": {
+      "total": 1024,
+      "clear_handoff": 0,
+      "six_stations_and_home": 28,
+      "fault_stop": 996,
+      "failure_codes": {
+        "3": 280,
+        "7": 223,
+        "4": 255,
+        "6": 238
+      }
+    },
+    "timing_wrap": {
+      "total": 8,
+      "clear_handoff": 0,
+      "six_stations_and_home": 8,
+      "fault_stop": 0,
+      "failure_codes": {}
+    },
+    "random_timing": {
+      "total": 100,
+      "clear_handoff": 0,
+      "six_stations_and_home": 100,
+      "fault_stop": 0,
+      "failure_codes": {}
+    },
+    "start_pose": {
+      "total": 18,
+      "clear_handoff": 0,
+      "six_stations_and_home": 8,
+      "fault_stop": 10,
+      "failure_codes": {
+        "2": 10
+      }
+    },
+    "protocol_fault": {
+      "total": 16,
+      "clear_handoff": 0,
+      "six_stations_and_home": 0,
+      "fault_stop": 16,
+      "failure_codes": {
+        "1": 16
+      }
+    },
+    "qr_timeout": {
+      "total": 2,
+      "clear_handoff": 0,
+      "six_stations_and_home": 0,
+      "fault_stop": 2,
+      "failure_codes": {
+        "8": 2
+      }
+    },
+    "scan_total_timeout": {
+      "total": 2,
+      "clear_handoff": 0,
+      "six_stations_and_home": 0,
+      "fault_stop": 2,
+      "failure_codes": {
+        "1": 2
+      }
+    },
+    "empty_first_blind_spot": {
+      "total": 2,
+      "clear_handoff": 2,
+      "six_stations_and_home": 0,
+      "fault_stop": 0,
+      "failure_codes": {}
+    }
+  },
+  "static_by_obstacle_count": [
+    {
+      "obstacle_cells": 0,
+      "zone": 1,
+      "total": 1,
+      "clear_handoff": 1,
+      "completed": 0,
+      "fault_stop": 0
+    },
+    {
+      "obstacle_cells": 0,
+      "zone": 2,
+      "total": 1,
+      "clear_handoff": 1,
+      "completed": 0,
+      "fault_stop": 0
+    },
+    {
+      "obstacle_cells": 1,
+      "zone": 1,
+      "total": 21,
+      "clear_handoff": 0,
+      "completed": 14,
+      "fault_stop": 7
+    },
+    {
+      "obstacle_cells": 1,
+      "zone": 2,
+      "total": 21,
+      "clear_handoff": 0,
+      "completed": 14,
+      "fault_stop": 7
+    },
+    {
+      "obstacle_cells": 2,
+      "zone": 1,
+      "total": 210,
+      "clear_handoff": 0,
+      "completed": 91,
+      "fault_stop": 119
+    },
+    {
+      "obstacle_cells": 2,
+      "zone": 2,
+      "total": 210,
+      "clear_handoff": 0,
+      "completed": 91,
+      "fault_stop": 119
+    },
+    {
+      "obstacle_cells": 3,
+      "zone": 1,
+      "total": 1330,
+      "clear_handoff": 0,
+      "completed": 319,
+      "fault_stop": 1011
+    },
+    {
+      "obstacle_cells": 3,
+      "zone": 2,
+      "total": 1330,
+      "clear_handoff": 0,
+      "completed": 319,
+      "fault_stop": 1011
+    }
+  ]
+}

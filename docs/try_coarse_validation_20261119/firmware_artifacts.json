@@ -1,0 +1,27 @@
+{
+  "genericSTM32H750VB": {
+    "ram_bytes": 13472,
+    "flash_bytes": 127712,
+    "firmware_bin_sha256": "91a5fdd20f54087ba011ff1985f5307ea94d97a1c63b8a908082e58c0e7ad5ce"
+  },
+  "debug_workstation": {
+    "ram_bytes": 11828,
+    "flash_bytes": 113572,
+    "firmware_bin_sha256": "39475e36efcc36a305a3bde57c15ea743174718095c7e45efbfb57004d4a99a9"
+  },
+  "debug_storage2_workstation": {
+    "ram_bytes": 11824,
+    "flash_bytes": 119320,
+    "firmware_bin_sha256": "4595c3a33319ac310d48f326003f146017fdf4e609d5cda55eecdacfa56e226d"
+  },
+  "debug_grid_navigation": {
+    "ram_bytes": 7472,
+    "flash_bytes": 61788,
+    "firmware_bin_sha256": "a12064f7ea2a72eb28d6b516dc1d7da756ba55904f780eb985291b9d60cf9f6d"
+  },
+  "legacy_route": {
+    "ram_bytes": 12048,
+    "flash_bytes": 130180,
+    "firmware_bin_sha256": "0bde2e749b4f02fe494a12f8d682e1617620964ecce5a7e6cb28cf273bf0d5f9"
+  }
+}

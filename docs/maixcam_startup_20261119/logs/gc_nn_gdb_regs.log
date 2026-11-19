@@ -1,0 +1,22 @@
+[New LWP 795]
+-- [I] [Maix Comm Protocol] auto set pinmap A16 to UART0_TX for uart0
+-- [I] [Maix Comm Protocol] auto set pinmap A17 to UART0_RX for uart0
+-- [I] [Maix Comm Protocol] listening on uart port: uart0(/dev/ttyS0)
+[New LWP 796]
+
+Thread 1 "python3" received signal SIGSEGV, Segmentation fault.
+0xffffffc0ea5e96b4 in ?? ()
+pc             0xffffffc0ea5e96b4	0xffffffc0ea5e96b4
+ra             0xffffbac0ea5e96b4	0xffffbac0ea5e96b4
+sp             0x3fffd57180	0x3fffd57180
+a0             0xffffba8100000000	-76411763163136
+a1             0x6d	109
+a2             0x3fffd57158	274875117912
+t0             0xffffbac0ffd574f8	-76136888044296
+t1             0xffffba8100000000	-76411763163136
+gp             0x2aad450800	0x2aad450800
+   0xffffbac0ea5e96a4:	Cannot access memory at address 0xffffbac0ea5e96a4
+0x3fffd57180:	0xffffbac0ffd574f8	0x0000003fffd57198
+0x3fffd57190:	0x0000003fe78725a8	0x0000003fe7872510
+0x3fffd571a0:	0x0000000000000000	0x0000003fec8b45d0
+#0  0xffffffc0ea5e96b4 in ?? ()
