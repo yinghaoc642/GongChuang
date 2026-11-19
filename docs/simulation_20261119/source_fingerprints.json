@@ -1,0 +1,23 @@
+{
+  "baseline": "e1a285cef19e081a0f6cece95cf8ff5ab72cd12f",
+  "sha256": {
+    "src/main.cpp": "aa99639211e55deea85d3760b3e837eca074b6f2e8606dd1c1b806ef9ce5c54c",
+    "src/route_chassis_main.inc": "62adbd9958140fdf48d3e3026bfefea36a63be4771f734b4318014c3f1ef9bde",
+    "src/radar_navigation.inc": "93efa0d53b896ab87e13e7702cbc6d1d46f948694f8c81957917a4b8bac13da8",
+    "src/radar_navigation_config.h": "8d70cd4b9ba968e9d0dde0da16c4556cf032119292df4ac8bbbe4338e43e4628",
+    "platformio.ini": "4cc307ed836d1de1daefec6dcc2ae314b48c0ff32bbda73519723380ee70f657",
+    "lib/QimingGrid/src/GridNavigator.cpp": "2bea098ba2a5f6a115a23d4a8de47b6cb1e7d1458e8db0d6af7bef2d13ec283c",
+    "lib/QimingGrid/src/GridNavigator.h": "9d08cc2d676440eafc705d12a679160bc558db99ac2cf054d7725d5f5292fd24",
+    "lib/QimingGrid/src/LinkProtocol.cpp": "41861590c1ac132e18bc85fd064d5278b77718e56b62ebe516689ad46a46ec97",
+    "lib/QimingGrid/src/NavigationMode.h": "a47f3e33bb1ff20fddd0ec0fcfb1c227ec8a47b6637b8bbe48bfaf77d09add34",
+    "lib/QimingGrid/src/QimingGridClient.cpp": "236c32dff9384a9ceb548da2c65c7e21667d09cb12ea2581d1fcd04943e3bc5f",
+    "lib/QimingGrid/src/QimingGridClient.h": "b429acf2f9eb1852a81885ef10a2a7458ec5610e8d729da8fd0270ca2495b6e5",
+    "lib/QimingGrid/src/link_protocol.h": "a7e78be17b3d3762d2635bfefa42f99758a0b499ad635221ca32153c297517c7",
+    "test/native_grid_drive.cpp": "c1fe19ed2af36bb5492b7295c6bb41aa9201dfb24a4b12ee04d9c5b1cbe27483",
+    "test/native_grid_protocol_stress.cpp": "1d3dfce67e93502f7fd934d3e312a252f84a578d99e4888f580643cace8e69b5",
+    "test/native_grid_reachability.cpp": "3685f472d66b5871b4e7edc815074c542e2835276bf1f331d879dd0ad067878e",
+    "test/native_grid_simulation.cpp": "d5162605f21240376bafae4667d7df5a6662ac5067c2e7863b94915ad5769309",
+    "test/grid_scenarios_test.py": "d11bafb87a24c66f41c1bfe3808f2eab2a249f77c443239e491558b9bf5cd1c1",
+    "test/simulation_suite.py": "8bc61dc900030df947aba3647147f807e1c42fd3b931acd3fae492bc1bc53d82"
+  }
+}

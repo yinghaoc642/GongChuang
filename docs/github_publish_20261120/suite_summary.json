@@ -1,0 +1,8 @@
+{
+  "script_total": 39,
+  "script_passed": 30,
+  "script_failed": 9,
+  "native_total": 5,
+  "native_failed": 0,
+  "simulation_scope": "host native modules and extracted production functions; event models for hardware"
+}

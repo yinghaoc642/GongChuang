@@ -1,0 +1,464 @@
+{
+  "source_image_sizes": [
+    [
+      416,
+      234
+    ]
+  ],
+  "scope": "Static report-coordinate replay of box_candidate only. Source JPGs are 416x234, while camera code uses 320x240. NOT camera inference, Hough refinement, temporal stability, quantized model validation, or hardware validation. Raw replay counts cannot be presented as deployment accuracy.",
+  "results": [
+    {
+      "id": 311465,
+      "passed": 2,
+      "total": 3,
+      "details": [
+        {
+          "image": "15.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              103,
+              26,
+              190,
+              177,
+              0.7915601134300232
+            ]
+          ],
+          "candidate": [
+            0.7915601134300232,
+            198.0,
+            114.5,
+            91.75
+          ]
+        },
+        {
+          "image": "16.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              88,
+              31,
+              194,
+              170,
+              0.6794828772544861
+            ]
+          ],
+          "candidate": null
+        },
+        {
+          "image": "27.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              106,
+              23,
+              176,
+              176,
+              0.72472083568573
+            ]
+          ],
+          "candidate": [
+            0.72472083568573,
+            194.0,
+            111.0,
+            88.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": 331358,
+      "passed": 0,
+      "total": 3,
+      "details": [
+        {
+          "image": "18.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              105,
+              31,
+              172,
+              172,
+              0.6211483478546143
+            ]
+          ],
+          "candidate": null
+        },
+        {
+          "image": "17.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              115,
+              32,
+              175,
+              182,
+              0.6840384602546692
+            ]
+          ],
+          "candidate": null
+        },
+        {
+          "image": "16.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              90,
+              26,
+              175,
+              186,
+              0.5671162009239197
+            ]
+          ],
+          "candidate": null
+        }
+      ]
+    },
+    {
+      "id": 331402,
+      "passed": 3,
+      "total": 3,
+      "details": [
+        {
+          "image": "15.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              99,
+              34,
+              200,
+              157,
+              0.708066463470459
+            ]
+          ],
+          "candidate": [
+            0.708066463470459,
+            199.0,
+            112.5,
+            89.25
+          ]
+        },
+        {
+          "image": "16.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              95,
+              7,
+              182,
+              207,
+              0.7408125996589661
+            ]
+          ],
+          "candidate": [
+            0.7408125996589661,
+            186.0,
+            110.5,
+            97.25
+          ]
+        },
+        {
+          "image": "18.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              99,
+              15,
+              180,
+              203,
+              0.8830680251121521
+            ]
+          ],
+          "candidate": [
+            0.8830680251121521,
+            189.0,
+            116.5,
+            95.75
+          ]
+        }
+      ]
+    },
+    {
+      "id": 331403,
+      "passed": 0,
+      "total": 3,
+      "details": [
+        {
+          "image": "17.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              116,
+              45,
+              168,
+              151,
+              0.5965019464492798
+            ]
+          ],
+          "candidate": null
+        },
+        {
+          "image": "16.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              95,
+              35,
+              172,
+              161,
+              0.5757915377616882
+            ]
+          ],
+          "candidate": null
+        },
+        {
+          "image": "18.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              107,
+              39,
+              171,
+              154,
+              0.6070902943611145
+            ]
+          ],
+          "candidate": null
+        }
+      ]
+    },
+    {
+      "id": 331404,
+      "passed": 2,
+      "total": 3,
+      "details": [
+        {
+          "image": "17.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              124,
+              35,
+              159,
+              172,
+              0.7621378302574158
+            ]
+          ],
+          "candidate": [
+            0.7621378302574158,
+            203.5,
+            121.0,
+            82.75
+          ]
+        },
+        {
+          "image": "18.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              106,
+              28,
+              176,
+              177,
+              0.6632592678070068
+            ]
+          ],
+          "candidate": null
+        },
+        {
+          "image": "28.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              99,
+              38,
+              190,
+              160,
+              0.8013632297515869
+            ]
+          ],
+          "candidate": [
+            0.8013632297515869,
+            194.0,
+            118.0,
+            87.5
+          ]
+        }
+      ]
+    },
+    {
+      "id": 331405,
+      "passed": 2,
+      "total": 3,
+      "details": [
+        {
+          "image": "16.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              80,
+              38,
+              212,
+              159,
+              0.7592015266418457
+            ]
+          ],
+          "candidate": null
+        },
+        {
+          "image": "15.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              105,
+              29,
+              190,
+              167,
+              0.7083114385604858
+            ]
+          ],
+          "candidate": [
+            0.7083114385604858,
+            200.0,
+            112.5,
+            89.25
+          ]
+        },
+        {
+          "image": "27.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              107,
+              27,
+              186,
+              170,
+              0.8199967741966248
+            ]
+          ],
+          "candidate": [
+            0.8199967741966248,
+            200.0,
+            112.0,
+            89.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": 331406,
+      "passed": 2,
+      "total": 3,
+      "details": [
+        {
+          "image": "16.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              92,
+              31,
+              187,
+              172,
+              0.7288313508033752
+            ]
+          ],
+          "candidate": [
+            0.7288313508033752,
+            185.5,
+            117.0,
+            89.75
+          ]
+        },
+        {
+          "image": "17.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              118,
+              28,
+              177,
+              179,
+              0.6452280282974243
+            ]
+          ],
+          "candidate": null
+        },
+        {
+          "image": "28.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              106,
+              33,
+              173,
+              177,
+              0.7405015826225281
+            ]
+          ],
+          "candidate": [
+            0.7405015826225281,
+            192.5,
+            121.5,
+            87.5
+          ]
+        }
+      ]
+    },
+    {
+      "id": 331407,
+      "passed": 1,
+      "total": 3,
+      "details": [
+        {
+          "image": "27.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              108,
+              31,
+              177,
+              164,
+              0.600184977054596
+            ]
+          ],
+          "candidate": null
+        },
+        {
+          "image": "17.jpg",
+          "pass": false,
+          "boxes": [
+            [
+              111,
+              33,
+              169,
+              173,
+              0.6968733668327332
+            ]
+          ],
+          "candidate": null
+        },
+        {
+          "image": "28.jpg",
+          "pass": true,
+          "boxes": [
+            [
+              112,
+              29,
+              156,
+              183,
+              0.7057986855506897
+            ]
+          ],
+          "candidate": [
+            0.7057986855506897,
+            190.0,
+            120.5,
+            84.75
+          ]
+        }
+      ]
+    }
+  ],
+  "known_geometry_observation": "331405 sample 16.jpg has width=212 height=159; ratio=1.333333 exceeds existing 1.33 limit. This is a static diagnostic, not proof of failure on a real camera frame."
+}

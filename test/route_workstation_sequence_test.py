@@ -714,8 +714,8 @@ def verify_process_ring_transfer_order_contract(
             "VISION_POST_MOTION_SETTLE_TIME_MS,"
             "VISION_HEADING_STABLE_TIME_MS)"
         )
-        == 2,
-        "circle correction and post-vision heading locks do not both use "
+        == 4,
+        "coarse, circle correction and post-vision heading locks do not both use "
         "the 10 ms vision gate",
     )
     initial_storage_parallel = compact_cpp(
@@ -1208,7 +1208,7 @@ def verify_raw_pick_and_process_entry_contract(
         "safe parallel/fallback arm path",
     )
     require(
-        "commandStorageServoParkingPosition();"
+        "prepareDepartureTrayParking();"
         not in begin_work[raw_branch_index:raw_branch_return_index],
         "RAW entry still performs the redundant 165-degree parking move",
     )
@@ -1833,7 +1833,7 @@ def verify_raw_pick_and_process_entry_contract(
             "rawTravelM5ZeroPending = true",
             "RAW_EXIT_M5_MAXIMUM_STEP_RATE",
             "RAW_EXIT_M5_STEP_ACCELERATION",
-            "commandStorageServoParkingPosition("
+            "prepareDepartureTrayParking("
             "DEPARTURE_STORAGE_SERVO_INTERVAL_MS)",
             "finishActiveWorkAction()",
         ),
@@ -2224,8 +2224,8 @@ def verify_run_mode_contract(
         flags=re.MULTILINE,
     )
     require(
-        environments == ["genericSTM32H750VB", "debug_qr_continuous", "debug_workstation", "debug_raw_workstation", "debug_raw_workstation_341", "debug_storage2_workstation", "debug_translation", "debug_chassis_route", "debug_maix_mode8", "debug_maix_protocol_cycle"],
-        "platformio.ini must expose production plus the nine isolated debug environments; "
+        environments == ["genericSTM32H750VB", "debug_qr_continuous", "debug_workstation", "debug_raw_workstation", "debug_raw_workstation_341", "debug_storage2_workstation", "debug_translation", "debug_chassis_route", "debug_grid_navigation", "legacy_route", "debug_maix_mode8", "debug_maix_protocol_cycle"],
+        "platformio.ini must expose production plus the eleven optional environments; "
         f"found {environments}",
     )
     require(
@@ -2752,7 +2752,7 @@ def verify_run_mode_contract(
             "branches",
         )
         require(
-            source_without_comments.count("resetQrReceiver();") == 2
+            source_without_comments.count("resetQrReceiver();") == (4 if split_route_chassis else 2)
             and source_without_comments.count("receiveQrData();") == 1
             and source_without_comments.count(
                 "route_chassis::setup();"
@@ -2764,7 +2764,7 @@ def verify_run_mode_contract(
         )
     else:
         require(
-            source_without_comments.count("resetQrReceiver();") == 2
+            source_without_comments.count("resetQrReceiver();") == (4 if split_route_chassis else 2)
             and source_without_comments.count("receiveQrData();") == 1
             and source_without_comments.count(
                 "SerialQr.begin(QR_BAUDRATE);"
@@ -2913,7 +2913,7 @@ def verify_calibration_mode_contract(
             "if (finishedFinalContainerSequence)",
             "if (!processRound1TravelOwnsTrayCommand && "
             "!storageRound1RawTravelOwnsTrayCommand)",
-            "commandStorageServoParkingPosition("
+            "prepareDepartureTrayParking("
             "activeWorkAction == WORK_ACTION_PROCESS ? "
             "DEPARTURE_STORAGE_SERVO_INTERVAL_MS : "
             "STORAGE_SERVO_INTERVAL_MS)",
@@ -2931,7 +2931,7 @@ def verify_calibration_mode_contract(
         final_sequence_index,
     )
     process2_parking_command_index = transfer_completion.find(
-        "commandStorageServoParkingPosition("
+        "prepareDepartureTrayParking("
         "activeWorkAction==WORK_ACTION_PROCESS?"
         "DEPARTURE_STORAGE_SERVO_INTERVAL_MS:"
         "STORAGE_SERVO_INTERVAL_MS);",

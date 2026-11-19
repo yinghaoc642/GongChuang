@@ -1,0 +1,17 @@
+-- [I] [Maix Comm Protocol] auto set pinmap A16 to UART0_TX for uart0
+-- [I] [Maix Comm Protocol] auto set pinmap A17 to UART0_RX for uart0
+-- [I] [Maix Comm Protocol] listening on uart port: uart0(/dev/ttyS0)
+-- [I] load cvimodel from: /root/models/yolov5s_320x224_int8.cvimodel
+version: 1.4.0
+yolov5s Build at 2024-03-20 10:58:28 For platform cv181x
+Max SharedMem size:860160
+-- [I] model info:
+	type: yolov5
+	input type: rgb
+	mean:0.000000 0.000000 0.000000 
+	scale:0.003922 0.003922 0.003922 
+	labels num: 80
+	anchors:10.00 13.00 16.00 30.00 33.00 23.00 30.00 61.00 62.00 45.00 59.00 119.00 116.00 90.00 156.00 198.00 373.00 326.00 
+	input size: 320x224
+
+NORMAL OFFICIAL MODEL OK 80

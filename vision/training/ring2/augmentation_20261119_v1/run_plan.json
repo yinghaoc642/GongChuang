@@ -1,0 +1,37 @@
+{
+  "dataset_id": 157083,
+  "comparison_baseline_model": 331402,
+  "runs": [
+    {
+      "name": "aug-v1-224-b8-lr001",
+      "platform": "maixcam",
+      "model": "yolov5s",
+      "input_width": 224,
+      "input_height": 224,
+      "batch_size": 8,
+      "learning_rate": 0.001,
+      "epochs": 200,
+      "fit": "contain",
+      "mirror": false,
+      "rotate": false,
+      "blur": false
+    },
+    {
+      "name": "aug-v1-224-b16-lr001",
+      "platform": "maixcam",
+      "model": "yolov5s",
+      "input_width": 224,
+      "input_height": 224,
+      "batch_size": 16,
+      "learning_rate": 0.001,
+      "epochs": 200,
+      "fit": "contain",
+      "mirror": false,
+      "rotate": false,
+      "blur": false
+    }
+  ],
+  "reason": "Keep all exposed parameters fixed except batch size; offline augmentation already covers photometric and geometric variation.",
+  "acceptance_scope": "Compare score>=0.70, IoU>=0.5 and center errors on exposed report samples. Do not claim full validation or hardware accuracy from three samples.",
+  "runtime_model_changed": false
+}

@@ -1,0 +1,7 @@
+{
+  "compile_code": 0,
+  "compile_output": "",
+  "exit_code": 0,
+  "stdout": "PASS protocol stress: 20000 valid roundtrips, 20000 corrupt frames rejected, 300000 noise bytes and delimiter recovery\n",
+  "stderr": ""
+}

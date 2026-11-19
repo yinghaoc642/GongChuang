@@ -1,0 +1,17 @@
+{
+  "baseline_report": "GongChuang/docs/scan60_validation_20261119/existing_tests.json",
+  "same_failed_script_names": true,
+  "failed_scripts": [
+    "arm_soft_landing_test.py",
+    "debug_raw_workstation_test.py",
+    "m6_endpoint_reach_recovery_test.py",
+    "m7_double_experiment_test.py",
+    "process_gripper_m7_interlock_test.py",
+    "qr_startup_checkpoint_test.py",
+    "storage2_debug_scan_pose_correction_test.py",
+    "storage_round2_local_mode_test.py",
+    "yan2_mode1_red_shape_test.py"
+  ],
+  "new_failures": [],
+  "note": "Only failure-name equality checked here; raw outputs remain in existing_tests.json. Unrelated failures not repaired in this task."
+}

@@ -1,0 +1,117 @@
+{
+  "scope": "Static replay of report boxes in original416x234 coordinates through existing box_candidate. Camera uses320x240: not hardware inference, temporal stability, Hough refinement or full validation.",
+  "runtime_source_sha256": "6b2bc52f9bcab2bb5f9ca5e05408161ff0d9f0385f41a3c6ceacbed20d98b7b2",
+  "results": [
+    {
+      "training_id": 331402,
+      "passed": 3,
+      "total": 3,
+      "details": [
+        {
+          "name": "15.jpg",
+          "pass": true,
+          "candidate": [
+            0.708066463470459,
+            199.0,
+            112.5,
+            89.25
+          ]
+        },
+        {
+          "name": "16.jpg",
+          "pass": true,
+          "candidate": [
+            0.7408125996589661,
+            186.0,
+            110.5,
+            97.25
+          ]
+        },
+        {
+          "name": "18.jpg",
+          "pass": true,
+          "candidate": [
+            0.8830680251121521,
+            189.0,
+            116.5,
+            95.75
+          ]
+        }
+      ]
+    },
+    {
+      "training_id": 331476,
+      "passed": 3,
+      "total": 3,
+      "details": [
+        {
+          "name": "27_48.jpg",
+          "pass": true,
+          "candidate": [
+            0.9138688445091248,
+            200.0,
+            111.5,
+            92.25
+          ]
+        },
+        {
+          "name": "18_46.jpg",
+          "pass": true,
+          "candidate": [
+            0.9246512055397034,
+            194.0,
+            121.5,
+            91.75
+          ]
+        },
+        {
+          "name": "16_44.jpg",
+          "pass": true,
+          "candidate": [
+            0.9105584025382996,
+            185.5,
+            119.5,
+            93.0
+          ]
+        }
+      ]
+    },
+    {
+      "training_id": 331477,
+      "passed": 3,
+      "total": 3,
+      "details": [
+        {
+          "name": "17_43.jpg",
+          "pass": true,
+          "candidate": [
+            0.9387239813804626,
+            203.0,
+            124.5,
+            94.25
+          ]
+        },
+        {
+          "name": "28_53.jpg",
+          "pass": true,
+          "candidate": [
+            0.9083824753761292,
+            193.5,
+            120.5,
+            88.0
+          ]
+        },
+        {
+          "name": "27_48.jpg",
+          "pass": true,
+          "candidate": [
+            0.8715181350708008,
+            197.5,
+            110.0,
+            90.25
+          ]
+        }
+      ]
+    }
+  ]
+}

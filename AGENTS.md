@@ -5,9 +5,9 @@
 
 ## 1. 工程边界与权威入口
 
-- 当前工程固定为 `C:\Users\Administrator\Documents\PlatformIO\Projects\Gongchuang (6)\Gongchuang`。
+- 本次独立试验工程为 `/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try`；原 `GongChuang` 和全部历史存档保持只读。仅两次粗加工和第一次暂存增加高位2号圈粗定位，第二次暂存和原料区保留原流程。
 - 正式固件入口是 `src/main.cpp`，PlatformIO 环境是 `genericSTM32H750VB`，也是 `default_envs`。
-- 正式底盘路线的唯一实现是 `src/route_chassis_main.inc`。它由 `main.cpp`、完整底盘调试和单段平移调试复用。
+- 底盘硬件、IMU转向和旧路线唯一实现是 `src/route_chassis_main.inc`。当前正式默认采用 `lib/QimingGrid` 和 `src/radar_navigation.inc` 的网格导航，由 `main.cpp` 统一调度。旧路线仍由完整底盘/单段调试和 `legacy_route` 复用。
 - 正式机械臂、工位和视觉状态机都在 `src/main.cpp`。各工位调试入口通过宏包含这份实现，不得复制出第二套参数。
 - 机械臂通用硬件参数在 `lib/RobotConfig/src/RobotConfig.h`；视觉 UART 封装在 `lib/MaixCamClient` 和 `lib/VisionProtocol`。
 - `src/yanyanversionnew*.inc`、`src/*disabled`、`backups/` 和 `文件说明资料/` 中带日期的报告都是历史材料，不参与正式构建。
@@ -54,7 +54,19 @@
 - M6 上电前应完全回缩到机械端点，M7 应位于物理最高点。M7 建零前会先停止残留命令、清除锁存保护并要求清除/使能回复成功；建零再读取驱动器角度、离开端点 10 mm，并复读验证实际运动。任一步失败都会阻止启动，启动并不要求电机先发生堵转。运行中若驱动器明确拒绝 M6/M7 使能，程序必须进入故障，不能继续下发位置命令。
 - 任务等待和允许的视觉等待不应被普通动作看门狗误判；机械轴故障、通信验证耗尽或明确安全边界越界仍进入 FAULT。
 
-## 5. 当前启停区 1 路线状态机
+## 5. 当前网格模式与保留固定路线
+
+- `GONGCHUANG_GRID_NAVIGATION=1`在正式编入运行时模式选择，NavigationMode默认RADAR；双击PB9/HMI3或4切换，启动后锁定。独立工位关闭雷达。
+- `debug_grid_navigation` 共用正式网格/雷达/底盘实现，跳过工位，不初始化机械臂。
+- `legacy_route` 显式设0运行下述固定路线。不可把旧段距离标定再次叠加到网格世界向量。
+- 网格地图+X朝暂存、+Y朝原料，CCW正；车头M3/M4。库forward与车前相反，库left与车右相同。
+- RADAR先在启停区安全预扫，再在向场内150/右移200 mm处，区1依次0°/CCW60°/CCW120°、区2镜像为0°/CW60°/CW120°停稳扫描，各次SET_POSE后ACK+HELLO读回确认，四图并集。区1扫完CW120°、区2CCW120°恢复；无障碍先退回原启停位置再交11月2日路线。准备和空图归位保持SCANNING，不能首个MOVE就接受地图。雷达heading正方向资料未定义，radarHeadingPerCcw默认−1仍需实车核对。显式LEGACY不依赖雷达，工位料盘沿用基线。
+- 区1前进150/入口20格，区2后退150/入口0格；两区共用工位，分别回本区保存起点。障碍整格禁行。RadarViewer布局必须与代码一致，公开协议无法读回布局。
+- 六次工位离站首个底盘命令下发时并行回料盘165°，旅行准备不能再将其转回槽位0。
+- 改动此链路需跑 `test/navigation_mode_test.py`、`qiming_grid_test.py`、`grid_departure_tray_test.py`、`grid_workstation_tracking_test.py`，并构建正式/网格底盘及受影响调试。
+- 接线、资料、现场标定和软件里程限制见 `docs/RADAR_GRID_NAVIGATION.md`，测试记录见 `docs/GRID_VALIDATION.md`。
+
+### 保留的启停区1固定路线
 
 `GONGCHUANG_ZONE1_ROUTE_MODE` 位于 `src/route_chassis_main.inc`，当前默认值为0，只控制出发路线。
 
@@ -198,7 +210,7 @@ STM32 `HardwareSerial` 构造参数顺序是 RX、TX。MaixCAM 接线为 STM32 P
 
 ## 9. 视觉协议和 MaixCAM
 
-当前相机脚本是 `vision/yanyanview5.py`，标识为 `5.5.1-aggressive-latency`、协议 v2，标定状态仍是 `UNVERIFIED`。
+当前相机脚本是 `vision/yanyanview5.py`，标识为 `5.6.0-try-coarse-ring2`、协议 v2，标定状态仍是 `UNVERIFIED`。
 
 另有用户指定的相机脚本 `yan_2/main.py`，当前标识为 `5.3.0-find1,3-red-shape`。
 该脚本的 `MODE1_RED_DETECTION_LOGIC` 是Python顶部配置常量：0保留旧的最大红色色块选择，
@@ -215,6 +227,7 @@ STM32 `HardwareSerial` 构造参数顺序是 RX、TX。MaixCAM 接线为 STM32 P
 - 模式 8：四种颜色中选择一个稳定目标。
 - 模式 9：霍夫三圆中心环，允许受限单圆回退。
 - 模式 10：端点单圆，用于 1、3 号位端点扫描。
+- 模式 11：仅两次粗加工与第一次暂存的高位2号圈粗定位；目标2，metric为外圈半径，至少700置信度，两轮各2500 ms；失败继续精定位。几何估计统一在 `src/workstation_coarse.h`，不得把80.37570 mm有效轴偏置当成实测值。第二次暂存不得接入此模式。
 
 主控严格核对 CRC、字段数、数值范围、序号、模式、状态和目标身份。当前相机只在稳定结果成立时发送 OK；无目标、歧义和不稳定通常表现为静默等待。
 
@@ -282,8 +295,8 @@ M7高度保留：普通取料−33 mm、第二次取料−36 mm、原料放入�
 ## 11. 工位视觉流程
 
 - 原料区：按二维码颜色顺序找色块并夹取，默认旧 A 点逻辑。
-- 粗加工区两轮：扫描 1、3 号环，推算 2 号环；按二维码顺序放置三件，再按同一顺序取回。
-- 第一次暂存区：将三件放到第一层。
+- 粗加工区两轮：先两轮高位2号圈粗定位，再扫描 1、3 号环，推算 2 号环；按二维码顺序放置三件，再按同一顺序取回。
+- 第一次暂存区：先两轮高位2号圈粗定位，再按原精定位流程将三件放到第一层。
 - 第二次暂存区：先按已知颜色扫描底层目标并建立颜色到位置映射，再按物理 1、2、3 号位连续堆叠。
 
 模式 9/10 的圆半径首先用于目标合法性筛选；坐标映射的用户比例系数不能反向放大半径并导致合法圆被误判。
@@ -313,3 +326,13 @@ M7高度保留：普通取料−33 mm、第二次取料−36 mm、原料放入�
 - 不得修改、覆盖或清理现有 `backups/`。创建新基线必须由用户明确要求。
 - 不得恢复旧 28 项路线表、独立扫码段 2/3、局部 `updateRoute()` 或第二套工位参数。
 - 注释和文档出现冲突时，以当前构建入口和实际调用链为准，并同步修正文档；历史报告本身保持只读。
+
+2026-11-18网格接入：正式Flash/RAM 130152/13344 bytes（Flash余920）；七个相关环境通过，未烧录。全量脚本中九项既有失败已在e1a285c基线复现，不可把它们写成通过；详情见docs/GRID_VALIDATION.md。
+
+运行时双模式后：正式126028/13444 bytes，剩5044。常规长诊断受GONGCHUANG_VERBOSE_TRACE控制；不可将运动或互锁语句放入日志宏。七环境通过，37脚本28通过/九项既有失败。
+
+2026-11-19三朝向停稳扫描：预扫加0/60/120°四图并集，CW120°复原，空图先回原启停位再交旧路线；临时位姿ACK+HELLO读回。heading正方向待实机核对。12环境通过，正式126336/13448 bytes，Flash余4736。7490场景断言通过；38脚本29通过/九项既有失败，5原生模块通过。见docs/scan60_validation_20261119/README.md。
+
+2026-11-19镜像扫描修正：launchPlans.scanStepDegrees区1=+60、区2=−60，复原=−2×步角；雷达偏置坐标/heading随实际有符号航向更新。相关集成及7490场景断言通过；正式/网格底盘构建成功，正式126360/13448 bytes，Flash余4712。见docs/scan60_mirrored_validation_20261119/README.md。
+
+2026-11-19 try副本：正式127712/13472 bytes、工位113572/11828、暂存2调试119320/11824、网格61788/7472、legacy130180/12048。39脚本30通过/九项既有失败，5原生模块通过，新粗定位5043场景通过。见docs/TRY_COARSE_RING2.md和docs/try_coarse_validation_20261119/README.md；未烧录和实车验证。

@@ -1,0 +1,50 @@
+{
+  "path": "/private/tmp/gc_grid_baseline__yy3pegy",
+  "tests": [
+    {
+      "test": "arm_soft_landing_test.py",
+      "baseline_status": 1,
+      "baseline_output": "ARM SOFT-LANDING CHECK FAILED: target placement does not apply exactly one extra 5 mm M7 descent\n"
+    },
+    {
+      "test": "debug_raw_workstation_test.py",
+      "baseline_status": 1,
+      "baseline_output": "Traceback (most recent call last):\n  File \"/private/tmp/gc_grid_baseline__yy3pegy/test/debug_raw_workstation_test.py\", line 45, in <module>\n    assert \"local legacy fixed-A pickup started\" in MAIN\nAssertionError\n"
+    },
+    {
+      "test": "m6_endpoint_reach_recovery_test.py",
+      "baseline_status": 1,
+      "baseline_output": "Traceback (most recent call last):\n  File \"/private/tmp/gc_grid_baseline__yy3pegy/test/m6_endpoint_reach_recovery_test.py\", line 43, in <module>\n    handoff_start = source.index(\"      if (ring == 1U) {\", source.index(\nValueError: substring not found\n"
+    },
+    {
+      "test": "m7_double_experiment_test.py",
+      "baseline_status": 1,
+      "baseline_output": "M7 DOUBLE EXPERIMENT CHECK FAILED: round-2 STORAGE does not use normal high-speed M7 with 300 ms head start\n"
+    },
+    {
+      "test": "process_gripper_m7_interlock_test.py",
+      "baseline_status": 1,
+      "baseline_output": "WORKSTATION INTERLOCK CHECK FAILED: M6/M7 encoder fast-arrival bypass is incomplete\n"
+    },
+    {
+      "test": "qr_startup_checkpoint_test.py",
+      "baseline_status": 1,
+      "baseline_output": "Traceback (most recent call last):\n  File \"/private/tmp/gc_grid_baseline__yy3pegy/test/qr_startup_checkpoint_test.py\", line 50, in <module>\n    assert (\nAssertionError\n"
+    },
+    {
+      "test": "storage2_debug_scan_pose_correction_test.py",
+      "baseline_status": 1,
+      "baseline_output": "Traceback (most recent call last):\n  File \"/private/tmp/gc_grid_baseline__yy3pegy/test/storage2_debug_scan_pose_correction_test.py\", line 68, in <module>\n    assert (\nAssertionError\n"
+    },
+    {
+      "test": "storage_round2_local_mode_test.py",
+      "baseline_status": 1,
+      "baseline_output": "Traceback (most recent call last):\n  File \"/private/tmp/gc_grid_baseline__yy3pegy/test/storage_round2_local_mode_test.py\", line 53, in <module>\n    assert (\nAssertionError\n"
+    },
+    {
+      "test": "yan2_mode1_red_shape_test.py",
+      "baseline_status": 1,
+      "baseline_output": "   return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/gc_grid_baseline__yy3pegy/yan_2/main.py'\n\n======================================================================\nERROR: test_missing_shape_api_is_diagnostic_and_does_not_fall_back (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/gc_grid_baseline__yy3pegy/test/yan2_mode1_red_shape_test.py\", line 234, in test_missing_shape_api_is_diagnostic_and_does_not_fall_back\n    sent, output = run_camera_loop([[broken]] * 3)\n  File \"/private/tmp/gc_grid_baseline__yy3pegy/test/yan2_mode1_red_shape_test.py\", line 105, in run_camera_loop\n    model = load_logic()\n  File \"/private/tmp/gc_grid_baseline__yy3pegy/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/gc_grid_baseline__yy3pegy/yan_2/main.py'\n\n======================================================================\nERROR: test_rejected_frame_resets_stability (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/tmp/gc_grid_baseline__yy3pegy/test/yan2_mode1_red_shape_test.py\", line 221, in test_rejected_frame_resets_stability\n    sent, _ = run_camera_loop([[self.circle], [self.diagonal], [self.circle], [self.circle]])\n  File \"/private/tmp/gc_grid_baseline__yy3pegy/test/yan2_mode1_red_shape_test.py\", line 105, in run_camera_loop\n    model = load_logic()\n  File \"/private/tmp/gc_grid_baseline__yy3pegy/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/gc_grid_baseline__yy3pegy/yan_2/main.py'\n\n----------------------------------------------------------------------\nRan 10 tests in 0.040s\n\nFAILED (errors=10)\n"
+    }
+  ]
+}

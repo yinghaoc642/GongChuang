@@ -1,0 +1,5 @@
+-- [I] [Maix Comm Protocol] auto set pinmap A16 to UART0_TX for uart0
+-- [I] [Maix Comm Protocol] auto set pinmap A17 to UART0_RX for uart0
+-- [I] [Maix Comm Protocol] listening on uart port: uart0(/dev/ttyS0)
+OFFICIAL LIB START
+Trigger signal, code:SIGSEGV(11)!

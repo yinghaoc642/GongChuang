@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "vision_version": "5.5.1-aggressive-latency",
+  "vision_version": "5.6.0-try-coarse-ring2",
   "protocol_version": 2,
   "calibration_version": "UNVERIFIED-2026-08-03-AGGRESSIVE-LATENCY-R2",
   "verified": false,
@@ -96,5 +96,15 @@
   "notes": [
     "Thresholds and transforms must be replaced by measured competition-robot values.",
     "This file is traceability metadata; v5 currently keeps runtime constants in the script."
-  ]
+  ],
+  "coarse_ring2": {
+    "mode": 11,
+    "target_id": 2,
+    "verified": false,
+    "tolerance_mm": 15,
+    "max_rounds": 2,
+    "vision_timeout_ms": 2500,
+    "scale": "41.75/radius_pixels; high-view estimate, not calibrated",
+    "geometry_source": "src/workstation_coarse.h"
+  }
 }

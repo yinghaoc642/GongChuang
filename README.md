@@ -1,13 +1,16 @@
 # Gongchuang STM32H750 搬运机器人
 
-当前有效工程：`C:\Users\Administrator\Documents\PlatformIO\Projects\Gongchuang (6)\Gongchuang`
+当前有效工程：`/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try`
+
+本副本新增两次粗加工与第一次暂存的高位2号圈粗定位（两轮、15 mm容差、失败继续原精定位），原料区和第二次暂存保持原流程。实现、估计参数和部署边界见 [试验说明](docs/TRY_COARSE_RING2.md)，测试结果见 [验证报告](docs/try_coarse_validation_20261119/README.md)。原 `GongChuang` 及旧存档保持不变。
 
 ## 当前入口
 
 - 正式 PlatformIO 环境：`genericSTM32H750VB`
 - 正式源码：`src/main.cpp`
 - 唯一底盘路线实现：`src/route_chassis_main.inc`
-- 当前默认：启停区1、普通出发（`GONGCHUANG_ZONE1_ROUTE_MODE=0`）、先短后长返程、完整比赛运行模式
+- 当前默认：启停区1、默认RADAR运行模式；等待时双击PB9切RADAR/LEGACY、单击启动。RADAR先预扫，再做三朝向停稳扫描（区1逆时针0°/+60°/+120°，区2顺时针0°/−60°/−120°）；四图无可变障碍时归位后走11月2日原路线，有障碍走25格避障；两个启停区均支持。
+- 网格接线、两区标定、布局、坐标和限制：[`docs/RADAR_GRID_NAVIGATION.md`](docs/RADAR_GRID_NAVIGATION.md)。同一正式固件可选LEGACY，另有编译期去除雷达的 `legacy_route` 环境；下面第7/11等规范段修正仅用于旧路线。
 - 第7段与第一次E→暂存区F（第11段）在上一版实际行程上各增加15 mm，当前分别为1861.81965 mm、840.175 mm；F→G（第12段）仍为936.75 mm。
 - 全局放置：两次粗加工和两次暂存的三个位置均在已有修正后追加顺时针1°、回缩5 mm及伸长15 mm（净伸长10 mm），正式与工位调试一致。
 - 全局2号位放置：已有修正后的标准角度严格超出−3°～+3°时，再回缩2 mm、顺时针0.3°；恰好±3°不追加。
@@ -54,6 +57,8 @@ pio run -e genericSTM32H750VB -t upload
 - `debug_raw_workstation_341`：原料区 3→4→1 通信复现，旧 A 点逻辑，底盘不移动。
 - `debug_storage2_workstation`：固定第二次暂存区并输出详细日志。
 - `debug_translation`：单个规范段，默认第 4 段旧式 190 mm 扫码等待。
+- `debug_grid_navigation`：新增网格底盘调试，共用正式雷达/IMU/导航，跳过工位且不初始化机械臂。
+- `legacy_route`：保留固定路线的完整正式程序。
 - `debug_chassis_route`：完整纯底盘路线，默认启停区1普通出发，第4段保留扫码条件停车；返程先短纵移再长横移，最后补回150 mm。
 - `debug_maix_mode8`：MaixCAM 模式 8 通信。
 - `debug_maix_protocol_cycle`：正式 Maix 客户端的 STOP→3→STOP→4→STOP→1 最小循环。

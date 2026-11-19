@@ -67,7 +67,8 @@ bool MaixCamClient::requestIsValid(uint8_t request) {
   return targetedColorRequest ||
          request == ALL_COLORS_REQUEST ||
          request == HOUGH_CIRCLE_REQUEST ||
-         request == ENDPOINT_CIRCLE_REQUEST;
+         request == ENDPOINT_CIRCLE_REQUEST ||
+         request == COARSE_RING2_REQUEST;
 }
 
 void MaixCamClient::writeRequestFrame(uint8_t request) {
@@ -260,7 +261,8 @@ bool MaixCamClient::responseTargetMatchesMode(
          (requestedMode_ == ALL_COLORS_REQUEST &&
           target >= 1U &&
           target <= 4U) ||
-         (requestedMode_ == HOUGH_CIRCLE_REQUEST &&
+         ((requestedMode_ == HOUGH_CIRCLE_REQUEST ||
+           requestedMode_ == COARSE_RING2_REQUEST) &&
           target == 2U) ||
          (requestedMode_ == ENDPOINT_CIRCLE_REQUEST &&
           target == 1U);
@@ -310,7 +312,8 @@ void MaixCamClient::finishCoordinateLine() {
     debug_.print("MaixCAM status=");
     debug_.println(response.status);
     if (response.status ==
-        vision_protocol::STATUS_CAMERA_ERROR) {
+        vision_protocol::STATUS_CAMERA_ERROR &&
+        requestedMode_ != COARSE_RING2_REQUEST) {
       fault("MaixCAM reported camera error");
     }
     return;

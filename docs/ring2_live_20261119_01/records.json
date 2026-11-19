@@ -1,0 +1,502 @@
+{
+  "summary": {
+    "frames": 40,
+    "seconds": 1.572,
+    "frames_with_score_070": 0,
+    "frames_with_geometric_box": 0,
+    "frames_with_stable_output": 0,
+    "low_threshold_frames": 8,
+    "low_threshold_hits": 8,
+    "scope": "One stationary scene; diagnostic 0.20 results never used as accepted outputs. No robot request or response sent."
+  },
+  "frames": [
+    {
+      "frame": 0,
+      "production_ms": 62.72,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.4696311950683594,
+          "x": 120,
+          "y": 135,
+          "w": 85,
+          "h": 100
+        },
+        {
+          "label": "2r",
+          "score": 0.35308319330215454,
+          "x": 2,
+          "y": 150,
+          "w": 71,
+          "h": 70
+        },
+        {
+          "label": "2r",
+          "score": 0.3302454650402069,
+          "x": 0,
+          "y": 104,
+          "w": 81,
+          "h": 136
+        }
+      ]
+    },
+    {
+      "frame": 1,
+      "production_ms": 16.98,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 2,
+      "production_ms": 15.86,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 3,
+      "production_ms": 15.47,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 4,
+      "production_ms": 15.23,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 5,
+      "production_ms": 18.31,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.42487749457359314,
+          "x": 121,
+          "y": 138,
+          "w": 81,
+          "h": 87
+        },
+        {
+          "label": "2r",
+          "score": 0.24798138439655304,
+          "x": 4,
+          "y": 147,
+          "w": 65,
+          "h": 77
+        },
+        {
+          "label": "2r",
+          "score": 0.24798059463500977,
+          "x": 0,
+          "y": 105,
+          "w": 74,
+          "h": 135
+        }
+      ]
+    },
+    {
+      "frame": 6,
+      "production_ms": 16.86,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 7,
+      "production_ms": 15.77,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 8,
+      "production_ms": 15.47,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 9,
+      "production_ms": 15.51,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 10,
+      "production_ms": 18.26,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.530347466468811,
+          "x": 114,
+          "y": 134,
+          "w": 91,
+          "h": 102
+        },
+        {
+          "label": "2r",
+          "score": 0.40026938915252686,
+          "x": 0,
+          "y": 142,
+          "w": 75,
+          "h": 87
+        }
+      ]
+    },
+    {
+      "frame": 11,
+      "production_ms": 16.72,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 12,
+      "production_ms": 16.87,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 13,
+      "production_ms": 15.59,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 14,
+      "production_ms": 15.38,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 15,
+      "production_ms": 18.33,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.4999862313270569,
+          "x": 1,
+          "y": 141,
+          "w": 75,
+          "h": 87
+        },
+        {
+          "label": "2r",
+          "score": 0.42487749457359314,
+          "x": 121,
+          "y": 138,
+          "w": 81,
+          "h": 87
+        }
+      ]
+    },
+    {
+      "frame": 16,
+      "production_ms": 14.21,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 17,
+      "production_ms": 17.18,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 18,
+      "production_ms": 18.19,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 19,
+      "production_ms": 27.34,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 20,
+      "production_ms": 16.18,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.44962114095687866,
+          "x": 4,
+          "y": 145,
+          "w": 71,
+          "h": 77
+        },
+        {
+          "label": "2r",
+          "score": 0.4096824526786804,
+          "x": 118,
+          "y": 134,
+          "w": 85,
+          "h": 100
+        },
+        {
+          "label": "2r",
+          "score": 0.32766085863113403,
+          "x": 0,
+          "y": 124,
+          "w": 94,
+          "h": 116
+        }
+      ]
+    },
+    {
+      "frame": 21,
+      "production_ms": 15.22,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 22,
+      "production_ms": 16.14,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 23,
+      "production_ms": 18.66,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 24,
+      "production_ms": 15.32,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 25,
+      "production_ms": 15.34,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.6748906970024109,
+          "x": 120,
+          "y": 132,
+          "w": 85,
+          "h": 100
+        },
+        {
+          "label": "2r",
+          "score": 0.5750917196273804,
+          "x": 1,
+          "y": 140,
+          "w": 75,
+          "h": 87
+        }
+      ]
+    },
+    {
+      "frame": 26,
+      "production_ms": 21.93,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 27,
+      "production_ms": 14.0,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 28,
+      "production_ms": 17.3,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 29,
+      "production_ms": 16.86,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 30,
+      "production_ms": 15.83,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.5750917196273804,
+          "x": 1,
+          "y": 140,
+          "w": 75,
+          "h": 87
+        },
+        {
+          "label": "2r",
+          "score": 0.38075125217437744,
+          "x": 118,
+          "y": 132,
+          "w": 85,
+          "h": 102
+        }
+      ]
+    },
+    {
+      "frame": 31,
+      "production_ms": 18.02,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 32,
+      "production_ms": 14.2,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 33,
+      "production_ms": 16.91,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 34,
+      "production_ms": 16.04,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 35,
+      "production_ms": 15.75,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.4394979178905487,
+          "x": 120,
+          "y": 134,
+          "w": 85,
+          "h": 102
+        },
+        {
+          "label": "2r",
+          "score": 0.2869594693183899,
+          "x": 7,
+          "y": 147,
+          "w": 65,
+          "h": 77
+        },
+        {
+          "label": "2r",
+          "score": 0.22952845692634583,
+          "x": 0,
+          "y": 112,
+          "w": 80,
+          "h": 128
+        }
+      ]
+    },
+    {
+      "frame": 36,
+      "production_ms": 15.83,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 37,
+      "production_ms": 15.46,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 38,
+      "production_ms": 15.62,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 39,
+      "production_ms": 22.66,
+      "objects": [],
+      "geometric_box": null,
+      "stable_result": null,
+      "diagnostic_objects": null
+    }
+  ]
+}

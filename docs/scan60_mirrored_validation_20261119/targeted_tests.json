@@ -1,0 +1,48 @@
+[
+  {
+    "name": "navigation_mode_test.py",
+    "command": [
+      "python3",
+      "/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/GongChuang/test/navigation_mode_test.py"
+    ],
+    "exit_code": 0,
+    "seconds": 6.64,
+    "stdout": "PASS runtime modes: default radar; actual PB9 double-click/HMI3/4; zone1/2; lock after start; scan failure cannot become clear; original Nov02 table; first nonzero departure pulse parks once\nPASS actual production dispatcher: preparation keeps SCANNING; delayed clear handoff; accepted obstacle map enters GRID\n",
+    "stderr": ""
+  },
+  {
+    "name": "grid_departure_tray_test.py",
+    "command": [
+      "python3",
+      "/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/GongChuang/test/grid_departure_tray_test.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.409,
+    "stdout": "PASS departure tray: deferred until chassis dispatch; no in-travel slot-0 overwrite; bench/legacy settling preserved; radar STOP on abort/fault\n",
+    "stderr": ""
+  },
+  {
+    "name": "grid_workstation_tracking_test.py",
+    "command": [
+      "python3",
+      "/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/GongChuang/test/grid_workstation_tracking_test.py"
+    ],
+    "exit_code": 0,
+    "seconds": 1.368,
+    "stdout": "PASS actual station pulse guard: M3/M4 physical front; user right; CCW/CW signs; unsafe/IMU-lost commands blocked before motor output\n",
+    "stderr": ""
+  },
+  {
+    "name": "grid_scenarios_test.py",
+    "command": [
+      "python3",
+      "/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/GongChuang/test/grid_scenarios_test.py",
+      "--output",
+      "/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/GongChuang/docs/scan60_mirrored_validation_20261119"
+    ],
+    "exit_code": 0,
+    "seconds": 15.362,
+    "stdout": "PASS 7490 navigation scenarios: independent radar BFS, swept footprint, six station order, departures, home, failure latching; ASan/UBSan\nstatic_0_to_3 {\"total\": 3124, \"clear_handoff\": 2, \"six_stations_and_home\": 848, \"fault_stop\": 2274, \"failure_codes\": {\"3\": 422, \"6\": 1126, \"4\": 726}}\nfirst_only_0_to_3 {\"total\": 3122, \"clear_handoff\": 0, \"six_stations_and_home\": 848, \"fault_stop\": 2274, \"failure_codes\": {\"3\": 422, \"7\": 1126, \"4\": 726}}\nsplit_random_4_to_10 {\"total\": 1024, \"clear_handoff\": 0, \"six_stations_and_home\": 18, \"fault_stop\": 1006, \"failure_codes\": {\"4\": 565, \"3\": 164, \"7\": 144, \"6\": 133}}\ntiming_wrap {\"total\": 8, \"clear_handoff\": 0, \"six_stations_and_home\": 8, \"fault_stop\": 0, \"failure_codes\": {}}\nrandom_timing {\"total\": 100, \"clear_handoff\": 0, \"six_stations_and_home\": 100, \"fault_stop\": 0, \"failure_codes\": {}}\nstart_pose {\"total\": 18, \"clear_handoff\": 0, \"six_stations_and_home\": 8, \"fault_stop\": 10, \"failure_codes\": {\"2\": 10}}\nprotocol_fault {\"total\": 16, \"clear_handoff\": 0, \"six_stations_and_home\": 0, \"fault_stop\": 16, \"failure_codes\": {\"1\": 16}}\nqr_timeout {\"total\": 2, \"clear_handoff\": 0, \"six_stations_and_home\": 0, \"fault_stop\": 2, \"failure_codes\": {\"8\": 2}}\nscan_total_timeout {\"total\": 2, \"clear_handoff\": 0, \"six_stations_and_home\": 0, \"fault_stop\": 2, \"failure_codes\": {\"1\": 2}}\nempty_first_later_detection {\"total\": 2, \"clear_handoff\": 0, \"six_stations_and_home\": 2, \"fault_stop\": 0, \"failure_codes\": {}}\nobstacle_in_one_view {\"total\": 6, \"clear_handoff\": 0, \"six_stations_and_home\": 6, \"fault_stop\": 0, \"failure_codes\": {}}\npose_update_fault {\"total\": 30, \"clear_handoff\": 0, \"six_stations_and_home\": 0, \"fault_stop\": 30, \"failure_codes\": {\"1\": 30}}\nlater_scan_fault {\"total\": 36, \"clear_handoff\": 0, \"six_stations_and_home\": 0, \"fault_stop\": 36, \"failure_codes\": {\"1\": 36}}\n",
+    "stderr": ""
+  }
+]

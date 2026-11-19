@@ -1,0 +1,16 @@
+{
+  "recommended_candidate": 331402,
+  "candidate_folder": "try/vision/deploy/ring2_tuned_331402",
+  "active_local_default": 311465,
+  "runtime_model_changed": false,
+  "hardware_uploaded": false,
+  "reason": "One of two runs passing all exposed score/IoU samples; same 224 square input as existing default, and all exposed boxes also pass raw-coordinate static screening. Favor it over 331405 because one 331405 box exceeds current aspect ratio limit. Neither comparison establishes real camera generalization.",
+  "runtime_threshold": 0.7,
+  "fully_qualified": false,
+  "limitations": [
+    "Only 3 random report samples per run; samples differ across runs",
+    "12 val entries contain 6 byte-unique images; no exact-byte train/val overlap",
+    "No complete validation inference from exported quantized cvimodel",
+    "No high-position camera or robot validation"
+  ]
+}

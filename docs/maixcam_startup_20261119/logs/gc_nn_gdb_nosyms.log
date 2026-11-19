@@ -1,0 +1,81 @@
+[New LWP 761]
+-- [I] [Maix Comm Protocol] auto set pinmap A16 to UART0_TX for uart0
+-- [I] [Maix Comm Protocol] auto set pinmap A17 to UART0_RX for uart0
+-- [I] [Maix Comm Protocol] listening on uart port: uart0(/dev/ttyS0)
+[New LWP 762]
+LOAD
+
+Thread 1 "python3" received signal SIGSEGV, Segmentation fault.
+0xffffffc0b8b856b4 in ?? ()
+#0  0xffffffc0b8b856b4 in ?? ()
+From                To                  Syms Read   Shared Object Library
+0x0000003fbb621610  0x0000003fbb662d7e  No          /lib/ld-musl-riscv64v0p7_xthead.so.1
+0x0000003fbb271120  0x0000003fbb3e3ae2  No          /lib/libpython3.11.so.1.0
+0x0000003fba79c210  0x0000003fbab6a786  No          /usr/lib/python3.11/site-packages/maix/_maix.so
+0x0000003fba555870  0x0000003fba56bdc2  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libms_asr_sg2002.so
+0x0000003fba4a8ad0  0x0000003fba51a6a6  No          /lib/libasound.so.2
+0x0000003fba455520  0x0000003fba46645c  No          /lib/libatopology.so.2
+0x0000003fb8b83720  0x0000003fb8c25f1e  No          /lib/libmaixcam_lib.so
+0x0000003fb8b37f40  0x0000003fb8b596ac  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libsophgo-middleware.so
+0x0000003fb8b14610  0x0000003fb8b22b56  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libcvi_ive.so
+0x0000003fb8b0a580  0x0000003fb8b0d92a  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libcvi_bin.so
+0x0000003fbae96410  0x0000003fbae964fa  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libaaccomm2.so
+0x0000003fbae93750  0x0000003fbae938ca  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libaacdec2.so
+0x0000003fb8b05580  0x0000003fb8b056dc  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libaacenc2.so
+0x0000003fb8b02410  0x0000003fb8b024fa  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libaacsbrdec2.so
+0x0000003fb8aff410  0x0000003fb8aff4fa  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libaacsbrenc2.so
+0x0000003fb8adb220  0x0000003fb8aedc70  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libae.so
+0x0000003fb8acb5d0  0x0000003fb8acb700  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libaf.so
+0x0000003fb8abaa60  0x0000003fb8ac29f6  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libawb.so
+0x0000003fb8a9db60  0x0000003fb8aab3da  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libcvi_audio.so
+0x0000003fb8a55410  0x0000003fb8a8d59c  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libcvi_bin_isp.so
+0x0000003fb8a26500  0x0000003fb8a34dbe  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libcvi_ispd2.so
+0x0000003fb8a16660  0x0000003fb8a16a20  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libcvi_RES1.so
+0x0000003fb8a0a700  0x0000003fb8a11d46  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libcvi_ssp.so
+0x0000003fb8a02d70  0x0000003fb8a04b30  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libcvi_VoiceEngine.so
+0x0000003fb89fa470  0x0000003fb89fd49e  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libcvi_vqe.so
+0x0000003fb89f5600  0x0000003fb89f56d2  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libdnvqe.so
+0x0000003fb89d3970  0x0000003fb89dc1ea  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libisp_algo.so
+0x0000003fb89939e0  0x0000003fb89bbf7a  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libisp.so
+0x0000003fb8981430  0x0000003fb898170e  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libmipi_tx.so
+0x0000003fb897c440  0x0000003fb897d848  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libmisc.so
+0x0000003fb8975880  0x0000003fb8977a2a  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libosdc.so
+0x0000003fb896df40  0x0000003fb896fe34  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libraw_dump.so
+0x0000003fb8960da0  0x0000003fb8966d88  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libsys.so
+0x0000003fb8958a40  0x0000003fb89590d2  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libvdec.so
+0x0000003fb8954620  0x0000003fb895566e  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libvenc.so
+0x0000003fb892f680  0x0000003fb89470b6  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libvpu.so
+0x0000003fb891ca20  0x0000003fb892302c  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libjson-c.so.5
+0x0000003fb8911e60  0x0000003fb8915d80  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libtinyalsa.so
+0x0000003fb8907230  0x0000003fb890bc6c  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libcli.so
+0x0000003fb88f9500  0x0000003fb88f981e  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libini.so
+0x0000003fb87b8070  0x0000003fb88720a8  No          /lib/libopencv_core.so.409
+0x0000003fb8759480  0x0000003fb8760d6a  No          /lib/libopencv_highgui.so.409
+0x0000003fb86ab7d0  0x0000003fb8714c22  No          /lib/libopencv_imgcodecs.so.409
+0x0000003fb84a13b0  0x0000003fb8577f9c  No          /lib/libopencv_imgproc.so.409
+0x0000003fb842d3e0  0x0000003fb84467d8  No          /lib/libopencv_video.so.409
+0x0000003fb741df20  0x0000003fb7bb6892  No          /lib/libavcodec.so.58
+0x0000003fb73aed80  0x0000003fb73b3f6a  No          /lib/libavdevice.so.58
+0x0000003fb7119c30  0x0000003fb72e2e8c  No          /lib/libavfilter.so.7
+0x0000003fb6eec5c0  0x0000003fb7026f32  No          /lib/libavformat.so.58
+0x0000003fb6ea2290  0x0000003fb6eaa532  No          /lib/libavresample.so.4
+0x0000003fb6c1f5c0  0x0000003fb6c77c9e  No          /lib/libavutil.so.56
+0x0000003fb6c05090  0x0000003fb6c0bd8e  No          /lib/libpostproc.so.55
+0x0000003fb6bf0af0  0x0000003fb6bfad16  No          /lib/libswresample.so.3
+0x0000003fb6b88960  0x0000003fb6bdfd5e  No          /lib/libswscale.so.5
+0x0000003fb6a36f10  0x0000003fb6b0483e  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libdatachannel.so
+0x0000003fb68f6330  0x0000003fb693b298  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libssl.so.3
+0x0000003fb6658f00  0x0000003fb6818fd0  No          /usr/lib/python3.11/site-packages/maix/dl_lib/libcrypto.so.3
+0x0000003fb64aa360  0x0000003fb653d828  No          /lib/libstdc++.so.6
+0x0000003fb63e81a0  0x0000003fb6402250  No          /lib/libgomp.so.1
+0x0000003fb63cb7b0  0x0000003fb63da652  No          /lib/libgcc_s.so.1
+0x0000003fb63c1e90  0x0000003fb63c3906  No          /lib/libatomic.so.1
+0x0000003fb63af810  0x0000003fb63b9b42  No          /lib/libz.so.1
+0x0000003fb637ba60  0x0000003fb63990fe  No          /lib/libfontconfig.so.1
+0x0000003fb63666d0  0x0000003fb6370900  No          /lib/libbz2.so.1.0
+0x0000003fb62eee90  0x0000003fb6346122  No          /lib/libfreetype.so.6
+0x0000003fb62bee30  0x0000003fb62d9876  No          /lib/libpng16.so.16
+0x0000003fb62aecc0  0x0000003fb62b45ec  No          /lib/libbrotlidec.so.1
+0x0000003fb628a970  0x0000003fb629f578  No          /lib/libexpat.so.1
+0x0000003fb62658a0  0x0000003fb6265e68  No          /lib/libbrotlicommon.so.1
+0x0000003fb5d309d0  0x0000003fb5d30ca0  No          /usr/lib/python3.11/lib-dynload/_opcode.cpython-311-riscv64-linux-gnu.so

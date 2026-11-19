@@ -1,7 +1,9 @@
 
 from maix import app, uart, time, pinmap, camera, display, image, gpio
 
-VISION_VERSION = "5.5.1-aggressive-latency"
+VISION_VERSION = "5.6.0-try-coarse-ring2"
+from ring2_coarse import Ring2Detector
+coarse_ring2_detector = Ring2Detector()
 PROTOCOL_VERSION = 2
 CALIBRATION_VERSION = (
     "UNVERIFIED-2026-08-03-AGGRESSIVE-LATENCY-R2"
@@ -247,7 +249,7 @@ def detection_mode_for_request(
             if request_sequence == completed_color_sequence
             else requested_mode
         )
-    if requested_mode in (9, 10):
+    if requested_mode in (9, 10, 11):
         return requested_mode
     return 0
 
@@ -884,6 +886,7 @@ while not app.need_exit():
                     print(deferred_circle_diagnostic)
                     deferred_circle_diagnostic = None
                 reset_circle_stability()
+                coarse_ring2_detector.reset()
                 reset_all_color_stability()
                 circle_request_start_time = (
                     current_time
@@ -1036,6 +1039,19 @@ while not app.need_exit():
                 current_request_sequence
             )
             reset_all_color_stability()
+
+    elif current_color_to_detect == 11:
+        try:
+            coarse_result = coarse_ring2_detector.detect(img)
+            if coarse_result is not None:
+                x, y, radius, confidence = coarse_result
+                Serial_Maix0.write_str(build_v2_response(
+                    current_request_sequence, 11, protocol_status_ok, 2,
+                    x, y, radius, confidence, current_time))
+        except Exception as error:
+            # No result is allowed to time out at STM32 and continue fine scan.
+            coarse_ring2_detector.reset()
+            print("[COARSE2] detection error:", error)
 
     elif current_color_to_detect in (9, 10):
         active_circle_r_min = (

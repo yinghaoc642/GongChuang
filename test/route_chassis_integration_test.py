@@ -13,7 +13,7 @@ MAIN_PATH = ROOT / "src" / "main.cpp"
 ROUTE_PATH = ROOT / "src" / "route_chassis_main.inc"
 PLATFORMIO_PATH = ROOT / "platformio.ini"
 EXPECTED_ROUTE_SHA256 = (
-    "a2f1b90956cca82b5f778c33d5764cf75a66abea3f2cd01d7fb3674997790316"
+    "bc1f4badaf392ba7df9037ffa604e61b71b2d121611c0135d91c3543d28288f6"
 )
 
 
@@ -99,8 +99,8 @@ def verify_platformio(platformio_source: str) -> None:
         flags=re.MULTILINE,
     )
     require(
-        environments == ["genericSTM32H750VB", "debug_qr_continuous", "debug_workstation", "debug_raw_workstation", "debug_raw_workstation_341", "debug_storage2_workstation", "debug_translation", "debug_chassis_route", "debug_maix_mode8", "debug_maix_protocol_cycle"],
-        f"expected production and nine isolated debug environments, found {environments}",
+        environments == ["genericSTM32H750VB", "debug_qr_continuous", "debug_workstation", "debug_raw_workstation", "debug_raw_workstation_341", "debug_storage2_workstation", "debug_translation", "debug_chassis_route", "debug_grid_navigation", "legacy_route", "debug_maix_mode8", "debug_maix_protocol_cycle"],
+        f"expected production and eleven optional environments, found {environments}",
     )
     require(
         re.search(

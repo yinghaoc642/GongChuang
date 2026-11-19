@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/Users/chenyinghao/.platformio/penv/bin/pio",
+    "run",
+    "-e",
+    "genericSTM32H750VB",
+    "-e",
+    "debug_qr_continuous",
+    "-e",
+    "debug_workstation",
+    "-e",
+    "debug_raw_workstation",
+    "-e",
+    "debug_raw_workstation_341",
+    "-e",
+    "debug_storage2_workstation",
+    "-e",
+    "debug_translation",
+    "-e",
+    "debug_chassis_route",
+    "-e",
+    "debug_grid_navigation",
+    "-e",
+    "legacy_route",
+    "-e",
+    "debug_maix_mode8",
+    "-e",
+    "debug_maix_protocol_cycle"
+  ],
+  "exit_code": 0,
+  "seconds": 148.081
+}

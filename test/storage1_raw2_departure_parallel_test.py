@@ -69,7 +69,7 @@ m6_index = handoff.index(
     "STORAGE1_RAW2_M6_SPEED_RPM,STORAGE1_RAW2_M6_ACCELERATION)"
 )
 tray_index = handoff.index(
-    "commandStorageServoParkingPosition(STORAGE1_RAW2_SERVO_INTERVAL_MS)"
+    "prepareDepartureTrayParking(STORAGE1_RAW2_SERVO_INTERVAL_MS)"
 )
 chassis_index = handoff.index("startVisualCorrectionRestore()")
 assert m6_index < tray_index < chassis_index
@@ -91,6 +91,6 @@ assert "storage1Raw2TravelPreparationReady()" in integrated
 assert "beginWorkAction(WORK_ACTION_RAW,2U);" in integrated
 
 print(
-    "PASS STORAGE1 exit: M7 zero -> 100 us -> 40%-speed M6/tray + chassis; "
+    "PASS STORAGE1 exit: M7 zero -> 100 us -> 40%-speed M6 + departure tray request; "
     "RAW2 waits only if the travelling M6 has not reached its view pose"
 )

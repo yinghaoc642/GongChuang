@@ -1,0 +1,9 @@
+{
+  "train_images": 42,
+  "val_images": 12,
+  "train_unique_bytes": 14,
+  "val_unique_bytes": 6,
+  "val_images_identical_to_training": 0,
+  "overlap": [],
+  "method": "Read-only SHA-256 of original JPG bytes; no data modified"
+}

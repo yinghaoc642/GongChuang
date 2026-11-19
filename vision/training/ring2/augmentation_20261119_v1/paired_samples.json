@@ -1,0 +1,51 @@
+{
+  "count": 1,
+  "pairs": [
+    {
+      "server_image_id": "3c7be6fb9f784270abb7ed2d78e6017c.jpg",
+      "nickname": "27_48.jpg",
+      "source_sha256": "3726b6e138cba9a854ae2ad132347831936f7628c14a6e90cf975c79a31514ef",
+      "results": {
+        "331476": {
+          "name": "27_48.jpg",
+          "server_ok": true,
+          "all_reported_scores": [
+            0.9138688445091248
+          ],
+          "ground_truths": 1,
+          "matched": 1,
+          "missed": 0,
+          "unmatched_above_gate": 0,
+          "matches": [
+            {
+              "score": 0.9138688445091248,
+              "iou": 0.9582716611636115,
+              "center_error_px": 3.1622776601683795,
+              "estimated_center_error_mm": 1.4158186843113119
+            }
+          ]
+        },
+        "331477": {
+          "name": "27_48.jpg",
+          "server_ok": true,
+          "all_reported_scores": [
+            0.8715181350708008
+          ],
+          "ground_truths": 1,
+          "matched": 1,
+          "missed": 0,
+          "unmatched_above_gate": 0,
+          "matches": [
+            {
+              "score": 0.8715181350708008,
+              "iou": 0.9364394593039977,
+              "center_error_px": 0.7071067811865476,
+              "estimated_center_error_mm": 0.3165866821934408
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "scope": "Only common image IDs exposed by both new reports; other sampled images differ."
+}

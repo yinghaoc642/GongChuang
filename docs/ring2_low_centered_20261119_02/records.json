@@ -1,0 +1,2604 @@
+{
+  "summary": {
+    "frames": 100,
+    "seconds": 9.982,
+    "frames_with_score_070": 100,
+    "frames_with_geometric_box": 100,
+    "frames_with_stable_output": 42,
+    "low_threshold_frames": 20,
+    "low_threshold_hits": 20,
+    "scope": "One stationary scene; diagnostic 0.20 results never used as accepted outputs. No robot request or response sent."
+  },
+  "frames": [
+    {
+      "frame": 0,
+      "production_ms": 129.83,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479527235031128,
+          "x": 97,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8479527235031128,
+        165.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8479527235031128,
+          "x": 97,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ]
+    },
+    {
+      "frame": 1,
+      "production_ms": 79.06,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8343929648399353,
+          "x": 98,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8343929648399353,
+        166.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": [
+        164,
+        117,
+        63,
+        834
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 2,
+      "production_ms": 80.29,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8343929648399353,
+          "x": 97,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8343929648399353,
+        165.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": [
+        164,
+        119,
+        62,
+        834
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 3,
+      "production_ms": 87.85,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479536771774292,
+          "x": 95,
+          "y": 50,
+          "w": 137,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8479536771774292,
+        163.5,
+        118.5,
+        68.5
+      ],
+      "stable_result": [
+        161,
+        119,
+        62,
+        847
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 4,
+      "production_ms": 79.42,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8343791365623474,
+          "x": 98,
+          "y": 52,
+          "w": 130,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8343791365623474,
+        163.0,
+        120.5,
+        66.75
+      ],
+      "stable_result": [
+        160,
+        116,
+        60,
+        834
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 5,
+      "production_ms": 83.28,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8043987154960632,
+          "x": 95,
+          "y": 51,
+          "w": 137,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8043987154960632,
+        163.5,
+        119.5,
+        68.5
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8043987154960632,
+          "x": 95,
+          "y": 51,
+          "w": 137,
+          "h": 137
+        }
+      ]
+    },
+    {
+      "frame": 6,
+      "production_ms": 83.0,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8343945741653442,
+          "x": 95,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8343945741653442,
+        163.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 7,
+      "production_ms": 81.68,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479536771774292,
+          "x": 98,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8479536771774292,
+        166.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": [
+        163,
+        116,
+        59,
+        847
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 8,
+      "production_ms": 79.36,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8343945741653442,
+          "x": 97,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8343945741653442,
+        165.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": [
+        164,
+        118,
+        62,
+        834
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 9,
+      "production_ms": 83.01,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8343929648399353,
+          "x": 98,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8343929648399353,
+        166.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": [
+        164,
+        118,
+        62,
+        834
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 10,
+      "production_ms": 97.4,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479602336883545,
+          "x": 98,
+          "y": 50,
+          "w": 137,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8479602336883545,
+        166.5,
+        118.5,
+        68.5
+      ],
+      "stable_result": [
+        165,
+        119,
+        60,
+        847
+      ],
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8479602336883545,
+          "x": 98,
+          "y": 50,
+          "w": 137,
+          "h": 137
+        }
+      ]
+    },
+    {
+      "frame": 11,
+      "production_ms": 85.32,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479602336883545,
+          "x": 97,
+          "y": 50,
+          "w": 137,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8479602336883545,
+        165.5,
+        118.5,
+        68.5
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 12,
+      "production_ms": 88.83,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8198660016059875,
+          "x": 100,
+          "y": 54,
+          "w": 130,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8198660016059875,
+        165.0,
+        122.5,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 13,
+      "production_ms": 83.38,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7704391479492188,
+          "x": 100,
+          "y": 54,
+          "w": 130,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.7704391479492188,
+        165.0,
+        122.5,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 14,
+      "production_ms": 84.04,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7879195809364319,
+          "x": 95,
+          "y": 54,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.7879195809364319,
+        163.5,
+        119.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 15,
+      "production_ms": 85.21,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8043925166130066,
+          "x": 95,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8043925166130066,
+        163.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8043925166130066,
+          "x": 95,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ]
+    },
+    {
+      "frame": 16,
+      "production_ms": 88.18,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479552865028381,
+          "x": 95,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8479552865028381,
+        163.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 17,
+      "production_ms": 87.9,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479536771774292,
+          "x": 95,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8479536771774292,
+        163.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 18,
+      "production_ms": 91.43,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479536771774292,
+          "x": 95,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8479536771774292,
+        163.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 19,
+      "production_ms": 83.62,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479552865028381,
+          "x": 95,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8479552865028381,
+        163.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 20,
+      "production_ms": 84.2,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7879180312156677,
+          "x": 95,
+          "y": 50,
+          "w": 137,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.7879180312156677,
+        163.5,
+        118.5,
+        68.5
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.7879180312156677,
+          "x": 95,
+          "y": 50,
+          "w": 137,
+          "h": 137
+        }
+      ]
+    },
+    {
+      "frame": 21,
+      "production_ms": 81.12,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8043925166130066,
+          "x": 95,
+          "y": 54,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8043925166130066,
+        163.5,
+        119.0,
+        66.75
+      ],
+      "stable_result": [
+        163,
+        117,
+        62,
+        804
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 22,
+      "production_ms": 84.47,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.860590934753418,
+          "x": 95,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.860590934753418,
+        163.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": [
+        162,
+        114,
+        62,
+        860
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 23,
+      "production_ms": 82.73,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.804387629032135,
+          "x": 100,
+          "y": 51,
+          "w": 130,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.804387629032135,
+        165.0,
+        118.0,
+        66.0
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 24,
+      "production_ms": 83.55,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7704547643661499,
+          "x": 94,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.7704547643661499,
+        162.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 25,
+      "production_ms": 93.26,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7356225848197937,
+          "x": 92,
+          "y": 55,
+          "w": 132,
+          "h": 128
+        }
+      ],
+      "geometric_box": [
+        0.7356225848197937,
+        158.0,
+        119.0,
+        65.0
+      ],
+      "stable_result": [
+        161,
+        117,
+        60,
+        735
+      ],
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.7356225848197937,
+          "x": 92,
+          "y": 55,
+          "w": 132,
+          "h": 128
+        }
+      ]
+    },
+    {
+      "frame": 26,
+      "production_ms": 79.28,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7918060421943665,
+          "x": 87,
+          "y": 55,
+          "w": 132,
+          "h": 128
+        }
+      ],
+      "geometric_box": [
+        0.7918060421943665,
+        153.0,
+        119.0,
+        65.0
+      ],
+      "stable_result": [
+        158,
+        116,
+        62,
+        791
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 27,
+      "production_ms": 82.1,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7549006938934326,
+          "x": 87,
+          "y": 48,
+          "w": 132,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.7549006938934326,
+        153.0,
+        118.5,
+        68.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 28,
+      "production_ms": 81.63,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8198795914649963,
+          "x": 88,
+          "y": 54,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8198795914649963,
+        156.5,
+        119.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 29,
+      "production_ms": 79.58,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7879153490066528,
+          "x": 92,
+          "y": 55,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.7879153490066528,
+        160.5,
+        120.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 30,
+      "production_ms": 82.13,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8198733329772949,
+          "x": 100,
+          "y": 54,
+          "w": 125,
+          "h": 124
+        }
+      ],
+      "geometric_box": [
+        0.8198733329772949,
+        162.5,
+        116.0,
+        62.25
+      ],
+      "stable_result": [
+        160,
+        116,
+        62,
+        819
+      ],
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8198733329772949,
+          "x": 100,
+          "y": 54,
+          "w": 125,
+          "h": 124
+        }
+      ]
+    },
+    {
+      "frame": 31,
+      "production_ms": 84.27,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479552865028381,
+          "x": 95,
+          "y": 47,
+          "w": 137,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8479552865028381,
+        163.5,
+        115.5,
+        68.5
+      ],
+      "stable_result": [
+        159,
+        115,
+        61,
+        847
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 32,
+      "production_ms": 81.73,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8198707103729248,
+          "x": 101,
+          "y": 51,
+          "w": 130,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8198707103729248,
+        166.0,
+        118.0,
+        66.0
+      ],
+      "stable_result": [
+        162,
+        117,
+        61,
+        819
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 33,
+      "production_ms": 82.39,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7879132628440857,
+          "x": 100,
+          "y": 50,
+          "w": 130,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.7879132628440857,
+        165.0,
+        118.5,
+        66.75
+      ],
+      "stable_result": [
+        163,
+        119,
+        62,
+        787
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 34,
+      "production_ms": 82.35,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479536771774292,
+          "x": 95,
+          "y": 50,
+          "w": 137,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8479536771774292,
+        163.5,
+        118.5,
+        68.5
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 35,
+      "production_ms": 78.53,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8198692798614502,
+          "x": 100,
+          "y": 52,
+          "w": 130,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8198692798614502,
+        165.0,
+        120.5,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8198692798614502,
+          "x": 100,
+          "y": 52,
+          "w": 130,
+          "h": 137
+        }
+      ]
+    },
+    {
+      "frame": 36,
+      "production_ms": 82.97,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8343901038169861,
+          "x": 100,
+          "y": 54,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8343901038169861,
+        168.5,
+        119.0,
+        66.75
+      ],
+      "stable_result": [
+        167,
+        119,
+        60,
+        834
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 37,
+      "production_ms": 80.78,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8723217844963074,
+          "x": 104,
+          "y": 51,
+          "w": 125,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8723217844963074,
+        166.5,
+        118.0,
+        64.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 38,
+      "production_ms": 80.28,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479471802711487,
+          "x": 105,
+          "y": 50,
+          "w": 125,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8479471802711487,
+        167.5,
+        117.0,
+        64.75
+      ],
+      "stable_result": [
+        168,
+        115,
+        61,
+        847
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 39,
+      "production_ms": 87.91,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.81987464427948,
+          "x": 98,
+          "y": 48,
+          "w": 140,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.81987464427948,
+        168.0,
+        116.5,
+        69.25
+      ],
+      "stable_result": [
+        168,
+        114,
+        60,
+        819
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 40,
+      "production_ms": 81.75,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8376019597053528,
+          "x": 98,
+          "y": 42,
+          "w": 148,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.8376019597053528,
+        172.0,
+        112.5,
+        72.25
+      ],
+      "stable_result": [
+        170,
+        115,
+        63,
+        837
+      ],
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8376019597053528,
+          "x": 98,
+          "y": 42,
+          "w": 148,
+          "h": 141
+        }
+      ]
+    },
+    {
+      "frame": 41,
+      "production_ms": 87.3,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8509464859962463,
+          "x": 98,
+          "y": 41,
+          "w": 148,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.8509464859962463,
+        172.0,
+        111.5,
+        72.25
+      ],
+      "stable_result": [
+        172,
+        112,
+        61,
+        850
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 42,
+      "production_ms": 80.01,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.823309600353241,
+          "x": 101,
+          "y": 42,
+          "w": 132,
+          "h": 128
+        }
+      ],
+      "geometric_box": [
+        0.823309600353241,
+        167.0,
+        106.0,
+        65.0
+      ],
+      "stable_result": [
+        173,
+        110,
+        58,
+        823
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 43,
+      "production_ms": 79.63,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8605949282646179,
+          "x": 100,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8605949282646179,
+        168.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 44,
+      "production_ms": 82.09,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8723297715187073,
+          "x": 100,
+          "y": 58,
+          "w": 130,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8723297715187073,
+        165.0,
+        125.0,
+        66.0
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 45,
+      "production_ms": 82.11,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8633731007575989,
+          "x": 101,
+          "y": 55,
+          "w": 132,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.8633731007575989,
+        167.0,
+        125.5,
+        68.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8633731007575989,
+          "x": 101,
+          "y": 55,
+          "w": 132,
+          "h": 141
+        }
+      ]
+    },
+    {
+      "frame": 46,
+      "production_ms": 82.72,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8633731007575989,
+          "x": 105,
+          "y": 55,
+          "w": 132,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.8633731007575989,
+        171.0,
+        125.5,
+        68.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 47,
+      "production_ms": 82.01,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.860584020614624,
+          "x": 112,
+          "y": 70,
+          "w": 130,
+          "h": 124
+        }
+      ],
+      "geometric_box": [
+        0.860584020614624,
+        177.0,
+        132.0,
+        63.5
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 48,
+      "production_ms": 81.52,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.860584020614624,
+          "x": 111,
+          "y": 64,
+          "w": 130,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.860584020614624,
+        176.0,
+        131.0,
+        66.0
+      ],
+      "stable_result": [
+        176,
+        134,
+        59,
+        860
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 49,
+      "production_ms": 77.12,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8932890892028809,
+          "x": 112,
+          "y": 62,
+          "w": 130,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8932890892028809,
+        177.0,
+        129.0,
+        66.0
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 50,
+      "production_ms": 79.67,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8233107328414917,
+          "x": 108,
+          "y": 61,
+          "w": 132,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.8233107328414917,
+        174.0,
+        131.5,
+        68.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8233107328414917,
+          "x": 108,
+          "y": 61,
+          "w": 132,
+          "h": 141
+        }
+      ]
+    },
+    {
+      "frame": 51,
+      "production_ms": 78.26,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7918040752410889,
+          "x": 110,
+          "y": 68,
+          "w": 132,
+          "h": 128
+        }
+      ],
+      "geometric_box": [
+        0.7918040752410889,
+        176.0,
+        132.0,
+        65.0
+      ],
+      "stable_result": [
+        174,
+        133,
+        57,
+        791
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 52,
+      "production_ms": 83.49,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8233107328414917,
+          "x": 108,
+          "y": 71,
+          "w": 132,
+          "h": 128
+        }
+      ],
+      "geometric_box": [
+        0.8233107328414917,
+        174.0,
+        135.0,
+        65.0
+      ],
+      "stable_result": [
+        174,
+        134,
+        59,
+        823
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 53,
+      "production_ms": 80.85,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7918040752410889,
+          "x": 108,
+          "y": 62,
+          "w": 132,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.7918040752410889,
+        174.0,
+        132.5,
+        68.25
+      ],
+      "stable_result": [
+        177,
+        134,
+        60,
+        791
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 54,
+      "production_ms": 81.95,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8233107328414917,
+          "x": 110,
+          "y": 62,
+          "w": 132,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.8233107328414917,
+        176.0,
+        132.5,
+        68.25
+      ],
+      "stable_result": [
+        176,
+        134,
+        59,
+        823
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 55,
+      "production_ms": 81.66,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8376019597053528,
+          "x": 110,
+          "y": 68,
+          "w": 132,
+          "h": 128
+        }
+      ],
+      "geometric_box": [
+        0.8376019597053528,
+        176.0,
+        132.0,
+        65.0
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8376019597053528,
+          "x": 110,
+          "y": 68,
+          "w": 132,
+          "h": 128
+        }
+      ]
+    },
+    {
+      "frame": 56,
+      "production_ms": 82.98,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7745667695999146,
+          "x": 112,
+          "y": 71,
+          "w": 132,
+          "h": 128
+        }
+      ],
+      "geometric_box": [
+        0.7745667695999146,
+        178.0,
+        135.0,
+        65.0
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 57,
+      "production_ms": 88.02,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.860582709312439,
+          "x": 112,
+          "y": 72,
+          "w": 130,
+          "h": 124
+        }
+      ],
+      "geometric_box": [
+        0.860582709312439,
+        177.0,
+        134.0,
+        63.5
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 58,
+      "production_ms": 82.55,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479471802711487,
+          "x": 114,
+          "y": 71,
+          "w": 130,
+          "h": 124
+        }
+      ],
+      "geometric_box": [
+        0.8479471802711487,
+        179.0,
+        133.0,
+        63.5
+      ],
+      "stable_result": [
+        177,
+        137,
+        59,
+        847
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 59,
+      "production_ms": 83.24,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.9019001126289368,
+          "x": 114,
+          "y": 64,
+          "w": 130,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.9019001126289368,
+        179.0,
+        131.0,
+        66.0
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 60,
+      "production_ms": 78.94,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8932890892028809,
+          "x": 117,
+          "y": 68,
+          "w": 125,
+          "h": 124
+        }
+      ],
+      "geometric_box": [
+        0.8932890892028809,
+        179.5,
+        130.0,
+        62.25
+      ],
+      "stable_result": [
+        179,
+        133,
+        57,
+        893
+      ],
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8932890892028809,
+          "x": 117,
+          "y": 68,
+          "w": 125,
+          "h": 124
+        }
+      ]
+    },
+    {
+      "frame": 61,
+      "production_ms": 84.77,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8824077844619751,
+          "x": 115,
+          "y": 68,
+          "w": 130,
+          "h": 124
+        }
+      ],
+      "geometric_box": [
+        0.8824077844619751,
+        180.0,
+        130.0,
+        63.5
+      ],
+      "stable_result": [
+        176,
+        132,
+        60,
+        882
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 62,
+      "production_ms": 82.23,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.911157488822937,
+          "x": 115,
+          "y": 68,
+          "w": 130,
+          "h": 124
+        }
+      ],
+      "geometric_box": [
+        0.911157488822937,
+        180.0,
+        130.0,
+        63.5
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 63,
+      "production_ms": 82.37,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8723297715187073,
+          "x": 117,
+          "y": 62,
+          "w": 130,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8723297715187073,
+        182.0,
+        129.0,
+        66.0
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 64,
+      "production_ms": 81.03,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.9111613035202026,
+          "x": 117,
+          "y": 61,
+          "w": 132,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.9111613035202026,
+        183.0,
+        128.0,
+        66.5
+      ],
+      "stable_result": [
+        185,
+        132,
+        59,
+        911
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 65,
+      "production_ms": 77.84,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8343929648399353,
+          "x": 118,
+          "y": 55,
+          "w": 132,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8343929648399353,
+        184.0,
+        122.0,
+        66.5
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8343929648399353,
+          "x": 118,
+          "y": 55,
+          "w": 132,
+          "h": 134
+        }
+      ]
+    },
+    {
+      "frame": 66,
+      "production_ms": 78.47,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7154016494750977,
+          "x": 112,
+          "y": 48,
+          "w": 132,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.7154016494750977,
+        178.0,
+        118.5,
+        68.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 67,
+      "production_ms": 83.06,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7879095077514648,
+          "x": 115,
+          "y": 50,
+          "w": 130,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.7879095077514648,
+        180.0,
+        118.5,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 68,
+      "production_ms": 80.79,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7548913955688477,
+          "x": 111,
+          "y": 45,
+          "w": 132,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.7548913955688477,
+        177.0,
+        115.5,
+        68.25
+      ],
+      "stable_result": [
+        181,
+        115,
+        64,
+        754
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 69,
+      "production_ms": 79.59,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8605892658233643,
+          "x": 112,
+          "y": 54,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8605892658233643,
+        180.5,
+        119.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 70,
+      "production_ms": 83.31,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8605892658233643,
+          "x": 112,
+          "y": 54,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8605892658233643,
+        180.5,
+        119.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8605892658233643,
+          "x": 112,
+          "y": 54,
+          "w": 137,
+          "h": 130
+        }
+      ]
+    },
+    {
+      "frame": 71,
+      "production_ms": 81.5,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8198733329772949,
+          "x": 114,
+          "y": 48,
+          "w": 130,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8198733329772949,
+        179.0,
+        116.5,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 72,
+      "production_ms": 79.72,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8343839645385742,
+          "x": 115,
+          "y": 48,
+          "w": 130,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8343839645385742,
+        180.0,
+        116.5,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 73,
+      "production_ms": 82.27,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7745591998100281,
+          "x": 114,
+          "y": 45,
+          "w": 132,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.7745591998100281,
+        180.0,
+        115.5,
+        68.25
+      ],
+      "stable_result": [
+        180,
+        115,
+        62,
+        774
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 74,
+      "production_ms": 81.37,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8080419898033142,
+          "x": 114,
+          "y": 45,
+          "w": 132,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.8080419898033142,
+        180.0,
+        115.5,
+        68.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 75,
+      "production_ms": 77.69,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7917963266372681,
+          "x": 112,
+          "y": 48,
+          "w": 132,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.7917963266372681,
+        178.0,
+        118.5,
+        68.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.7917963266372681,
+          "x": 112,
+          "y": 48,
+          "w": 132,
+          "h": 141
+        }
+      ]
+    },
+    {
+      "frame": 76,
+      "production_ms": 83.01,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479552865028381,
+          "x": 112,
+          "y": 51,
+          "w": 137,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8479552865028381,
+        180.5,
+        119.5,
+        68.5
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 77,
+      "production_ms": 77.07,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7879180312156677,
+          "x": 112,
+          "y": 54,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.7879180312156677,
+        180.5,
+        119.0,
+        66.75
+      ],
+      "stable_result": [
+        182,
+        119,
+        64,
+        787
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 78,
+      "production_ms": 93.03,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7879120707511902,
+          "x": 117,
+          "y": 50,
+          "w": 130,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.7879120707511902,
+        182.0,
+        118.5,
+        66.75
+      ],
+      "stable_result": [
+        182,
+        119,
+        62,
+        787
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 79,
+      "production_ms": 80.98,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.7548913955688477,
+          "x": 108,
+          "y": 45,
+          "w": 148,
+          "h": 141
+        }
+      ],
+      "geometric_box": [
+        0.7548913955688477,
+        182.0,
+        115.5,
+        72.25
+      ],
+      "stable_result": [
+        185,
+        117,
+        63,
+        754
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 80,
+      "production_ms": 88.77,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8043954968452454,
+          "x": 118,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8043954968452454,
+        186.5,
+        117.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8043954968452454,
+          "x": 118,
+          "y": 52,
+          "w": 137,
+          "h": 130
+        }
+      ]
+    },
+    {
+      "frame": 81,
+      "production_ms": 79.6,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8043960332870483,
+          "x": 118,
+          "y": 50,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8043960332870483,
+        186.5,
+        115.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 82,
+      "production_ms": 84.53,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.9111613035202026,
+          "x": 118,
+          "y": 42,
+          "w": 135,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.9111613035202026,
+        185.5,
+        109.0,
+        67.25
+      ],
+      "stable_result": [
+        186,
+        113,
+        63,
+        911
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 83,
+      "production_ms": 80.6,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479592204093933,
+          "x": 118,
+          "y": 42,
+          "w": 137,
+          "h": 130
+        }
+      ],
+      "geometric_box": [
+        0.8479592204093933,
+        186.5,
+        107.0,
+        66.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 84,
+      "production_ms": 90.84,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8824170231819153,
+          "x": 115,
+          "y": 38,
+          "w": 138,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8824170231819153,
+        184.0,
+        105.0,
+        68.0
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 85,
+      "production_ms": 90.97,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8932998180389404,
+          "x": 117,
+          "y": 38,
+          "w": 135,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8932998180389404,
+        184.5,
+        105.0,
+        67.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8932998180389404,
+          "x": 117,
+          "y": 38,
+          "w": 135,
+          "h": 134
+        }
+      ]
+    },
+    {
+      "frame": 86,
+      "production_ms": 87.28,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8479586839675903,
+          "x": 117,
+          "y": 34,
+          "w": 138,
+          "h": 145
+        }
+      ],
+      "geometric_box": [
+        0.8479586839675903,
+        186.0,
+        106.5,
+        70.75
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 87,
+      "production_ms": 83.87,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8932998180389404,
+          "x": 115,
+          "y": 37,
+          "w": 138,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8932998180389404,
+        184.0,
+        104.0,
+        68.0
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 88,
+      "production_ms": 84.1,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.9019024968147278,
+          "x": 115,
+          "y": 37,
+          "w": 135,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.9019024968147278,
+        182.5,
+        104.0,
+        67.25
+      ],
+      "stable_result": [
+        187,
+        108,
+        63,
+        901
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 89,
+      "production_ms": 83.27,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8933003544807434,
+          "x": 114,
+          "y": 35,
+          "w": 135,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8933003544807434,
+        181.5,
+        102.0,
+        67.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 90,
+      "production_ms": 87.71,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8824131488800049,
+          "x": 115,
+          "y": 37,
+          "w": 135,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8824131488800049,
+        182.5,
+        104.0,
+        67.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8824131488800049,
+          "x": 115,
+          "y": 37,
+          "w": 135,
+          "h": 134
+        }
+      ]
+    },
+    {
+      "frame": 91,
+      "production_ms": 83.22,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8932945132255554,
+          "x": 115,
+          "y": 35,
+          "w": 135,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8932945132255554,
+        182.5,
+        102.0,
+        67.25
+      ],
+      "stable_result": [
+        185,
+        105,
+        64,
+        893
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 92,
+      "production_ms": 90.26,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8605883717536926,
+          "x": 115,
+          "y": 29,
+          "w": 135,
+          "h": 145
+        }
+      ],
+      "geometric_box": [
+        0.8605883717536926,
+        182.5,
+        101.5,
+        70.0
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 93,
+      "production_ms": 89.02,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8605784177780151,
+          "x": 115,
+          "y": 35,
+          "w": 140,
+          "h": 137
+        }
+      ],
+      "geometric_box": [
+        0.8605784177780151,
+        185.0,
+        103.5,
+        69.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 94,
+      "production_ms": 103.46,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8723385334014893,
+          "x": 114,
+          "y": 29,
+          "w": 138,
+          "h": 145
+        }
+      ],
+      "geometric_box": [
+        0.8723385334014893,
+        183.0,
+        101.5,
+        70.75
+      ],
+      "stable_result": [
+        185,
+        106,
+        63,
+        872
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 95,
+      "production_ms": 82.07,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.8605892658233643,
+          "x": 117,
+          "y": 37,
+          "w": 132,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.8605892658233643,
+        183.0,
+        104.0,
+        66.5
+      ],
+      "stable_result": null,
+      "diagnostic_objects": [
+        {
+          "label": "2r",
+          "score": 0.8605892658233643,
+          "x": 117,
+          "y": 37,
+          "w": 132,
+          "h": 134
+        }
+      ]
+    },
+    {
+      "frame": 96,
+      "production_ms": 82.15,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.9111634492874146,
+          "x": 111,
+          "y": 34,
+          "w": 135,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.9111634492874146,
+        178.5,
+        101.0,
+        67.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 97,
+      "production_ms": 83.4,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.9262872338294983,
+          "x": 111,
+          "y": 35,
+          "w": 135,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.9262872338294983,
+        178.5,
+        102.0,
+        67.25
+      ],
+      "stable_result": null,
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 98,
+      "production_ms": 81.68,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.918463945388794,
+          "x": 111,
+          "y": 37,
+          "w": 135,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.918463945388794,
+        178.5,
+        104.0,
+        67.25
+      ],
+      "stable_result": [
+        181,
+        105,
+        64,
+        918
+      ],
+      "diagnostic_objects": null
+    },
+    {
+      "frame": 99,
+      "production_ms": 83.53,
+      "objects": [
+        {
+          "label": "2r",
+          "score": 0.9019046425819397,
+          "x": 110,
+          "y": 35,
+          "w": 135,
+          "h": 134
+        }
+      ],
+      "geometric_box": [
+        0.9019046425819397,
+        177.5,
+        102.0,
+        67.25
+      ],
+      "stable_result": [
+        178,
+        105,
+        62,
+        901
+      ],
+      "diagnostic_objects": null
+    }
+  ]
+}

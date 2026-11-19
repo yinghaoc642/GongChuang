@@ -1,0 +1,181 @@
+-- [I] [Maix Comm Protocol] auto set pinmap A16 to UART0_TX for uart0
+-- [I] [Maix Comm Protocol] auto set pinmap A17 to UART0_RX for uart0
+-- [I] [Maix Comm Protocol] listening on uart port: uart0(/dev/ttyS0)
+-- [I] load cvimodel from: /maixapp/apps/gc_try_r2_331476_20261119/models/ring2/model_331476.cvimodel
+version: 1.4.0
+model Build at 2026-11-19 13:17:25 For platform cv181x
+Max SharedMem size:602112
+-- [I] model info:
+	type: yolov5
+	input type: rgb
+	mean:0.000000 0.000000 0.000000 
+	scale:0.003922 0.003922 0.003922 
+	labels num: 1
+	anchors:10.00 13.00 16.00 30.00 33.00 23.00 30.00 61.00 62.00 45.00 59.00 119.00 116.00 90.00 156.00 198.00 373.00 326.00 
+	input size: 224x224
+
+[COARSE2] loaded /maixapp/apps/gc_try_r2_331476_20261119/models/ring2/model.mud
+[SAMPLE_COMM_SNS_ParseIni]-2203: Parse /mnt/data/sensor_cfg.ini
+[parse_source_devnum]-1796: devNum =  1
+[parse_sensor_name]-1877: sensor =  GCORE_GC4653_MIPI_4M_30FPS_10BIT
+[parse_sensor_busid]-1906: bus_id =  4
+[parse_sensor_i2caddr]-1917: sns_i2c_addr =  29
+[parse_sensor_mipidev]-1928: mipi_dev =  0
+[parse_sensor_laneid]-1939: Lane_id =  4, 3, 2, -1, -1
+[parse_sensor_pnswap]-1950: pn_swap =  0, 0, 0, 0, 0
+[parse_sensor_mclken]-1972: mclk_en =  1
+[parse_sensor_mclk]-1983: mclk =  1
+[SAMPLE_COMM_SNS_ParseIni]-2203: Parse /mnt/data/sensor_cfg.ini
+[parse_source_devnum]-1796: devNum =  1
+[parse_sensor_name]-1877: sensor =  GCORE_GC4653_MIPI_4M_30FPS_10BIT
+[parse_sensor_busid]-1906: bus_id =  4
+[parse_sensor_i2caddr]-1917: sns_i2c_addr =  29
+[parse_sensor_mipidev]-1928: mipi_dev =  0
+[parse_sensor_laneid]-1939: Lane_id =  4, 3, 2, -1, -1
+[parse_sensor_pnswap]-1950: pn_swap =  0, 0, 0, 0, 0
+[parse_sensor_mclken]-1972: mclk_en =  1
+[parse_sensor_mclk]-1983: mclk =  1
+try release sys ok
+[_mmf_init]-1144: maix multi-media version:67a90e2-musl_riscv64
+maix multi-media init ok
+try release vio ok
+try release venc ok
+ISP Vipipe(0) Allocate pa(0x8acdc000) va(0x0x3fc02b6000) size(291424)
+stSnsrMode.u16Width 1280 stSnsrMode.u16Height 720 60.000000 wdrMode 0 pstSnsObj 0x3fc3a2f060
+[SAMPLE_COMM_VI_StartMIPI]-494: sensor 0 stDevAttr.devno 0
+awbInit ver 6.9@2021500
+0 R:1400 B:3100 CT:2850
+1 R:1500 B:2500 CT:3900
+2 R:2300 B:1600 CT:6500
+Golden 1024 1024 1024
+WB Quadratic:0
+isWdr:0
+ViPipe:0,===GC4653 720P 60fps 10bit LINEAR Init OK!===
+********************************************************************************
+cvi_bin_isp message
+gerritId:      97347          commitId:      fc6ce647       
+md5:           [redacted identifier]
+sensorNum      1              
+sensorName0    4653           
+
+PQBIN message
+gerritId:      
+              commitId:      fc6ce647       
+md5:           [redacted identifier]
+sensorNum      1              
+sensorName0    4653           
+
+author:        lxowalle       desc:          gc4653 30fps   
+createTime:    2024-03-26 13:41:34version:                      
+tool Version:       v3.0.5.48           mode:      
+********************************************************************************
+[SAMPLE_COMM_ISP_Thread]-95: ISP Dev 0 running!
+0 R:1298 B:3773 CT:2688
+1 R:1629 B:2599 CT:3890
+2 R:2430 B:1675 CT:7300
+Golden 1629 1024 2599
+wdrLEOnly:1
+[SAMPLE_COMM_VO_StartChn]-351: u32Width:480, u32Height:640, u32Square:1
+FRAME {"frame": 0, "production_ms": 129.83, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 97, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 165.5, 117.0, 66.75], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 97, "y": 52, "w": 137, "h": 130}]}
+FRAME {"frame": 1, "production_ms": 79.06, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 98, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 166.5, 117.0, 66.75], "stable_result": [164, 117, 63, 834], "diagnostic_objects": null}
+FRAME {"frame": 2, "production_ms": 80.29, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 97, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 165.5, 117.0, 66.75], "stable_result": [164, 119, 62, 834], "diagnostic_objects": null}
+FRAME {"frame": 3, "production_ms": 87.85, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 50, "w": 137, "h": 137}], "geometric_box": [0.[redacted identifier], 163.5, 118.5, 68.5], "stable_result": [161, 119, 62, 847], "diagnostic_objects": null}
+FRAME {"frame": 4, "production_ms": 79.42, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 98, "y": 52, "w": 130, "h": 137}], "geometric_box": [0.[redacted identifier], 163.0, 120.5, 66.75], "stable_result": [160, 116, 60, 834], "diagnostic_objects": null}
+FRAME {"frame": 5, "production_ms": 83.28, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 51, "w": 137, "h": 137}], "geometric_box": [0.[redacted identifier], 163.5, 119.5, 68.5], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 51, "w": 137, "h": 137}]}
+FRAME {"frame": 6, "production_ms": 83.0, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 163.5, 117.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 7, "production_ms": 81.68, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 98, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 166.5, 117.0, 66.75], "stable_result": [163, 116, 59, 847], "diagnostic_objects": null}
+FRAME {"frame": 8, "production_ms": 79.36, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 97, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 165.5, 117.0, 66.75], "stable_result": [164, 118, 62, 834], "diagnostic_objects": null}
+FRAME {"frame": 9, "production_ms": 83.01, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 98, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 166.5, 117.0, 66.75], "stable_result": [164, 118, 62, 834], "diagnostic_objects": null}
+FRAME {"frame": 10, "production_ms": 97.4, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 98, "y": 50, "w": 137, "h": 137}], "geometric_box": [0.[redacted identifier], 166.5, 118.5, 68.5], "stable_result": [165, 119, 60, 847], "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 98, "y": 50, "w": 137, "h": 137}]}
+FRAME {"frame": 11, "production_ms": 85.32, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 97, "y": 50, "w": 137, "h": 137}], "geometric_box": [0.[redacted identifier], 165.5, 118.5, 68.5], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 12, "production_ms": 88.83, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 54, "w": 130, "h": 137}], "geometric_box": [0.[redacted identifier], 165.0, 122.5, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 13, "production_ms": 83.38, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 54, "w": 130, "h": 137}], "geometric_box": [0.[redacted identifier], 165.0, 122.5, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 14, "production_ms": 84.04, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 54, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 163.5, 119.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 15, "production_ms": 85.21, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 163.5, 117.0, 66.75], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 52, "w": 137, "h": 130}]}
+FRAME {"frame": 16, "production_ms": 88.18, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 163.5, 117.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 17, "production_ms": 87.9, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 163.5, 117.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 18, "production_ms": 91.43, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 163.5, 117.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 19, "production_ms": 83.62, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 163.5, 117.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 20, "production_ms": 84.2, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 50, "w": 137, "h": 137}], "geometric_box": [0.[redacted identifier], 163.5, 118.5, 68.5], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 50, "w": 137, "h": 137}]}
+FRAME {"frame": 21, "production_ms": 81.12, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 54, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 163.5, 119.0, 66.75], "stable_result": [163, 117, 62, 804], "diagnostic_objects": null}
+FRAME {"frame": 22, "production_ms": 84.47, "objects": [{"label": "2r", "score": 0.860590934753418, "x": 95, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.860590934753418, 163.5, 117.0, 66.75], "stable_result": [162, 114, 62, 860], "diagnostic_objects": null}
+FRAME {"frame": 23, "production_ms": 82.73, "objects": [{"label": "2r", "score": 0.804387629032135, "x": 100, "y": 51, "w": 130, "h": 134}], "geometric_box": [0.804387629032135, 165.0, 118.0, 66.0], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 24, "production_ms": 83.55, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 94, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 162.5, 117.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 25, "production_ms": 93.26, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 92, "y": 55, "w": 132, "h": 128}], "geometric_box": [0.[redacted identifier], 158.0, 119.0, 65.0], "stable_result": [161, 117, 60, 735], "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 92, "y": 55, "w": 132, "h": 128}]}
+FRAME {"frame": 26, "production_ms": 79.28, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 87, "y": 55, "w": 132, "h": 128}], "geometric_box": [0.[redacted identifier], 153.0, 119.0, 65.0], "stable_result": [158, 116, 62, 791], "diagnostic_objects": null}
+FRAME {"frame": 27, "production_ms": 82.1, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 87, "y": 48, "w": 132, "h": 141}], "geometric_box": [0.[redacted identifier], 153.0, 118.5, 68.25], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 28, "production_ms": 81.63, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 88, "y": 54, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 156.5, 119.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 29, "production_ms": 79.58, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 92, "y": 55, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 160.5, 120.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 30, "production_ms": 82.13, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 54, "w": 125, "h": 124}], "geometric_box": [0.[redacted identifier], 162.5, 116.0, 62.25], "stable_result": [160, 116, 62, 819], "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 54, "w": 125, "h": 124}]}
+FRAME {"frame": 31, "production_ms": 84.27, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 47, "w": 137, "h": 137}], "geometric_box": [0.[redacted identifier], 163.5, 115.5, 68.5], "stable_result": [159, 115, 61, 847], "diagnostic_objects": null}
+FRAME {"frame": 32, "production_ms": 81.73, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 101, "y": 51, "w": 130, "h": 134}], "geometric_box": [0.[redacted identifier], 166.0, 118.0, 66.0], "stable_result": [162, 117, 61, 819], "diagnostic_objects": null}
+FRAME {"frame": 33, "production_ms": 82.39, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 50, "w": 130, "h": 137}], "geometric_box": [0.[redacted identifier], 165.0, 118.5, 66.75], "stable_result": [163, 119, 62, 787], "diagnostic_objects": null}
+FRAME {"frame": 34, "production_ms": 82.35, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 95, "y": 50, "w": 137, "h": 137}], "geometric_box": [0.[redacted identifier], 163.5, 118.5, 68.5], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 35, "production_ms": 78.53, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 52, "w": 130, "h": 137}], "geometric_box": [0.[redacted identifier], 165.0, 120.5, 66.75], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 52, "w": 130, "h": 137}]}
+FRAME {"frame": 36, "production_ms": 82.97, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 54, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 168.5, 119.0, 66.75], "stable_result": [167, 119, 60, 834], "diagnostic_objects": null}
+FRAME {"frame": 37, "production_ms": 80.78, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 104, "y": 51, "w": 125, "h": 134}], "geometric_box": [0.[redacted identifier], 166.5, 118.0, 64.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 38, "production_ms": 80.28, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 105, "y": 50, "w": 125, "h": 134}], "geometric_box": [0.[redacted identifier], 167.5, 117.0, 64.75], "stable_result": [168, 115, 61, 847], "diagnostic_objects": null}
+FRAME {"frame": 39, "production_ms": 87.91, "objects": [{"label": "2r", "score": 0.81987464427948, "x": 98, "y": 48, "w": 140, "h": 137}], "geometric_box": [0.81987464427948, 168.0, 116.5, 69.25], "stable_result": [168, 114, 60, 819], "diagnostic_objects": null}
+FRAME {"frame": 40, "production_ms": 81.75, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 98, "y": 42, "w": 148, "h": 141}], "geometric_box": [0.[redacted identifier], 172.0, 112.5, 72.25], "stable_result": [170, 115, 63, 837], "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 98, "y": 42, "w": 148, "h": 141}]}
+FRAME {"frame": 41, "production_ms": 87.3, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 98, "y": 41, "w": 148, "h": 141}], "geometric_box": [0.[redacted identifier], 172.0, 111.5, 72.25], "stable_result": [172, 112, 61, 850], "diagnostic_objects": null}
+FRAME {"frame": 42, "production_ms": 80.01, "objects": [{"label": "2r", "score": 0.823309600353241, "x": 101, "y": 42, "w": 132, "h": 128}], "geometric_box": [0.823309600353241, 167.0, 106.0, 65.0], "stable_result": [173, 110, 58, 823], "diagnostic_objects": null}
+FRAME {"frame": 43, "production_ms": 79.63, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 168.5, 117.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 44, "production_ms": 82.09, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 100, "y": 58, "w": 130, "h": 134}], "geometric_box": [0.[redacted identifier], 165.0, 125.0, 66.0], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 45, "production_ms": 82.11, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 101, "y": 55, "w": 132, "h": 141}], "geometric_box": [0.[redacted identifier], 167.0, 125.5, 68.25], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 101, "y": 55, "w": 132, "h": 141}]}
+FRAME {"frame": 46, "production_ms": 82.72, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 105, "y": 55, "w": 132, "h": 141}], "geometric_box": [0.[redacted identifier], 171.0, 125.5, 68.25], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 47, "production_ms": 82.01, "objects": [{"label": "2r", "score": 0.860584020614624, "x": 112, "y": 70, "w": 130, "h": 124}], "geometric_box": [0.860584020614624, 177.0, 132.0, 63.5], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 48, "production_ms": 81.52, "objects": [{"label": "2r", "score": 0.860584020614624, "x": 111, "y": 64, "w": 130, "h": 134}], "geometric_box": [0.860584020614624, 176.0, 131.0, 66.0], "stable_result": [176, 134, 59, 860], "diagnostic_objects": null}
+FRAME {"frame": 49, "production_ms": 77.12, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 112, "y": 62, "w": 130, "h": 134}], "geometric_box": [0.[redacted identifier], 177.0, 129.0, 66.0], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 50, "production_ms": 79.67, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 108, "y": 61, "w": 132, "h": 141}], "geometric_box": [0.[redacted identifier], 174.0, 131.5, 68.25], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 108, "y": 61, "w": 132, "h": 141}]}
+FRAME {"frame": 51, "production_ms": 78.26, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 110, "y": 68, "w": 132, "h": 128}], "geometric_box": [0.[redacted identifier], 176.0, 132.0, 65.0], "stable_result": [174, 133, 57, 791], "diagnostic_objects": null}
+FRAME {"frame": 52, "production_ms": 83.49, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 108, "y": 71, "w": 132, "h": 128}], "geometric_box": [0.[redacted identifier], 174.0, 135.0, 65.0], "stable_result": [174, 134, 59, 823], "diagnostic_objects": null}
+FRAME {"frame": 53, "production_ms": 80.85, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 108, "y": 62, "w": 132, "h": 141}], "geometric_box": [0.[redacted identifier], 174.0, 132.5, 68.25], "stable_result": [177, 134, 60, 791], "diagnostic_objects": null}
+FRAME {"frame": 54, "production_ms": 81.95, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 110, "y": 62, "w": 132, "h": 141}], "geometric_box": [0.[redacted identifier], 176.0, 132.5, 68.25], "stable_result": [176, 134, 59, 823], "diagnostic_objects": null}
+FRAME {"frame": 55, "production_ms": 81.66, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 110, "y": 68, "w": 132, "h": 128}], "geometric_box": [0.[redacted identifier], 176.0, 132.0, 65.0], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 110, "y": 68, "w": 132, "h": 128}]}
+FRAME {"frame": 56, "production_ms": 82.98, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 112, "y": 71, "w": 132, "h": 128}], "geometric_box": [0.[redacted identifier], 178.0, 135.0, 65.0], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 57, "production_ms": 88.02, "objects": [{"label": "2r", "score": 0.860582709312439, "x": 112, "y": 72, "w": 130, "h": 124}], "geometric_box": [0.860582709312439, 177.0, 134.0, 63.5], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 58, "production_ms": 82.55, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 114, "y": 71, "w": 130, "h": 124}], "geometric_box": [0.[redacted identifier], 179.0, 133.0, 63.5], "stable_result": [177, 137, 59, 847], "diagnostic_objects": null}
+FRAME {"frame": 59, "production_ms": 83.24, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 114, "y": 64, "w": 130, "h": 134}], "geometric_box": [0.[redacted identifier], 179.0, 131.0, 66.0], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 60, "production_ms": 78.94, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 117, "y": 68, "w": 125, "h": 124}], "geometric_box": [0.[redacted identifier], 179.5, 130.0, 62.25], "stable_result": [179, 133, 57, 893], "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 117, "y": 68, "w": 125, "h": 124}]}
+FRAME {"frame": 61, "production_ms": 84.77, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 115, "y": 68, "w": 130, "h": 124}], "geometric_box": [0.[redacted identifier], 180.0, 130.0, 63.5], "stable_result": [176, 132, 60, 882], "diagnostic_objects": null}
+FRAME {"frame": 62, "production_ms": 82.23, "objects": [{"label": "2r", "score": 0.911157488822937, "x": 115, "y": 68, "w": 130, "h": 124}], "geometric_box": [0.911157488822937, 180.0, 130.0, 63.5], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 63, "production_ms": 82.37, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 117, "y": 62, "w": 130, "h": 134}], "geometric_box": [0.[redacted identifier], 182.0, 129.0, 66.0], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 64, "production_ms": 81.03, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 117, "y": 61, "w": 132, "h": 134}], "geometric_box": [0.[redacted identifier], 183.0, 128.0, 66.5], "stable_result": [185, 132, 59, 911], "diagnostic_objects": null}
+FRAME {"frame": 65, "production_ms": 77.84, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 118, "y": 55, "w": 132, "h": 134}], "geometric_box": [0.[redacted identifier], 184.0, 122.0, 66.5], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 118, "y": 55, "w": 132, "h": 134}]}
+FRAME {"frame": 66, "production_ms": 78.47, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 112, "y": 48, "w": 132, "h": 141}], "geometric_box": [0.[redacted identifier], 178.0, 118.5, 68.25], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 67, "production_ms": 83.06, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 115, "y": 50, "w": 130, "h": 137}], "geometric_box": [0.[redacted identifier], 180.0, 118.5, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 68, "production_ms": 80.79, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 111, "y": 45, "w": 132, "h": 141}], "geometric_box": [0.[redacted identifier], 177.0, 115.5, 68.25], "stable_result": [181, 115, 64, 754], "diagnostic_objects": null}
+FRAME {"frame": 69, "production_ms": 79.59, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 112, "y": 54, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 180.5, 119.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 70, "production_ms": 83.31, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 112, "y": 54, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 180.5, 119.0, 66.75], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 112, "y": 54, "w": 137, "h": 130}]}
+FRAME {"frame": 71, "production_ms": 81.5, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 114, "y": 48, "w": 130, "h": 137}], "geometric_box": [0.[redacted identifier], 179.0, 116.5, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 72, "production_ms": 79.72, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 115, "y": 48, "w": 130, "h": 137}], "geometric_box": [0.[redacted identifier], 180.0, 116.5, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 73, "production_ms": 82.27, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 114, "y": 45, "w": 132, "h": 141}], "geometric_box": [0.[redacted identifier], 180.0, 115.5, 68.25], "stable_result": [180, 115, 62, 774], "diagnostic_objects": null}
+FRAME {"frame": 74, "production_ms": 81.37, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 114, "y": 45, "w": 132, "h": 141}], "geometric_box": [0.[redacted identifier], 180.0, 115.5, 68.25], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 75, "production_ms": 77.69, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 112, "y": 48, "w": 132, "h": 141}], "geometric_box": [0.[redacted identifier], 178.0, 118.5, 68.25], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 112, "y": 48, "w": 132, "h": 141}]}
+FRAME {"frame": 76, "production_ms": 83.01, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 112, "y": 51, "w": 137, "h": 137}], "geometric_box": [0.[redacted identifier], 180.5, 119.5, 68.5], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 77, "production_ms": 77.07, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 112, "y": 54, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 180.5, 119.0, 66.75], "stable_result": [182, 119, 64, 787], "diagnostic_objects": null}
+FRAME {"frame": 78, "production_ms": 93.03, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 117, "y": 50, "w": 130, "h": 137}], "geometric_box": [0.[redacted identifier], 182.0, 118.5, 66.75], "stable_result": [182, 119, 62, 787], "diagnostic_objects": null}
+FRAME {"frame": 79, "production_ms": 80.98, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 108, "y": 45, "w": 148, "h": 141}], "geometric_box": [0.[redacted identifier], 182.0, 115.5, 72.25], "stable_result": [185, 117, 63, 754], "diagnostic_objects": null}
+FRAME {"frame": 80, "production_ms": 88.77, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 118, "y": 52, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 186.5, 117.0, 66.75], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 118, "y": 52, "w": 137, "h": 130}]}
+FRAME {"frame": 81, "production_ms": 79.6, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 118, "y": 50, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 186.5, 115.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 82, "production_ms": 84.53, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 118, "y": 42, "w": 135, "h": 134}], "geometric_box": [0.[redacted identifier], 185.5, 109.0, 67.25], "stable_result": [186, 113, 63, 911], "diagnostic_objects": null}
+FRAME {"frame": 83, "production_ms": 80.6, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 118, "y": 42, "w": 137, "h": 130}], "geometric_box": [0.[redacted identifier], 186.5, 107.0, 66.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 84, "production_ms": 90.84, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 115, "y": 38, "w": 138, "h": 134}], "geometric_box": [0.[redacted identifier], 184.0, 105.0, 68.0], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 85, "production_ms": 90.97, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 117, "y": 38, "w": 135, "h": 134}], "geometric_box": [0.[redacted identifier], 184.5, 105.0, 67.25], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 117, "y": 38, "w": 135, "h": 134}]}
+FRAME {"frame": 86, "production_ms": 87.28, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 117, "y": 34, "w": 138, "h": 145}], "geometric_box": [0.[redacted identifier], 186.0, 106.5, 70.75], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 87, "production_ms": 83.87, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 115, "y": 37, "w": 138, "h": 134}], "geometric_box": [0.[redacted identifier], 184.0, 104.0, 68.0], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 88, "production_ms": 84.1, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 115, "y": 37, "w": 135, "h": 134}], "geometric_box": [0.[redacted identifier], 182.5, 104.0, 67.25], "stable_result": [187, 108, 63, 901], "diagnostic_objects": null}
+FRAME {"frame": 89, "production_ms": 83.27, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 114, "y": 35, "w": 135, "h": 134}], "geometric_box": [0.[redacted identifier], 181.5, 102.0, 67.25], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 90, "production_ms": 87.71, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 115, "y": 37, "w": 135, "h": 134}], "geometric_box": [0.[redacted identifier], 182.5, 104.0, 67.25], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 115, "y": 37, "w": 135, "h": 134}]}
+FRAME {"frame": 91, "production_ms": 83.22, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 115, "y": 35, "w": 135, "h": 134}], "geometric_box": [0.[redacted identifier], 182.5, 102.0, 67.25], "stable_result": [185, 105, 64, 893], "diagnostic_objects": null}
+FRAME {"frame": 92, "production_ms": 90.26, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 115, "y": 29, "w": 135, "h": 145}], "geometric_box": [0.[redacted identifier], 182.5, 101.5, 70.0], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 93, "production_ms": 89.02, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 115, "y": 35, "w": 140, "h": 137}], "geometric_box": [0.[redacted identifier], 185.0, 103.5, 69.25], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 94, "production_ms": 103.46, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 114, "y": 29, "w": 138, "h": 145}], "geometric_box": [0.[redacted identifier], 183.0, 101.5, 70.75], "stable_result": [185, 106, 63, 872], "diagnostic_objects": null}
+FRAME {"frame": 95, "production_ms": 82.07, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 117, "y": 37, "w": 132, "h": 134}], "geometric_box": [0.[redacted identifier], 183.0, 104.0, 66.5], "stable_result": null, "diagnostic_objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 117, "y": 37, "w": 132, "h": 134}]}
+FRAME {"frame": 96, "production_ms": 82.15, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 111, "y": 34, "w": 135, "h": 134}], "geometric_box": [0.[redacted identifier], 178.5, 101.0, 67.25], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 97, "production_ms": 83.4, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 111, "y": 35, "w": 135, "h": 134}], "geometric_box": [0.[redacted identifier], 178.5, 102.0, 67.25], "stable_result": null, "diagnostic_objects": null}
+FRAME {"frame": 98, "production_ms": 81.68, "objects": [{"label": "2r", "score": 0.918463945388794, "x": 111, "y": 37, "w": 135, "h": 134}], "geometric_box": [0.918463945388794, 178.5, 104.0, 67.25], "stable_result": [181, 105, 64, 918], "diagnostic_objects": null}
+FRAME {"frame": 99, "production_ms": 83.53, "objects": [{"label": "2r", "score": 0.[redacted identifier], "x": 110, "y": 35, "w": 135, "h": 134}], "geometric_box": [0.[redacted identifier], 177.5, 102.0, 67.25], "stable_result": [178, 105, 62, 901], "diagnostic_objects": null}
+SUMMARY {"frames": 100, "seconds": 9.982, "frames_with_score_070": 100, "frames_with_geometric_box": 100, "frames_with_stable_output": 42, "low_threshold_frames": 20, "low_threshold_hits": 20, "scope": "One stationary scene; diagnostic 0.20 results never used as accepted outputs. No robot request or response sent."}
+maix multi-media driver released.
+ISP Vipipe(0) Free pa(0x8acdc000) va(0x0x3fc02b6000)

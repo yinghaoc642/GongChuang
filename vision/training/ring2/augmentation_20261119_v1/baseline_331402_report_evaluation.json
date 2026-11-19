@@ -1,0 +1,80 @@
+{
+  "path": "try/vision/models/ring2/trained_331402/report.json",
+  "input": {
+    "input0": [
+      224,
+      224,
+      3
+    ]
+  },
+  "best_epoch": 200,
+  "server_validation_accuracy": 1.0,
+  "score_gate": 0.7,
+  "sample_images": 3,
+  "matched": 3,
+  "missed": 0,
+  "unmatched_above_gate": 0,
+  "exposed_sample_gate_pass": true,
+  "details": [
+    {
+      "name": "15.jpg",
+      "server_ok": true,
+      "all_reported_scores": [
+        0.708066463470459
+      ],
+      "ground_truths": 1,
+      "matched": 1,
+      "missed": 0,
+      "unmatched_above_gate": 0,
+      "matches": [
+        {
+          "score": 0.708066463470459,
+          "iou": 0.8327698764280718,
+          "center_error_px": 0.0,
+          "estimated_center_error_mm": 0.0
+        }
+      ]
+    },
+    {
+      "name": "16.jpg",
+      "server_ok": true,
+      "all_reported_scores": [
+        0.7408125996589661
+      ],
+      "ground_truths": 1,
+      "matched": 1,
+      "missed": 0,
+      "unmatched_above_gate": 0,
+      "matches": [
+        {
+          "score": 0.7408125996589661,
+          "iou": 0.8544600938967136,
+          "center_error_px": 10.547511554864492,
+          "estimated_center_error_mm": 4.760633593682082
+        }
+      ]
+    },
+    {
+      "name": "18.jpg",
+      "server_ok": true,
+      "all_reported_scores": [
+        0.8830680251121521
+      ],
+      "ground_truths": 1,
+      "matched": 1,
+      "missed": 0,
+      "unmatched_above_gate": 0,
+      "matches": [
+        {
+          "score": 0.8830680251121521,
+          "iou": 0.8807912545549194,
+          "center_error_px": 5.315072906367325,
+          "estimated_center_error_mm": 2.34819358561731
+        }
+      ]
+    }
+  ],
+  "scope": "Only downloaded report best_eval.val_info samples; not all 12 val images.",
+  "mm_estimate": "Assumes GT box encloses 41.75mm outer radius; not camera calibration.",
+  "report_sha256": "8951d6edf71c161899907d55c843cfdd7d07402643aa05f5e523997f38368cef"
+}

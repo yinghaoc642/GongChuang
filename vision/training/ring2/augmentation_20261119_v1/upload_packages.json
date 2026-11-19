@@ -1,0 +1,14 @@
+{
+  "train": {
+    "images": 266,
+    "archive": "maixhub_train_images_xml.zip",
+    "sha256": "a499a30682ee44b96d68f499c8f240554d74f4c59b25cbb2f38f02509a903b9d"
+  },
+  "val": {
+    "images": 12,
+    "archive": "maixhub_val_images_xml.zip",
+    "sha256": "213cad561df365a51d6cecdbf70bd9f4811a9cae461a6729160dba32c8473a7d"
+  },
+  "ui_format_evidence": "MaixHub dataset/157083/collect/zip: images + xml, choose train or val separately; 500MB, 3000-image limit.",
+  "visual_review": "All 224 variants reviewed in qa_01.jpg to qa_07.jpg; target remains visible, labels enclose ring, synthetic padding visible."
+}
