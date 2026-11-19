@@ -1,0 +1,581 @@
+[
+  {
+    "path": "try/vision/models/ring2/historical_311465/report.json",
+    "input": {
+      "input0": [
+        224,
+        224,
+        3
+      ]
+    },
+    "best_epoch": 200,
+    "server_validation_accuracy": 1.0,
+    "score_gate": 0.7,
+    "sample_images": 3,
+    "matched": 2,
+    "missed": 1,
+    "unmatched_above_gate": 0,
+    "exposed_sample_gate_pass": false,
+    "details": [
+      {
+        "name": "15.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.7915601134300232
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.7915601134300232,
+            "iou": 0.936247398156408,
+            "center_error_px": 2.23606797749979,
+            "estimated_center_error_mm": 1.0518967668801829
+          }
+        ]
+      },
+      {
+        "name": "16.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.6794828772544861
+        ],
+        "ground_truths": 1,
+        "matched": 0,
+        "missed": 1,
+        "unmatched_above_gate": 0,
+        "matches": []
+      },
+      {
+        "name": "27.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.72472083568573
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.72472083568573,
+            "iou": 0.8907292385553255,
+            "center_error_px": 4.609772228646444,
+            "estimated_center_error_mm": 2.0638926600106062
+          }
+        ]
+      }
+    ],
+    "scope": "Only downloaded report best_eval.val_info samples; not all 12 val images.",
+    "mm_estimate": "Assumes GT box encloses 41.75mm outer radius; not camera calibration.",
+    "training_id": 311465,
+    "minimum_exposed_score": 0.6794828772544861,
+    "mean_exposed_score": 0.7319212754567465
+  },
+  {
+    "path": "try/vision/models/ring2/trained_331358/report.json",
+    "input": {
+      "input0": [
+        448,
+        448,
+        3
+      ]
+    },
+    "best_epoch": 200,
+    "server_validation_accuracy": 1.0,
+    "score_gate": 0.7,
+    "sample_images": 3,
+    "matched": 0,
+    "missed": 3,
+    "unmatched_above_gate": 0,
+    "exposed_sample_gate_pass": false,
+    "details": [
+      {
+        "name": "18.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.6211483478546143
+        ],
+        "ground_truths": 1,
+        "matched": 0,
+        "missed": 1,
+        "unmatched_above_gate": 0,
+        "matches": []
+      },
+      {
+        "name": "17.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.6840384602546692
+        ],
+        "ground_truths": 1,
+        "matched": 0,
+        "missed": 1,
+        "unmatched_above_gate": 0,
+        "matches": []
+      },
+      {
+        "name": "16.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.5671162009239197
+        ],
+        "ground_truths": 1,
+        "matched": 0,
+        "missed": 1,
+        "unmatched_above_gate": 0,
+        "matches": []
+      }
+    ],
+    "scope": "Only downloaded report best_eval.val_info samples; not all 12 val images.",
+    "mm_estimate": "Assumes GT box encloses 41.75mm outer radius; not camera calibration.",
+    "training_id": 331358,
+    "minimum_exposed_score": 0.5671162009239197,
+    "mean_exposed_score": 0.6241010030110677
+  },
+  {
+    "path": "try/vision/models/ring2/trained_331402/report.json",
+    "input": {
+      "input0": [
+        224,
+        224,
+        3
+      ]
+    },
+    "best_epoch": 200,
+    "server_validation_accuracy": 1.0,
+    "score_gate": 0.7,
+    "sample_images": 3,
+    "matched": 3,
+    "missed": 0,
+    "unmatched_above_gate": 0,
+    "exposed_sample_gate_pass": true,
+    "details": [
+      {
+        "name": "15.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.708066463470459
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.708066463470459,
+            "iou": 0.8327698764280718,
+            "center_error_px": 0.0,
+            "estimated_center_error_mm": 0.0
+          }
+        ]
+      },
+      {
+        "name": "16.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.7408125996589661
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.7408125996589661,
+            "iou": 0.8544600938967136,
+            "center_error_px": 10.547511554864492,
+            "estimated_center_error_mm": 4.760633593682082
+          }
+        ]
+      },
+      {
+        "name": "18.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.8830680251121521
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.8830680251121521,
+            "iou": 0.8807912545549194,
+            "center_error_px": 5.315072906367325,
+            "estimated_center_error_mm": 2.34819358561731
+          }
+        ]
+      }
+    ],
+    "scope": "Only downloaded report best_eval.val_info samples; not all 12 val images.",
+    "mm_estimate": "Assumes GT box encloses 41.75mm outer radius; not camera calibration.",
+    "training_id": 331402,
+    "minimum_exposed_score": 0.708066463470459,
+    "mean_exposed_score": 0.7773156960805258
+  },
+  {
+    "path": "try/vision/models/ring2/trained_331403/report.json",
+    "input": {
+      "input0": [
+        224,
+        224,
+        3
+      ]
+    },
+    "best_epoch": 200,
+    "server_validation_accuracy": 1.0,
+    "score_gate": 0.7,
+    "sample_images": 3,
+    "matched": 0,
+    "missed": 3,
+    "unmatched_above_gate": 0,
+    "exposed_sample_gate_pass": false,
+    "details": [
+      {
+        "name": "17.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.5965019464492798
+        ],
+        "ground_truths": 1,
+        "matched": 0,
+        "missed": 1,
+        "unmatched_above_gate": 0,
+        "matches": []
+      },
+      {
+        "name": "16.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.5757915377616882
+        ],
+        "ground_truths": 1,
+        "matched": 0,
+        "missed": 1,
+        "unmatched_above_gate": 0,
+        "matches": []
+      },
+      {
+        "name": "18.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.6070902943611145
+        ],
+        "ground_truths": 1,
+        "matched": 0,
+        "missed": 1,
+        "unmatched_above_gate": 0,
+        "matches": []
+      }
+    ],
+    "scope": "Only downloaded report best_eval.val_info samples; not all 12 val images.",
+    "mm_estimate": "Assumes GT box encloses 41.75mm outer radius; not camera calibration.",
+    "training_id": 331403,
+    "minimum_exposed_score": 0.5757915377616882,
+    "mean_exposed_score": 0.5931279261906942
+  },
+  {
+    "path": "try/vision/models/ring2/trained_331404/report.json",
+    "input": {
+      "input0": [
+        320,
+        320,
+        3
+      ]
+    },
+    "best_epoch": 200,
+    "server_validation_accuracy": 1.0,
+    "score_gate": 0.7,
+    "sample_images": 3,
+    "matched": 2,
+    "missed": 1,
+    "unmatched_above_gate": 0,
+    "exposed_sample_gate_pass": false,
+    "details": [
+      {
+        "name": "17.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.7621378302574158
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.7621378302574158,
+            "iou": 0.7616978609625669,
+            "center_error_px": 6.519202405202649,
+            "estimated_center_error_mm": 2.872577313110402
+          }
+        ]
+      },
+      {
+        "name": "18.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.6632592678070068
+        ],
+        "ground_truths": 1,
+        "matched": 0,
+        "missed": 1,
+        "unmatched_above_gate": 0,
+        "matches": []
+      },
+      {
+        "name": "28.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.8013632297515869
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.8013632297515869,
+            "iou": 0.8581809792952304,
+            "center_error_px": 3.6400549446402595,
+            "estimated_center_error_mm": 1.647396140257245
+          }
+        ]
+      }
+    ],
+    "scope": "Only downloaded report best_eval.val_info samples; not all 12 val images.",
+    "mm_estimate": "Assumes GT box encloses 41.75mm outer radius; not camera calibration.",
+    "training_id": 331404,
+    "minimum_exposed_score": 0.6632592678070068,
+    "mean_exposed_score": 0.7422534426053365
+  },
+  {
+    "path": "try/vision/models/ring2/trained_331405/report.json",
+    "input": {
+      "input0": [
+        224,
+        224,
+        3
+      ]
+    },
+    "best_epoch": 200,
+    "server_validation_accuracy": 1.0,
+    "score_gate": 0.7,
+    "sample_images": 3,
+    "matched": 3,
+    "missed": 0,
+    "unmatched_above_gate": 0,
+    "exposed_sample_gate_pass": true,
+    "details": [
+      {
+        "name": "16.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.7592015266418457
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.7592015266418457,
+            "iou": 0.7859697097181321,
+            "center_error_px": 3.6400549446402595,
+            "estimated_center_error_mm": 1.6429437182565496
+          }
+        ]
+      },
+      {
+        "name": "15.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.7083114385604858
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.7083114385604858,
+            "iou": 0.9260252269819024,
+            "center_error_px": 1.0,
+            "estimated_center_error_mm": 0.4704225352112676
+          }
+        ]
+      },
+      {
+        "name": "27.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.8199967741966248
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.8199967741966248,
+            "iou": 0.9001144819690898,
+            "center_error_px": 3.3541019662496847,
+            "estimated_center_error_mm": 1.5017024889107167
+          }
+        ]
+      }
+    ],
+    "scope": "Only downloaded report best_eval.val_info samples; not all 12 val images.",
+    "mm_estimate": "Assumes GT box encloses 41.75mm outer radius; not camera calibration.",
+    "training_id": 331405,
+    "minimum_exposed_score": 0.7083114385604858,
+    "mean_exposed_score": 0.7625032464663187
+  },
+  {
+    "path": "try/vision/models/ring2/trained_331406/report.json",
+    "input": {
+      "input0": [
+        224,
+        224,
+        3
+      ]
+    },
+    "best_epoch": 200,
+    "server_validation_accuracy": 1.0,
+    "score_gate": 0.7,
+    "sample_images": 3,
+    "matched": 2,
+    "missed": 1,
+    "unmatched_above_gate": 0,
+    "exposed_sample_gate_pass": false,
+    "details": [
+      {
+        "name": "16.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.7288313508033752
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.7288313508033752,
+            "iou": 0.9205045128442491,
+            "center_error_px": 5.220153254455275,
+            "estimated_center_error_mm": 2.3561232256595432
+          }
+        ]
+      },
+      {
+        "name": "17.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.6452280282974243
+        ],
+        "ground_truths": 1,
+        "matched": 0,
+        "missed": 1,
+        "unmatched_above_gate": 0,
+        "matches": []
+      },
+      {
+        "name": "28.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.7405015826225281
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.7405015826225281,
+            "iou": 0.8947230014025246,
+            "center_error_px": 0.7071067811865476,
+            "estimated_center_error_mm": 0.31915360123825254
+          }
+        ]
+      }
+    ],
+    "scope": "Only downloaded report best_eval.val_info samples; not all 12 val images.",
+    "mm_estimate": "Assumes GT box encloses 41.75mm outer radius; not camera calibration.",
+    "training_id": 331406,
+    "minimum_exposed_score": 0.6452280282974243,
+    "mean_exposed_score": 0.7048536539077759
+  },
+  {
+    "path": "try/vision/models/ring2/trained_331407/report.json",
+    "input": {
+      "input0": [
+        320,
+        320,
+        3
+      ]
+    },
+    "best_epoch": 200,
+    "server_validation_accuracy": 1.0,
+    "score_gate": 0.7,
+    "sample_images": 3,
+    "matched": 1,
+    "missed": 2,
+    "unmatched_above_gate": 0,
+    "exposed_sample_gate_pass": false,
+    "details": [
+      {
+        "name": "27.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.600184977054596
+        ],
+        "ground_truths": 1,
+        "matched": 0,
+        "missed": 1,
+        "unmatched_above_gate": 0,
+        "matches": []
+      },
+      {
+        "name": "17.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.6968733668327332
+        ],
+        "ground_truths": 1,
+        "matched": 0,
+        "missed": 1,
+        "unmatched_above_gate": 0,
+        "matches": []
+      },
+      {
+        "name": "28.jpg",
+        "server_ok": true,
+        "all_reported_scores": [
+          0.7057986855506897
+        ],
+        "ground_truths": 1,
+        "matched": 1,
+        "missed": 0,
+        "unmatched_above_gate": 0,
+        "matches": [
+          {
+            "score": 0.7057986855506897,
+            "iou": 0.8303211089664854,
+            "center_error_px": 3.1622776601683795,
+            "estimated_center_error_mm": 1.4311663123255267
+          }
+        ]
+      }
+    ],
+    "scope": "Only downloaded report best_eval.val_info samples; not all 12 val images.",
+    "mm_estimate": "Assumes GT box encloses 41.75mm outer radius; not camera calibration.",
+    "training_id": 331407,
+    "minimum_exposed_score": 0.600184977054596,
+    "mean_exposed_score": 0.667619009812673
+  }
+]

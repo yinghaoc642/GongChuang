@@ -1,0 +1,87 @@
+[
+  {
+    "name": "competition_core",
+    "compile": {
+      "name": "competition_core:compile",
+      "exit_code": 0,
+      "seconds": 0.496,
+      "stdout": "",
+      "stderr": ""
+    },
+    "run": {
+      "name": "competition_core",
+      "exit_code": 0,
+      "seconds": 0.779,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  {
+    "name": "vision_protocol",
+    "compile": {
+      "name": "vision_protocol:compile",
+      "exit_code": 0,
+      "seconds": 0.274,
+      "stdout": "",
+      "stderr": ""
+    },
+    "run": {
+      "name": "vision_protocol",
+      "exit_code": 0,
+      "seconds": 0.55,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  {
+    "name": "mecanum_odometry",
+    "compile": {
+      "name": "mecanum_odometry:compile",
+      "exit_code": 0,
+      "seconds": 1.194,
+      "stdout": "",
+      "stderr": ""
+    },
+    "run": {
+      "name": "mecanum_odometry",
+      "exit_code": 0,
+      "seconds": 0.405,
+      "stdout": "MecanumOdometry native tests passed\n",
+      "stderr": ""
+    }
+  },
+  {
+    "name": "protocol_stress",
+    "compile": {
+      "name": "protocol_stress:compile",
+      "exit_code": 0,
+      "seconds": 1.618,
+      "stdout": "",
+      "stderr": ""
+    },
+    "run": {
+      "name": "protocol_stress",
+      "exit_code": 0,
+      "seconds": 0.64,
+      "stdout": "PASS protocol stress: 20000 valid roundtrips, 20000 corrupt frames rejected, 300000 noise bytes and delimiter recovery\n",
+      "stderr": ""
+    }
+  },
+  {
+    "name": "grid_reachability",
+    "compile": {
+      "name": "grid_reachability:compile",
+      "exit_code": 0,
+      "seconds": 1.415,
+      "stdout": "",
+      "stderr": ""
+    },
+    "run": {
+      "name": "grid_reachability",
+      "exit_code": 0,
+      "seconds": 2.369,
+      "stdout": "k=0 maps=1 total=2500 success=1764 permanent_endpoint=736 dynamic_endpoint=0 disconnected=0 clearance=0 valid=1764 valid_success=100.000000%\nk=1 maps=21 total=52500 success=33600 permanent_endpoint=15456 dynamic_endpoint=3444 disconnected=0 clearance=0 valid=33600 valid_success=100.000000%\nk=2 maps=210 total=525000 success=297224 permanent_endpoint=154560 dynamic_endpoint=67200 disconnected=6016 clearance=0 valid=303240 valid_success=98.016093%\nk=3 maps=1330 total=3325000 success=1560096 permanent_endpoint=978880 dynamic_endpoint=622440 disconnected=163584 clearance=0 valid=1723680 valid_success=90.509607%\nexample PASS: cells1+9 occupied => free start0 cannot reach free goal10\n",
+      "stderr": ""
+    }
+  }
+]

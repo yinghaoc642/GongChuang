@@ -1,0 +1,32 @@
+[
+  {
+    "id": 331356,
+    "status": "failed",
+    "exact_observed_error": "[ERROR] : augmentation.resize.height should be a number",
+    "observed_parameters": {
+      "width": 320,
+      "height": null
+    },
+    "source": "Chrome native AX/screenshot; error excerpt, not full downloaded log",
+    "url": "https://maixhub.com/model/training/project/137925/training/331356"
+  },
+  {
+    "id": 331357,
+    "status": "failed",
+    "exact_observed_error": "[ERROR] : 对于 YOLOv5, 输入尺寸应该为正方形，但实际为(320, 448)",
+    "observed_parameters": {
+      "width": 320,
+      "height": 448
+    },
+    "source": "Chrome native AX/screenshot; error excerpt, not full downloaded log",
+    "url": "https://maixhub.com/model/training/project/137925/training/331357"
+  },
+  {
+    "id": 331358,
+    "status": "completed",
+    "model_archive": "../../models/ring2/model-331358.maixcam.zip",
+    "report": "../../models/ring2/trained_331358/report.json",
+    "source": "Chrome page showed training complete 100%; downloaded native model/report inspected",
+    "url": "https://maixhub.com/model/training/project/137925/training/331358"
+  }
+]

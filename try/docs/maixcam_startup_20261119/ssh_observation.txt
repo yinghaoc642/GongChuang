@@ -1,0 +1,37 @@
+tail -14 /maixapp/tmp/last_run.log; free -m; dmesg | grep -Ei 'oom|killed proc
+ess|segfault' | tail -8; grep -n -E '^class (MUD|NN)|def (__init__|load)' /usr/l
+ib/python3.11/site-packages/maix/_maix/nn/__init__.pyi | head -20
+program: /usr/bin/env
+-- [I] [Maix Comm Protocol] auto set pinmap A16 to UART0_TX for uart0
+-- [I] [Maix Comm Protocol] auto set pinmap A17 to UART0_RX for uart0
+-- [I] [Maix Comm Protocol] listening on uart port: uart0(/dev/ttyS0)
+Trigger signal, code:SIGSEGV(11)!
+program: /usr/bin/env
+-- [I] [Maix Comm Protocol] auto set pinmap A16 to UART0_TX for uart0
+-- [I] [Maix Comm Protocol] auto set pinmap A17 to UART0_RX for uart0
+-- [I] [Maix Comm Protocol] listening on uart port: uart0(/dev/ttyS0)
+Trigger signal, code:SIGSEGV(11)!
+              total        used        free      shared  buff/cache   available
+Mem:            128          49          22           0          58          73
+Swap:             0           0           0
+16:    def __init__(self, model: str = '', dual_buff: bool = True) -> None:
+71:    def load(self, model: str) -> maix._maix.err.Err:
+90:    def __init__(self, model: str = '', dual_buff: bool = True) -> None:
+129:    def load(self, model: str) -> maix._maix.err.Err:
+149:    def __init__(self, x: int = 0, y: int = 0, w: int = 0, h: int = 0, class_id: int = 0, score: float = 0, points: list[int] = [], feature: list[float] = [], face: maix._maix.image.Image = ...) -> None:
+164:    def __init__(self, detect_model: str = '', feature_model: str = '', dual_buff: bool = True) -> None:
+198:    def load(self, detect_model: str, feature_model: str) -> maix._maix.err.Err:
+209:    def load_faces(self, path: str) -> maix._maix.err.Err:
+257:    def __init__(self, name: str = '', dtype: maix._maix.tensor.DType = ..., shape: list[int] = []) -> None:
+271:class MUD:
+274:    def __init__(self, model_path: str = None) -> None:
+276:    def load(self, model_path: str) -> maix._maix.err.Err:
+286:class NN:
+287:    def __init__(self, model: str = '', dual_buff: bool = True) -> None:
+334:    def load(self, model: str) -> maix._maix.err.Err:
+344:    def loaded(self) -> bool:
+366:    def __init__(self, model: str = '') -> None:
+403:    def load(self, model: str) -> maix._maix.err.Err:
+433:    def __init__(self, x1: int = 0, y1: int = 0, x2: int = 0, y2: int = 0, x3: int = 0, y3: int = 0, x4: int = 0, y4: int = 0) -> None:
+446:    def __init__(self, box: OCR_Box, idx_list: list[int], char_list: list[str], score: float = 0, char_pos: list[int] = []) -> None:
+# 

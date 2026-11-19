@@ -1,0 +1,42 @@
+[
+  {
+    "path": ".DS_Store",
+    "reason": "macOS metadata"
+  },
+  {
+    "path": "vision/deploy/maixcam_recovery_20261119_runtime1240/after_manifest.json",
+    "reason": "Local camera recovery archive/device-specific runtime"
+  },
+  {
+    "path": "vision/deploy/maixcam_recovery_20261119_runtime1240/before_manifest.json",
+    "reason": "Local camera recovery archive/device-specific runtime"
+  },
+  {
+    "path": "vision/deploy/maixcam_recovery_20261119_runtime1240/camera_before_runtime_refresh.tar",
+    "reason": "Local camera recovery archive/device-specific runtime"
+  },
+  {
+    "path": "vision/deploy/maixcam_recovery_20261119_runtime1240/camera_known_hosts",
+    "reason": "Local camera recovery archive/device-specific runtime"
+  },
+  {
+    "path": "vision/deploy/maixcam_recovery_20261119_runtime1240/metadata_update.json",
+    "reason": "Local camera recovery archive/device-specific runtime"
+  },
+  {
+    "path": "vision/deploy/maixcam_recovery_20261119_runtime1240/repair_verification.json",
+    "reason": "Local camera recovery archive/device-specific runtime"
+  },
+  {
+    "path": "vision/deploy/maixcam_recovery_20261119_runtime1240/restore_original_runtime_on_camera.py",
+    "reason": "Local camera recovery archive/device-specific runtime"
+  },
+  {
+    "path": "vision/deploy/maixcam_recovery_20261119_runtime1240/verification.json",
+    "reason": "Local camera recovery archive/device-specific runtime"
+  },
+  {
+    "path": "vision/deploy/maixcam_recovery_20261119_runtime1240/working_runtime_1.24.0_for_this_camera.so",
+    "reason": "Local camera recovery archive/device-specific runtime"
+  }
+]

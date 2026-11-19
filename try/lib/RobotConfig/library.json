@@ -1,0 +1,7 @@
+{
+  "name": "RobotConfig",
+  "version": "1.0.0",
+  "description": "Single source of truth for GongChuang run modes and physical hardware configuration",
+  "frameworks": "arduino",
+  "platforms": "ststm32"
+}

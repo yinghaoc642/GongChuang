@@ -1,0 +1,62 @@
+[
+  {
+    "environment": "genericSTM32H750VB",
+    "flash": 126028,
+    "ram": 13444
+  },
+  {
+    "environment": "debug_qr_continuous",
+    "flash": 23940,
+    "ram": 3752
+  },
+  {
+    "environment": "debug_workstation",
+    "flash": 112248,
+    "ram": 11800
+  },
+  {
+    "environment": "debug_raw_workstation",
+    "flash": 112580,
+    "ram": 11812
+  },
+  {
+    "environment": "debug_raw_workstation_341",
+    "flash": 112580,
+    "ram": 11812
+  },
+  {
+    "environment": "debug_storage2_workstation",
+    "flash": 117968,
+    "ram": 11808
+  },
+  {
+    "environment": "debug_translation",
+    "flash": 55660,
+    "ram": 6092
+  },
+  {
+    "environment": "debug_chassis_route",
+    "flash": 55316,
+    "ram": 6080
+  },
+  {
+    "environment": "debug_grid_navigation",
+    "flash": 61448,
+    "ram": 7468
+  },
+  {
+    "environment": "legacy_route",
+    "flash": 128872,
+    "ram": 12032
+  },
+  {
+    "environment": "debug_maix_mode8",
+    "flash": 20916,
+    "ram": 3684
+  },
+  {
+    "environment": "debug_maix_protocol_cycle",
+    "flash": 22380,
+    "ram": 3660
+  }
+]

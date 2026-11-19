@@ -1,0 +1,6 @@
+{
+  "scope": "Historical src/yanyanversionnew.inc; excluded from current firmware suite",
+  "exit_code": 1,
+  "stdout": "PASS RouteCommand contract: 2 booleans + explicit route binding\nPASS start-zone selection: PB9 double-click toggles Zone1/Zone2\nPASS mission actions: QR, RAW/PROCESS/STORAGE x2, FINAL_ALIGN\nPASS route tail: no chassis translation after FINAL_ALIGN\nPASS dual-zone route: Start1/Start2 -> (2215,1200), finish -> (2250,2250)/(2250,150)\nPASS start/final footprints: 230x300 mm chassis is fully inside each 300x300 zone\nPASS wheel pulses: all 6 sign patterns, calibrated magnitudes, 52 resolved route moves\nPASS AccelStepper trajectories: 35 unique motor/profile cases, zero overshoot and zero reversal\nPASS IMU unwrap: +/-180 crossings and +/-730 degree turns\nPASS QR reliability: single validated-frame lock, invalid reset, dual-zone sweep, absolute four-wheel return\nPASS VisionProtocol v2: framed requests, per-request sequence, strict response gates, mode-9/10 target gates, atomic overflow discard\n",
+  "stderr": "PREFLIGHT FAILED: unloading is not marked as mildly slowed map-based destination\n"
+}

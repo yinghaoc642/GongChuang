@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta name='viewport' content='width=device-width,         initial-scale=1.0,         user-scalable=no' />
+    <meta charset="utf-8" />
+
+
+    <title>Sunnybot Joystick </title>
+
+
+    <style>
+        #container {
+            width: 100%;
+            height: 49vh;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 7px;
+            touch-action: none;
+        }
+
+        #item {
+            width: 100px;
+            height: 100px;
+            background-color: rgb(245, 230, 99);
+            border: 10px solid rgba(136, 136, 136, .5);
+            border-radius: 50%;
+            touch-action: none;
+            user-select: none;
+        }
+
+        #item:active {
+            background-color: rgba(168, 218, 220, 1.00);
+        }
+
+        #item:hover {
+            cursor: pointer;
+            border-width: 20px;
+        }
+
+        #area {
+            position: fixed;
+            right: 0;
+            top: 0;
+        }
+    </style>
+
+
+    <script type="text/javascript">
+let StickStatus={xPosition:0,yPosition:0,x:0,y:0,cardinalDirection:"C"};var JoyStick=function(t,e,i){var o=void 0===(e=e||{}).title?"joystick":e.title,n=void 0===e.width?0:e.width,a=void 0===e.height?0:e.height,r=void 0===e.internalFillColor?"#00AA00":e.internalFillColor,c=void 0===e.internalLineWidth?2:e.internalLineWidth,s=void 0===e.internalStrokeColor?"#003300":e.internalStrokeColor,d=void 0===e.externalLineWidth?2:e.externalLineWidth,u=void 0===e.externalStrokeColor?"#008000":e.externalStrokeColor,h=void 0===e.autoReturnToCenter||e.autoReturnToCenter;i=i||function(t){};var S=document.getElementById(t);S.style.touchAction="none";var f=document.createElement("canvas");f.id=o,0===n&&(n=S.clientWidth),0===a&&(a=S.clientHeight),f.width=n,f.height=a,S.appendChild(f);var l=f.getContext("2d"),k=0,g=2*Math.PI,x=(f.width-(f.width/2+10))/2,v=x+5,P=x+30,m=f.width/2,C=f.height/2,p=f.width/10,y=-1*p,w=f.height/10,L=-1*w,F=m,E=C;function W(){l.beginPath(),l.arc(m,C,P,0,g,!1),l.lineWidth=d,l.strokeStyle=u,l.stroke()}function T(){l.beginPath(),F<x&&(F=v),F+x>f.width&&(F=f.width-v),E<x&&(E=v),E+x>f.height&&(E=f.height-v),l.arc(F,E,x,0,g,!1);var t=l.createRadialGradient(m,C,5,m,C,200);t.addColorStop(0,r),t.addColorStop(1,s),l.fillStyle=t,l.fill(),l.lineWidth=c,l.strokeStyle=s,l.stroke()}function D(){let t="",e=F-m,i=E-C;return i>=L&&i<=w&&(t="C"),i<L&&(t="N"),i>w&&(t="S"),e<y&&("C"===t?t="W":t+="W"),e>p&&("C"===t?t="E":t+="E"),t}"ontouchstart"in document.documentElement?(f.addEventListener("touchstart",function(t){k=1},!1),document.addEventListener("touchmove",function(t){1===k&&t.targetTouches[0].target===f&&(F=t.targetTouches[0].pageX,E=t.targetTouches[0].pageY,"BODY"===f.offsetParent.tagName.toUpperCase()?(F-=f.offsetLeft,E-=f.offsetTop):(F-=f.offsetParent.offsetLeft,E-=f.offsetParent.offsetTop),l.clearRect(0,0,f.width,f.height),W(),T(),StickStatus.xPosition=F,StickStatus.yPosition=E,StickStatus.x=((F-m)/v*100).toFixed(),StickStatus.y=((E-C)/v*100*-1).toFixed(),StickStatus.cardinalDirection=D(),i(StickStatus))},!1),document.addEventListener("touchend",function(t){k=0,h&&(F=m,E=C);l.clearRect(0,0,f.width,f.height),W(),T(),StickStatus.xPosition=F,StickStatus.yPosition=E,StickStatus.x=((F-m)/v*100).toFixed(),StickStatus.y=((E-C)/v*100*-1).toFixed(),StickStatus.cardinalDirection=D(),i(StickStatus)},!1)):(f.addEventListener("mousedown",function(t){k=1},!1),document.addEventListener("mousemove",function(t){1===k&&(F=t.pageX,E=t.pageY,"BODY"===f.offsetParent.tagName.toUpperCase()?(F-=f.offsetLeft,E-=f.offsetTop):(F-=f.offsetParent.offsetLeft,E-=f.offsetParent.offsetTop),l.clearRect(0,0,f.width,f.height),W(),T(),StickStatus.xPosition=F,StickStatus.yPosition=E,StickStatus.x=((F-m)/v*100).toFixed(),StickStatus.y=((E-C)/v*100*-1).toFixed(),StickStatus.cardinalDirection=D(),i(StickStatus))},!1),document.addEventListener("mouseup",function(t){k=0,h&&(F=m,E=C);l.clearRect(0,0,f.width,f.height),W(),T(),StickStatus.xPosition=F,StickStatus.yPosition=E,StickStatus.x=((F-m)/v*100).toFixed(),StickStatus.y=((E-C)/v*100*-1).toFixed(),StickStatus.cardinalDirection=D(),i(StickStatus)},!1)),W(),T(),this.GetWidth=function(){return f.width},this.GetHeight=function(){return f.height},this.GetPosX=function(){return F},this.GetPosY=function(){return E},this.GetX=function(){return((F-m)/v*100).toFixed()},this.GetY=function(){return((E-C)/v*100*-1).toFixed()},this.GetDir=function(){return D()}};    </script>
+</head>
+
+
+<body>
+
+    <div id='outerContainer'>
+        <div style="height: 40vh;">浙江大学工程训练中心ESP32机器人<br />
+            任务：WiFi遥控移动机器人绕场一周并计时。<br />
+            摇杆方位:<input id="direzione" type="text" /><br />
+            摇杆X方向值 :<input id="X" type="text" /></br>
+            LRValue[-100,100]</br>
+            摇杆Y方向值 :<input id="Y" type="text" /></br>
+            FBValue[-100,100]</br>
+            注：1.数据发送服务器间隔200ms</br>
+                2.若摇杆失去响应请按下方按钮刷新页面。</br>
+            <p><input type="button" onclick="javascript:location.reload();" value="刷新当前页面"></p>
+        <div id="joyDiv" style="width:200px;height:200px;margin:auto;">	</div>
+
+			
+    </div>
+
+    <script>
+
+
+        const view = document.getElementById('stream');
+        const WS_URL = "ws://" + window.location.host + ":82";
+        const ws = new WebSocket(WS_URL);
+       // 执行上面语句之后，客户端就会与服务器进行连接。
+        
+//等待消息
+        ws.onmessage = message => {
+            if (message.data instanceof Blob) {
+                var urlObject = URL.createObjectURL(message.data);
+                view.src = urlObject;
+            }
+        };
+
+
+        var lastText, lastSend, sendTimeout;
+        // limit sending to one message every 30 ms
+        // https://github.com/neonious/lowjs_esp32_examples/blob/master/neonious_one/cellphone_controlled_rc_car/www/index.html
+        function send(txt) {
+            var now = new Date().getTime();
+            if (lastSend === undefined || now - lastSend >= 30) {
+                try {
+                    ws.send(txt);//发送消息
+                    lastSend = new Date().getTime();
+                    return;
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+            lastText = txt;
+            if (!sendTimeout) {
+                var ms = lastSend !== undefined ? 30 - (now - lastSend) : 30;
+                if (ms < 0)
+                    ms = 0;
+                sendTimeout = setTimeout(() => {
+                    sendTimeout = null;
+                    send(lastText);
+                }, ms);
+            }
+        }
+
+    </script>
+</body>
+
+<script type="text/javascript">
+    // Create JoyStick object into the DIV 'joyDiv'
+    var joy = new JoyStick('joyDiv');
+    var inputPosX = document.getElementById("posizioneX");
+    var inputPosY = document.getElementById("posizioneY");
+    var direzione = document.getElementById("direzione");
+    var fuerzaI = document.getElementById("fuerzaI");
+    var fuerzaD = document.getElementById("fuerzaD");
+    var x = document.getElementById("X");
+    var y = document.getElementById("Y");
+
+
+
+setInterval(function(){ direzione.value=joy.GetDir();}, 50);
+setInterval(function(){  x.value=joy.GetX();  }, 50);
+setInterval(function(){  y.value=joy.GetY(); }, 50);
+
+   //https://nkmakes.github.io/2020/09/02/esp32-tank-robot-joystick-http-web-control/
+    //   bake
+    //https://gchq.github.io/CyberChef/#recipe=Gzip('Dynamic%20Huffman%20Coding','index.html.gz','',false)To_Hex('0x',0)Split('0x',',0x')
+
+    function getfuerza(nJoyX, nJoyY) {
+
+
+
+
+        return Math.round(nJoyX ) + "," + Math.round(nJoyY);   // The function returns the product of p1 and p2
+    }
+
+    setInterval(function () { send(getfuerza(joy.GetX(), joy.GetY())); }, 200);
+
+</script>
+
+</html>

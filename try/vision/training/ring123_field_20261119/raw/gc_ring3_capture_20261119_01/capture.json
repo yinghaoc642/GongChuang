@@ -1,0 +1,136 @@
+{
+  "intended_class": "3r",
+  "capture_group": "ring3_handheld_01",
+  "actual_height_mm": null,
+  "frames": 20,
+  "records": [
+    {
+      "file": "ring3_000.png",
+      "elapsed": 3.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_001.png",
+      "elapsed": 4.009,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_002.png",
+      "elapsed": 5.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_003.png",
+      "elapsed": 6.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_004.png",
+      "elapsed": 7.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_005.png",
+      "elapsed": 8.009,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_006.png",
+      "elapsed": 9.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_007.png",
+      "elapsed": 10.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_008.png",
+      "elapsed": 11.011,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_009.png",
+      "elapsed": 12.011,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_010.png",
+      "elapsed": 13.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_011.png",
+      "elapsed": 14.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_012.png",
+      "elapsed": 15.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_013.png",
+      "elapsed": 16.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_014.png",
+      "elapsed": 17.009,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_015.png",
+      "elapsed": 18.011,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_016.png",
+      "elapsed": 19.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_017.png",
+      "elapsed": 20.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_018.png",
+      "elapsed": 21.01,
+      "intended_class": "3r",
+      "review": "pending"
+    },
+    {
+      "file": "ring3_019.png",
+      "elapsed": 22.01,
+      "intended_class": "3r",
+      "review": "pending"
+    }
+  ],
+  "review": "All images pending visual confirmation; not labeled or split",
+  "camera": {
+    "width": 320,
+    "height": 240,
+    "fps": 60.0,
+    "exposure_us": 9888,
+    "gain": 1024
+  }
+}

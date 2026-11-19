@@ -1,0 +1,482 @@
+*** Begin Patch
+*** Update File: D:/Gongcuhang _electric_control/Gongchuang/lib/RobotConfig/src/RobotConfig.h
+@@
+-constexpr uint16_t M7_TRAVEL_SPEED_RPM = 6740U;
++constexpr uint16_t M7_TRAVEL_SPEED_RPM = 3744U;
+@@
+-constexpr uint16_t M7_ZERO_SOFT_LANDING_SPEED_RPM = 2160U;
++constexpr uint16_t M7_ZERO_SOFT_LANDING_SPEED_RPM = 1200U;
+@@
+-constexpr float M5_STANDARD_MAXIMUM_STEP_RATE = 210600.0f;
++constexpr float M5_STANDARD_MAXIMUM_STEP_RATE = 117000.0f;
+@@
+-constexpr float M5_PLACE_MAXIMUM_STEP_RATE = 181440.0f;
++constexpr float M5_PLACE_MAXIMUM_STEP_RATE = 100800.0f;
+@@
+-constexpr float M5_RETURN_MAXIMUM_STEP_RATE = 252720.0f;
++constexpr float M5_RETURN_MAXIMUM_STEP_RATE = 108000.0f;
+@@
+-constexpr float M5_RAW_MAXIMUM_STEP_RATE = 210600.0f;
++constexpr float M5_RAW_MAXIMUM_STEP_RATE = 117000.0f;
+@@
+-constexpr uint16_t M6_STANDARD_SPEED_RPM = 702U;
++constexpr uint16_t M6_STANDARD_SPEED_RPM = 390U;
+@@
+-constexpr uint16_t M6_RAW_SPEED_RPM = 756U;
++constexpr uint16_t M6_RAW_SPEED_RPM = 420U;
+@@
+-constexpr uint16_t M6_PLACE_SPEED_RPM = 810U;
++constexpr uint16_t M6_PLACE_SPEED_RPM = 450U;
+@@
+-constexpr uint16_t M6_RETURN_SPEED_RPM = 1516U;
++constexpr uint16_t M6_RETURN_SPEED_RPM = 648U;
+@@
+-constexpr uint16_t M7_RETURN_SPEED_RPM = 10514U;
++constexpr uint16_t M7_RETURN_SPEED_RPM = 4493U;
+@@
+-constexpr uint16_t M7_RING_PLACE_SPEED_RPM = 2700U;
++constexpr uint16_t M7_RING_PLACE_SPEED_RPM = 1800U;
+@@
+-constexpr uint8_t M7_TRAVEL_ACCELERATION = 239U;
++constexpr uint8_t M7_TRAVEL_ACCELERATION = 230U;
+@@
+-constexpr uint8_t M7_ZERO_SOFT_LANDING_ACCELERATION = 171U;
++constexpr uint8_t M7_ZERO_SOFT_LANDING_ACCELERATION = 128U;
+@@
+-constexpr uint8_t M6_CONTACT_SOFT_LANDING_ACCELERATION = 149U;
++constexpr uint8_t M6_CONTACT_SOFT_LANDING_ACCELERATION = 96U;
+@@
+-constexpr uint8_t M7_CONTACT_SOFT_LANDING_ACCELERATION = 171U;
++constexpr uint8_t M7_CONTACT_SOFT_LANDING_ACCELERATION = 128U;
+@@
+-constexpr float M5_STANDARD_STEP_ACCELERATION = 81000.0f;
++constexpr float M5_STANDARD_STEP_ACCELERATION = 54000.0f;
+@@
+-constexpr float M5_PLACE_STEP_ACCELERATION = 72000.0f;
++constexpr float M5_PLACE_STEP_ACCELERATION = 48000.0f;
+@@
+-constexpr float M5_RETURN_STEP_ACCELERATION = 112320.0f;
++constexpr float M5_RETURN_STEP_ACCELERATION = 57600.0f;
+@@
+-constexpr float M5_RAW_STEP_ACCELERATION = 90000.0f;
++constexpr float M5_RAW_STEP_ACCELERATION = 60000.0f;
+@@
+-constexpr uint8_t M6_STANDARD_ACCELERATION = 199U;
++constexpr uint8_t M6_STANDARD_ACCELERATION = 171U;
+@@
+-constexpr uint8_t M6_RAW_ACCELERATION = 205U;
++constexpr uint8_t M6_RAW_ACCELERATION = 179U;
+@@
+-constexpr uint8_t M6_PLACE_ACCELERATION = 208U;
++constexpr uint8_t M6_PLACE_ACCELERATION = 184U;
+@@
+-constexpr uint8_t M6_RETURN_ACCELERATION = 232U;
++constexpr uint8_t M6_RETURN_ACCELERATION = 209U;
+@@
+-constexpr uint8_t M7_RETURN_ACCELERATION = 244U;
++constexpr uint8_t M7_RETURN_ACCELERATION = 234U;
+@@
+-constexpr uint8_t M7_RING_PLACE_ACCELERATION = 199U;
++constexpr uint8_t M7_RING_PLACE_ACCELERATION = 171U;
+*** Update File: D:/Gongcuhang _electric_control/Gongchuang/src/main.cpp
+@@
+-const float ARM_BASE_MAXIMUM_STEP_RATE = 81000.0f;
++const float ARM_BASE_MAXIMUM_STEP_RATE = 45000.0f;
+@@
+-const float ARM_BASE_ENDPOINT_COARSE_MAXIMUM_STEP_RATE = 121500.0f;
++const float ARM_BASE_ENDPOINT_COARSE_MAXIMUM_STEP_RATE = 67500.0f;
+@@
+-const float ARM_BASE_ENDPOINT_TRAVEL_MAXIMUM_STEP_RATE = 182250.0f;
++const float ARM_BASE_ENDPOINT_TRAVEL_MAXIMUM_STEP_RATE = 101250.0f;
+@@
+-constexpr uint16_t ENDPOINT_FINE_M6_SPEED_RPM = 288U;
++constexpr uint16_t ENDPOINT_FINE_M6_SPEED_RPM = 160U;
+@@
+-constexpr uint16_t ENDPOINT_COARSE_M6_SPEED_RPM = 432U;
++constexpr uint16_t ENDPOINT_COARSE_M6_SPEED_RPM = 240U;
+@@
+-constexpr uint16_t M6_RECOVERY_SPEED_RPM = 216U;
++constexpr uint16_t M6_RECOVERY_SPEED_RPM = 120U;
+@@
+-constexpr uint16_t M7_RECOVERY_SPEED_RPM = 2160U;
++constexpr uint16_t M7_RECOVERY_SPEED_RPM = 1200U;
+@@
+-constexpr uint16_t ARM_LINEAR_STARTUP_ZERO_SPEED_RPM = 180U;
++constexpr uint16_t ARM_LINEAR_STARTUP_ZERO_SPEED_RPM = 100U;
+@@
+-constexpr uint16_t ENDPOINT_FINE_M7_SPEED_RPM = 4493U;
++constexpr uint16_t ENDPOINT_FINE_M7_SPEED_RPM = 2496U;
+@@
+ constexpr float ROUTE_FAST_MAXIMUM_STEP_RATE =
+-    16731.0f *
++    9295.0f *
+@@
+ constexpr float ROUTE_SCAN_MAXIMUM_STEP_RATE =
+-    7488.0f *
++    4160.0f *
+@@
+ constexpr float ROUTE_TURN_MAXIMUM_STEP_RATE =
+-    6750.0f *
++    3750.0f *
+@@
+ constexpr float ROUTE_HEADING_CORRECTION_MAXIMUM_STEP_RATE =
+-    2700.0f *
++    1500.0f *
+@@
+-const float MAXIMUM_STEP_RATE = 12870.0f;
+-const float CENTRAL_CHANNEL_MAXIMUM_STEP_RATE = 16731.0f;
++const float MAXIMUM_STEP_RATE = 7150.0f;
++const float CENTRAL_CHANNEL_MAXIMUM_STEP_RATE = 9295.0f;
+@@
+-const float TURN_MAXIMUM_STEP_RATE = 5400.0f;
++const float TURN_MAXIMUM_STEP_RATE = 3000.0f;
+@@
+-const float HEADING_CORRECTION_MAXIMUM_STEP_RATE = 2700.0f;
++const float HEADING_CORRECTION_MAXIMUM_STEP_RATE = 1500.0f;
+@@
+-const float WORKSTATION_MAXIMUM_STEP_RATE = 3744.0f;
++const float WORKSTATION_MAXIMUM_STEP_RATE = 2080.0f;
+@@
+-const float FINAL_MAXIMUM_STEP_RATE = 1872.0f;
++const float FINAL_MAXIMUM_STEP_RATE = 1040.0f;
+@@
+-const float QR_SCAN_MAXIMUM_STEP_RATE = 1872.0f;
++const float QR_SCAN_MAXIMUM_STEP_RATE = 1040.0f;
+@@
+-const float ARM_BASE_STEP_ACCELERATION = 27000.0f;
++const float ARM_BASE_STEP_ACCELERATION = 18000.0f;
+@@
+-const float ARM_BASE_ENDPOINT_COARSE_STEP_ACCELERATION = 40500.0f;
++const float ARM_BASE_ENDPOINT_COARSE_STEP_ACCELERATION = 27000.0f;
+@@
+-const float ARM_BASE_ENDPOINT_TRAVEL_STEP_ACCELERATION = 60750.0f;
++const float ARM_BASE_ENDPOINT_TRAVEL_STEP_ACCELERATION = 40500.0f;
+@@
+-constexpr uint8_t ENDPOINT_FINE_M6_ACCELERATION = 149U;
++constexpr uint8_t ENDPOINT_FINE_M6_ACCELERATION = 96U;
+@@
+-constexpr uint8_t ENDPOINT_COARSE_M6_ACCELERATION = 185U;
++constexpr uint8_t ENDPOINT_COARSE_M6_ACCELERATION = 149U;
+@@
+-constexpr uint8_t M6_RECOVERY_ACCELERATION = 128U;
++constexpr uint8_t M6_RECOVERY_ACCELERATION = 64U;
+@@
+-constexpr uint8_t M7_RECOVERY_ACCELERATION = 171U;
++constexpr uint8_t M7_RECOVERY_ACCELERATION = 128U;
+@@
+-constexpr uint8_t ARM_LINEAR_STARTUP_ZERO_ACCELERATION = 139U;
++constexpr uint8_t ARM_LINEAR_STARTUP_ZERO_ACCELERATION = 80U;
+@@
+-constexpr uint8_t ENDPOINT_FINE_M7_ACCELERATION = 232U;
++constexpr uint8_t ENDPOINT_FINE_M7_ACCELERATION = 220U;
+@@
+ constexpr float ROUTE_FAST_STEP_ACCELERATION =
+-    3750.0f *
++    2500.0f *
+@@
+ constexpr float ROUTE_SCAN_STEP_ACCELERATION =
+-    2400.0f *
++    1600.0f *
+@@
+ constexpr float ROUTE_TURN_STEP_ACCELERATION =
+-    1500.0f *
++    1000.0f *
+@@
+ constexpr float ROUTE_HEADING_CORRECTION_STEP_ACCELERATION =
+-    675.0f *
++    450.0f *
+@@
+-const float STEP_ACCELERATION = 3750.0f;
++const float STEP_ACCELERATION = 2500.0f;
+@@
+-const float TURN_STEP_ACCELERATION = 1200.0f;
++const float TURN_STEP_ACCELERATION = 800.0f;
+@@
+-const float HEADING_CORRECTION_STEP_ACCELERATION = 675.0f;
++const float HEADING_CORRECTION_STEP_ACCELERATION = 450.0f;
+@@
+-const float WORKSTATION_STEP_ACCELERATION = 1050.0f;
++const float WORKSTATION_STEP_ACCELERATION = 700.0f;
+@@
+-const float FINAL_STEP_ACCELERATION = 600.0f;
++const float FINAL_STEP_ACCELERATION = 400.0f;
+@@
+-const float QR_SCAN_STEP_ACCELERATION = 600.0f;
++const float QR_SCAN_STEP_ACCELERATION = 400.0f;
+*** Update File: D:/Gongcuhang _electric_control/Gongchuang/lib/ArmMotorController/ArmMotorController.cpp
+@@
+-const float DEFAULT_M5_MAXIMUM_STEP_RATE = 1800.0f;
++const float DEFAULT_M5_MAXIMUM_STEP_RATE = 1000.0f;
+@@
+-const uint16_t DEFAULT_SERIAL_SPEED_RPM = 108U;
++const uint16_t DEFAULT_SERIAL_SPEED_RPM = 60U;
+@@
+-const float DEFAULT_M5_STEP_ACCELERATION = 750.0f;
++const float DEFAULT_M5_STEP_ACCELERATION = 500.0f;
+@@
+-const uint8_t DEFAULT_SERIAL_ACCELERATION = 119U;
++const uint8_t DEFAULT_SERIAL_ACCELERATION = 50U;
+*** Update File: D:/Gongcuhang _electric_control/Gongchuang/lib/PulseMecanumChassis/src/PulseMecanumChassis.h
+@@
+-      float maximumPulseRate = 54000.0f,
++      float maximumPulseRate = 30000.0f,
+*** Update File: D:/Gongcuhang _electric_control/Gongchuang/test/module_boundary_test.py
+@@
+-        "M7_TRAVEL_SPEED_RPM = 6740U" in config_source
++        "M7_TRAVEL_SPEED_RPM = 3744U" in config_source
+@@
+-        and "M7_ZERO_SOFT_LANDING_SPEED_RPM = 2160U"
++        and "M7_ZERO_SOFT_LANDING_SPEED_RPM = 1200U"
+@@
+-        and "M7_TRAVEL_ACCELERATION = 239U" in config_source
++        and "M7_TRAVEL_ACCELERATION = 230U" in config_source
+@@
+-        and "M7_ZERO_SOFT_LANDING_ACCELERATION = 171U"
++        and "M7_ZERO_SOFT_LANDING_ACCELERATION = 128U"
+*** Update File: D:/Gongcuhang _electric_control/Gongchuang/test/arm_soft_landing_test.py
+@@
+-        "M7_TRAVEL_SPEED_RPM=6740U;" in tuning
++        "M7_TRAVEL_SPEED_RPM=3744U;" in tuning
+@@
+-        and "M7_ZERO_SOFT_LANDING_SPEED_RPM=2160U;" in tuning
++        and "M7_ZERO_SOFT_LANDING_SPEED_RPM=1200U;" in tuning
+@@
+-        "M7 zero approach does not enforce the 2160 RPM final cap",
++        "M7 zero approach does not enforce the 1200 RPM final cap",
+@@
+-        and "M7_RING_PLACE_SPEED_RPM=2700U;" in tuning
++        and "M7_RING_PLACE_SPEED_RPM=1800U;" in tuning
+@@
+-        "M6_STANDARD_SPEED_RPM=702U;" in tuning
+-        and "M6_RAW_SPEED_RPM=756U;" in tuning
+-        and "M6_RETURN_SPEED_RPM=1516U;" in tuning
++        "M6_STANDARD_SPEED_RPM=390U;" in tuning
++        and "M6_RAW_SPEED_RPM=420U;" in tuning
++        and "M6_RETURN_SPEED_RPM=648U;" in tuning
+@@
+-        and "M7_RETURN_SPEED_RPM=10514U;" in tuning
++        and "M7_RETURN_SPEED_RPM=4493U;" in tuning
+@@
+-        and "M6_PLACE_SPEED_RPM=810U;" in tuning
++        and "M6_PLACE_SPEED_RPM=450U;" in tuning
+@@
+-        "M6/M7 +20% motion or extra +30% return profiles are wrong",
++        "restored M6/M7 speed/acceleration profiles are wrong",
+@@
+-        "M5_STANDARD_MAXIMUM_STEP_RATE=210600.0f;" in tuning
+-        and "M5_PLACE_MAXIMUM_STEP_RATE=181440.0f;" in tuning
++        "M5_STANDARD_MAXIMUM_STEP_RATE=117000.0f;" in tuning
++        and "M5_PLACE_MAXIMUM_STEP_RATE=100800.0f;" in tuning
+@@
+-        and "M5_RETURN_MAXIMUM_STEP_RATE=252720.0f;" in tuning
++        and "M5_RETURN_MAXIMUM_STEP_RATE=108000.0f;" in tuning
+@@
+-        and "M5_RAW_MAXIMUM_STEP_RATE=210600.0f;" in tuning,
+-        "M5 +20% motion or extra +30% return profiles are wrong",
++        and "M5_RAW_MAXIMUM_STEP_RATE=117000.0f;" in tuning,
++        "restored M5 transfer/place/return speeds or accelerations are wrong",
+@@
+-        and "M7_TRAVEL_ACCELERATION=239U;" in tuning
++        and "M7_TRAVEL_ACCELERATION=230U;" in tuning
+@@
+-        "M7_ZERO_SOFT_LANDING_ACCELERATION=171U;" in tuning
+-        and "M7_CONTACT_SOFT_LANDING_ACCELERATION=171U;"
++        "M7_ZERO_SOFT_LANDING_ACCELERATION=128U;" in tuning
++        and "M7_CONTACT_SOFT_LANDING_ACCELERATION=128U;"
+@@
+-        and "M6_CONTACT_SOFT_LANDING_ACCELERATION=149U;"
++        and "M6_CONTACT_SOFT_LANDING_ACCELERATION=96U;"
+@@
+-        "soft-segment accelerations are not physically increased by 50%",
++        "restored soft-segment accelerations are wrong",
+@@
+-        and "M7_RING_PLACE_ACCELERATION=199U;" in tuning
++        and "M7_RING_PLACE_ACCELERATION=171U;" in tuning
+@@
+-        and "M6_RETURN_ACCELERATION=232U;" in tuning
++        and "M6_RETURN_ACCELERATION=209U;" in tuning
+@@
+-        and "M7_RETURN_ACCELERATION=244U;" in tuning
++        and "M7_RETURN_ACCELERATION=234U;" in tuning
+@@
+-        and "M6_PLACE_ACCELERATION=208U;" in tuning,
++        and "M6_PLACE_ACCELERATION=184U;" in tuning,
+@@
+-        and "M5_PLACE_STEP_ACCELERATION=72000.0f;" in tuning
++        and "M5_PLACE_STEP_ACCELERATION=48000.0f;" in tuning
+@@
+-        and "M5_RETURN_STEP_ACCELERATION=112320.0f;" in tuning
++        and "M5_RETURN_STEP_ACCELERATION=57600.0f;" in tuning
+*** Update File: D:/Gongcuhang _electric_control/Gongchuang/test/all_motor_speed_test.py
+@@
+-            "ARM_BASE_MAXIMUM_STEP_RATE=81000.0f;",
+-            "ARM_BASE_ENDPOINT_COARSE_MAXIMUM_STEP_RATE=121500.0f;",
+-            "ARM_BASE_ENDPOINT_TRAVEL_MAXIMUM_STEP_RATE=182250.0f;",
+-            "ENDPOINT_FINE_M6_SPEED_RPM=288U;",
+-            "ENDPOINT_COARSE_M6_SPEED_RPM=432U;",
+-            "M6_RECOVERY_SPEED_RPM=216U;",
+-            "M7_RECOVERY_SPEED_RPM=2160U;",
+-            "ARM_LINEAR_STARTUP_ZERO_SPEED_RPM=180U;",
+-            "ENDPOINT_FINE_M7_SPEED_RPM=4493U;",
+-            "ROUTE_FAST_MAXIMUM_STEP_RATE=16731.0f*",
+-            "ROUTE_SCAN_MAXIMUM_STEP_RATE=7488.0f*",
+-            "ROUTE_TURN_MAXIMUM_STEP_RATE=6750.0f*",
+-            "ROUTE_HEADING_CORRECTION_MAXIMUM_STEP_RATE=2700.0f*",
+-            "MAXIMUM_STEP_RATE=12870.0f;",
+-            "CENTRAL_CHANNEL_MAXIMUM_STEP_RATE=16731.0f;",
+-            "TURN_MAXIMUM_STEP_RATE=5400.0f;",
+-            "HEADING_CORRECTION_MAXIMUM_STEP_RATE=2700.0f;",
+-            "WORKSTATION_MAXIMUM_STEP_RATE=3744.0f;",
+-            "FINAL_MAXIMUM_STEP_RATE=1872.0f;",
+-            "QR_SCAN_MAXIMUM_STEP_RATE=1872.0f;",
++            "ARM_BASE_MAXIMUM_STEP_RATE=45000.0f;",
++            "ARM_BASE_ENDPOINT_COARSE_MAXIMUM_STEP_RATE=67500.0f;",
++            "ARM_BASE_ENDPOINT_TRAVEL_MAXIMUM_STEP_RATE=101250.0f;",
++            "ENDPOINT_FINE_M6_SPEED_RPM=160U;",
++            "ENDPOINT_COARSE_M6_SPEED_RPM=240U;",
++            "M6_RECOVERY_SPEED_RPM=120U;",
++            "M7_RECOVERY_SPEED_RPM=1200U;",
++            "ARM_LINEAR_STARTUP_ZERO_SPEED_RPM=100U;",
++            "ENDPOINT_FINE_M7_SPEED_RPM=2496U;",
++            "ROUTE_FAST_MAXIMUM_STEP_RATE=9295.0f*",
++            "ROUTE_SCAN_MAXIMUM_STEP_RATE=4160.0f*",
++            "ROUTE_TURN_MAXIMUM_STEP_RATE=3750.0f*",
++            "ROUTE_HEADING_CORRECTION_MAXIMUM_STEP_RATE=1500.0f*",
++            "MAXIMUM_STEP_RATE=7150.0f;",
++            "CENTRAL_CHANNEL_MAXIMUM_STEP_RATE=9295.0f;",
++            "TURN_MAXIMUM_STEP_RATE=3000.0f;",
++            "HEADING_CORRECTION_MAXIMUM_STEP_RATE=1500.0f;",
++            "WORKSTATION_MAXIMUM_STEP_RATE=2080.0f;",
++            "FINAL_MAXIMUM_STEP_RATE=1040.0f;",
++            "QR_SCAN_MAXIMUM_STEP_RATE=1040.0f;",
+@@
+-        "M1-M7 additional +20% active speed profile",
++        "M1-M7 restored active speed profile",
+@@
+-            "M7_TRAVEL_SPEED_RPM=6740U;",
+-            "M7_ZERO_SOFT_LANDING_SPEED_RPM=2160U;",
+-            "M5_STANDARD_MAXIMUM_STEP_RATE=210600.0f;",
+-            "M5_PLACE_MAXIMUM_STEP_RATE=181440.0f;",
+-            "M5_RETURN_MAXIMUM_STEP_RATE=252720.0f;",
+-            "M5_RAW_MAXIMUM_STEP_RATE=210600.0f;",
+-            "M6_STANDARD_SPEED_RPM=702U;",
+-            "M6_RAW_SPEED_RPM=756U;",
+-            "M6_PLACE_SPEED_RPM=810U;",
+-            "M6_RETURN_SPEED_RPM=1516U;",
+-            "M7_RETURN_SPEED_RPM=10514U;",
+-            "M7_RING_PLACE_SPEED_RPM=2700U;",
++            "M7_TRAVEL_SPEED_RPM=3744U;",
++            "M7_ZERO_SOFT_LANDING_SPEED_RPM=1200U;",
++            "M5_STANDARD_MAXIMUM_STEP_RATE=117000.0f;",
++            "M5_PLACE_MAXIMUM_STEP_RATE=100800.0f;",
++            "M5_RETURN_MAXIMUM_STEP_RATE=108000.0f;",
++            "M5_RAW_MAXIMUM_STEP_RATE=117000.0f;",
++            "M6_STANDARD_SPEED_RPM=390U;",
++            "M6_RAW_SPEED_RPM=420U;",
++            "M6_PLACE_SPEED_RPM=450U;",
++            "M6_RETURN_SPEED_RPM=648U;",
++            "M7_RETURN_SPEED_RPM=4493U;",
++            "M7_RING_PLACE_SPEED_RPM=1800U;",
+@@
+-        "M5-M7 +20% motion and extra +30% return speed profile",
++        "M5-M7 restored shared speed profile",
+@@
+-            "DEFAULT_M5_MAXIMUM_STEP_RATE=1800.0f;",
+-            "DEFAULT_SERIAL_SPEED_RPM=108U;",
++            "DEFAULT_M5_MAXIMUM_STEP_RATE=1000.0f;",
++            "DEFAULT_SERIAL_SPEED_RPM=60U;",
+@@
+-        "M5-M7 additional +20% controller defaults",
++        "M5-M7 restored controller defaults",
+@@
+-        ("floatmaximumPulseRate=54000.0f,",),
+-        "M1-M4 additional +20% chassis default",
++        ("floatmaximumPulseRate=30000.0f,",),
++        "M1-M4 restored chassis default",
+@@
+-            "DEFAULT_M5_STEP_ACCELERATION=750.0f;",
+-            "DEFAULT_SERIAL_ACCELERATION=119U;",
++            "DEFAULT_M5_STEP_ACCELERATION=500.0f;",
++            "DEFAULT_SERIAL_ACCELERATION=50U;",
+@@
+-    # AccelStepper values scale linearly. EMM byte values use the controller's
+-    # inverse mapping and are rounded to the nearest physical +50% setting.
++    # Speed and acceleration values are restored to the experiment baseline.
+@@
+-            "ARM_BASE_STEP_ACCELERATION=27000.0f;",
+-            "ARM_BASE_ENDPOINT_COARSE_STEP_ACCELERATION=40500.0f;",
+-            "ARM_BASE_ENDPOINT_TRAVEL_STEP_ACCELERATION=60750.0f;",
+-            "ENDPOINT_FINE_M6_ACCELERATION=149U;",
+-            "ENDPOINT_COARSE_M6_ACCELERATION=185U;",
+-            "M6_RECOVERY_ACCELERATION=128U;",
+-            "M7_RECOVERY_ACCELERATION=171U;",
+-            "ARM_LINEAR_STARTUP_ZERO_ACCELERATION=139U;",
+-            "ENDPOINT_FINE_M7_ACCELERATION=232U;",
+-            "ROUTE_FAST_STEP_ACCELERATION=3750.0f*",
+-            "ROUTE_SCAN_STEP_ACCELERATION=2400.0f*",
+-            "ROUTE_TURN_STEP_ACCELERATION=1500.0f*",
+-            "ROUTE_HEADING_CORRECTION_STEP_ACCELERATION=675.0f*",
+-            "STEP_ACCELERATION=3750.0f;",
+-            "TURN_STEP_ACCELERATION=1200.0f;",
+-            "HEADING_CORRECTION_STEP_ACCELERATION=675.0f;",
+-            "WORKSTATION_STEP_ACCELERATION=1050.0f;",
+-            "FINAL_STEP_ACCELERATION=600.0f;",
+-            "QR_SCAN_STEP_ACCELERATION=600.0f;",
++            "ARM_BASE_STEP_ACCELERATION=18000.0f;",
++            "ARM_BASE_ENDPOINT_COARSE_STEP_ACCELERATION=27000.0f;",
++            "ARM_BASE_ENDPOINT_TRAVEL_STEP_ACCELERATION=40500.0f;",
++            "ENDPOINT_FINE_M6_ACCELERATION=96U;",
++            "ENDPOINT_COARSE_M6_ACCELERATION=149U;",
++            "M6_RECOVERY_ACCELERATION=64U;",
++            "M7_RECOVERY_ACCELERATION=128U;",
++            "ARM_LINEAR_STARTUP_ZERO_ACCELERATION=80U;",
++            "ENDPOINT_FINE_M7_ACCELERATION=220U;",
++            "ROUTE_FAST_STEP_ACCELERATION=2500.0f*",
++            "ROUTE_SCAN_STEP_ACCELERATION=1600.0f*",
++            "ROUTE_TURN_STEP_ACCELERATION=1000.0f*",
++            "ROUTE_HEADING_CORRECTION_STEP_ACCELERATION=450.0f*",
++            "STEP_ACCELERATION=2500.0f;",
++            "TURN_STEP_ACCELERATION=800.0f;",
++            "HEADING_CORRECTION_STEP_ACCELERATION=450.0f;",
++            "WORKSTATION_STEP_ACCELERATION=700.0f;",
++            "FINAL_STEP_ACCELERATION=400.0f;",
++            "QR_SCAN_STEP_ACCELERATION=400.0f;",
+@@
+-        "M1-M7 +50% local acceleration profile",
++        "M1-M7 restored local acceleration profile",
+@@
+-            "M7_TRAVEL_ACCELERATION=239U;",
+-            "M7_ZERO_SOFT_LANDING_ACCELERATION=171U;",
+-            "M6_CONTACT_SOFT_LANDING_ACCELERATION=149U;",
+-            "M7_CONTACT_SOFT_LANDING_ACCELERATION=171U;",
+-            "M5_STANDARD_STEP_ACCELERATION=81000.0f;",
+-            "M5_PLACE_STEP_ACCELERATION=72000.0f;",
+-            "M5_RETURN_STEP_ACCELERATION=112320.0f;",
+-            "M5_RAW_STEP_ACCELERATION=90000.0f;",
+-            "M6_STANDARD_ACCELERATION=199U;",
+-            "M6_RAW_ACCELERATION=205U;",
+-            "M6_PLACE_ACCELERATION=208U;",
+-            "M6_RETURN_ACCELERATION=232U;",
+-            "M7_RETURN_ACCELERATION=244U;",
+-            "M7_RING_PLACE_ACCELERATION=199U;",
++            "M7_TRAVEL_ACCELERATION=230U;",
++            "M7_ZERO_SOFT_LANDING_ACCELERATION=128U;",
++            "M6_CONTACT_SOFT_LANDING_ACCELERATION=96U;",
++            "M7_CONTACT_SOFT_LANDING_ACCELERATION=128U;",
++            "M5_STANDARD_STEP_ACCELERATION=54000.0f;",
++            "M5_PLACE_STEP_ACCELERATION=48000.0f;",
++            "M5_RETURN_STEP_ACCELERATION=57600.0f;",
++            "M5_RAW_STEP_ACCELERATION=60000.0f;",
++            "M6_STANDARD_ACCELERATION=171U;",
++            "M6_RAW_ACCELERATION=179U;",
++            "M6_PLACE_ACCELERATION=184U;",
++            "M6_RETURN_ACCELERATION=209U;",
++            "M7_RETURN_ACCELERATION=234U;",
++            "M7_RING_PLACE_ACCELERATION=171U;",
+@@
+-        "M5-M7 physical acceleration with extra +30% return profile",
++        "M5-M7 restored shared acceleration profile",
+@@
+-    print("PASS non-place speeds +20%; return speed/acceleration extra +30%")
++    print("PASS M1-M7 speed and acceleration baseline is restored")
+*** End Patch

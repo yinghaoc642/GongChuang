@@ -1,0 +1,22 @@
+{
+  "exit_code": 0,
+  "stderr": "",
+  "compile_command": [
+    "clang++",
+    "-std=c++17",
+    "-O1",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-fsanitize=address,undefined",
+    "-g",
+    "-I",
+    "/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/lib/QimingGrid/src",
+    "/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/native_grid_simulation.cpp",
+    "/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/lib/QimingGrid/src/GridNavigator.cpp",
+    "/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/lib/QimingGrid/src/QimingGridClient.cpp",
+    "/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/lib/QimingGrid/src/LinkProtocol.cpp",
+    "-o",
+    "/var/folders/z7/y4h_204j233dz77s29wfqj6c0000gn/T/gc_scenarios_67zk1nep/simulation"
+  ]
+}

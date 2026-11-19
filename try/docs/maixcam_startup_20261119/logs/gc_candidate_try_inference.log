@@ -1,0 +1,81 @@
+-- [I] [Maix Comm Protocol] auto set pinmap A16 to UART0_TX for uart0
+-- [I] [Maix Comm Protocol] auto set pinmap A17 to UART0_RX for uart0
+-- [I] [Maix Comm Protocol] listening on uart port: uart0(/dev/ttyS0)
+-- [I] load cvimodel from: /maixapp/apps/gc_try_r2_331476_20261119/models/ring2/model_331476.cvimodel
+version: 1.4.0
+model Build at 2026-11-19 13:17:25 For platform cv181x
+Max SharedMem size:602112
+-- [I] model info:
+	type: yolov5
+	input type: rgb
+	mean:0.000000 0.000000 0.000000 
+	scale:0.003922 0.003922 0.003922 
+	labels num: 1
+	anchors:10.00 13.00 16.00 30.00 33.00 23.00 30.00 61.00 62.00 45.00 59.00 119.00 116.00 90.00 156.00 198.00 373.00 326.00 
+	input size: 224x224
+
+[COARSE2] loaded /maixapp/apps/gc_try_r2_331476_20261119/models/ring2/model.mud
+TRY MODEL OK ['2r']
+[SAMPLE_COMM_SNS_ParseIni]-2203: Parse /mnt/data/sensor_cfg.ini
+[parse_source_devnum]-1796: devNum =  1
+[parse_sensor_name]-1877: sensor =  GCORE_GC4653_MIPI_4M_30FPS_10BIT
+[parse_sensor_busid]-1906: bus_id =  4
+[parse_sensor_i2caddr]-1917: sns_i2c_addr =  29
+[parse_sensor_mipidev]-1928: mipi_dev =  0
+[parse_sensor_laneid]-1939: Lane_id =  4, 3, 2, -1, -1
+[parse_sensor_pnswap]-1950: pn_swap =  0, 0, 0, 0, 0
+[parse_sensor_mclken]-1972: mclk_en =  1
+[parse_sensor_mclk]-1983: mclk =  1
+[SAMPLE_COMM_SNS_ParseIni]-2203: Parse /mnt/data/sensor_cfg.ini
+[parse_source_devnum]-1796: devNum =  1
+[parse_sensor_name]-1877: sensor =  GCORE_GC4653_MIPI_4M_30FPS_10BIT
+[parse_sensor_busid]-1906: bus_id =  4
+[parse_sensor_i2caddr]-1917: sns_i2c_addr =  29
+[parse_sensor_mipidev]-1928: mipi_dev =  0
+[parse_sensor_laneid]-1939: Lane_id =  4, 3, 2, -1, -1
+[parse_sensor_pnswap]-1950: pn_swap =  0, 0, 0, 0, 0
+[parse_sensor_mclken]-1972: mclk_en =  1
+[parse_sensor_mclk]-1983: mclk =  1
+try release sys ok
+[_mmf_init]-1144: maix multi-media version:67a90e2-musl_riscv64
+maix multi-media init ok
+try release vio ok
+try release venc ok
+ISP Vipipe(0) Allocate pa(0x8acdc000) va(0x0x3fb2777000) size(291424)
+stSnsrMode.u16Width 1280 stSnsrMode.u16Height 720 60.000000 wdrMode 0 pstSnsObj 0x3fb5f67060
+[SAMPLE_COMM_VI_StartMIPI]-494: sensor 0 stDevAttr.devno 0
+awbInit ver 6.9@2021500
+0 R:1400 B:3100 CT:2850
+1 R:1500 B:2500 CT:3900
+2 R:2300 B:1600 CT:6500
+Golden 1024 1024 1024
+WB Quadratic:0
+isWdr:0
+ViPipe:0,===GC4653 720P 60fps 10bit LINEAR Init OK!===
+********************************************************************************
+cvi_bin_isp message
+gerritId:      97347          commitId:      fc6ce647       
+md5:           [redacted identifier]
+sensorNum      1              
+sensorName0    4653           
+
+PQBIN message
+gerritId:      
+              commitId:      fc6ce647       
+md5:           [redacted identifier]
+sensorNum      1              
+sensorName0    4653           
+
+author:        lxowalle       desc:          gc4653 30fps   
+createTime:    2024-03-26 13:41:34version:                      
+tool Version:       v3.0.5.48           mode:      
+********************************************************************************
+[SAMPLE_COMM_ISP_Thread]-95: ISP Dev 0 running!
+0 R:1298 B:3773 CT:2688
+1 R:1629 B:2599 CT:3890
+2 R:2430 B:1675 CT:7300
+Golden 1629 1024 2599
+wdrLEOnly:1
+TRY 3 FRAMES OK [None, None, None]
+maix multi-media driver released.
+ISP Vipipe(0) Free pa(0x8acdc000) va(0x0x3fb2777000)

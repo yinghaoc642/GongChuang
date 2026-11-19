@@ -1,0 +1,28 @@
+{
+  "training_id": 331358,
+  "url": "https://maixhub.com/model/training/project/137925/training/331358",
+  "status_observed": "训练完成",
+  "progress_percent": 100,
+  "parameters": {
+    "width": 448,
+    "height": 448,
+    "resize": "contain",
+    "rotate": true,
+    "mirror": false,
+    "blur": false,
+    "platform": "maixcam",
+    "network": "yolov5s",
+    "epoch": 200,
+    "batch": 6,
+    "learning_rate": 0.001
+  },
+  "server_split": {
+    "train": 42,
+    "val": 12
+  },
+  "best_epoch": 200,
+  "validation_accuracy": 1.0,
+  "limits": "Existing small dataset only; high-pose/real-robot inference and latency unverified. Deployment confidence threshold is 0.70 and is stricter than report sample predictions.",
+  "archive_sha256": "a6b81f748abb872aaef012932e222df3ef96aba754969e983576f4a16649a904",
+  "model_sha256": "735157e220b65b144dbb0e6200acb93795d53b027b7b5bc15be4d00e119da4d0"
+}

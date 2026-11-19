@@ -1,0 +1,58 @@
+[
+  {
+    "training_id": 331476,
+    "archive_sha256": "ddef143f3b4e48f0965224723b07065cbf93daeea06366aee5cecd8390dd2fde",
+    "crc_ok": true,
+    "extracted_files_match_archive": true,
+    "files": {
+      "app.yaml": {
+        "size": 215,
+        "sha256": "69ac5b9aef0de07b4664e29b99bcf8f3cebb441262812463b15ee1893aff7417"
+      },
+      "model_331476.mud": {
+        "size": 286,
+        "sha256": "e652404804f17d2f156d251f3144a51014dab3c4a21369af5bd7f94a136f6f1b"
+      },
+      "report.json": {
+        "size": 40019,
+        "sha256": "5bf2490108acdb45e7f3d128e1dcd2c879191b7bfd1f557eb2635bd7374ec06d"
+      },
+      "model_331476.cvimodel": {
+        "size": 7270728,
+        "sha256": "03695d0dc9c36a0cd2945343e128f8d914284175bd87e088058eea1515a2f813"
+      },
+      "main.py": {
+        "size": 1265,
+        "sha256": "a3c259ac7ce6c702f1d3730abba9d464c0a8f7cf7020895e43028812207bab02"
+      }
+    }
+  },
+  {
+    "training_id": 331477,
+    "archive_sha256": "6a1d2ac86db5c61c4d12a1b7aa7af03790ef467f8dbd786b7d4f9c84fc191d37",
+    "crc_ok": true,
+    "extracted_files_match_archive": true,
+    "files": {
+      "app.yaml": {
+        "size": 215,
+        "sha256": "7f1e6ae918bf789ee1217e3b8d3f3e48cb451bf961967130b8291138140fb502"
+      },
+      "report.json": {
+        "size": 40022,
+        "sha256": "3f6547281fbc09dcb7e910d8da5d17745937baabdc4d983d520507dad6838302"
+      },
+      "model_331477.mud": {
+        "size": 286,
+        "sha256": "af44c511322c0ce8d51c881c243731d116b90fd16575ce36fa15560b9743843c"
+      },
+      "model_331477.cvimodel": {
+        "size": 7270712,
+        "sha256": "80c3ff441541ed9213defaa13339794f0d82335372eb8be7f188ed4a64ea62b8"
+      },
+      "main.py": {
+        "size": 1265,
+        "sha256": "52dbd066f360212d2ed3d5c97bfa5ff4f12454f52c683a1e30150b4bb76e0662"
+      }
+    }
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "source_manifest": "try_source_manifest_20261119.json",
+  "storage2_entry_sha256": "22a294827d827acb735eb9a1a9cc22105969c91414a1805725c81262bc04091f",
+  "vision_function_sha256": {
+    "crc8": "ca004d434faf556653ec248b41d4af6f4f977868a9169b99bde8a5255c8fee8a",
+    "decode_v2_request_frame": "e523d4063cda89cde2540251cd970ce192077c6398c6d0881095da38c16bc4d5",
+    "build_v2_response": "08d8682e1c403ef0f309d2fc2de16f45790094e1f4be38c273dcc3a9b44407cb",
+    "stability_confidence": "57889806fe453810b8e1bdf6e010d7348e17394bc07af262e7d7db208b291c4a",
+    "reset_color_stability": "9d991e8522d39393f7bd42066a265e9bf7eb596106ef08118f45cb737c10b097",
+    "reset_all_color_stability": "537a0be66f19ce170d41190807af4617039d4780357ca201204b34dff9e105f5",
+    "update_color_stability": "78d75e6b89e17423cf077fe328f82da297f7182f28ee2028e0bab93a76190180",
+    "stable_color_coordinate": "edb5efcf2f24f5bced9414031db689611a1ea07df9c0a9ed33e05ada7500d5e5",
+    "latest_color_coordinate": "bef129497f834d43e2549f0b87fed4818c3d59de11a9d732b39e8c0856160524",
+    "color_stability_profile": "8cfc08ccdddf507133051b53717a895f947c66be1c13799d163cb1550abdc7f0",
+    "color_response_coordinate": "5f5a1caedcbff01aba58184f64526a9d1a9a7a64b78721badeafd64d0a3e5521",
+    "reset_circle_stability": "23ade3a2f6a4ce44edf87bcaeef9741c91642f1660c8c1435d3ace5f203c991c",
+    "update_circle_tracking_lock": "e6bc0527966dedb726a8bf45660c270443fbb937b10a00c6aca0b538abb20c83",
+    "note_circle_tracking_hit": "e0b2a088e0b15b72c71fe228956e674dd42be81932f86c12aebb9957ee0ad6b7",
+    "circle_tracking_roi": "458ad2084262d0f5d99ed9fcc9d24f6536029aa7adffb9266a942bd27addcda6",
+    "circle_tracking_radius_bounds": "aafdac80538db371847d164f2f73b8f40759ff783aa0a305e7b9c830d709796a",
+    "circle_full_search_profile": "3f801ef66218ce64eb8dc7790aaa68efb1a2ce8141f6d6258377e0b5b9836e75",
+    "centered_ring_fallback_enabled": "3a3e316aa374ea6156940cccab00013743d3a6882ebf51548f064a544e898a80",
+    "select_locked_ring": "003156695194f842bcf3dace131286d9a154ffbf21c8ed58113108520bd495e1",
+    "note_circle_tracking_miss": "2ced88a269b982a128732881e670fb4dbf6a1b90c34ea29634ebd34781d0f6b5",
+    "update_circle_stability": "7f0e5d5135ddcde0cdf11c46bbc59276509a515bd64f2f3351d166e6a1811efa",
+    "filter_outer_ring_candidates": "59b17020110c4b07c2537aa27541d077f97d5e7a513845d0d0ca85db29d083c3",
+    "select_center_ring": "7db4f7dbf76d7ef37d31fb704715b8802fd4d00e05ce211cb3801e2d90bfddb3",
+    "select_centered_ring_fallback": "6b4d7b3004ead528da6cd81db30204ae7844dcb07915998ae50eb80cdec89531",
+    "select_endpoint_ring": "c5996be2cc296fc40a17be3da64985935b0b74807f61d68a3198171959d0a01d"
+  }
+}

@@ -1,0 +1,279 @@
+{
+  "total": 39,
+  "passed": 30,
+  "results": [
+    {
+      "name": "arm_soft_landing_test.py",
+      "exit_code": 1,
+      "seconds": 0.053,
+      "stdout": "ARM SOFT-LANDING CHECK FAILED: tray pickup is not an explicit single direct M7 descent\n",
+      "stderr": ""
+    },
+    {
+      "name": "chassis_motion_profile_test.py",
+      "exit_code": 0,
+      "seconds": 0.056,
+      "stdout": "PASS chassis profile: morning M1-M4 speed/acceleration restored, step 7/15 speed/acceleration ceilings raised 20 percent, manipulator tuning remains isolated\n",
+      "stderr": ""
+    },
+    {
+      "name": "coarse_ring2_test.py",
+      "exit_code": 0,
+      "seconds": 1.888,
+      "stdout": "PASS: actual coarse states, 5043 geometric scenarios, two timeout/invalid/tolerance/residual rounds, driver fault and local no-wheel guard, storage2 exclusion, legacy vision functions, YOLO identity/stability.\n",
+      "stderr": ""
+    },
+    {
+      "name": "container_pose_test.py",
+      "exit_code": 0,
+      "seconds": 1.114,
+      "stdout": "PASS actual tray planner: all picks/placements M5=-104 deg, M6=4 mm; M7 heights and second-pick depth preserved, no accumulated correction\n",
+      "stderr": ""
+    },
+    {
+      "name": "debug_chassis_route_test.py",
+      "exit_code": 0,
+      "seconds": 0.068,
+      "stdout": "PASS: isolated 19-command chassis route, production corrections, 500ms startup, Zone-1 route-mode state machine, no workstation/arm/vision entrypoints\n",
+      "stderr": ""
+    },
+    {
+      "name": "debug_raw_workstation_test.py",
+      "exit_code": 1,
+      "seconds": 0.046,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/debug_raw_workstation_test.py\", line 45, in <module>\n    assert \"local legacy fixed-A pickup started\" in MAIN\nAssertionError\n"
+    },
+    {
+      "name": "debug_storage2_workstation_test.py",
+      "exit_code": 0,
+      "seconds": 0.04,
+      "stdout": "PASS dedicated STORAGE2 workstation debug: fixed state 3, isolated build entry, shared production arm/vision state machine, M5 -5/+5deg, M6 +30mm and detailed scan serial telemetry\n",
+      "stderr": ""
+    },
+    {
+      "name": "debug_translation_test.py",
+      "exit_code": 0,
+      "seconds": 0.848,
+      "stdout": "PASS: step4 QR, step6 forward10 with no rear correction, step7/15 +80mm, continuous second-half step7 +15mm/step15 +40mm, one-command routing and startup guards\n",
+      "stderr": ""
+    },
+    {
+      "name": "emm_command_recovery_test.py",
+      "exit_code": 0,
+      "seconds": 0.044,
+      "stdout": "PASS EMM command recovery: missing ACK is recovered early, query 00 EE is nonfatal, and M7 retry stays at 2160/171\n",
+      "stderr": ""
+    },
+    {
+      "name": "empty_gripper_motion_profile_test.py",
+      "exit_code": 0,
+      "seconds": 0.045,
+      "stdout": "PASS empty-gripper arm profile: M5/M6 +30% speed/physical acceleration, then global M5 symmetric ramp time +15%; M7 +30% speed with acceleration saturated at 255; loaded and soft-landing motions retain their profiles\n",
+      "stderr": ""
+    },
+    {
+      "name": "grid_departure_tray_test.py",
+      "exit_code": 0,
+      "seconds": 0.726,
+      "stdout": "PASS departure tray: deferred until chassis dispatch; no in-travel slot-0 overwrite; bench/legacy settling preserved; radar STOP on abort/fault\n",
+      "stderr": ""
+    },
+    {
+      "name": "grid_scenarios_test.py",
+      "exit_code": 0,
+      "seconds": 6.162,
+      "stdout": "PASS 7490 navigation scenarios: independent radar BFS, swept footprint, six station order, departures, home, failure latching; ASan/UBSan\nstatic_0_to_3 {\"total\": 3124, \"clear_handoff\": 2, \"six_stations_and_home\": 848, \"fault_stop\": 2274, \"failure_codes\": {\"3\": 422, \"6\": 1126, \"4\": 726}}\nfirst_only_0_to_3 {\"total\": 3122, \"clear_handoff\": 0, \"six_stations_and_home\": 848, \"fault_stop\": 2274, \"failure_codes\": {\"3\": 422, \"7\": 1126, \"4\": 726}}\nsplit_random_4_to_10 {\"total\": 1024, \"clear_handoff\": 0, \"six_stations_and_home\": 18, \"fault_stop\": 1006, \"failure_codes\": {\"4\": 565, \"3\": 164, \"7\": 144, \"6\": 133}}\ntiming_wrap {\"total\": 8, \"clear_handoff\": 0, \"six_stations_and_home\": 8, \"fault_stop\": 0, \"failure_codes\": {}}\nrandom_timing {\"total\": 100, \"clear_handoff\": 0, \"six_stations_and_home\": 100, \"fault_stop\": 0, \"failure_codes\": {}}\nstart_pose {\"total\": 18, \"clear_handoff\": 0, \"six_stations_and_home\": 8, \"fault_stop\": 10, \"failure_codes\": {\"2\": 10}}\nprotocol_fault {\"total\": 16, \"clear_handoff\": 0, \"six_stations_and_home\": 0, \"fault_stop\": 16, \"failure_codes\": {\"1\": 16}}\nqr_timeout {\"total\": 2, \"clear_handoff\": 0, \"six_stations_and_home\": 0, \"fault_stop\": 2, \"failure_codes\": {\"8\": 2}}\nscan_total_timeout {\"total\": 2, \"clear_handoff\": 0, \"six_stations_and_home\": 0, \"fault_stop\": 2, \"failure_codes\": {\"1\": 2}}\nempty_first_later_detection {\"total\": 2, \"clear_handoff\": 0, \"six_stations_and_home\": 2, \"fault_stop\": 0, \"failure_codes\": {}}\nobstacle_in_one_view {\"total\": 6, \"clear_handoff\": 0, \"six_stations_and_home\": 6, \"fault_stop\": 0, \"failure_codes\": {}}\npose_update_fault {\"total\": 30, \"clear_handoff\": 0, \"six_stations_and_home\": 0, \"fault_stop\": 30, \"failure_codes\": {\"1\": 30}}\nlater_scan_fault {\"total\": 36, \"clear_handoff\": 0, \"six_stations_and_home\": 0, \"fault_stop\": 36, \"failure_codes\": {\"1\": 36}}\n",
+      "stderr": ""
+    },
+    {
+      "name": "grid_workstation_tracking_test.py",
+      "exit_code": 0,
+      "seconds": 0.581,
+      "stdout": "PASS actual station pulse guard: M3/M4 physical front; user right; CCW/CW signs; unsafe/IMU-lost commands blocked before motor output\n",
+      "stderr": ""
+    },
+    {
+      "name": "m6_endpoint_reach_recovery_test.py",
+      "exit_code": 1,
+      "seconds": 0.06,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/m6_endpoint_reach_recovery_test.py\", line 43, in <module>\n    handoff_start = source.index(\"      if (ring == 1U) {\", source.index(\nValueError: substring not found\n"
+    },
+    {
+      "name": "m7_double_experiment_test.py",
+      "exit_code": 1,
+      "seconds": 0.059,
+      "stdout": "M7 DOUBLE EXPERIMENT CHECK FAILED: round-2 STORAGE does not use normal high-speed M7 with 300 ms head start\n",
+      "stderr": ""
+    },
+    {
+      "name": "module_boundary_test.py",
+      "exit_code": 0,
+      "seconds": 0.05,
+      "stdout": "PASS module boundaries: shared config, MaixCAM transport, and IMU parsing are isolated\n",
+      "stderr": ""
+    },
+    {
+      "name": "navigation_mode_test.py",
+      "exit_code": 0,
+      "seconds": 1.292,
+      "stdout": "PASS runtime modes: default radar; actual PB9 double-click/HMI3/4; zone1/2; lock after start; scan failure cannot become clear; original Nov02 table; first nonzero departure pulse parks once\nPASS actual production dispatcher: preparation keeps SCANNING; delayed clear handoff; accepted obstacle map enters GRID\n",
+      "stderr": ""
+    },
+    {
+      "name": "placement_timing_optimization_test.py",
+      "exit_code": 0,
+      "seconds": 0.068,
+      "stdout": "PASS placement timing policy: 120/160 ms loaded-jaw settles, 500 ms ring-return delay and RAW next-slot release+1000 ms delay; independent 100 us handoffs and guarded RAW 200 ms commands retained\n",
+      "stderr": ""
+    },
+    {
+      "name": "process_gripper_m7_interlock_test.py",
+      "exit_code": 1,
+      "seconds": 0.072,
+      "stdout": "WORKSTATION INTERLOCK CHECK FAILED: M6/M7 encoder fast-arrival bypass is incomplete\n",
+      "stderr": ""
+    },
+    {
+      "name": "qiming_grid_test.py",
+      "exit_code": 0,
+      "seconds": 2.92,
+      "stdout": "Qiming protocol, clear-route handoff, grid geometry and two-zone six-station missions PASS\nGrid UART wiring, nonblocking TX, mirrored +/-60/120 and accumulated 360 turns, terminal IMU locks and motion faults PASS\n",
+      "stderr": ""
+    },
+    {
+      "name": "qr_startup_checkpoint_test.py",
+      "exit_code": 1,
+      "seconds": 0.147,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/qr_startup_checkpoint_test.py\", line 50, in <module>\n    assert (\nAssertionError\n"
+    },
+    {
+      "name": "ring1_tray_clearance_overlap_test.py",
+      "exit_code": 0,
+      "seconds": 0.181,
+      "stdout": "PASS ring-1 tray clearance: PROCESS x2 + STORAGE1 only, departure+180 parking/restoration ordered around M7 clearance with no added wait phase\n",
+      "stderr": ""
+    },
+    {
+      "name": "ring_map_heading_warning_test.py",
+      "exit_code": 0,
+      "seconds": 0.058,
+      "stdout": "PASS ring-map heading policy: fresh drift warns and continues; stale IMU still faults\n",
+      "stderr": ""
+    },
+    {
+      "name": "route_chassis_integration_test.py",
+      "exit_code": 0,
+      "seconds": 0.322,
+      "stdout": "PASS route chassis integration: 19 active specification steps/19 motion commands, one VB build, single M1-M4/PB9/IMU owner, QR handoff, six guarded workstation pauses, and QR-wait watchdog exemption\n",
+      "stderr": ""
+    },
+    {
+      "name": "route_workstation_sequence_test.py",
+      "exit_code": 0,
+      "seconds": 1.201,
+      "stdout": "PASS live chassis bridge: six route pauses and completion gates\nPASS run-mode contract: guarded 0/1/2 switch in RobotConfig, local modes isolated, no fake completion or 180-second hard stop\nPASS workstation gates: arm/vision blocks next chassis segment\nPASS PROCESS order: scan 1/3, infer 2, then place and pick QR items 0/1/2 at their same-index destination rings\nPASS RAW contract: QR-ordered mode-8 colors, camera-side five-sample confirmation, reach wait, 65/15 s timing and travel-zero PROCESS gate\nPASS calibration mode: wheels locked, route frozen, three real placements + three pickups, safe park, CALDONE\nALL ROUTE/WORKSTATION CHECKS PASSED: /Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/src/main.cpp\n",
+      "stderr": ""
+    },
+    {
+      "name": "storage1_raw2_departure_parallel_test.py",
+      "exit_code": 0,
+      "seconds": 0.068,
+      "stdout": "PASS STORAGE1 exit: M7 zero -> 100 us -> 40%-speed M6 + departure tray request; RAW2 waits only if the travelling M6 has not reached its view pose\n",
+      "stderr": ""
+    },
+    {
+      "name": "storage2_debug_scan_pose_correction_test.py",
+      "exit_code": 1,
+      "seconds": 0.066,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/storage2_debug_scan_pose_correction_test.py\", line 68, in <module>\n    assert (\nAssertionError\n"
+    },
+    {
+      "name": "storage2_verbose_serial_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "stdout": "PASS STORAGE2 verbose serial: debug-only enable, per-frame decisions, rescan reasons, map progress and pre-stop fault snapshot\n",
+      "stderr": ""
+    },
+    {
+      "name": "storage_arrival_return_test.py",
+      "exit_code": 0,
+      "seconds": 0.531,
+      "stdout": "PASS actual firmware: M5 held in both travel rounds; 36 QR-known color/slot permutations; targeted requests; 1/2/3 order; safe parallel return; endpoint-only M5 home\n",
+      "stderr": ""
+    },
+    {
+      "name": "storage_round1_m5_zero_test.py",
+      "exit_code": 0,
+      "seconds": 0.066,
+      "stdout": "PASS storage round 1: M7 zero -> 100 us -> M5 hold, M6/tray parallel; arrival reuses the safe M6=ring-1 seed, then reaches the mode-10 request\n",
+      "stderr": ""
+    },
+    {
+      "name": "storage_round2_color_accuracy_window_test.py",
+      "exit_code": 0,
+      "seconds": 0.067,
+      "stdout": "PASS STORAGE2 color accuracy: each of three targets gets a 500 ms targeted-color, center-ROI multi-request coordinate average\n",
+      "stderr": ""
+    },
+    {
+      "name": "storage_round2_color_travel_test.py",
+      "exit_code": 0,
+      "seconds": 0.069,
+      "stdout": "PASS STORAGE2 travel holds M5; survey uses QR-known targeted colors, center ROI, bounded dwell, no inter-item rescans\n",
+      "stderr": ""
+    },
+    {
+      "name": "storage_round2_interitem_pipeline_test.py",
+      "exit_code": 0,
+      "seconds": 0.624,
+      "stdout": "PASS firmware: 36 QR-known color/slot permutations, targeted requests, center ROI, 500ms miss polling, early tray and late pickup gate\n",
+      "stderr": ""
+    },
+    {
+      "name": "storage_round2_local_mode_test.py",
+      "exit_code": 1,
+      "seconds": 0.064,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/storage_round2_local_mode_test.py\", line 53, in <module>\n    assert (\nAssertionError\n"
+    },
+    {
+      "name": "storage_round2_prescan_test.py",
+      "exit_code": 0,
+      "seconds": 0.496,
+      "stdout": "PASS firmware: 36 QR-known color/slot permutations, targeted requests, center ROI, 500ms miss polling, early tray and late pickup gate\n",
+      "stderr": ""
+    },
+    {
+      "name": "storage_round2_stack_m6_compensation_test.py",
+      "exit_code": 0,
+      "seconds": 0.966,
+      "stdout": "PASS actual C++ ring2: corrected angle outside [-3,+3] adds -2 mm / CW0.3 deg; inclusive endpoints, both rounds/stations/modes, saved bases and pickups preserved\nPASS actual C++: shared CW 1 deg / net extension 10 mm in all four visits, identical production/debug, final limits, STORAGE2 ring1 CW0.5/ring3 CCW0.5 and both -5 mm, saved-base normalization, unchanged return poses and M7 guards\nPASS STORAGE2 integration: production unloading applies all M6 corrections before transfer, using the shared main.cpp in debug firmware\n",
+      "stderr": ""
+    },
+    {
+      "name": "vision_logic_test.py",
+      "exit_code": 0,
+      "seconds": 0.09,
+      "stdout": "PASS Vision v5 targeted-color, ring-layout, endpoint-mode, protocol-v2 CRC and calibration schema\nNOTICE Vision calibration is intentionally marked UNVERIFIED; real-image commissioning is still required\n",
+      "stderr": ""
+    },
+    {
+      "name": "yan2_mode1_red_shape_test.py",
+      "exit_code": 1,
+      "seconds": 0.251,
+      "stdout": "",
+      "stderr": "test_circle_ellipses_and_mildly_deformed_shapes (__main__.Mode1RedShapeTest) ... ERROR\ntest_complete_loop_legacy_and_mode8_keep_original_target (__main__.Mode1RedShapeTest) ... ERROR\ntest_corner_order_does_not_change_features (__main__.Mode1RedShapeTest) ... ERROR\ntest_crossed_lines_rejected_even_with_similar_width_and_height (__main__.Mode1RedShapeTest) ... ERROR\ntest_full_loop_selects_small_circle_and_reports_its_metric (__main__.Mode1RedShapeTest) ... ERROR\ntest_legacy_switch_and_other_modes_retain_original_selection (__main__.Mode1RedShapeTest) ... ERROR\ntest_line_only_sends_no_success_and_logs_why (__main__.Mode1RedShapeTest) ... ERROR\ntest_lines_including_diagonal_and_very_flat_ellipse_rejected (__main__.Mode1RedShapeTest) ... ERROR\ntest_missing_shape_api_is_diagnostic_and_does_not_fall_back (__main__.Mode1RedShapeTest) ... ERROR\ntest_rejected_frame_resets_stability (__main__.Mode1RedShapeTest) ... ERROR\n\n======================================================================\nERROR: test_circle_ellipses_and_mildly_deformed_shapes (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 172, in test_circle_ellipses_and_mildly_deformed_shapes\n    model = load_logic()\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/yan_2/main.py'\n\n======================================================================\nERROR: test_complete_loop_legacy_and_mode8_keep_original_target (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 227, in test_complete_loop_legacy_and_mode8_keep_original_target\n    sent, _ = run_camera_loop([[self.circle, self.diagonal]] * count, logic, mode)\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 105, in run_camera_loop\n    model = load_logic()\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/yan_2/main.py'\n\n======================================================================\nERROR: test_corner_order_does_not_change_features (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 192, in test_corner_order_does_not_change_features\n    model = load_logic()\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/yan_2/main.py'\n\n======================================================================\nERROR: test_crossed_lines_rejected_even_with_similar_width_and_height (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 189, in test_crossed_lines_rejected_even_with_similar_width_and_height\n    self.assertIsNone(load_logic()[\"select_color_blob\"](1, 0, [cross]))\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/yan_2/main.py'\n\n======================================================================\nERROR: test_full_loop_selects_small_circle_and_reports_its_metric (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 208, in test_full_loop_selects_small_circle_and_reports_its_metric\n    sent, _ = run_camera_loop([[self.circle, self.diagonal]] * 4)\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 105, in run_camera_loop\n    model = load_logic()\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/yan_2/main.py'\n\n======================================================================\nERROR: test_legacy_switch_and_other_modes_retain_original_selection (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 200, in test_legacy_switch_and_other_modes_retain_original_selection\n    model = load_logic()\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/yan_2/main.py'\n\n======================================================================\nERROR: test_line_only_sends_no_success_and_logs_why (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 216, in test_line_only_sends_no_success_and_logs_why\n    sent, output = run_camera_loop([[self.diagonal]] * 4)\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 105, in run_camera_loop\n    model = load_logic()\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/yan_2/main.py'\n\n======================================================================\nERROR: test_lines_including_diagonal_and_very_flat_ellipse_rejected (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 180, in test_lines_including_diagonal_and_very_flat_ellipse_rejected\n    model = load_logic()\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/yan_2/main.py'\n\n======================================================================\nERROR: test_missing_shape_api_is_diagnostic_and_does_not_fall_back (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 234, in test_missing_shape_api_is_diagnostic_and_does_not_fall_back\n    sent, output = run_camera_loop([[broken]] * 3)\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 105, in run_camera_loop\n    model = load_logic()\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/yan_2/main.py'\n\n======================================================================\nERROR: test_rejected_frame_resets_stability (__main__.Mode1RedShapeTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 221, in test_rejected_frame_resets_stability\n    sent, _ = run_camera_loop([[self.circle], [self.diagonal], [self.circle], [self.circle]])\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 105, in run_camera_loop\n    model = load_logic()\n  File \"/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/test/yan2_mode1_red_shape_test.py\", line 18, in load_logic\n    tree = ast.parse(SOURCE.read_text(encoding=\"utf-8\"))\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1256, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1242, in open\n    return io.open(self, mode, buffering, encoding, errors, newline,\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py\", line 1110, in _opener\n    return self._accessor.open(self, flags, mode)\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/chenyinghao/Documents/University/Projects/GongChuang_2026/code/try/yan_2/main.py'\n\n----------------------------------------------------------------------\nRan 10 tests in 0.087s\n\nFAILED (errors=10)\n"
+    },
+    {
+      "name": "zone1_return_route_test.py",
+      "exit_code": 0,
+      "seconds": 0.907,
+      "stdout": "PASS actual C++ step6: zone1 left948.4325 mm, zone2 left925.3 mm; both modes, forward10 mm and speed/acceleration preserved\nPASS actual C++ steps7/15: lateral1861.81965/1857.02 mm, forward80 mm; step7 distance+3% then -15 mm, both zones/modes, speed/acceleration preserved\nPASS actual C++ E->F: steps11/19 forward840.175/867.3 + right20 mm; one move, both zones/modes\nPASS actual C++ first E->F->G: step11 net -5 mm, step12 +20 mm; 840.175/936.75 mm, combined travel1776.925 mm and second visit preserved\nPASS actual C++ forward profiles: step14 distance822.8995 mm, speed unchanged; steps9/11/17 speed90%; acceleration and other segments preserved\nPASS actual C++ step1: actual distance -10 mm, both zones/modes, speed/acceleration preserved\nPASS actual C++ return: zone1 908.4 -> (right1944.38, forward170) -> 150 mm in both modes; completion gates, zone2 and ordinary outbound preserved\n",
+      "stderr": ""
+    }
+  ]
+}

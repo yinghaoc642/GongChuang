@@ -1,0 +1,67 @@
+{
+  "app_id": "gc_try_r2_331476_20261119",
+  "name": "GC Try",
+  "package_version": "5.6.1",
+  "script_version": "5.6.0-try-coarse-ring2",
+  "protocol_version": 2,
+  "files": {
+    "app.yaml": {
+      "bytes": 335,
+      "sha256": "a92c57aceffcd843d585237b5efc7bd15a007996dcb6ce5a916c08a6e3b27e63"
+    },
+    "main.py": {
+      "bytes": 42668,
+      "sha256": "f696cef65dfb4a079150ce66302830fc3a09fbd73e2a78d3f71e7871f23f8cd9"
+    },
+    "models/ring2/model.mud": {
+      "bytes": 286,
+      "sha256": "e652404804f17d2f156d251f3144a51014dab3c4a21369af5bd7f94a136f6f1b"
+    },
+    "models/ring2/model_331476.cvimodel": {
+      "bytes": 7270728,
+      "sha256": "03695d0dc9c36a0cd2945343e128f8d914284175bd87e088058eea1515a2f813"
+    },
+    "ring2_coarse.py": {
+      "bytes": 4486,
+      "sha256": "c159df5370dffe1767d1b31e8fd5e488f2ae3c1dc534cf4ba398e6e498972106"
+    }
+  },
+  "change": "Only app display name and package version changed. Scripts, model and robot protocol are byte-identical to the prior deployment.",
+  "device_installation": {
+    "result": "METADATA UPDATE OK",
+    "app_id": "gc_try_r2_331476_20261119",
+    "name": "GC Try",
+    "version": "5.6.1",
+    "registry_sha256": "c1bf66864b84f9672bb7ac99a95ca716d2c33f9f71ff24f06523f7a3ebfb4c3c",
+    "unrelated_registry_sections": "byte-identical",
+    "payload": "scripts and models unchanged"
+  },
+  "package": {
+    "path": "vision/deploy/maixvision_gc_try_331476_v5_6_1_20261119/dist/maix-gc_try_r2_331476_20261119-v5.6.1.zip",
+    "bytes": 6166994,
+    "sha256": "e2c90523e6d3fa896545a5ec210c95dfaa000c8046a78527dcca8ed72d923e41"
+  },
+  "installation_method": "Existing identical scripts/models verified; app metadata and only its own registry section atomically updated over SSH after MaixVision native dialog failed.",
+  "startup_validation": {
+    "result": "PASS",
+    "unchanged_entries": 90,
+    "intentional_changes": [
+      "maixapp/apps/app.info",
+      "maixapp/apps/gc_try_r2_331476_20261119/app.yaml",
+      "usr/lib/libmaixcam_lib.so.1.24.0"
+    ],
+    "protected": "xg13, /root/models, autostart, system config, OS/MaixPy version files, our scripts/models and unrelated application registry sections all unchanged",
+    "official_model_exit": 0,
+    "try_three_frame_inference_exit": 0,
+    "full_app_exit": 0,
+    "camera_frames": 602,
+    "display_frames": 192,
+    "vision_uart_write_calls": 0,
+    "request_modes": [
+      0
+    ],
+    "limitations": "Single camera; short startup verification only. No recognition accuracy, real coarse alignment or STM32 integration validated.",
+    "evidence": "docs/maixcam_startup_20261119/REPAIR_RESULT.md",
+    "running_after_validation": false
+  }
+}

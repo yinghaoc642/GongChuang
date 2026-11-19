@@ -1,0 +1,9 @@
+{
+  "selected_training": 311465,
+  "selected_path": "ring2/model.mud",
+  "new_training": 331358,
+  "new_path": "ring2_new_331358/model.mud",
+  "reason": "At deployed 0.70 confidence gate, downloaded report samples accepted: historical 2/3, new 0/3; neither is validated at high pose. New model is archived and selectable, not silently promoted based on val_acc=1.",
+  "report_samples_only": true,
+  "hardware_latency_unverified": true
+}

@@ -1,0 +1,14 @@
+{
+  "name": "MecanumKinematics",
+  "version": "1.0.0",
+  "description": "Four-wheel X-layout mecanum chassis kinematics and DDSM210 command conversion",
+  "keywords": [
+    "mecanum",
+    "kinematics",
+    "robot",
+    "chassis",
+    "ddsm210"
+  ],
+  "frameworks": "*",
+  "platforms": "*"
+}

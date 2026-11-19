@@ -1,0 +1,33 @@
+{
+  "classes": [
+    "1r",
+    "2r",
+    "3r"
+  ],
+  "files": [
+    {
+      "file": "raw/reference_scene_00.jpg",
+      "source": "try/docs/ring2_live_20261119_01/frame_000_raw.jpg",
+      "sha256": "15f7f6fd99e059e6ee198e226386534e4f13e4afc9cae8138da1687b825f5326",
+      "group": "initial_oblique",
+      "status": "Reference only; annotations pending; not split or uploaded"
+    },
+    {
+      "file": "raw/reference_scene_01.jpg",
+      "source": "try/docs/ring2_low_centered_20261119_02/frame_000_raw.jpg",
+      "sha256": "882a03fad40cdf005cc0cf6fd8124dcce387b26167c79fe9e1ee67796a2fb4d6",
+      "group": "low_handheld",
+      "status": "Reference only; annotations pending; not split or uploaded"
+    },
+    {
+      "file": "raw/reference_scene_02.jpg",
+      "source": "try/docs/ring2_high_handheld_20261119_03/frame_200_raw.jpg",
+      "sha256": "729780b4bc5c15bddb1f7ad8db00e2bbaaa0f20e96527e76e39cb48136a0d524",
+      "group": "high_handheld",
+      "status": "Reference only; annotations pending; not split or uploaded"
+    }
+  ],
+  "original_train_val": "Unchanged",
+  "split": "Pending, group by capture session/pose rather than adjacent frame",
+  "training": "Not started"
+}

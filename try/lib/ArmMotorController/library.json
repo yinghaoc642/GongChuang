@@ -1,0 +1,10 @@
+{
+  "name": "ArmMotorController",
+  "version": "1.0.0",
+  "description": "Basic angle-based controller for GongChuang arm motors M5, M6 and M7",
+  "frameworks": "arduino",
+  "platforms": "ststm32",
+  "dependencies": {
+    "waspinator/AccelStepper": "^1.64"
+  }
+}

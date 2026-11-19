@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/Users/chenyinghao/.platformio/penv/bin/pio",
+    "run",
+    "-e",
+    "genericSTM32H750VB",
+    "-e",
+    "debug_grid_navigation"
+  ],
+  "exit_code": 0,
+  "seconds": 82.612
+}

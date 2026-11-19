@@ -1,0 +1,46 @@
+{
+  "constraints": {
+    "dataset_id": 146275,
+    "train": 42,
+    "val": 12,
+    "change_dataset": false,
+    "change_annotations": false,
+    "change_split": false,
+    "runtime_confidence": 0.7
+  },
+  "evaluation": {
+    "primary": "Fixed validation server val_acc; compare loss curves and deployment score acceptance",
+    "sample_gate": "All exposed predictions correct, score>=0.70; localization checked against GT",
+    "scope_limit": "Downloaded MaixHub report exposes only 3 validation samples; cannot infer all 12 deployment-threshold outcomes or real-robot success from them"
+  },
+  "experiments_planned": [
+    {
+      "resolution": 224,
+      "epochs": 200,
+      "batch": 4,
+      "lr": 0.001,
+      "rotate": false,
+      "blur": false,
+      "mirror": false
+    },
+    {
+      "resolution": 224,
+      "epochs": 200,
+      "batch": 4,
+      "lr": 0.003,
+      "rotate": true,
+      "blur": true,
+      "mirror": false
+    },
+    {
+      "resolution": 320,
+      "epochs": 200,
+      "batch": 8,
+      "lr": 0.001,
+      "rotate": true,
+      "blur": false,
+      "mirror": false
+    }
+  ],
+  "ui_observation": "Attempting 400 epochs returns 200 in AX and screenshot; used 200 unless verified otherwise"
+}
